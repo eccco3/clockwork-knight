@@ -32,7 +32,7 @@ Not started. Without chandelier shadows the same view takes 6.3 ms instead of 7.
 
 ### Task description
 
-Make the knight's wooden body less polished; leave the armour as it is. Today `shaders/knight_wood.gdshader` gives the wood a roughness of 0.24 to 0.50 under a half-strength clear coat at 0.14 roughness, so it reads as varnished. Aim for oiled or waxed wood: a soft, broad sheen that shows the finish without sharp reflections. The painted brows, eyes and lips lose their gloss too, but the paint must stay as vivid and readable as now. Compare before and after screenshots in the hall, close up and at play distance; `dev/shots/face/` holds today's face.
+Make the knight's wooden body less polished; leave the armour as it is. Today `shaders/knight_wood.gdshader` gives the wood a roughness of 0.24 to 0.50 under a half-strength clear coat at 0.14 roughness, so it reads as varnished. Aim for oiled or waxed wood: a soft, broad sheen that shows the finish without sharp reflections. The painted brows and lips lose their gloss too, but the paint must stay as vivid and readable as now. Compare before and after screenshots in the hall, close up and at play distance; `dev/shots/face/` holds today's face.
 
 ### Open questions
 
