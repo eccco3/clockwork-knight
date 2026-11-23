@@ -1,15 +1,14 @@
-// Leaded diamond-pane window at dusk. Opaque: each hand-blown pane shows a slightly different
-// patch of evening sky (procedural gradient), with a glossy surface that mirrors the firelight.
+// Leaded diamond-pane window on a foggy day. Opaque: each hand-blown pane passes a slightly
+// different share of the flat white fog outside, under a glossy surface that mirrors the firelight.
+// The light the windows throw into the hall comes from the FogLight spots in hall_build.gd.
 shader_type spatial;
 render_mode cull_disabled;
 
 uniform vec2 size = vec2(1.6, 2.5);
 uniform vec2 pane = vec2(0.105, 0.15);
-uniform vec3 sky_top : source_color = vec3(0.035, 0.07, 0.2);
-uniform vec3 sky_mid : source_color = vec3(0.16, 0.2, 0.42);
-uniform vec3 sky_horizon : source_color = vec3(0.62, 0.36, 0.3);
-uniform vec3 ground : source_color = vec3(0.02, 0.025, 0.04);
-uniform float energy = 1.0;
+uniform vec3 fog_high : source_color = vec3(0.86, 0.9, 0.96);
+uniform vec3 fog_low : source_color = vec3(0.6, 0.65, 0.71);
+uniform float energy = 3.0;
 
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -25,17 +24,12 @@ void fragment() {
 	float lead = 1.0 - smoothstep(0.045, 0.045 + aa, edge);
 	float h1 = hash(cell);
 	float h2 = hash(cell + 17.3);
-	vec3 dir = normalize((INV_VIEW_MATRIX * vec4(-VIEW, 0.0)).xyz);
-	float up = dir.y * 0.8 + (0.5 - UV.y) * 0.35 + (h1 - 0.5) * 0.22 + 0.12;
-	vec3 sky = mix(sky_horizon, sky_mid, smoothstep(-0.05, 0.28, up));
-	sky = mix(sky, sky_top, smoothstep(0.25, 0.8, up));
-	sky = mix(ground, sky, smoothstep(-0.28, -0.04, up));
-	sky *= mix(0.7, 1.15, h2);
-	// bullseye-ish thickness variation inside a pane
-	float bump = length(f - 0.5);
-	sky *= 1.0 - 0.18 * bump;
+	float up = 1.0 - UV.y + (h1 - 0.5) * 0.3;
+	vec3 fog = mix(fog_low, fog_high, smoothstep(0.0, 0.85, up));
+	fog *= mix(0.72, 1.1, h2);
+	fog *= 1.0 - 0.2 * length(f - 0.5);
 	ALBEDO = mix(vec3(0.015), vec3(0.05, 0.05, 0.055), lead);
-	EMISSION = sky * energy * (1.0 - lead);
+	EMISSION = fog * energy * (1.0 - lead);
 	ROUGHNESS = mix(0.14 + 0.14 * h1, 0.55, lead);
 	METALLIC = lead * 0.7;
 	SPECULAR = 0.6;

@@ -1,4 +1,5 @@
-# Rebuilds the git-ignored models (assets/models/*.glb) from source and imports them into Godot.
+# Rebuilds the git-ignored models (assets/models/*.glb) from source, imports them into Godot and
+# bakes the hall's lightmap (assets/lightmaps/). The bake opens the Godot editor for a few minutes.
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $blender = Join-Path $root 'toolchain\blender\blender.exe'
@@ -6,6 +7,7 @@ $godot = Join-Path $root 'toolchain\godot\Godot_v4.7.2-stable_win64_console.exe'
 
 function Invoke-Step([string]$name, [string]$exe, [string[]]$arguments) {
   $started = Get-Date
+  $ErrorActionPreference = 'Continue' # Godot prints harmless errors on exit; only the exit code counts
   & $exe @arguments | Out-Host
   if ($LASTEXITCODE -ne 0) { throw "$name failed with exit code $LASTEXITCODE" }
   '{0,-8} {1,5:N0} s' -f $name, ((Get-Date) - $started).TotalSeconds
@@ -20,6 +22,8 @@ try {
     if (-not (Test-Path "assets\models\$model.glb")) { throw "$model.glb was not written" }
   }
   Invoke-Step 'import' $godot @('--path', '.', '--headless', '--import')
+  Invoke-Step 'lightmap' $godot @('--path', '.', '--editor', 'res://scenes/hall.tscn', '--', 'bake-lightmaps')
+  if (-not (Test-Path 'assets\lightmaps\hall.exr')) { throw 'the hall lightmap was not written' }
 } finally {
   Pop-Location
 }

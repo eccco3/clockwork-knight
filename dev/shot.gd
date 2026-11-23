@@ -8,6 +8,7 @@ extends Node
 ## Several views in one run: views="x,y,z>x,y,z;x,y,z>x,y,z" writes out_0.png, out_1.png ...
 ## Omit pos/views to use whatever camera the scene itself makes current.
 ## call=method[:arg] invokes a method on the scene root after loading (for posing things).
+## lamps=baked drops the hall's live character lights.
 
 var _args := {}
 var _cam: Camera3D
@@ -18,6 +19,7 @@ func _ready() -> void:
 		var i := a.find("=")
 		if i > 0:
 			_args[a.substr(0, i)] = a.substr(i + 1)
+	Hall.character_lights = _args.get("lamps", "characters") != "baked"
 	var packed: PackedScene = load(_args.get("scene", "res://scenes/main.tscn"))
 	_scene = packed.instantiate()
 	add_child(_scene)

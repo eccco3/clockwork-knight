@@ -69,8 +69,8 @@ with open(imp, 'w', newline='\n') as f:
     f.write('[remap]\n\nimporter="scene"\nimporter_version=1\ntype="PackedScene"\n' + uid_line +
             'path="res://.godot/imported/hall.glb-PLACEHOLDER.scn"\n\n[deps]\n\nsource_file="res://assets/models/hall.glb"\n\n[params]\n\n'
             'nodes/root_type=""\nnodes/root_name=""\nnodes/apply_root_scale=true\nnodes/root_scale=1.0\n'
-            'meshes/ensure_tangents=true\nmeshes/generate_lods=false\nmeshes/create_shadow_meshes=true\nmeshes/light_baking=1\n'
-            'meshes/lightmap_texel_size=0.2\nmeshes/force_disable_compression=false\nskins/use_named_skins=true\n'
+            'meshes/ensure_tangents=true\nmeshes/generate_lods=false\nmeshes/create_shadow_meshes=true\nmeshes/light_baking=2\n'
+            'meshes/lightmap_texel_size=0.04\nmeshes/force_disable_compression=false\nskins/use_named_skins=true\n'
             'animation/import=false\nimport_script/path="res://scripts/hall_import.gd"\n_subresources={\n"materials": {\n' + sub + '\n}\n}\n')
 print("materials:", mats)
 print("done in %.1fs" % (time.time() - t0))

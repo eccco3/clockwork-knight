@@ -12,7 +12,7 @@ extends Node
 ## set:<node path or name pattern>:<property>:<value>, env:<property>:<value>,
 ## vp:<property>:<value>, rs:<RenderingServer method>:<args...> (what-if switches), quit.
 ## side=dx,dy,dz puts a camera at that offset from the player (looking at her) instead of the
-## orbit camera. tile=WxH and cols=N shape the sheet.
+## orbit camera. tile=WxH and cols=N shape the sheet. lamps=baked drops the hall's live character lights.
 
 var _args := {}
 var _scene: Node
@@ -37,6 +37,7 @@ func _ready() -> void:
 		if i > 0:
 			_args[a.substr(0, i)] = a.substr(i + 1)
 	Player.setup_input()
+	Hall.character_lights = _args.get("lamps", "characters") != "baked"
 	var tr := Tracker.new()
 	tr.host = self
 	tr.process_priority = 1000

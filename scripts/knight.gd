@@ -70,6 +70,8 @@ func _ready() -> void:
 	_setup_materials()
 	_setup_extras()
 	mesh.extra_cull_margin = 0.15
+	for v: VisualInstance3D in find_children("*", "VisualInstance3D", true, false):
+		v.layers = Hall.CHARACTER_LAYER
 	_apply_pose(0.0)
 
 

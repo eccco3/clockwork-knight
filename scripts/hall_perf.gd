@@ -34,10 +34,8 @@ func _run() -> void:
 					l.light_angular_distance = 0.0
 			"halfgi":
 				RenderingServer.gi_set_use_half_resolution(true)
-			"nosun":
-				hall.get_node("Lights/DuskLight").shadow_enabled = false
-			"nogi":
-				hall.get_node("VoxelGI").visible = false
+			"nolightmap":
+				hall.get_node("LightmapGI").visible = false
 			"nossil":
 				env.ssil_enabled = false
 			"nossao":

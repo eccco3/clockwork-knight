@@ -1,19 +1,5 @@
 # Backlog
 
-## Bake the hall's lighting
-
-### Task description
-
-Bake the hall's static lights and bounce light into lightmaps, replacing VoxelGI and the live cost of about thirty unshadowed lights. Build two variants and compare them with screenshots, GPU time and GPU power: (A) everything baked except the fire and the knight's own shadows; (B) as A, plus live copies of the chandelier and sconce lights that light only characters, to keep highlights on lacquer and brass. Add the bake to `tools/build_models.ps1` and git-ignore its output.
-
-### Open questions
-
-- Godot's lightmap baker may only run inside the editor. If it cannot be scripted, is baking in Blender acceptable?
-
-### Status
-
-Not started. Peter: it is always daytime with heavy fog outdoors, so the time of day is fixed; first change the hall's window light from blue dusk to foggy daylight, then bake. Baseline in real play: 9 ms GPU time, 81 W, 87 °C. The driver lowers the GPU clock below about 6.5 ms; 5 ms gave 72 W and 3.5 ms gave 43 W.
-
 ## Test lower render scale
 
 ### Task description
@@ -26,7 +12,21 @@ After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% wit
 
 ### Status
 
-Not started. Measured before baking, with plain stretching: 67% gave 72 W and 78 °C; 50% gave 43 W and 70 °C.
+Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 °C; 50% gave 43 W and 70 °C.
+
+## Cheaper knight shadows
+
+### Task description
+
+The knight's full 303,000-triangle mesh is drawn into the shadow maps of the three chandeliers every frame, which costs about 0.8 ms of GPU time. Give her a shadow mesh of a few thousand triangles, built by `tools/knight/build_knight.py` and skinned to the same skeleton, and draw only that into shadow maps. Compare shadow shapes in screenshots and report GPU time before and after.
+
+### Open questions
+
+- Should distant chandeliers stop casting her shadow altogether?
+
+### Status
+
+Not started. Without chandelier shadows the same view takes 6.3 ms instead of 7.1 ms.
 
 ## Outdoors: foggy ground scene
 

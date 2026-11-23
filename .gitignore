@@ -3,8 +3,10 @@
 /dev/shots/
 __pycache__/
 
-# Built models, restored by tools/build_models.ps1
+# Built models and the hall's baked lighting, restored by tools/build_models.ps1
 /assets/models/*.glb
+/assets/models/*.unwrap_cache
+/assets/lightmaps/
 
 # Poly Haven downloads, restored by tools/fetch_assets.ps1
 /assets/textures/*/*.jpg

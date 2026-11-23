@@ -4,16 +4,16 @@ extends SceneTree
 ##   godot --headless --path . --script res://scripts/hall_build.gd -- materials
 ##   godot --headless --path . --import
 ##   godot --headless --path . --script res://scripts/hall_build.gd -- scene
-##   godot --path . --script res://scripts/hall_build.gd -- bake      (needs a window: GPU voxel bake)
 ##
 ## "materials" writes materials/hall_*.tres from the Poly Haven scans, "scene" assembles
-## scenes/hall.tscn from assets/models/hall.glb + hall_layout.json, "bake" bakes the VoxelGI
-## and stores it in assets/models/hall_voxelgi.res.
+## scenes/hall.tscn from assets/models/hall.glb + hall_layout.json. The scene's lamps are baked
+## into a lightmap afterwards by addons/lightmap_bake.
 
 const TEX := "res://assets/textures/%s/%s.jpg"
 const MAT := "res://materials/hall_%s.tres"
-const GI_DATA := "res://assets/models/hall_voxelgi.res"
 const SCENE := "res://scenes/hall.tscn"
+const CHANDELIER_RADIUS := 0.7
+const BOUNCE := 3.0
 
 var _root: Node3D
 var _layout: Dictionary
@@ -31,8 +31,6 @@ func _init() -> void:
 		"scene":
 			_scene()
 			quit()
-		"bake":
-			_bake()
 		_:
 			push_error("unknown mode " + mode)
 			quit(1)
@@ -258,7 +256,8 @@ func _marks(kind: String) -> Array:
 	return _layout["marks"].get(kind, [])
 
 
-func _omni(n: String, pos: Vector3, color: Color, energy: float, rng: float, shadow := false, parent: Node = null) -> OmniLight3D:
+func _omni(n: String, pos: Vector3, color: Color, energy: float, rng: float, shadow := false, parent: Node = null,
+		bake := Light3D.BAKE_STATIC) -> OmniLight3D:
 	var l := OmniLight3D.new()
 	l.position = pos
 	l.light_color = color
@@ -266,7 +265,8 @@ func _omni(n: String, pos: Vector3, color: Color, energy: float, rng: float, sha
 	l.omni_range = rng
 	l.omni_attenuation = 1.0
 	l.shadow_enabled = shadow
-	l.light_bake_mode = Light3D.BAKE_DYNAMIC
+	l.light_bake_mode = bake
+	l.light_indirect_energy = BOUNCE
 	_add(l, parent, n)
 	return l
 
@@ -279,6 +279,7 @@ func _scene() -> void:
 	var apex: float = dims["apex"]
 	_root = Node3D.new()
 	_root.name = "Hall"
+	_root.set_script(load("res://scripts/hall.gd"))
 
 	# --- geometry -----------------------------------------------------------
 	var glb: PackedScene = load("res://assets/models/hall.glb")
@@ -354,7 +355,6 @@ func _scene() -> void:
 	env.volumetric_fog_anisotropy = 0.45
 	env.volumetric_fog_length = 40.0
 	env.volumetric_fog_ambient_inject = 0.0
-	env.volumetric_fog_gi_inject = 0.6
 	env.volumetric_fog_temporal_reprojection_enabled = true
 	env.adjustment_enabled = true
 	env.adjustment_contrast = 1.08
@@ -363,24 +363,8 @@ func _scene() -> void:
 	we.environment = env
 	_add(we, null, "WorldEnvironment")
 
-	# --- dusk light through the east windows --------------------------------
 	var lights := Node3D.new()
 	_add(lights, null, "Lights")
-	var sun := DirectionalLight3D.new()
-	sun.light_color = Color(0.36, 0.52, 1.0)
-	sun.light_energy = 2.8
-	sun.light_specular = 0.35
-	sun.light_angular_distance = 0.0
-	sun.shadow_enabled = true
-	sun.shadow_bias = 0.04
-	sun.shadow_normal_bias = 1.5
-	sun.shadow_blur = 2.2
-	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
-	sun.directional_shadow_max_distance = 34.0
-	sun.light_volumetric_fog_energy = 1.0
-	sun.light_bake_mode = Light3D.BAKE_DYNAMIC
-	_add(sun, lights, "DuskLight")
-	sun.look_at_from_position(Vector3(10, 9, 5), Vector3(10, 9, 5) + Vector3(-0.72, -0.5, -0.36), Vector3.UP)
 
 	# --- windows ------------------------------------------------------------
 	var win := Node3D.new()
@@ -401,11 +385,7 @@ func _scene() -> void:
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 		_add(mi, win, "Glass%d" % i)
-		# soft cool sky-glow spilling in from each window
-		var into := Vector3(0, 0, 1).rotated(Vector3.UP, rot[g["wall"]])
-		var sl := _omni("SkyGlow%d" % i, mi.position + into * 0.9 + Vector3(0, 0.3, 0), Color(0.42, 0.56, 1.0), 0.75, 5.0, false, win)
-		sl.light_specular = 0.2
-		sl.light_volumetric_fog_energy = 0.0
+		_fog_light(win, i, mi.position, Vector3(0, 0, 1).rotated(Vector3.UP, rot[g["wall"]]))
 		i += 1
 
 	# --- hearth fire ----------------------------------------------------------
@@ -428,9 +408,14 @@ func _scene() -> void:
 			o.shadow_bias = 0.06
 			o.shadow_normal_bias = 1.2
 			o.shadow_blur = 1.2
+		if l.get("name", "") == "Chandelier":
+			o.light_size = CHANDELIER_RADIUS
+			o.add_to_group(Hall.SHADOW_LIGHTS, true)
+		if l.get("name", "") in ["Chandelier", "Sconce"]:
+			o.add_to_group(Hall.CHARACTER_LIGHTS, true)
 		i += 1
 
-	# --- reflection + GI ----------------------------------------------------------
+	# --- reflection + lightmap ------------------------------------------------------
 	var probe := ReflectionProbe.new()
 	probe.position = Vector3(0, 3.0, 0)
 	probe.size = Vector3(hw * 2 + 0.4, 6.4, hl * 2 + 0.4)
@@ -444,13 +429,14 @@ func _scene() -> void:
 	probe.max_distance = 40.0
 	_add(probe, null, "ReflectionProbe")
 
-	var gi := VoxelGI.new()
-	gi.position = Vector3(0, apex * 0.5 - 0.2, 0)
-	gi.size = Vector3(hw * 2 + 1.8, apex + 1.4, hl * 2 + 1.8)
-	gi.subdiv = VoxelGI.SUBDIV_128
-	if ResourceLoader.exists(GI_DATA):
-		gi.data = load(GI_DATA)
-	_add(gi, null, "VoxelGI")
+	var lm := LightmapGI.new()
+	lm.quality = LightmapGI.BAKE_QUALITY_HIGH
+	lm.bounces = 5
+	lm.directional = true
+	lm.interior = true
+	lm.max_texture_size = 4096
+	lm.generate_probes_subdiv = LightmapGI.GENERATE_PROBES_SUBDIV_16
+	_add(lm, null, "LightmapGI")
 
 	# --- spawn ---------------------------------------------------------------------
 	var sp := Marker3D.new()
@@ -465,6 +451,26 @@ func _scene() -> void:
 	err = ResourceSaver.save(ps, SCENE)
 	print("saved ", SCENE, " -> ", error_string(err), "  colliders=", _layout["colliders"].size())
 	_root.free()
+
+
+## Daylight through one window: fog outside makes the whole pane a soft source with no sunbeam.
+func _fog_light(parent: Node, i: int, glass: Vector3, into: Vector3) -> void:
+	var l := SpotLight3D.new()
+	l.light_color = Color(0.8, 0.87, 1.0)
+	l.light_energy = 6.0
+	l.light_specular = 0.25
+	l.light_size = 0.8
+	l.light_volumetric_fog_energy = 0.35
+	l.spot_range = 12.0
+	l.spot_attenuation = 1.0
+	l.spot_angle = 85.0
+	l.spot_angle_attenuation = 1.0
+	l.light_bake_mode = Light3D.BAKE_STATIC
+	l.light_indirect_energy = BOUNCE
+	l.add_to_group(Hall.CHARACTER_LIGHTS, true)
+	_add(l, parent, "FogLight%d" % i)
+	var at := glass + into * 0.1
+	l.look_at_from_position(at, at + into + Vector3.DOWN * 0.35, Vector3.UP)
 
 
 func _build_fire(p: Vector3) -> void:
@@ -535,7 +541,7 @@ func _build_fire(p: Vector3) -> void:
 	sparks.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_add(sparks, fire, "Sparks")
 	# lights: a shadowed key that flickers, and a broad soft fill that carries the warmth
-	var key := _omni("FireKey", Vector3(0, 0.85, 0.95), Color(1.0, 0.55, 0.22), 5.5, 17.0, true, fire)
+	var key := _omni("FireKey", Vector3(0, 0.85, 0.95), Color(1.0, 0.55, 0.22), 5.5, 17.0, true, fire, Light3D.BAKE_DYNAMIC)
 	key.shadow_bias = 0.05
 	key.shadow_normal_bias = 1.5
 	key.shadow_blur = 1.3
@@ -544,7 +550,7 @@ func _build_fire(p: Vector3) -> void:
 	key.set("base_energy", 5.5)
 	key.set("flicker", 0.22)
 	key.set("wander", 0.05)
-	var fill := _omni("FireFill", Vector3(0, 0.45, 0.0), Color(1.0, 0.45, 0.16), 0.5, 2.2, false, fire)
+	var fill := _omni("FireFill", Vector3(0, 0.45, 0.0), Color(1.0, 0.45, 0.16), 0.5, 2.2, false, fire, Light3D.BAKE_DYNAMIC)
 	fill.light_specular = 0.0
 	fill.light_volumetric_fog_energy = 0.0
 	fill.set_script(load("res://scripts/hall_fire_light.gd"))
@@ -573,36 +579,3 @@ func _build_candles() -> void:
 	mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 	_add(mmi, null, "CandleFlames")
 
-
-# ---------------------------------------------------------------------------
-# VoxelGI bake (windowed run)
-# ---------------------------------------------------------------------------
-
-func _bake() -> void:
-	await process_frame
-	var packed: PackedScene = load(SCENE)
-	var hall: Node3D = packed.instantiate()
-	root.add_child(hall)
-	for n in 20:
-		await process_frame
-	var gi: VoxelGI = hall.get_node("VoxelGI")
-	gi.data = null
-	print("baking VoxelGI ...")
-	gi.bake(hall)
-	for n in 10:
-		await process_frame
-	var data := gi.data
-	if data == null:
-		push_error("bake produced no data")
-		quit(1)
-		return
-	data.interior = true
-	data.energy = 1.0
-	data.dynamic_range = 6.0
-	data.propagation = 0.55
-	data.bias = 1.5
-	data.normal_bias = 1.0
-	data.use_two_bounces = true
-	var err := ResourceSaver.save(data, GI_DATA, ResourceSaver.FLAG_COMPRESS)
-	print("saved ", GI_DATA, " -> ", error_string(err))
-	quit()
