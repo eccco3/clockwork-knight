@@ -182,3 +182,17 @@ Stand the lady in the study and have her speak as the knight comes near. Check t
 ### Status
 
 Not started.
+
+## Outdoors: tone down the helmet's shine
+
+### Task description
+
+In the foggy outdoors scene the knight's helmet looks too glossy: its lacquer catches a hard highlight that soft, overcast light should not make. Find the cause (the sun's small angular size, the sky's reflections, or the material's roughness) and make the helmet read as satin under fog, without changing how she looks in the hall. Compare screenshots in both scenes before and after, standing and turning, and check GPU time is unchanged.
+
+### Open questions
+
+- Is it only the helmet, or should all her lacquer be duller outdoors?
+
+### Status
+
+Not started. The outdoors scene is on branch `worktree-agent-a540b2b1af48a3c2d`, not yet merged.
