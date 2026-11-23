@@ -59,7 +59,13 @@ func _ready() -> void:
 	model = MODEL.instantiate()
 	add_child(model)
 	skel = _find(model, "Skeleton3D")
-	mesh = _find(model, "MeshInstance3D")
+	mesh = model.find_child("Knight", true, false)
+	# the full mesh is too dense for the shadow maps; a low-polygon copy on the same bones casts instead
+	var caster := model.find_child("KnightShadow", true, false) as MeshInstance3D
+	if caster:
+		caster.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+		caster.extra_cull_margin = 0.15
+		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var player: AnimationPlayer = _find(model, "AnimationPlayer")
 	player.active = false
 	anim.setup(skel, player)
