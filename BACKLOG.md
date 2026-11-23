@@ -28,6 +28,20 @@ The knight's full 303,000-triangle mesh is drawn into the shadow maps of the thr
 
 Not started. Without chandelier shadows the same view takes 6.3 ms instead of 7.1 ms.
 
+## Knight: less glossy wood
+
+### Task description
+
+Make the knight's wooden body less polished; leave the armour as it is. Today `shaders/knight_wood.gdshader` gives the wood a roughness of 0.24 to 0.50 under a half-strength clear coat at 0.14 roughness, so it reads as varnished. Aim for oiled or waxed wood: a soft, broad sheen that shows the finish without sharp reflections. Compare before and after screenshots in the hall, close up and at play distance.
+
+### Open questions
+
+- Should the painted face keep its current gloss?
+
+### Status
+
+Not started.
+
 ## Outdoors: foggy ground scene
 
 ### Task description
