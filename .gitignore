@@ -3,6 +3,9 @@
 /dev/shots/
 __pycache__/
 
+# Built models, restored by tools/build_models.ps1
+/assets/models/*.glb
+
 # Poly Haven downloads, restored by tools/fetch_assets.ps1
 /assets/textures/*/*.jpg
 /assets/hdri/*.hdr

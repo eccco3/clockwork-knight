@@ -28,6 +28,7 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 
 ## Build and run
 
+- Both models and the Godot import: `tools\build_models.ps1`. Needed after cloning.
 - Knight: `blender --background --python tools/knight/build_knight.py -- --out assets/models/knight.glb` (about 80 s), then `godot --path . --headless --import`.
 - Never combine `--only` with `--out`: it overwrites the full model with a partial one.
 - Run: `godot --path .`
@@ -45,7 +46,7 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 
 - `tools/check_docs.sh` enforces the four documentation rules above; `tools/hooks/pre-commit` runs it. After cloning: `git config core.hooksPath tools/hooks`.
 - First-party means everything git tracks except `tools/downloads/`.
-- Git ignores `toolchain/`, `.godot/`, `dev/shots/` and the Poly Haven files, which `tools/fetch_assets.ps1` restores.
+- Git ignores `toolchain/`, `.godot/`, `dev/shots/`, the Poly Haven files, which `tools/fetch_assets.ps1` restores, and the built models `assets/models/*.glb`, which `tools/build_models.ps1` restores.
 - Commit with Windows git, not WSL.
 
 ## Controls
