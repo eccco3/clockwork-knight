@@ -13,7 +13,7 @@ extends Node
 ## vp:<property>:<value>, rs:<RenderingServer method>:<args...> (what-if switches), quit.
 ## side=dx,dy,dz puts a camera at that offset from the player (looking at her) instead of the
 ## orbit camera. tile=WxH and cols=N shape the sheet. lamps=baked drops the hall's live character lights.
-## --main-pack dev/unfocused/pack.zip (before the scene) opens the window without taking focus.
+## Replace godot with python -I dev/quiet.py to run on a hidden desktop.
 
 var _args := {}
 var _scene: Node

@@ -4,7 +4,7 @@
 
 ### Task description
 
-After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% with each upscaler Godot offers: plain stretching, FSR 1, and FSR 2 with multisampling off. Record GPU time, power, temperature after five minutes from a cool start, and frame pacing. Save matching screenshots, standing and mid-swing, to `dev/shots/` for Peter to judge. Recommend one setting and apply it only with his agreement.
+After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% with each upscaler Godot offers: plain stretching, FSR 1, and FSR 2 with multisampling off. Record GPU time, power, temperature after five minutes from a cool start, and frame pacing. Save matching screenshots, standing and mid-swing, to `dev/shots/` for the dev to judge. Recommend one setting and apply it only with the dev's agreement.
 
 ### Open questions
 
@@ -27,6 +27,20 @@ The knight's full 303,000-triangle mesh is drawn into the shadow maps of the thr
 ### Status
 
 Not started. Without chandelier shadows the same view takes 6.3 ms instead of 7.1 ms.
+
+## Knight: less glossy wood
+
+### Task description
+
+Make the knight's wooden body less polished; leave the armour as it is. Today `shaders/knight_wood.gdshader` gives the wood a roughness of 0.24 to 0.50 under a half-strength clear coat at 0.14 roughness, so it reads as varnished. Aim for oiled or waxed wood: a soft, broad sheen that shows the finish without sharp reflections. The painted brows and lips lose their gloss too, but the paint must stay as vivid and readable as now. Compare before and after screenshots in the hall, close up and at play distance; `dev/shots/face/` holds today's face.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started.
 
 ## Outdoors: foggy ground scene
 

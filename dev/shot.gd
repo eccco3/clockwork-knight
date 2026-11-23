@@ -9,7 +9,7 @@ extends Node
 ## Omit pos/views to use whatever camera the scene itself makes current.
 ## call=method[:arg] invokes a method on the scene root after loading (for posing things).
 ## lamps=baked drops the hall's live character lights.
-## --main-pack dev/unfocused/pack.zip (before the scene) opens the window without taking focus.
+## Replace godot with python -I dev/quiet.py to run on a hidden desktop.
 
 var _args := {}
 var _cam: Camera3D

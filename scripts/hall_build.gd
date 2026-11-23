@@ -456,21 +456,21 @@ func _scene() -> void:
 ## Daylight through one window: fog outside makes the whole pane a soft source with no sunbeam.
 func _fog_light(parent: Node, i: int, glass: Vector3, into: Vector3) -> void:
 	var l := SpotLight3D.new()
-	l.light_color = Color(0.8, 0.87, 1.0)
-	l.light_energy = 6.0
+	l.light_color = Color(0.72, 0.84, 1.0)
+	l.light_energy = 42.0
 	l.light_specular = 0.25
-	l.light_size = 0.8
+	l.light_size = 1.0
 	l.light_volumetric_fog_energy = 0.35
-	l.spot_range = 12.0
-	l.spot_attenuation = 1.0
-	l.spot_angle = 85.0
-	l.spot_angle_attenuation = 1.0
+	l.spot_range = 8.0
+	l.spot_attenuation = 1.25
+	l.spot_angle = 43.0
+	l.spot_angle_attenuation = 1.5
 	l.light_bake_mode = Light3D.BAKE_STATIC
 	l.light_indirect_energy = BOUNCE
 	l.add_to_group(Hall.CHARACTER_LIGHTS, true)
 	_add(l, parent, "FogLight%d" % i)
 	var at := glass + into * 0.1
-	l.look_at_from_position(at, at + into + Vector3.DOWN * 0.35, Vector3.UP)
+	l.look_at_from_position(at, at + into + Vector3.DOWN * 1.0, Vector3.UP)
 
 
 func _build_fire(p: Vector3) -> void:
