@@ -20,7 +20,9 @@ $textures = @(
   'velour_velvet','fabric_pattern_07','floral_jacquard','quatrefoil_jacquard_fabric','rough_linen',
   'wool_boucle','hessian_230','book_pattern','leather_red_02','rusty_metal_02','metal_plate',
   # hall: extra plain stone / plaster / roof boards
-  'rock_surface','sandstone_cracks','white_rough_plaster','white_plaster_rough_01','roof_planks','rough_concrete','leather_red_03'
+  'rock_surface','sandstone_cracks','white_rough_plaster','white_plaster_rough_01','roof_planks','rough_concrete','leather_red_03',
+  # outdoors: bare earth and its mossy patches
+  'brown_mud_02','forrest_ground_01'
 )
 $maps = [ordered]@{ Diffuse = 'albedo'; nor_gl = 'normal'; arm = 'arm'; Displacement = 'height' }
 

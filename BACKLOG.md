@@ -28,22 +28,6 @@ The knight's full 303,000-triangle mesh is drawn into the shadow maps of the thr
 
 Not started. Without chandelier shadows the same view takes 6.3 ms instead of 7.1 ms.
 
-## Outdoors: foggy ground scene
-
-### Task description
-
-Build `scenes/outdoors.tscn`, the grinner's real environment, so it can be tested there: only ground with sparse grass, and heavy daytime fog. Use a scanned ground material, instanced grass that thins with distance, and the fixed foggy daylight the hall's windows show. Spawn the knight in it, make it loadable by `dev/drive.tscn` and `dev/shot.tscn`, and record GPU time against the hall.
-
-### Open questions
-
-- How far should one see before the fog closes in?
-- Is the ground flat or gently rolling?
-- Should the hall's exterior stand in the scene?
-
-### Status
-
-Not started.
-
 ## Enemy: sculpt the model
 
 ### Task description
