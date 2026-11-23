@@ -9,14 +9,13 @@ extends Node
 ## Omit pos/views to use whatever camera the scene itself makes current.
 ## call=method[:arg] invokes a method on the scene root after loading (for posing things).
 ## lamps=baked drops the hall's live character lights.
-## --main-pack dev/unfocused/pack.zip (before the scene) opens the window without focus, off-screen.
+## Replace godot with python -I dev/quiet.py to run on a hidden desktop.
 
 var _args := {}
 var _cam: Camera3D
 var _scene: Node
 
 func _ready() -> void:
-	_park_window()
 	for a in OS.get_cmdline_user_args():
 		var i := a.find("=")
 		if i > 0:
@@ -45,11 +44,6 @@ func _ready() -> void:
 		add_child(_cam)
 		_cam.make_current()
 	_run(views)
-
-func _park_window() -> void:
-	if ProjectSettings.get_setting("display/window/size/no_focus", false):
-		await get_tree().process_frame
-		get_window().position = Vector2i(-20000, -20000)
 
 func _vec(s: String) -> Vector3:
 	var p := s.split(",")

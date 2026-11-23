@@ -29,13 +29,13 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 ## Build and run
 
 - Both models, the Godot import and the hall's lightmap: `tools\build_models.ps1`. Needed after cloning.
-- Lightmap alone: `godot --editor --path . res://scenes/hall.tscn -- bake-lightmaps` opens the editor for about seven minutes; add `draft` for a one-minute preview. Rebake after changing the hall's geometry or lamps.
+- Lightmap alone: `godot --editor --path . res://scenes/hall.tscn -- bake-lightmaps` runs the editor for about six minutes; add `draft` for a one-minute preview. Rebake after changing the hall's geometry or lamps.
 - Hall scene after editing `scripts/hall_build.gd`: `godot --headless --path . --script res://scripts/hall_build.gd -- scene`.
 - Knight: `blender --background --python tools/knight/build_knight.py -- --out assets/models/knight.glb` (about 80 s), then `godot --path . --headless --import`.
 - Never combine `--only` with `--out`: it overwrites the full model with a partial one.
 - Run: `godot --path .`
 - Scripted play and screenshots: `dev/drive.tscn` with `--fixed-fps 60`; `dev/shot.tscn` photographs a scene. Both take `lamps=baked` to drop the live character lights.
-- So that drive and shot runs open off-screen without focus, add `--main-pack dev/unfocused/pack.zip` before the scene. In that mode `DirAccess` cannot list `res://`. The editor bake still takes focus.
+- Never open Godot windows on Peter's screen for tests or bakes: replace `godot` with `toolchain\blender\4.5\python\bin\python.exe -I dev\quiet.py`, which runs it on a hidden desktop with the same arguments.
 - The game caps at 60 fps (`run/max_fps`). Frame times: `dev/drive.tscn` events `perf:start` and `perf:stop`, run with `--disable-vsync --max-fps 0`.
 - Fast sculpt iteration: `tools/knight/preview_head.py` renders clay turnarounds.
 

@@ -13,15 +13,10 @@ extends Node
 ## vp:<property>:<value>, rs:<RenderingServer method>:<args...> (what-if switches), quit.
 ## side=dx,dy,dz puts a camera at that offset from the player (looking at her) instead of the
 ## orbit camera. tile=WxH and cols=N shape the sheet. lamps=baked drops the hall's live character lights.
-## --main-pack dev/unfocused/pack.zip (before the scene) opens the window without focus, off-screen.
+## Replace godot with python -I dev/quiet.py to run on a hidden desktop.
 
 var _args := {}
 var _scene: Node
-
-func _park_window() -> void:
-	if ProjectSettings.get_setting("display/window/size/no_focus", false):
-		await get_tree().process_frame
-		get_window().position = Vector2i(-20000, -20000)
 var _events: Array = []
 var _t := 0.0
 var _tiles: Array[Image] = []
@@ -38,7 +33,6 @@ var _perf: Perf
 
 func _ready() -> void:
 	process_physics_priority = -100
-	_park_window()
 	for a in OS.get_cmdline_user_args():
 		var i := a.find("=")
 		if i > 0:
