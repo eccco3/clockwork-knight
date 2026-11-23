@@ -20,7 +20,9 @@ When the dev says "backlog fan", pick up to three backlog items that are indepen
 - Moderate: Opus at high effort.
 - Simple and mechanical: Sonnet at medium effort.
 
-Each subagent completes its item and commits on its own branch without touching BACKLOG.md. When all have finished, merge the branches into main, then clear the finished items, commit and push.
+Each subagent completes its item and commits on its own branch without touching BACKLOG.md. As each one finishes, merge its branch into main, clear its item, commit and push, without waiting for the others.
+
+Never ask the dev whether to commit or push: commit and push whenever work is done.
 
 </immutable without the dev's blessing>
 <Claude's notes>
