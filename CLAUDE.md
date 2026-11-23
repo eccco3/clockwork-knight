@@ -58,6 +58,7 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 - `addons/lightmap_bake` presses the editor's bake button, the only way Godot bakes lightmaps.
 - `tools/knight/` builds the knight from signed-distance sculpts (`head.py`, `mesher.py`); `tools/build_hall.py` and `scripts/hall_build.gd` build the hall.
 - `assets/textures/knight/face_paint.png` is baked from `head.py` by the knight build.
+- Only `KnightShadow`, a 4,700-triangle copy from `tools/knight/shadow.py`, casts the knight's shadows.
 
 ## Repository
 

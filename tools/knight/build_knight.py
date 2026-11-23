@@ -11,7 +11,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
-from knight import sdf as S, mesher, head, gen, bl
+from knight import sdf as S, mesher, head, gen, bl, shadow
 from knight.sdf import V
 from knight.gen import Frame
 
@@ -834,8 +834,9 @@ def preview(arm, body, path, views, zoom):
     out.save()
 
 
-def export(arm, body, path):
-    body.parent = arm
+def export(arm, body, path, extra=()):
+    for ob in (body, *extra):
+        ob.parent = arm
     arm.animation_data_create()
     arm.animation_data.action = None
     for name in CLIPS:
@@ -851,7 +852,8 @@ def export(arm, body, path):
         tr.mute = False
     bpy.ops.object.select_all(action="DESELECT")
     arm.select_set(True)
-    body.select_set(True)
+    for ob in (body, *extra):
+        ob.select_set(True)
     bpy.context.view_layer.objects.active = arm
     bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_animations=True,
                               export_animation_mode="NLA_TRACKS", export_force_sampling=True, export_frame_step=1,
@@ -884,7 +886,9 @@ def main():
         views = [float(a) for a in opt("--views", "0,-40,-90,180").split(",")]
         preview(arm, body, opt("--preview"), views, opt("--zoom", "full"))
     if opt("--out"):
-        export(arm, body, opt("--out"))
+        caster = shadow.shadow_mesh(body, 3000)
+        print("SHADOW MESH tris=%d" % len(caster.data.polygons))
+        export(arm, body, opt("--out"), [caster])
         write_face_paint(os.path.join(os.path.dirname(os.path.dirname(HERE)), "assets", "textures", "knight", "face_paint.png"))
     print("DONE t=%.1fs" % (time.time() - t0))
 
