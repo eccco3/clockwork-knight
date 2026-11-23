@@ -9,11 +9,10 @@ Bake the hall's static lights and bounce light into lightmaps, replacing VoxelGI
 ### Open questions
 
 - Godot's lightmap baker may only run inside the editor. If it cannot be scripted, is baking in Blender acceptable?
-- The hall's windows are lit as blue dusk today. Change them to foggy daylight before baking?
 
 ### Status
 
-Not started. Peter: it is always daytime with heavy fog outdoors, so the time of day is fixed. Baseline in real play: 9 ms GPU time, 81 W, 87 °C. The driver lowers the GPU clock below about 6.5 ms; 5 ms gave 72 W and 3.5 ms gave 43 W.
+Not started. Peter: it is always daytime with heavy fog outdoors, so the time of day is fixed; first change the hall's window light from blue dusk to foggy daylight, then bake. Baseline in real play: 9 ms GPU time, 81 W, 87 °C. The driver lowers the GPU clock below about 6.5 ms; 5 ms gave 72 W and 3.5 ms gave 43 W.
 
 ## Test lower render scale
 
