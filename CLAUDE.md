@@ -35,6 +35,7 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 - Never combine `--only` with `--out`: it overwrites the full model with a partial one.
 - Run: `godot --path .`
 - Scripted play and screenshots: `dev/drive.tscn` with `--fixed-fps 60`; `dev/shot.tscn` photographs a scene. Both take `lamps=baked` to drop the live character lights.
+- So that drive and shot runs don't take focus, add `--main-pack dev/unfocused/pack.zip` before the scene. In that mode `DirAccess` cannot list `res://`. The editor bake still takes focus.
 - The game caps at 60 fps (`run/max_fps`). Frame times: `dev/drive.tscn` events `perf:start` and `perf:stop`, run with `--disable-vsync --max-fps 0`.
 - Fast sculpt iteration: `tools/knight/preview_head.py` renders clay turnarounds.
 
