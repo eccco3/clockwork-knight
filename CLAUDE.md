@@ -1,4 +1,4 @@
-<immutable without Peter's (the dev) blessing>
+<immutable without the dev's blessing>
 In this project you develop a game. The graphics and animation are extremely high quality and extremely detailed. Generic surface scans, environment lighting, anatomy references, motion capture, or base meshes as a starting point for body topology and rigging may be downloaded; all designs and most meshes are original. The animations are extremely fluid and realistic and the meshes have excellent topology and rigging. Be ambitious. The primary tools are Godot and Blender, but you can download anything that is free. The following rules must be enforced deterministically:
 
 1. The only global documentation is the CLAUDE.md and the BACKLOG.md.
@@ -12,9 +12,17 @@ All tasks that would take more than a minute are processed into backlog items, e
 
 1. Clear the backlog item.
 2. Commit and push to the remote without asking.
-3. If appropriate, recommend Peter to execute /clear or /compact before the next task.
+3. If appropriate, recommend the dev to execute /clear or /compact before the next task.
 
-</immutable without Peter's blessing>
+When the dev says "backlog fan", pick up to three backlog items that are independent: none needs another's result and none touches the same files. Give each its own subagent in its own git worktree, choosing model and effort by difficulty:
+
+- Most difficult (sculpting, rigging, animation, shaders, lighting, anything needing judgement across many files): Fable at high effort, or Opus at max effort when Fable usage is exhausted.
+- Moderate: Opus at high effort.
+- Simple and mechanical: Sonnet at medium effort.
+
+Each subagent completes its item and commits on its own branch without touching BACKLOG.md. When all have finished, merge the branches into main, then clear the finished items, commit and push.
+
+</immutable without the dev's blessing>
 <Claude's notes>
 
 ## Tools
@@ -35,7 +43,7 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 - Never combine `--only` with `--out`: it overwrites the full model with a partial one.
 - Run: `godot --path .`
 - Scripted play and screenshots: `dev/drive.tscn` with `--fixed-fps 60`; `dev/shot.tscn` photographs a scene. Both take `lamps=baked` to drop the live character lights.
-- Never open Godot windows on Peter's screen for tests or bakes: replace `godot` with `toolchain\blender\4.5\python\bin\python.exe -I dev\quiet.py`, which runs it on a hidden desktop with the same arguments.
+- Never open Godot windows on the dev's screen for tests or bakes, unless he is playtesting: replace `godot` with `toolchain\blender\4.5\python\bin\python.exe -I dev\quiet.py`, which runs it on a hidden desktop with the same arguments.
 - The game caps at 60 fps (`run/max_fps`). Frame times: `dev/drive.tscn` events `perf:start` and `perf:stop`, run with `--disable-vsync --max-fps 0`.
 - Fast sculpt iteration: `tools/knight/preview_head.py` renders clay turnarounds.
 
