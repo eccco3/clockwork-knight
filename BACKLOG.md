@@ -141,7 +141,7 @@ Not started.
 
 ### Task description
 
-Rig the lady: body, shoulders and torso for gesturing, fingers, and a face that can speak, with jaw and lips. Skin the dress so the smocked bodice and skirt deform cleanly. Pose her standing with her hands clasped in front of her, and animate a quiet idle on that pose: breathing and small weight shifts. Deliver turnarounds and a contact sheet of the idle.
+Rig the lady: shoulders and upper body for gesturing, fingers, and a face that can speak, with jaw and lips. Skin the dress so the smocked bodice and skirt deform cleanly. Pose her standing with her hands clasped in front of her, and animate a quiet idle on that pose: breathing and small weight shifts. Deliver turnarounds and a contact sheet of the idle.
 
 ### Open questions
 
@@ -156,7 +156,7 @@ Not started.
 
 ### Task description
 
-Animate the lady speaking: her mouth moves, and she gestures lightly by rotating her torso and shoulders while her hands stay clasped. Make several looping speech clips that blend with the idle and with each other without repeating visibly, played through Godot's AnimationTree. Deliver contact sheets and a close-up capture of her face while speaking.
+Animate the lady speaking: her mouth moves, and she gestures lightly by moving her upper body and shoulders while her hands stay clasped. Make several looping speech clips that blend with the idle and with each other without repeating visibly, played through Godot's AnimationTree. Deliver contact sheets and a close-up capture of her face while speaking.
 
 ### Open questions
 
