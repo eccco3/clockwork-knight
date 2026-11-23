@@ -1,30 +1,5 @@
-<immutable without the dev's blessing>
-In this project you develop a game. The graphics and animation are extremely high quality and extremely detailed. Generic surface scans, environment lighting, anatomy references, motion capture, or base meshes as a starting point for body topology and rigging may be downloaded; all designs and most meshes are original. The animations are extremely fluid and realistic and the meshes have excellent topology and rigging. Be ambitious. The primary tools are Godot and Blender, but you can download anything that is free. The following rules must be enforced deterministically:
+The dev's rules, which bind every session, are in @DEV.md.
 
-1. The only global documentation is the CLAUDE.md and the BACKLOG.md.
-2. Claude's notes in the CLAUDE.md do not exceed 600 words.
-3. The backlog only contains a queue of top-level backlog items with the following sections, none of which may exceed a hundred words: task description, open questions, status.
-4. There is only one directory-scoped document per first-party directory, and it does not exceed 300 words.
-
-The following is not enforced deterministically, but scripts and application files prefer code over comments.
-
-All tasks that would take more than a minute are processed into backlog items, each sized for one session. After completing a backlog item:
-
-1. Clear the backlog item.
-2. Commit and push to the remote without asking.
-3. If appropriate, recommend the dev to execute /clear or /compact before the next task.
-
-When the dev says "backlog fan", pick up to three backlog items that are independent: none needs another's result and none touches the same files. Give each its own subagent in its own git worktree, choosing model and effort by difficulty:
-
-- Most difficult (sculpting, rigging, animation, shaders, lighting, anything needing judgement across many files): Fable at high effort, or Opus at max effort when Fable usage is exhausted.
-- Moderate: Opus at high effort.
-- Simple and mechanical: Sonnet at medium effort.
-
-Each subagent completes its item and commits on its own branch without touching BACKLOG.md. As each one finishes, merge its branch into main, clear its item, commit and push, without waiting for the others.
-
-Never ask the dev whether to commit or push: commit and push whenever work is done.
-
-</immutable without the dev's blessing>
 <Claude's notes>
 
 ## Tools
@@ -62,7 +37,7 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 
 ## Repository
 
-- `tools/check_docs.sh` enforces the four documentation rules above; `tools/hooks/pre-commit` runs it. After cloning: `git config core.hooksPath tools/hooks`.
+- `tools/check_docs.sh` enforces the four documentation rules in `DEV.md`; `tools/hooks/pre-commit` runs it. After cloning: `git config core.hooksPath tools/hooks`.
 - First-party means everything git tracks except `tools/downloads/`.
 - Git ignores `toolchain/`, `.godot/`, `dev/shots/`, the Poly Haven files, which `tools/fetch_assets.ps1` restores, and the built models `assets/models/*.glb` and lightmap `assets/lightmaps/`, which `tools/build_models.ps1` restores.
 - Commit with Windows git, not WSL.

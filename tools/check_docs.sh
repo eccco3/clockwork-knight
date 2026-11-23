@@ -1,5 +1,5 @@
 #!/bin/sh
-# Enforces the four documentation rules in CLAUDE.md. Words are whitespace-separated tokens.
+# Enforces the four documentation rules in DEV.md. Words are whitespace-separated tokens.
 set -eu
 cd "$(git rev-parse --show-toplevel)"
 
@@ -20,13 +20,13 @@ docs() {
 }
 
 check_global() {
-	for f in CLAUDE.md BACKLOG.md; do
+	for f in CLAUDE.md DEV.md BACKLOG.md; do
 		[ -f "$f" ] || echo "$f: missing"
 	done
 	docs | while IFS= read -r f; do
 		case "$f" in
-			CLAUDE.md | BACKLOG.md | */*) ;;
-			*) echo "$f: the only global documents are CLAUDE.md and BACKLOG.md" ;;
+			CLAUDE.md | DEV.md | BACKLOG.md | */*) ;;
+			*) echo "$f: the only global documents are CLAUDE.md, DEV.md and BACKLOG.md" ;;
 		esac
 	done
 }

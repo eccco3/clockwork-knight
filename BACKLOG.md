@@ -119,6 +119,20 @@ Add a `dev/` scene that spawns a chosen number of grinners around the knight, an
 
 Not started. For comparison, one knight costs the GPU about 0.25 ms at mid distance.
 
+## Shared sculpt toolkit
+
+### Task description
+
+Move the parts of `tools/knight/` that any character uses into a new `tools/sculpt/` package: the signed-distance shapes, mesher, frames, texture baking, Blender helpers and export. Fold in duplicates such as `tools/grinner/sculpt.py`. Leave in `tools/knight/` and `tools/grinner/` only what makes each character itself. Prove the refactor changed nothing: rebuild both models and compare vertex counts, bounds and turnarounds before and after.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Wait for the grinner sculpt to merge; the lady sculpt should build on this.
+
 ## Lady: sculpt the model
 
 ### Task description
