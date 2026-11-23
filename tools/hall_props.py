@@ -324,7 +324,7 @@ def table_setting(b, L=4.4, W=0.95):
                     b.lathe([(0, 0), (0.012, 0), (0.028, 0.014), (0.028, 0.02), (0.016, 0.01), (0, 0.01)], 'brass', 10)
                     with b.at(T(0, 0.01, 0)):
                         candle(b, b.r(0.11, 0.17), 0.012)
-            b.mark('light', (0, 0.75, 0), name='Table', color=WARM, energy=0.8, range=3.6, shadow=False, size=0.05, fog=0.15)
+            b.mark('light', (0, 0.75, 0), name='Table', color=WARM, energy=0.6, range=3.6, shadow=False, size=0.05, fog=0.15)
     with b.at(T(0, y + 0.004, 0.02)):
         fruit_bowl(b)
     places = [(-1.75, 0.27), (-0.7, 0.3), (0.5, 0.28), (1.7, 0.3), (-1.4, -0.29), (-0.2, -0.3), (0.95, -0.28), (1.9, -0.27)]
