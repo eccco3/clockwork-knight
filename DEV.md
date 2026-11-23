@@ -14,14 +14,6 @@ All tasks that would take more than a minute are processed into backlog items, e
 2. Commit and push to the remote without asking.
 3. If appropriate, recommend the dev to execute /clear or /compact before the next task.
 
-When the dev says "backlog fan", pick up to three backlog items that are independent: none needs another's result and none touches the same files. Give each its own subagent in its own git worktree, choosing model and effort by difficulty:
-
-- Most difficult (sculpting, rigging, animation, shaders, lighting, anything needing judgement across many files): Fable at high effort, or Opus at max effort when Fable usage is exhausted.
-- Moderate: Opus at high effort.
-- Simple and mechanical: Sonnet at medium effort.
-
-Each subagent completes its item and commits on its own branch without touching BACKLOG.md. As each one finishes, merge its branch into main, clear its item, commit and push, without waiting for the others.
-
 Never ask the dev whether to commit or push: commit and push whenever work is done.
 
 </immutable without the dev's blessing>

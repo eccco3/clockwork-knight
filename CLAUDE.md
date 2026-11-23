@@ -20,7 +20,7 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 - Never combine `--only` with `--out`: it overwrites the full model with a partial one.
 - Run: `godot --path .`
 - Scripted play and screenshots: `dev/drive.tscn` with `--fixed-fps 60`; `dev/shot.tscn` photographs a scene. Both take `lamps=baked` to drop the live character lights.
-- Never open Godot windows on the dev's screen for tests or bakes, unless he is playtesting: replace `godot` with `toolchain\blender\4.5\python\bin\python.exe -I dev\quiet.py`, which runs it on a hidden desktop with the same arguments.
+- Never open Godot windows on the dev's screen for tests or bakes, unless he is playtesting: replace `godot` with `toolchain\blender\4.5\python\bin\python.exe -I dev\quiet.py`, which runs it on a hidden desktop with the same arguments. Put `--timing` first for GPU timing runs: it waits until no other Godot or Blender runs and holds other launches off.
 - The game caps at 60 fps (`run/max_fps`). Frame times: `dev/drive.tscn` events `perf:start` and `perf:stop`, run with `--disable-vsync --max-fps 0`.
 - Fast sculpt iteration: `tools/knight/preview_head.py` renders clay turnarounds.
 
