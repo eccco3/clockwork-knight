@@ -52,6 +52,7 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 ## Where things are
 
 - `scenes/main.tscn` is the playable scene; `scripts/main.gd` adds the hall, player and hint.
+- `scenes/outdoors.tscn` builds the grinner's foggy ground on load; drive and shot take `scene=res://scenes/outdoors.tscn`.
 - `scripts/` holds the player controller, animator and camera rig; `shaders/` the wood, metal and eye shaders.
 - The hall's lamps are baked. `scripts/hall.gd` replaces them at runtime with lights that reach only characters (render layer 2) and with cancelling pairs that leave character shadows on the baked floor. Only the fire lights the hall live.
 - `addons/lightmap_bake` presses the editor's bake button, the only way Godot bakes lightmaps.
