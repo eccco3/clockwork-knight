@@ -69,7 +69,7 @@ func _ready() -> void:
 	_carry = anim.new_pose()
 	_setup_materials()
 	_setup_extras()
-	mesh.extra_cull_margin = 1.5
+	mesh.extra_cull_margin = 0.15
 	_apply_pose(0.0)
 
 

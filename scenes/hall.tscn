@@ -767,7 +767,7 @@ light_volumetric_fog_energy = 0.3
 shadow_enabled = true
 shadow_bias = 0.06
 shadow_normal_bias = 1.2
-shadow_blur = 2.4
+shadow_blur = 1.2
 omni_range = 13.0
 
 [node name="ChandelierUp1" type="OmniLight3D" parent="Lights" unique_id=1067538579]
@@ -786,7 +786,7 @@ light_volumetric_fog_energy = 0.3
 shadow_enabled = true
 shadow_bias = 0.06
 shadow_normal_bias = 1.2
-shadow_blur = 2.4
+shadow_blur = 1.2
 omni_range = 13.0
 
 [node name="ChandelierUp3" type="OmniLight3D" parent="Lights" unique_id=954793251]
@@ -805,7 +805,7 @@ light_volumetric_fog_energy = 0.3
 shadow_enabled = true
 shadow_bias = 0.06
 shadow_normal_bias = 1.2
-shadow_blur = 2.4
+shadow_blur = 1.2
 omni_range = 13.0
 
 [node name="ChandelierUp5" type="OmniLight3D" parent="Lights" unique_id=1736149141]
@@ -1141,7 +1141,7 @@ light_volumetric_fog_energy = 0.03
 shadow_enabled = true
 shadow_bias = 0.05
 shadow_normal_bias = 1.5
-shadow_blur = 2.6
+shadow_blur = 1.3
 omni_range = 17.0
 script = ExtResource("9_2x4b0")
 base_energy = 5.5

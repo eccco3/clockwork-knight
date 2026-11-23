@@ -8,7 +8,9 @@ extends Node
 ##
 ## Events: press/release/tap:<action>, shot:<name> (full frame -> prefix_name.png), snap (adds a
 ## tile to the contact sheet prefix_sheet.png), snaps:<n>:<interval>, yaw:<radians> / pitch:<r>
-## / dist:<m> (orbit camera), quit.
+## / dist:<m> (orbit camera), perf:start / perf:stop (frame times; run with --disable-vsync),
+## set:<node path or name pattern>:<property>:<value>, env:<property>:<value>,
+## vp:<property>:<value>, rs:<RenderingServer method>:<args...> (what-if switches), quit.
 ## side=dx,dy,dz puts a camera at that offset from the player (looking at her) instead of the
 ## orbit camera. tile=WxH and cols=N shape the sheet.
 
@@ -25,6 +27,7 @@ var _cam: Camera3D
 var _side := Vector3.ZERO
 var _busy := false
 var _track := 0
+var _perf: Perf
 
 
 func _ready() -> void:
@@ -41,6 +44,10 @@ func _ready() -> void:
 	var packed: PackedScene = load(_args.get("scene", "res://dev/stage.tscn"))
 	_scene = packed.instantiate()
 	add_child(_scene)
+	if _player():
+		_player().set("capture_mouse", false)
+	print("load: scene ready at %d ms" % Time.get_ticks_msec())
+	RenderingServer.frame_post_draw.connect(func(): print("load: first frame at %d ms" % Time.get_ticks_msec()), CONNECT_ONE_SHOT)
 	for e in String(_args.get("do", "")).split(";", false):
 		var p := e.split(":")
 		_events.append([float(p[0]), p.slice(1)])
@@ -113,6 +120,26 @@ func _physics_process(dt: float) -> void:
 					print("hide: no node ", ev[1])
 			"call":
 				_scene.call(ev[1])
+			"set":
+				var found := [_scene.get_node(ev[1])] if ev[1].contains("/") else _scene.find_children(ev[1], "", true, false)
+				if found.is_empty():
+					print("set: no node ", ev[1])
+				for n in found:
+					n.set(ev[2], str_to_var(ev[3]))
+			"env":
+				get_viewport().world_3d.environment.set(ev[1], str_to_var(ev[2]))
+			"vp":
+				get_viewport().set(ev[1], str_to_var(ev[2]))
+			"rs":
+				RenderingServer.callv(ev[1], Array(ev.slice(2)).map(str_to_var))
+			"perf":
+				if ev[1] == "start":
+					_perf = Perf.new()
+					add_child(_perf)
+				elif _perf:
+					_perf.report()
+					_perf.queue_free()
+					_perf = null
 			"quit":
 				_finish()
 	if _pending_snaps > 0 and _t >= _snap_next:
@@ -134,6 +161,42 @@ class Tracker extends Node:
 			var g: Vector3 = (sk.global_transform * sk.get_bone_global_pose(sk.find_bone(n))).origin
 			out += "  %s %.3f %.3f %.3f" % [n, g.x, g.y, g.z]
 		print(out)
+
+
+class Perf extends Node:
+	var frames := PackedFloat32Array()
+	var gpu := 0.0
+	var cpu := 0.0
+	var _last := 0
+
+	func _ready() -> void:
+		RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
+		_last = Time.get_ticks_usec()
+
+	func _process(_dt: float) -> void:
+		var now := Time.get_ticks_usec()
+		frames.append((now - _last) / 1000.0)
+		_last = now
+		var vp := get_viewport().get_viewport_rid()
+		gpu += RenderingServer.viewport_get_measured_render_time_gpu(vp)
+		cpu += RenderingServer.viewport_get_measured_render_time_cpu(vp) + RenderingServer.get_frame_setup_time_cpu()
+
+	func report() -> void:
+		var n := frames.size()
+		var sorted := frames.duplicate()
+		sorted.sort()
+		var total := 0.0
+		for f in frames:
+			total += f
+		print("perf: %d frames at %s  avg %.2f ms (%.0f fps)  p1 %.2f  p99 %.2f  worst %.2f  gpu %.2f  cpu-render %.2f" % [
+			n, get_viewport().size, total / n, 1000.0 * n / total, sorted[int(n * 0.01)], sorted[int(n * 0.99)], sorted[n - 1],
+			gpu / n, cpu / n])
+		print("perf: draw calls %d  primitives %d  vram %.0f MB  texture %.0f MB  buffer %.0f MB" % [
+			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
+			Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME),
+			Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
+			Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
+			Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0])
 
 
 func _grab() -> Image:

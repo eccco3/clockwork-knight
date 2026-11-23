@@ -12,7 +12,7 @@ All tasks that would take more than a minute are processed into backlog items, e
 
 1. Clear the backlog item.
 2. Commit and push to the remote without asking.
-3. Recommend Peter to execute /clear or /compact before the next task.
+3. If appropriate, recommend Peter to execute /clear or /compact before the next task.
 
 </immutable without Peter's blessing>
 <Claude's notes>
@@ -33,6 +33,7 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 - Never combine `--only` with `--out`: it overwrites the full model with a partial one.
 - Run: `godot --path .`
 - Scripted play and screenshots: `dev/drive.tscn` with `--fixed-fps 60`; `dev/shot.tscn` photographs a scene.
+- The game caps at 60 fps (`run/max_fps`). Frame times: `dev/drive.tscn` events `perf:start` and `perf:stop`, run with `--disable-vsync --max-fps 0`.
 - Fast sculpt iteration: `tools/knight/preview_head.py` renders clay turnarounds.
 
 ## Where things are

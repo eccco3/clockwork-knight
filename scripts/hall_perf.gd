@@ -1,6 +1,6 @@
 extends SceneTree
 ## Frame-time probe for the hall (dev tool, not used at runtime):
-##   godot --path . --disable-vsync --resolution 1920x1080 --script res://scripts/hall_perf.gd
+##   godot --path . --disable-vsync --max-fps 0 --resolution 1920x1080 --script res://scripts/hall_perf.gd
 ## Flies a camera through a few representative views and prints average / worst frame times.
 
 const VIEWS := [
