@@ -1,0 +1,12 @@
+/toolchain/
+/.godot/
+/dev/shots/
+__pycache__/
+
+# Poly Haven downloads, restored by tools/fetch_assets.ps1
+/assets/textures/*/*.jpg
+/assets/hdri/*.hdr
+
+# Animation library formats the knight build does not read
+/tools/downloads/**/*.fbx
+/tools/downloads/**/*.blend

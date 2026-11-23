@@ -1,0 +1,41 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+
+config_version=5
+
+[application]
+
+config/name="Clockwork Knight"
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.7", "Forward Plus")
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/stretch/aspect="expand"
+
+[physics]
+
+common/physics_ticks_per_second=120
+3d/default_gravity=22.0
+
+[rendering]
+
+global_illumination/gi/use_half_resolution=true
+
+anti_aliasing/quality/msaa_3d=2
+anti_aliasing/quality/screen_space_aa=2
+textures/default_filters/anisotropic_filtering_level=4
+lights_and_shadows/positional_shadow/atlas_size=8192
+lights_and_shadows/positional_shadow/soft_shadow_filter_quality=3
+lights_and_shadows/directional_shadow/size=4096
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3
+global_illumination/voxel_gi/quality=1
+environment/ssao/quality=3
+environment/ssil/quality=2
+environment/volumetric_fog/volume_size=96
+environment/volumetric_fog/volume_depth=96
+environment/screen_space_reflection/roughness_quality=2
+environment/subsurface_scattering/subsurface_scattering_quality=2

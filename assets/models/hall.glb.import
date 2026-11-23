@@ -1,0 +1,218 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://ijpbw2uygi7y"
+path="res://.godot/imported/hall.glb-e5279714b183beb0f24edc9ba1538d65.scn"
+
+[deps]
+
+source_file="res://assets/models/hall.glb"
+dest_files=["res://.godot/imported/hall.glb-e5279714b183beb0f24edc9ba1538d65.scn"]
+
+[params]
+
+nodes/root_type=""
+nodes/root_name=""
+nodes/root_script=null
+mesh_library/use_node_names_as_mesh_names=false
+array_mesh/deduplicate_surfaces=true
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+nodes/import_as_skeleton_bones=false
+nodes/use_name_suffixes=true
+nodes/use_node_type_suffixes=true
+meshes/ensure_tangents=true
+meshes/generate_lods=false
+meshes/create_shadow_meshes=true
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+meshes/force_disable_compression=false
+skins/use_named_skins=true
+animation/import=false
+animation/fps=30
+animation/trimming=false
+animation/remove_immutable_tracks=true
+animation/import_rest_as_RESET=false
+import_script/path="res://scripts/hall_import.gd"
+materials/extract=0
+materials/extract_format=0
+materials/extract_path=""
+_subresources={
+"materials": {
+"hall_banner": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_banner.tres",
+"use_external/path": "res://materials/hall_banner.tres"
+},
+"hall_bark": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_bark.tres",
+"use_external/path": "res://materials/hall_bark.tres"
+},
+"hall_brass": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_brass.tres",
+"use_external/path": "res://materials/hall_brass.tres"
+},
+"hall_ceramic": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_ceramic.tres",
+"use_external/path": "res://materials/hall_ceramic.tres"
+},
+"hall_clockface": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_clockface.tres",
+"use_external/path": "res://materials/hall_clockface.tres"
+},
+"hall_ember": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_ember.tres",
+"use_external/path": "res://materials/hall_ember.tres"
+},
+"hall_endgrain": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_endgrain.tres",
+"use_external/path": "res://materials/hall_endgrain.tres"
+},
+"hall_food": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_food.tres",
+"use_external/path": "res://materials/hall_food.tres"
+},
+"hall_hessian": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_hessian.tres",
+"use_external/path": "res://materials/hall_hessian.tres"
+},
+"hall_iron": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_iron.tres",
+"use_external/path": "res://materials/hall_iron.tres"
+},
+"hall_leather": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_leather.tres",
+"use_external/path": "res://materials/hall_leather.tres"
+},
+"hall_linen": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_linen.tres",
+"use_external/path": "res://materials/hall_linen.tres"
+},
+"hall_log_burn": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_log_burn.tres",
+"use_external/path": "res://materials/hall_log_burn.tres"
+},
+"hall_mortar": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_mortar.tres",
+"use_external/path": "res://materials/hall_mortar.tres"
+},
+"hall_paper": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_paper.tres",
+"use_external/path": "res://materials/hall_paper.tres"
+},
+"hall_pewter": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_pewter.tres",
+"use_external/path": "res://materials/hall_pewter.tres"
+},
+"hall_plaster": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_plaster.tres",
+"use_external/path": "res://materials/hall_plaster.tres"
+},
+"hall_rope": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_rope.tres",
+"use_external/path": "res://materials/hall_rope.tres"
+},
+"hall_rug": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_rug.tres",
+"use_external/path": "res://materials/hall_rug.tres"
+},
+"hall_shield": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_shield.tres",
+"use_external/path": "res://materials/hall_shield.tres"
+},
+"hall_stone": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_stone.tres",
+"use_external/path": "res://materials/hall_stone.tres"
+},
+"hall_stone_flag": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_stone_flag.tres",
+"use_external/path": "res://materials/hall_stone_flag.tres"
+},
+"hall_tapestry": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_tapestry.tres",
+"use_external/path": "res://materials/hall_tapestry.tres"
+},
+"hall_velvet": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_velvet.tres",
+"use_external/path": "res://materials/hall_velvet.tres"
+},
+"hall_wax": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_wax.tres",
+"use_external/path": "res://materials/hall_wax.tres"
+},
+"hall_wood_beam": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_wood_beam.tres",
+"use_external/path": "res://materials/hall_wood_beam.tres"
+},
+"hall_wood_dark": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_wood_dark.tres",
+"use_external/path": "res://materials/hall_wood_dark.tres"
+},
+"hall_wood_floor": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_wood_floor.tres",
+"use_external/path": "res://materials/hall_wood_floor.tres"
+},
+"hall_wood_oak": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_wood_oak.tres",
+"use_external/path": "res://materials/hall_wood_oak.tres"
+},
+"hall_wood_panel": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_wood_panel.tres",
+"use_external/path": "res://materials/hall_wood_panel.tres"
+},
+"hall_wood_red": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_wood_red.tres",
+"use_external/path": "res://materials/hall_wood_red.tres"
+},
+"hall_wood_roof": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_wood_roof.tres",
+"use_external/path": "res://materials/hall_wood_roof.tres"
+},
+"hall_wood_table": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_wood_table.tres",
+"use_external/path": "res://materials/hall_wood_table.tres"
+},
+"hall_wool": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_wool.tres",
+"use_external/path": "res://materials/hall_wool.tres"
+}
+}
+}
+gltf/naming_version=2
+gltf/embedded_image_handling=1
+gltf/texture_map_mode=0

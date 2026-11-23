@@ -1,0 +1,17 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/hall_flame.gdshader" id="1_jne6j"]
+[ext_resource type="Texture2D" path="res://materials/hall_noise_flame.tres" id="2_mqr1l"]
+
+[resource]
+resource_name = "hall_flame3"
+render_priority = 0
+shader = ExtResource("1_jne6j")
+shader_parameter/noise_tex = ExtResource("2_mqr1l")
+shader_parameter/speed = 1.21
+shader_parameter/intensity = 0.6
+shader_parameter/seed = 4.510000000000001
+shader_parameter/lean = 0.18
+shader_parameter/color_core = null
+shader_parameter/color_mid = null
+shader_parameter/color_tip = null

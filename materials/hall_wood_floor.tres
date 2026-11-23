@@ -1,0 +1,24 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/hall_surface.gdshader" id="1_5xjxx"]
+[ext_resource type="Texture2D" path="res://assets/textures/wood_table_worn/albedo.jpg" id="2_wchlj"]
+[ext_resource type="Texture2D" path="res://materials/hall_noise_soft.tres" id="3_557g3"]
+[ext_resource type="Texture2D" path="res://assets/textures/wood_table_worn/normal.jpg" id="4_rs5tl"]
+[ext_resource type="Texture2D" path="res://assets/textures/wood_table_worn/arm.jpg" id="5_umgjy"]
+
+[resource]
+resource_name = "hall_wood_floor"
+render_priority = 0
+shader = ExtResource("1_5xjxx")
+shader_parameter/albedo_tex = ExtResource("2_wchlj")
+shader_parameter/normal_tex = ExtResource("4_rs5tl")
+shader_parameter/orm_tex = ExtResource("5_umgjy")
+shader_parameter/macro_tex = ExtResource("3_557g3")
+shader_parameter/tint = Vector3(1.08, 1, 0.9)
+shader_parameter/normal_strength = 0.9
+shader_parameter/macro_strength = 0.2
+shader_parameter/macro_scale = 0.13
+shader_parameter/roughness_scale = 0.62
+shader_parameter/grime_height = null
+shader_parameter/grime_strength = null
+shader_parameter/saturation = 0.8

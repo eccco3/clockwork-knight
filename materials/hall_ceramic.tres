@@ -1,0 +1,11 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[resource]
+resource_name = "hall_ceramic"
+vertex_color_use_as_albedo = true
+vertex_color_is_srgb = true
+roughness = 0.28
+clearcoat_enabled = true
+clearcoat = 0.6
+clearcoat_roughness = 0.25
+texture_filter = 5

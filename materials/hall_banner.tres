@@ -1,0 +1,19 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/hall_cloth_2s.gdshader" id="1_63kro"]
+[ext_resource type="Texture2D" path="res://assets/textures/hall_gen/banners.png" id="2_tkve0"]
+[ext_resource type="Texture2D" path="res://assets/textures/rough_linen/normal.jpg" id="3_xnk5o"]
+[ext_resource type="Texture2D" path="res://assets/textures/rough_linen/arm.jpg" id="4_u5jx6"]
+
+[resource]
+resource_name = "hall_banner"
+render_priority = 0
+shader = ExtResource("1_63kro")
+shader_parameter/pattern_tex = ExtResource("2_tkve0")
+shader_parameter/weave_normal = ExtResource("3_xnk5o")
+shader_parameter/weave_orm = ExtResource("4_u5jx6")
+shader_parameter/weave_scale = Vector2(5, 9)
+shader_parameter/normal_strength = 0.8
+shader_parameter/fuzz = 0.2
+shader_parameter/saturation = null
+shader_parameter/brightness = null

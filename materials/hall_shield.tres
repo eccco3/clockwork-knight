@@ -1,0 +1,9 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/hall_gen/shields.png" id="1_5p0ak"]
+
+[resource]
+resource_name = "hall_shield"
+albedo_texture = ExtResource("1_5p0ak")
+roughness = 0.55
+texture_filter = 5

@@ -1,0 +1,19 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/hall_cloth_2s.gdshader" id="1_4d6lx"]
+[ext_resource type="Texture2D" path="res://assets/textures/hall_gen/tapestry.png" id="2_0gv55"]
+[ext_resource type="Texture2D" path="res://assets/textures/hessian_230/normal.jpg" id="3_aiad3"]
+[ext_resource type="Texture2D" path="res://assets/textures/hessian_230/arm.jpg" id="4_loo15"]
+
+[resource]
+resource_name = "hall_tapestry"
+render_priority = 0
+shader = ExtResource("1_4d6lx")
+shader_parameter/pattern_tex = ExtResource("2_0gv55")
+shader_parameter/weave_normal = ExtResource("3_aiad3")
+shader_parameter/weave_orm = ExtResource("4_loo15")
+shader_parameter/weave_scale = Vector2(9, 9)
+shader_parameter/normal_strength = 0.7
+shader_parameter/fuzz = 0.25
+shader_parameter/saturation = null
+shader_parameter/brightness = null

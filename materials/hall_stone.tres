@@ -1,0 +1,24 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/hall_surface.gdshader" id="1_8j0x7"]
+[ext_resource type="Texture2D" path="res://assets/textures/rough_concrete/albedo.jpg" id="2_hu5ik"]
+[ext_resource type="Texture2D" path="res://materials/hall_noise_soft.tres" id="3_0dy32"]
+[ext_resource type="Texture2D" path="res://assets/textures/rough_concrete/normal.jpg" id="4_8335p"]
+[ext_resource type="Texture2D" path="res://assets/textures/rough_concrete/arm.jpg" id="5_t85se"]
+
+[resource]
+resource_name = "hall_stone"
+render_priority = 0
+shader = ExtResource("1_8j0x7")
+shader_parameter/albedo_tex = ExtResource("2_hu5ik")
+shader_parameter/normal_tex = ExtResource("4_8335p")
+shader_parameter/orm_tex = ExtResource("5_t85se")
+shader_parameter/macro_tex = ExtResource("3_0dy32")
+shader_parameter/tint = Vector3(0.9, 0.83, 0.74)
+shader_parameter/normal_strength = 1.4
+shader_parameter/macro_strength = 0.3
+shader_parameter/macro_scale = 0.45
+shader_parameter/roughness_scale = 1.0
+shader_parameter/grime_height = 0.0
+shader_parameter/grime_strength = 0.0
+shader_parameter/saturation = null

@@ -1,0 +1,21 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/rough_wood/albedo.jpg" id="1_ll4li"]
+[ext_resource type="Texture2D" path="res://assets/textures/rough_wood/arm.jpg" id="2_v6v3b"]
+[ext_resource type="Texture2D" path="res://assets/textures/rough_wood/normal.jpg" id="3_53r6n"]
+
+[resource]
+resource_name = "hall_wood_beam"
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.98, 0.86, 0.76, 1)
+albedo_texture = ExtResource("1_ll4li")
+roughness = 0.92
+roughness_texture = ExtResource("2_v6v3b")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 1.3
+normal_texture = ExtResource("3_53r6n")
+ao_enabled = true
+ao_light_affect = 0.5
+ao_texture = ExtResource("2_v6v3b")
+texture_filter = 5

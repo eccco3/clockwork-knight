@@ -1,0 +1,20 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/bark_brown_02/albedo.jpg" id="1_vgkp8"]
+[ext_resource type="Texture2D" path="res://assets/textures/bark_brown_02/arm.jpg" id="2_t1pie"]
+[ext_resource type="Texture2D" path="res://assets/textures/bark_brown_02/normal.jpg" id="3_eymnx"]
+
+[resource]
+resource_name = "hall_bark"
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.8, 0.72, 0.62, 1)
+albedo_texture = ExtResource("1_vgkp8")
+roughness_texture = ExtResource("2_t1pie")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 1.5
+normal_texture = ExtResource("3_eymnx")
+ao_enabled = true
+ao_light_affect = 0.35
+ao_texture = ExtResource("2_t1pie")
+texture_filter = 5

@@ -1,0 +1,16 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/hall_ember.gdshader" id="1_3vexl"]
+[ext_resource type="Texture2D" path="res://materials/hall_noise_cell.tres" id="2_ljuce"]
+
+[resource]
+resource_name = "hall_log_burn"
+render_priority = 0
+shader = ExtResource("1_3vexl")
+shader_parameter/noise_tex = ExtResource("2_ljuce")
+shader_parameter/glow = 1.6
+shader_parameter/coverage = 0.3
+shader_parameter/scale = 0.4
+shader_parameter/ash_amount = 0.25
+shader_parameter/char_color = Color(0.03, 0.024, 0.02, 1)
+shader_parameter/hot = null

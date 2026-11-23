@@ -1,0 +1,11 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/hall_candle_flame.gdshader" id="1_b0e17"]
+
+[resource]
+resource_name = "hall_candle_flame"
+render_priority = 0
+shader = ExtResource("1_b0e17")
+shader_parameter/intensity = 6.0
+shader_parameter/halo = null
+shader_parameter/quad_size = null

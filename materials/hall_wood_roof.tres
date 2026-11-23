@@ -1,0 +1,21 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/planks_brown_10/albedo.jpg" id="1_6n1bk"]
+[ext_resource type="Texture2D" path="res://assets/textures/planks_brown_10/arm.jpg" id="2_mphjk"]
+[ext_resource type="Texture2D" path="res://assets/textures/planks_brown_10/normal.jpg" id="3_ux154"]
+
+[resource]
+resource_name = "hall_wood_roof"
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.56, 0.47, 0.39, 1)
+albedo_texture = ExtResource("1_6n1bk")
+roughness = 0.95
+roughness_texture = ExtResource("2_mphjk")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 1.2
+normal_texture = ExtResource("3_ux154")
+ao_enabled = true
+ao_light_affect = 0.35
+ao_texture = ExtResource("2_mphjk")
+texture_filter = 5

@@ -1,0 +1,20 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/fine_grained_wood/albedo.jpg" id="1_8mr4e"]
+[ext_resource type="Texture2D" path="res://assets/textures/fine_grained_wood/arm.jpg" id="2_7aekd"]
+[ext_resource type="Texture2D" path="res://assets/textures/fine_grained_wood/normal.jpg" id="3_hryil"]
+
+[resource]
+resource_name = "hall_wood_dark"
+vertex_color_use_as_albedo = true
+albedo_color = Color(1.1, 1, 0.92, 1)
+albedo_texture = ExtResource("1_8mr4e")
+roughness = 0.7
+roughness_texture = ExtResource("2_7aekd")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_texture = ExtResource("3_hryil")
+ao_enabled = true
+ao_light_affect = 0.35
+ao_texture = ExtResource("2_7aekd")
+texture_filter = 5

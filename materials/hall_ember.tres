@@ -1,0 +1,16 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/hall_ember.gdshader" id="1_y0hrl"]
+[ext_resource type="Texture2D" path="res://materials/hall_noise_cell.tres" id="2_mulgc"]
+
+[resource]
+resource_name = "hall_ember"
+render_priority = 0
+shader = ExtResource("1_y0hrl")
+shader_parameter/noise_tex = ExtResource("2_mulgc")
+shader_parameter/glow = 1.7
+shader_parameter/coverage = 0.55
+shader_parameter/scale = 1.3
+shader_parameter/ash_amount = null
+shader_parameter/char_color = null
+shader_parameter/hot = null

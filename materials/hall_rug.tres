@@ -1,0 +1,19 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/hall_cloth.gdshader" id="1_4nlyo"]
+[ext_resource type="Texture2D" path="res://assets/textures/hall_gen/rug.png" id="2_oh36g"]
+[ext_resource type="Texture2D" path="res://assets/textures/wool_boucle/normal.jpg" id="3_mvmgs"]
+[ext_resource type="Texture2D" path="res://assets/textures/wool_boucle/arm.jpg" id="4_bc7hl"]
+
+[resource]
+resource_name = "hall_rug"
+render_priority = 0
+shader = ExtResource("1_4nlyo")
+shader_parameter/pattern_tex = ExtResource("2_oh36g")
+shader_parameter/weave_normal = ExtResource("3_mvmgs")
+shader_parameter/weave_orm = ExtResource("4_bc7hl")
+shader_parameter/weave_scale = Vector2(14, 24)
+shader_parameter/normal_strength = 1.0
+shader_parameter/fuzz = 0.3
+shader_parameter/saturation = 0.78
+shader_parameter/brightness = 0.55

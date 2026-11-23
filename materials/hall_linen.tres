@@ -1,0 +1,17 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/rough_linen/arm.jpg" id="1_aj6lb"]
+[ext_resource type="Texture2D" path="res://assets/textures/rough_linen/normal.jpg" id="2_268ll"]
+
+[resource]
+resource_name = "hall_linen"
+vertex_color_use_as_albedo = true
+vertex_color_is_srgb = true
+roughness_texture = ExtResource("1_aj6lb")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_texture = ExtResource("2_268ll")
+ao_enabled = true
+ao_light_affect = 0.35
+ao_texture = ExtResource("1_aj6lb")
+texture_filter = 5

@@ -1,0 +1,24 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/hall_surface.gdshader" id="1_ns8ma"]
+[ext_resource type="Texture2D" path="res://assets/textures/painted_plaster_wall/albedo.jpg" id="2_djd5t"]
+[ext_resource type="Texture2D" path="res://materials/hall_noise_soft.tres" id="3_pktrl"]
+[ext_resource type="Texture2D" path="res://assets/textures/white_rough_plaster/normal.jpg" id="4_siar0"]
+[ext_resource type="Texture2D" path="res://assets/textures/painted_plaster_wall/arm.jpg" id="5_l78ae"]
+
+[resource]
+resource_name = "hall_plaster"
+render_priority = 0
+shader = ExtResource("1_ns8ma")
+shader_parameter/albedo_tex = ExtResource("2_djd5t")
+shader_parameter/normal_tex = ExtResource("4_siar0")
+shader_parameter/orm_tex = ExtResource("5_l78ae")
+shader_parameter/macro_tex = ExtResource("3_pktrl")
+shader_parameter/tint = Vector3(1.32, 1.2, 0.98)
+shader_parameter/normal_strength = 0.55
+shader_parameter/macro_strength = 0.22
+shader_parameter/macro_scale = 0.11
+shader_parameter/roughness_scale = 1.0
+shader_parameter/grime_height = 2.2
+shader_parameter/grime_strength = 0.12
+shader_parameter/saturation = null

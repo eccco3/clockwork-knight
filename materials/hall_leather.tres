@@ -1,0 +1,19 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/brown_leather/arm.jpg" id="1_xjfk5"]
+[ext_resource type="Texture2D" path="res://assets/textures/brown_leather/normal.jpg" id="2_10her"]
+
+[resource]
+resource_name = "hall_leather"
+vertex_color_use_as_albedo = true
+vertex_color_is_srgb = true
+roughness = 0.8
+roughness_texture = ExtResource("1_xjfk5")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 1.2
+normal_texture = ExtResource("2_10her")
+ao_enabled = true
+ao_light_affect = 0.35
+ao_texture = ExtResource("1_xjfk5")
+texture_filter = 5

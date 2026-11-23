@@ -1,0 +1,9 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/hall_gen/clockface.png" id="1_gips4"]
+
+[resource]
+resource_name = "hall_clockface"
+albedo_texture = ExtResource("1_gips4")
+roughness = 0.5
+texture_filter = 5

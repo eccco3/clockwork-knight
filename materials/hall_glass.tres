@@ -1,0 +1,15 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/hall_glass.gdshader" id="1_2inpm"]
+
+[resource]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("1_2inpm")
+shader_parameter/size = null
+shader_parameter/pane = null
+shader_parameter/sky_top = null
+shader_parameter/sky_mid = null
+shader_parameter/sky_horizon = null
+shader_parameter/ground = null
+shader_parameter/energy = null
