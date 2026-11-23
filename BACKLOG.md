@@ -197,15 +197,15 @@ Stand the lady in the study and have her speak as the knight comes near. Check t
 
 Not started.
 
-## Outdoors: tone down the helmet's shine
+## Outdoors: soften the light on her helmet
 
 ### Task description
 
-In the foggy outdoors scene the knight's helmet looks too glossy: its lacquer catches a hard highlight that soft, overcast light should not make. Find the cause (the sun's small angular size, the sky's reflections, or the material's roughness) and make the helmet read as satin under fog, without changing how she looks in the hall. Compare screenshots in both scenes before and after, standing and turning, and check GPU time is unchanged.
+In the foggy outdoors scene the knight's helmet catches a hard highlight that overcast light should not make. Her materials are right, since the helmet looks good in the hall, so fix the outdoor lighting instead: the sun's 7° angular size and strength, the sky's reflections and the ambient light in `scripts/outdoors.gd` and `shaders/outdoors_sky.gdshader`. Don't change knight materials. Compare screenshots outdoors before and after, standing and turning, check the hall is unchanged and GPU time is not worse.
 
 ### Open questions
 
-- Is it only the helmet, or should all her lacquer be duller outdoors?
+- Should any direction of sunlight be visible through the fog, or should it be fully overcast?
 
 ### Status
 
