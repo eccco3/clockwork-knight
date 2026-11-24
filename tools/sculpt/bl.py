@@ -122,6 +122,14 @@ def save_image(path, px, colour=True):
     return img
 
 
+def read_image(path):
+    """A picture file as (H, W, 4) floats, bottom row first."""
+    img = bpy.data.images.load(os.path.abspath(path))
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(img.size[1], img.size[0], 4)
+    bpy.data.images.remove(img)
+    return px
+
+
 def studio(heights, energies, key=(1.0, 0.93, 0.85)):
     """Key, fill and rim lights for `turnaround`, at the given heights and energies."""
     return [("key", (1.2, -3.0, heights[0]), energies[0], 2.0, key),
@@ -147,9 +155,7 @@ def turnaround(path, views, target, scale, res, lights, samples=48):
         pivot.rotation_euler = (0, 0, math.radians(-yaw))
         tmp = path + ".%d.png" % i
         render(tmp)
-        img = bpy.data.images.load(tmp)
-        tiles.append(np.array(img.pixels[:], dtype=np.float32).reshape(img.size[1], img.size[0], 4))
-        bpy.data.images.remove(img)
+        tiles.append(read_image(tmp))
         os.remove(tmp)
     bpy.data.images.remove(save_image(path, np.concatenate(tiles, axis=1)))
     for o in rig + [pivot]:

@@ -1,12 +1,15 @@
-"""Builds the grinner: sculpts every piece, bakes its textures from the sculpt, exports GLB with detail levels.
+"""Builds the grinner: sculpts every piece, bakes its textures from the sculpt, rigs and animates it, and exports
+GLB with detail levels and clips.
 
   blender --background --python build_grinner.py -- [--out grinner.glb] [--shots dir] [--size 2048]
-          [--clay a.png] [--only a,b] [--sub 2] [--wire] [--views 0,-40,-90,180] [--zoom full|head|face|hand|legs]
+          [--clay a.png] [--pose crouch] [--only a,b] [--sub 2] [--wire] [--views 0,-40,-90,180]
+          [--zoom full|head|face|hand|legs]
 
---clay alone renders the bare game mesh, for judging forms quickly. --out and --shots run the whole build.
-Rest pose in Blender space: +X is the figure's left, -Y is forward, +Z up. Unrigged.
+--clay alone renders the bare game mesh, for judging forms quickly; --pose puts it in one of clips.POSES first.
+--out and --shots run the whole build. Rest pose in Blender space: +X is the figure's left, -Y is forward, +Z up.
 """
 import sys, os, time, tempfile
+import bpy
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -14,7 +17,7 @@ sys.path.insert(0, os.path.dirname(HERE))
 from sculpt import bl, bake, build, pieces as P
 from sculpt.bl import argv, opt
 from sculpt.pieces import under, either, on_left
-from grinner import body, head
+from grinner import body, head, rig, pose, clips
 
 LODS = (40000, 20000, 10000, 5000)              # triangle ceilings, full detail first
 MATS = {"skin": dict(grain=bake.pores), "cloth": dict(grain=bake.weave)}
@@ -67,14 +70,37 @@ def small_parts():
 ZOOMS = {"full": ((0, 0.02, 0.63), 1.36, (640, 900)), "upper": ((0, -0.05, 1.00), 0.72, (720, 720)),
          "head": ((0, -0.10, 1.125), 0.34, (720, 720)), "face": ((0, -0.10, 1.10), 0.17, (720, 720)),
          "hand": ((0.42, -0.19, 0.36), 0.26, (720, 720)), "legs": ((0, 0.06, 0.30), 0.70, (720, 720)),
-         "foot": ((0.09, -0.03, 0.06), 0.30, (720, 720))}
+         "foot": ((0.09, -0.03, 0.06), 0.30, (720, 720)), "pose": ((0, 0, 0.66), 1.70, (800, 800)),
+         "arms": ((0, -0.05, 0.95), 1.30, (800, 800)), "walk": ((0, 0, 0.62), 1.34, (480, 600))}
+POSED = {"crouch": ("pose", "legs"), "stride": ("pose", "legs"), "kick": ("pose", "legs"), "reach": ("pose", "arms"),
+         "claw": ("hand",), "splay": ("hand",)}
+SHEETS = {"Waddle": (12, (-90, -25)), "Idle": (12, (-25,))}        # steps round the loop, and the views of each
 
 
-def turnaround(path, views, zoom, samples=48):
-    target, scale, res = ZOOMS[zoom]
-    z = target[2]
+def turnaround(path, views, zoom, samples=48, at=(0.0, 0.0)):
+    (x, y, z), scale, res = ZOOMS[zoom]
     lights = bl.studio((z + 1.6, z + 0.3, z + 1.5), (250, 60, 200), key=(1.0, 0.95, 0.90))
-    bl.turnaround(path, views, target, scale, res, lights, samples)
+    bl.turnaround(path, views, (x + at[0], y + at[1], z), scale, res, lights, samples)
+
+
+def contact_sheet(path, skeleton, action, steps, views):
+    """A clip at even steps round its loop, left to right, with a row per view. The camera keeps pace with the root."""
+    ground = bl.to_object("ground", [(x, y, z) for z in (-0.02, 0) for x, y in ((-4, -4), (4, -4), (4, 4), (-4, 4))],
+                          [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)])
+    ground.data.materials.append(bl.clay("ground", base=(0.20, 0.20, 0.21), rough=0.9, vertex_color=False))
+    pose.use(skeleton, action)
+    width, strips = ZOOMS["walk"][2][0], []
+    for k in range(steps):
+        bpy.context.scene.frame_set(round(k * action.frame_range[1] / steps))
+        root = skeleton.pose.bones["root"].head
+        turnaround(path + ".step.png", views, "walk", 32, (root.x, root.y))
+        strips.append(bl.read_image(path + ".step.png"))
+    os.remove(path + ".step.png")
+    rows = [np.concatenate([s[:, v * width:(v + 1) * width] for s in strips], axis=1) for v in range(len(views))]
+    bpy.data.images.remove(bl.save_image(path, np.concatenate(rows[::-1], axis=0)))
+    bpy.data.objects.remove(ground, do_unlink=True)
+    pose.use(skeleton, None)
+    print("SHEET", path)
 
 
 def main():
@@ -92,7 +118,12 @@ def main():
     if not (opt("--out") or opt("--shots")):
         if opt("--clay"):
             build.clay_objects(pieces, "--wire" in argv, black=("eye",))
-            turnaround(opt("--clay"), views, opt("--zoom", "full"), 40)
+            if opt("--pose"):
+                skeleton = rig.armature("grinner")
+                for ob in [ob for ob in bpy.context.scene.objects if ob.type == "MESH"]:
+                    rig.bind(ob, skeleton)
+                pose.strike(skeleton, clips.POSES[opt("--pose")])
+            turnaround(opt("--clay"), views, opt("--zoom", "pose" if opt("--pose") else "full"), 40)
         return
     assert count <= LODS[0], "over the triangle budget"
 
@@ -105,6 +136,13 @@ def main():
         n = len(ob.data.polygons)
         print("LOD %s: %d triangles (ceiling %d), %d materials" % (ob.name, n, ceiling, len(ob.data.materials)))
         assert n <= ceiling and all(len(p.vertices) == 3 for p in ob.data.polygons)
+
+    skeleton = rig.armature("grinner")
+    for ob in levels:
+        rig.bind(ob, skeleton)
+    actions = {name: pose.record(skeleton, name, clip, frames) for name, (clip, frames) in clips.CLIPS.items()}
+    pose.use(skeleton, None)
+    pose.strike(skeleton, {})
 
     if opt("--shots"):
         shots = opt("--shots")
@@ -119,10 +157,27 @@ def main():
             for ob in levels[1:]:
                 build.show(levels, ob, painted)
                 turnaround(os.path.join(shots, "painted_%s.png" % ob.name[-4:]), [0, -40], "full")
+            for name, zooms in POSED.items():
+                pose.strike(skeleton, clips.POSES[name])
+                for zoom in zooms:
+                    for look, mats in (("clay", clay), ("painted", painted)):
+                        build.show(levels, levels[0], mats)
+                        turnaround(os.path.join(shots, "pose_%s_%s_%s.png" % (name, zoom, look)), views, zoom)
+            pose.strike(skeleton, clips.POSES["stride"])
+            for ob in levels[1:]:
+                build.show(levels, ob, painted)
+                turnaround(os.path.join(shots, "pose_stride_%s.png" % ob.name[-4:]), [-40, 140], "pose")
+            pose.strike(skeleton, {})
+            build.show(levels, levels[0], painted)
+            for name, (steps, angles) in SHEETS.items():
+                contact_sheet(os.path.join(shots, "sheet_%s.png" % name.lower()), skeleton, actions[name], steps, angles)
     if opt("--out"):
         for ob in levels:
             ob.hide_render = False
-        bl.export_glb(opt("--out"), levels, export_animations=False, export_skins=False, export_tangents=True)
+        pose.shelve(skeleton, actions.values())
+        bl.export_glb(opt("--out"), [skeleton] + levels, active=skeleton, export_animations=True,
+                      export_animation_mode="NLA_TRACKS", export_force_sampling=True, export_optimize_animation_size=False,
+                      export_reset_pose_bones=True, export_skins=True, export_tangents=True)
     print("DONE t=%.1fs" % (time.time() - t0))
 
 

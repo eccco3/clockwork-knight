@@ -85,7 +85,7 @@ def _with_claw(pts, d, r):
                  [0.90 * r[3], 0.92 * r[3], 0.66 * r[3], 0.0009], 3)
     c, cr = claw                                                # the lattice follows the claw's own centre line
     spine = [mcp - S.normalize(pip - mcp) * 0.008, pip, dip, c[2], c[5], c[7], c[9]]
-    return dict(flesh=flesh, claw=claw, joints=[pip, dip], dir=d, back=e, spine=spine,
+    return dict(flesh=flesh, claw=claw, chain=pts, joints=[pip, dip], dir=d, back=e, spine=spine,
                 spine_r=[0.7 * r[0], 0.7 * r[1], 0.7 * r[2], 0.55 * r[3], 0.5 * cr[5], 0.5 * cr[7], 0.0005])
 
 
