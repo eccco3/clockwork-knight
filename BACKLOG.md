@@ -22,7 +22,7 @@ The walking grinner's reversed knees bend to about 110 degrees. Open them to abo
 
 ### Open questions
 
-- Does the grinner keep its height, with shorter legs, or grow taller?
+- None. The grinner keeps its height: its legs get shorter.
 
 ### Status
 
