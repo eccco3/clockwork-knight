@@ -20,7 +20,8 @@ extends Harness
 ##   quit                            writes the contact sheet and quits
 ## side=dx,dy,dz puts a camera at that offset from the player, looking at her from lookh metres up
 ## (default 1.0) with fov degrees (default 40), instead of the orbit camera. tile=WxH and cols=N
-## shape the sheet. lamps=baked drops the hall's live character lights.
+## shape the sheet. who=<group> watches the first node of that group in the player's place.
+## lamps=baked drops the hall's live character lights.
 ## Replace godot with python -I dev/quiet.py to run on a hidden desktop.
 
 var _events: Array = []
@@ -56,7 +57,7 @@ func _ready() -> void:
 
 
 func _player() -> Node3D:
-	return get_tree().get_first_node_in_group("player")
+	return get_tree().get_first_node_in_group(args.get("who", "player"))
 
 
 func _process(_dt: float) -> void:
