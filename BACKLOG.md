@@ -40,6 +40,34 @@ Make a second kind of grinner that moves on all fours, much faster than the walk
 ### Status
 
 Not started. Comes after the walking grinner's attack animations.
+## Grinner: invisible near a detail boundary
+
+### Task description
+
+A grinner that first appears with the camera inside a detail level's 0.5 m margin in `tools/grinner/import_grinner.gd` may draw no level at all: recording the pounce, it was missing at 5.6 and 6.4 m and drew at 5.3 m. Confirm the cause in Godot's visibility-range hysteresis, then fix it so exactly one level always shows, without popping when the camera hovers at a boundary. Check the knight's and Rosalyn's detail levels for the same fault. Deliver a test in `dev/` that spawns grinners across each band.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started.
+
+## Dev: record clips to MP4
+
+### Task description
+
+Clips are recorded with Godot's movie writer to AVI, then encoded to H.264 MP4 by scratch scripts through Blender's built-in FFmpeg. Make that one committed command in `dev/` or `tools/`: it runs a `dev/drive.tscn` script on the hidden desktop with `--write-movie`, encodes the MP4, and deletes the AVI. Re-record the hall and outdoors clips with today's models as its test.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started.
+
 ## Enemy: behaviour and combat
 
 ### Task description
