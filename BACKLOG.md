@@ -346,7 +346,7 @@ Not started.
 
 ### Task description
 
-The morphable model in `tools/faces/` has ragged ears, slightly jagged nostril edges and outer eye corners, a soft lip groove with no edge loop, and dark smudges under the flat neck cut. Add a lip rail like Rosalyn's, handle the ears' undercuts, and speed up `scan.Solid.field`. Then wire a sampled face into a figure build, with its field for baking and hidden tests and a neck join, and add the model to `build_models.ps1`. Deliver the grid again and a figure wearing a sampled face.
+The morphable model in `tools/faces/` has ragged ears, slightly jagged nostril edges and outer eye corners, a soft lip groove with no edge loop, and dark smudges under the flat neck cut. Add a lip rail like Rosalyn's, handle the ears' undercuts, and speed up `scan.Solid.field`. Then wire a sampled face into a figure build, with its field for baking and hidden tests and a neck join, and add the model to `build_models.ps1`. Keep each coefficient's meaning, so the dev's ratings stay valid. Deliver the grid again and a figure wearing a sampled face.
 
 ### Open questions
 
@@ -368,4 +368,4 @@ Add a `dev/` tool that shows the dev two faces from the morphable model side by 
 
 ### Status
 
-Not started. Needs the dev's time to rate.
+The tool is built and its faces rendered: the dev runs `res://dev/taste.tscn` in Godot to rate, commits `tools/faces/taste.jsonl`, then `build_faces.py -- --best` makes the final faces.
