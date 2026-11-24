@@ -13,7 +13,7 @@ from sculpt.gen import Frame
 from sculpt.lattice import Box
 from sculpt.num import smoothstep, lerp, along
 
-UP, DOWN, FWD, BACK, LEFT = V(0, 0, 1), V(0, 0, -1), V(0, -1, 0), V(0, 1, 0), V(1, 0, 0)
+UP, FWD, BACK, LEFT = V(0, 0, 1), V(0, -1, 0), V(0, 1, 0), V(1, 0, 0)
 
 # ---------------------------------------------------------------- landmarks (left side)
 
@@ -24,7 +24,7 @@ CHOKER = lerp(NECK_A, NECK_B, 0.47)           # where the head's wood meets the 
 SHOULDER = V(0.150, 0.012, 1.405)
 ELBOW = SHOULDER + S.normalize(V(0.407, 0.050, -0.914)) * 0.285
 WRIST = ELBOW + S.normalize(V(0.300, -0.300, -0.905)) * 0.245
-UPPER, FORE = S.normalize(ELBOW - SHOULDER), S.normalize(WRIST - ELBOW)
+UPPER = S.normalize(ELBOW - SHOULDER)
 HF = Frame(WRIST, V(0.240, -0.260, -0.935), V(1.0, -0.30, 0.10))   # hand: x back of hand, y thumb side, z fingers
 HIP = V(0.082, 0.014, 0.905)
 KNEE = V(0.078, 0.000, 0.500)
