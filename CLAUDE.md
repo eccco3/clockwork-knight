@@ -32,12 +32,11 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 - The `App` autoload, `scripts/app.gd`, holds the keys Esc, F11 and H, cursor capture and the controls hint for playable scenes.
 - `scenes/outdoors.tscn` builds the grinner's foggy ground on load; drive and shot take `scene=res://scenes/outdoors.tscn`.
 - `dev/` runs the game to test it; `tools/`, hidden from Godot, builds and fetches assets.
-- `scripts/` holds the player controller, animator and camera rig; `shaders/` the wood, metal and eye shaders.
+- `scripts/` holds the player controller, animator and camera rig; `looks.gd` makes the wood, metal and eye materials in each figure's colours.
 - The hall's lamps are baked. `scripts/hall.gd` replaces them at runtime with lights that reach only the Characters layer and with cancelling pairs that leave character shadows on the baked floor. Only the fire lights the hall live.
 - `addons/lightmap_bake` presses the editor's bake button, the only way Godot bakes lightmaps.
 - `tools/sculpt/` is the characters' shared toolkit: shapes, meshers, unwrapping, baking, turnarounds, GLB export.
-- `tools/knight/` builds the knight; `tools/build_hall.py` and `scripts/hall_build.gd` build the hall.
-- `assets/textures/knight/face_paint.png` is baked from `head.py` by the knight build.
+- `tools/knight/` builds the knight, `assets/textures/knight/face_paint.png` and its placement `face_paint.json`; `tools/build_hall.py` and `scripts/hall_build.gd` build the hall.
 - Only `KnightShadow`, a 4,700-triangle copy from `tools/knight/shadow.py`, casts the knight's shadows.
 - `tools/grinner/` builds the first enemy and bakes its textures into the GLB; `import_lods.gd` sets the distances of its four detail levels. Shot shows it on `dev/stage.tscn` with `call=stand:res://assets/models/grinner.glb`, or `spread:` for the detail levels.
 
