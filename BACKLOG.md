@@ -278,17 +278,3 @@ The inside of the hall's doorframe shimmers. Find the cause, for example aliasin
 ### Status
 
 Not started. Low priority. If the fix changes the hall's geometry, the lightmap needs a rebake, so it cannot run beside other hall or baking work.
-
-## Clicking to recapture the cursor attacks
-
-### Task description
-
-After Esc frees the cursor, the click that captures it again also starts an attack. That click should only recapture. `scripts/app.gd` captures the cursor; `scripts/player.gd` buffers the attack. The old reset of `_buf_attack` never worked, because the physics step reads the press after it.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. Low priority.
