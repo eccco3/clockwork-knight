@@ -18,5 +18,7 @@ Never ask the dev whether to commit, merge or push: commit, merge and push whene
 
 Claude can use CLAUDE.md as memory.
 
+Dev-facing tools are added to the playtest launcher.
+
 You can proactively solve tech debt yourself. If a big refactor is needed, you can add it to the backlog.
 </immutable without the dev's blessing>

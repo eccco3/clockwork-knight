@@ -4,3 +4,4 @@
 
 [node name="Taste" type="Node"]
 script = ExtResource("1")
+metadata/dev_tool = "Face rating"

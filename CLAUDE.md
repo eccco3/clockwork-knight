@@ -29,7 +29,7 @@ Everything the project needs is here; `.gdignore` hides third-party `toolchain/`
 
 ## Where things are
 
-- Playable scenes carry `metadata/playable`, their playtest picker title; `scenes/main.tscn` adds the hall and player (`scripts/main.gd`).
+- The playtest picker lists `metadata/playable` scenes and `metadata/dev_tool` tools. `scenes/main.tscn` adds hall and player.
 - `project.godot` holds the input map and names the layers; `scripts/layers.gd` gives code the same names.
 - The `App` autoload, `scripts/app.gd`, holds the keys Esc, F11 and H, cursor capture and the controls hint for playable scenes.
 - `scenes/outdoors.tscn` builds the grinner's foggy ground on load.

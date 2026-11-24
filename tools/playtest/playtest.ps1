@@ -1,6 +1,6 @@
-# Picks the main checkout or a worktree and one of its playable scenes, readies the checkout and starts
-# the scene windowed. A scene is playable when its root node has metadata/playable, the title listed
-# here; a checkout without any offers its main scene. The scene last played is remembered per user.
+# Picks the main checkout or a worktree and one of its playable scenes or dev tools, readies the checkout
+# and starts the scene windowed. A scene is playable when its root node has metadata/playable, the title
+# listed here, and a dev tool when it has metadata/dev_tool; a checkout without any offers its main scene. The scene last played is remembered per user.
 # -DryRun prints the picker's entries and the steps it would take for -Pick (a branch or folder; main
 # by default) and -Scene (a title or res:// path; the remembered one by default).
 param([switch]$DryRun, [string]$Pick, [string]$Scene)
@@ -101,6 +101,7 @@ function Get-ProjectFiles([string]$dir) {
 function Get-PlayableTitle([string]$scene) {
   $root = [regex]::Match([IO.File]::ReadAllText($scene), '(?ms)^\[node .*?(?=^\[|\z)').Value
   if ($root -match '(?m)^metadata/playable = "(.*)"\r?$') { $Matches[1] }
+  elseif ($root -match '(?m)^metadata/dev_tool = "(.*)"\r?$') { "Tool: $($Matches[1])" }
 }
 
 function New-Scene([string]$title, [string]$path, [string]$main) {
@@ -242,7 +243,11 @@ function Show-Picker {
     $list.Enabled = $sceneBox.Enabled = $play.Enabled = $true
   })
   $list.Add_DoubleClick({ $play.PerformClick() })
-  $form.Add_Shown({ if ($list.SelectedItems.Count) { $list.SelectedItems[0].EnsureVisible() }; $list.Focus() })
+  # The picker takes seconds to list the checkouts, by which time Windows may keep it behind the window in front.
+  $form.Add_Shown({
+    $form.TopMost = $true; $form.TopMost = $false; $form.Activate()
+    if ($list.SelectedItems.Count) { $list.SelectedItems[0].EnsureVisible() }; $list.Focus()
+  })
   $form.ShowDialog() | Out-Null
 }
 
