@@ -241,7 +241,8 @@ def jaw(p):
     parting = np.where(tooth, MZ0 + RISE * np.clip(cell / TH_M, 0.0, 1.0) ** 2.2, zm)
     soft = np.where(tooth, 0.0002, np.maximum(0.9 * hh, 0.0002))
     forward = np.where(tooth, MYC + MB * np.cos(cell), p[:, 1])
-    return smoothstep(soft, -soft, p[:, 2] - parting) * smoothstep(JAW_SHUT, JAW_FULL, forward)         * smoothstep(-0.120, -0.096, p[:, 2])
+    below = smoothstep(soft, -soft, p[:, 2] - parting)
+    return below * smoothstep(JAW_SHUT, JAW_FULL, forward) * smoothstep(-0.120, -0.096, p[:, 2])
 
 
 def face(p):

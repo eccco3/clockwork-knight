@@ -105,15 +105,17 @@ def borne(controls, bearing=BEARING):
 
 
 class Kind:
-    """A kind of grinner, named as its model is: the clips it loops (name -> (clip, frames), a clip being a
-    function of phase, 0..1 from its start to its end, returning controls), the moves it plays once
-    (name -> (move, seconds, marks)), the poses that test its skin, and whether its jaw is hinged."""
+    """A kind of grinner, named as its model is: the clips it loops, standing still first and at full pace last
+    (name -> (clip, frames), a clip being a function of phase, 0..1 from its start to its end, returning
+    controls), the moves it plays once (name -> (move, seconds, marks)), the poses that test its skin, and
+    whether its jaw is hinged."""
 
     def __init__(self, name, loops, moves, poses, jaw=False):
         self.name, self.loops, self.poses, self.jaw = name, loops, poses, jaw
         self.clips = dict(loops, **{clip: (lambda phase, move=move, seconds=seconds: move(phase * seconds), round(seconds * FPS))
                                     for clip, (move, seconds, marks) in moves.items()})
         self.marks = {clip: marks for clip, (move, seconds, marks) in moves.items()}     # clip -> phase -> the second it begins
+        self.gait = {clip: k / (len(loops) - 1) for k, clip in enumerate(loops)}         # clip -> 0 at rest .. 1 at full pace
 
     def phase(self, clip, seconds):
         """The phase a clip is in: the last of its marks to have begun, or None before the first."""

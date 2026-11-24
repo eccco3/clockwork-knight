@@ -15,7 +15,8 @@ rotation from rest, in the figure's axes (+X its left, -Y forward, +Z up).
   shoulder_up/fwd, arm_fwd/out/twist, arm_hang (0..1: hangs plumb however the chest leans)
   elbow, wrist_curl/side, hand_twist
   curl_<finger>, spread, thumb_curl, thumb_in
-  knuckle                         the fingers bent back where they leave the palm
+  give                            0..1: how far the ground pushes the fingers and thumb back where they leave the
+                                  palm, which keeps their claws on it instead of under it
   planted                         0..1: how far the arm leaves the controls above to reach where its hand is put
   hand_x/y/z, hand_yaw/pitch/roll the palm of a planted hand, flat with its fingers forward, from the ground under
                                   the shoulder; pitch lifts its heel off the finger pads, yaw turns the fingers out
@@ -27,6 +28,7 @@ import numpy as np
 from mathutils import Matrix
 from sculpt import sdf as S
 from sculpt.sdf import V
+from sculpt.num import smoothstep
 from . import body, rig
 from .rig import HIP, KNEE, ANKLE, PELVIS, WAIST, CHEST, STERNUM, SHOULDER, ELBOW, WRIST, UPPER, FORE, FINGERWARD, HF
 
@@ -40,6 +42,7 @@ FAN = dict(pinky=-1.0, ring=-0.4, middle=0.1, index=0.8)          # how far each
 CURL = (0.9, 1.0, 0.7)                                           # each knuckle's share of a finger's curl
 _thumb = HF.dir(S.normalize(body.THUMB["chain"][1] - body.THUMB["chain"][0]))
 THUMB_HINGE = np.cross(_thumb, -BACK_OF_HAND - ACROSS_PALM)       # closes the thumb across the palm
+GIVES, SOFT = np.radians(np.arange(0.0, 101.0)), 0.012            # how far the ground can open a digit at its knuckle
 PALM = SHOULDER * V(1, 1, 0)
 LAID_FLAT = np.stack([Z, -X, -Y], axis=1) @ HF.R.T                # the rest hand to palm down, fingers forward, thumb inward
 WRIST_UP, PADS = V(0, 0, 0.016), V(0, -0.088, 0)                  # from the heel of a flat hand: its wrist, its finger pads
@@ -47,6 +50,19 @@ ARM_HINGE = S.normalize(np.cross(UPPER, FORE))
 ELBOW_BACK = V(0.3, 1.0, 0.0)
 FOREARM_TWIST = 0.5                                              # the share of the hand's twist that the forearm takes up
 MOVED = ("root", "hips")
+
+
+def _touching(digit, at):
+    """A digit's bones as the rig cuts them: each one's head, and where the ground can touch it and how thick it
+    is there. Each carries the joints up to its end, and the last the point of the claw."""
+    pts, (flesh, radii), (claw, sharp) = HF.w(np.array(digit["chain"])), digit["flesh"], digit["claw"]
+    thick = dict(zip(map(tuple, flesh), radii))
+    bones = [(pts[a], [(pts[i], thick[tuple(digit["chain"][i])]) for i in range(a + 1, b + 1)]) for a, b in zip(at, at[1:])]
+    bones[-1][1].append((HF.w(np.array(claw[-1])), sharp[-1]))
+    return bones
+
+
+TOUCHING = {name: _touching(*digit) for name, digit in rig.DIGITS.items()}
 
 
 def turn(axis, degrees):
@@ -94,6 +110,32 @@ def _bent(top, end, a, b, pole):
     return upper, lower, S.normalize(np.cross(upper, lower)), reach - d
 
 
+def _clearing(held, opens, curls, bones, knuckle):
+    """The turn in degrees about `opens` at a digit's knuckle by which the ground opens it: the least of GIVES
+    that lifts all of it clear, or the one that comes nearest to. A digit less than SOFT under the ground is
+    opened only part of the way, so that it leaves the ground and meets it without a snap. The digit is held
+    as `held` at the knuckle and curled by `curls` at joint after joint; `bones` is its entry in TOUCHING."""
+    opens, up = S.normalize(opens), held[2]
+    heights, bent, joint = [], SAME, np.zeros(3)
+    for (head, points), curl, (beyond, _) in zip(bones, curls, bones[1:] + bones[-1:]):
+        bent = bent @ turn(opens, -curl)
+        for point, radius in points:
+            w = joint + bent @ (point - head)
+            along_ = opens * (opens @ w)
+            heights.append((knuckle[2] + up @ along_ - radius, up @ (w - along_), up @ np.cross(opens, w)))
+        joint = joint + bent @ (beyond - head)
+    level, flat, tipped = np.array(heights).T[..., None]
+    clear = (level + flat * np.cos(GIVES) + tipped * np.sin(GIVES)).min(0)
+    first = int(np.argmax(clear >= 0.0))
+    if clear[first] < 0.0:
+        first, under = int(np.argmax(clear)), 0.0
+    elif first:
+        under = clear[first] / (clear[first] - clear[first - 1])
+    else:
+        return 0.0
+    return float(np.degrees(GIVES[first] - under * (GIVES[first] - GIVES[first - 1])) * smoothstep(0.0, SOFT, -clear[0]))
+
+
 def _leg(c, hips, pelvis):
     """The left leg's bones, reaching from the posed pelvis to where the foot is put, and how far short they fall."""
     flat = turn(Z, c("foot_yaw"))
@@ -130,17 +172,21 @@ def _arm(c, chest, sternum):
     upper = part(clavicle, 1.0 - c("arm_hang")) @ turn(X, -c("arm_fwd")) @ turn(Y, -c("arm_out")) @ turn(UPPER, c("arm_twist"))
     fore = upper @ turn(ELBOW_HINGE, c("elbow"))
     hand = fore @ turn(FINGERWARD, c("hand_twist")) @ turn(ACROSS_PALM, -c("wrist_curl")) @ turn(BACK_OF_HAND, c("wrist_side"))
-    short = 0.0
+    shoulder, short = sternum + clavicle @ (SHOULDER - STERNUM), 0.0
     if c("planted") > 0.0:
-        reached, short = _reach(c, chest, sternum + clavicle @ (SHOULDER - STERNUM))
+        reached, short = _reach(c, chest, shoulder)
         upper, fore, hand = (free @ part(free.T @ put, c("planted")) for free, put in zip((upper, fore, hand), reached))
     out = {"clavicle_l": clavicle, "upperarm_l": upper, "forearm_l": fore, "hand_l": hand}
+    wrist = shoulder + upper @ (ELBOW - SHOULDER) + fore @ (WRIST - ELBOW)
+
+    def digit(name, held, opens, curls):
+        bones = TOUCHING[name]
+        at = held @ turn(opens, c("give") * _clearing(held, opens, curls, bones, wrist + hand @ (bones[0][0] - WRIST)))
+        for k, curl in enumerate(curls, 1):
+            at = out["%s_%d_l" % (name, k)] = at @ turn(opens, -curl)
     for name, fan in FAN.items():
-        at = hand @ turn(BACK_OF_HAND, fan * c("spread")) @ turn(ACROSS_PALM, c("knuckle"))
-        for k, share in enumerate(CURL, 1):
-            at = out["%s_%d_l" % (name, k)] = at @ turn(ACROSS_PALM, -share * c("curl_" + name))
-    out["thumb_1_l"] = hand @ turn(BACK_OF_HAND, c("thumb_in")) @ turn(THUMB_HINGE, 0.5 * c("thumb_curl"))
-    out["thumb_2_l"] = out["thumb_1_l"] @ turn(THUMB_HINGE, c("thumb_curl"))
+        digit(name, hand @ turn(BACK_OF_HAND, fan * c("spread")), ACROSS_PALM, [share * c("curl_" + name) for share in CURL])
+    digit("thumb", hand @ turn(BACK_OF_HAND, c("thumb_in")), -THUMB_HINGE, [0.5 * c("thumb_curl"), c("thumb_curl")])
     return out, short * c("planted")
 
 

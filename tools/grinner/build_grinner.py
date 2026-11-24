@@ -129,10 +129,11 @@ def contact_sheet(path, skeleton, action, kind):
     pose.use(skeleton, None)
     print("SHEET", path)
 
-def export(path, skeleton, meshes, actions, marks):
-    """Write the GLB. The clips' marks ride on the skeleton as the custom property `marks`, which import_grinner.gd
-    turns into markers on Godot's animations."""
-    skeleton["marks"] = marks
+
+def export(path, skeleton, meshes, actions, kind):
+    """Write the GLB. The moves' marks and the looping clips' places in the gait ride on the skeleton as the custom
+    properties `marks` and `gait`, which import_grinner.gd turns into markers on Godot's animations and its blend."""
+    skeleton["marks"], skeleton["gait"] = kind.marks, kind.gait
     pose.shelve(skeleton, actions)
     bl.export_glb(path, [skeleton] + meshes, active=skeleton, export_animations=True, export_extras=True,
                   export_animation_mode="NLA_TRACKS", export_force_sampling=True, export_optimize_animation_size=False,
@@ -216,7 +217,7 @@ def main():
     if opt("--out"):
         for ob in levels:
             ob.hide_render = False
-        export(opt("--out"), skeleton, levels, actions.values(), kind.marks)
+        export(opt("--out"), skeleton, levels, actions.values(), kind)
     print("DONE t=%.1fs" % (time.time() - t0))
 
 

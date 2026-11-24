@@ -12,7 +12,6 @@ from .body import FINGERS
 from .keys import Curve, Kind, held, at, glide, thrown, trod, sided, both, borne, twice
 
 HEEL, PALM = 52.0, 0.0                          # how far the heel is carried off the ground at rest, and the palm's heel
-ARCHED = 22.0                                   # the fingers bent back from the palm, which sets their claws on the ground
 _LIMB = dict(planted=1.0, hand_x=0.06, hand_y=-0.27, hand_yaw=22.0, elbow_out=28.0, thumb_in=-10.0,
              foot_x=0.05, foot_y=0.25, foot_yaw=14.0, knee=8.0)
 CROUCH = dict(sided(_LIMB, dict(_LIMB, hand_y=-0.23, hand_yaw=30.0, foot_y=0.28, foot_yaw=18.0)),
@@ -30,12 +29,11 @@ def _foot(pitch, lift=0.0, **more):
 
 
 def _hand(pitch, lift=0.0, hooked=0.15, splayed=0.6, **more):
-    """A hand on its finger pads: `pitch` carries the heel of the palm, and the fingers lie flat while it is on
-    the ground. `hooked` closes the claws and `splayed` fans them."""
-    down = float(np.clip(1.0 - lift / 0.05, 0.0, 1.0))
+    """A hand on its finger pads: `pitch` carries the heel of the palm, and the ground pushes the fingers back
+    to stand on their claws. `hooked` closes the claws and `splayed` fans them."""
     out = {"curl_" + name: 46.0 * hooked - 6.0 * splayed for name in FINGERS}
-    out.update(more, hand_pitch=pitch, hand_z=lift, knuckle=(ARCHED + max(pitch, 0.0)) * down,
-               spread=4.0 * hooked + 13.0 * splayed, thumb_curl=30.0 * hooked - 30.0 * down, thumb_in=-12.0 * splayed)
+    out.update(more, hand_pitch=pitch, hand_z=lift, give=1.0, spread=4.0 * hooked + 13.0 * splayed, thumb_curl=30.0 * hooked,
+               thumb_in=-12.0 * splayed)
     return out
 
 
@@ -158,8 +156,8 @@ def idle(phase):
 
 LEAP, LEAP_HEIGHT = 4.5, 0.22
 POUNCE = dict(leap=0.38, hit=0.54, recover=0.82)
-HANDS_OFF, HANDS_ON, FEET_ON = 0.30, 0.74, 0.82
-TRAILED = Curve((0.0, 0.0), (0.22, 0.16), (0.60, 0.52), (0.90, 0.97), (1.0, 1.0), loop=False)
+HANDS_OFF, HANDS_ON, FEET_ON = 0.32, 0.74, 0.82
+TRAILED = Curve((0.0, 0.0), (0.12, 0.17), (0.28, 0.24), (0.60, 0.52), (0.90, 0.97), (1.0, 1.0), loop=False)
 FLUNG = Curve((0.0, 0.0), (0.35, 0.70), (0.70, 1.0), (1.0, 1.0), loop=False)
 STEPPED = Curve((0.0, 0.0), (0.5, 0.56), (1.0, 1.0), loop=False)
 COIL = dict(hips_y=held((0.10, 0.07), (0.28, 0.11), (0.38, -0.04), (0.60, -0.02), (0.78, 0.02), (0.90, -0.05), (1.10, 0.0)),
@@ -173,7 +171,7 @@ COIL_PITCH = held((0.10, 6.0), (0.26, 9.0), (0.34, -22.0), (0.42, -18.0), (0.56,
 COIL_FLEX = held((0.10, 10.0), (0.28, 16.0), (0.40, -14.0), (0.56, -10.0), (0.70, 2.0), (0.80, 8.0), (0.90, 22.0), (1.00, 14.0),
                  (1.25, 0.0))
 WIGGLE = held((0.08, 0.0), (0.13, 1.0), (0.25, 1.0), (0.31, 0.0))
-SPRUNG = dict(lift=held((0.38, 0.0), (0.50, 0.30), (0.64, 0.38), (0.76, 0.14), (FEET_ON, 0.0)),
+SPRUNG = dict(lift=held((0.38, 0.0), (0.44, 0.16), (0.50, 0.30), (0.64, 0.38), (0.76, 0.14), (FEET_ON, 0.0)),
               pitch=held((0.10, -10.0), (0.28, -14.0), (0.34, 10.0), (0.39, 36.0), (0.52, 50.0), (0.70, 10.0), (FEET_ON, -12.0),
                          (0.90, -22.0), (1.10, -4.0), (1.30, 0.0)),
               knee=held((0.10, 10.0), (0.28, 14.0), (0.40, 0.0), (0.64, 18.0), (FEET_ON, 16.0), (1.20, 0.0)),
@@ -195,13 +193,13 @@ def _leapt(t):
 
 def _sprung(t, late):
     c = at(SPRUNG, t - late)
-    y = trod(t - late, _leapt, (0.0, LEAP), [(POUNCE["leap"], FEET_ON, TRAILED)])
+    y = trod(t, _leapt, (0.0, LEAP), [(POUNCE["leap"], FEET_ON + late, TRAILED)])
     return _foot(HEEL + c.pop("pitch"), c.pop("lift"), foot_y=y, **c)
 
 
 def _cast(t, late):
     c = at(CAST, t - late)
-    y = trod(t - late, _leapt, (0.0, LEAP - 0.58, LEAP), [(HANDS_OFF, HANDS_ON, FLUNG), (0.82, 0.98, STEPPED)])
+    y = trod(t, _leapt, (0.0, LEAP - 0.58, LEAP), [(HANDS_OFF + late, HANDS_ON + late, FLUNG), (0.82 + late, 0.98 + late, STEPPED)])
     return _hand(PALM + c.pop("pitch"), c.pop("lift"), 0.15 + c.pop("hooked"), 0.6 + c.pop("splayed"), hand_y=y, **c)
 
 
@@ -213,7 +211,7 @@ def pounce(t):
     out.update(_back(COIL_PITCH(t), COIL_FLEX(t)), travel=_leapt(t), hips_x=0.016 * wiggle, hips_yaw=-6.0 * wiggle,
                spine_yaw=4.0 * wiggle)
     out["hips_z"] += LEAP_HEIGHT * thrown(t, POUNCE["leap"], 0.77)
-    out.update(sided(dict(_sprung(t, 0.0), **_cast(t, 0.03)), dict(_sprung(t, 0.025), **_cast(t, 0.0))))
+    out.update(sided(dict(_sprung(t, 0.0), **_cast(t, 0.03)), dict(_sprung(t, 0.008), **_cast(t, 0.0))))
     return _crouched(out)
 
 
@@ -338,12 +336,12 @@ PAWING = dict(planted=held((0.08, 0.0), (0.16, -1.0), (0.66, -1.0), (0.84, 0.0))
 SPLAYED = dict(hand_x=held((0.66, 0.0), (0.86, 0.08), (1.00, 0.17), (1.16, 0.19), (1.76, 0.19), (2.10, 0.13)),
                hand_y=held((0.66, 0.0), (0.86, -0.26), (1.00, -0.20), (1.16, -0.17), (1.76, -0.17), (2.10, -0.08)),
                hand_yaw=held((0.66, 0.0), (1.00, 30.0), (1.76, 34.0), (2.10, 12.0)),
-               lift=held((0.10, 0.0), (0.16, 0.30), (0.68, 0.34), (0.86, 0.0)),
+               lift=held((0.06, 0.0), (0.16, 0.30), (0.68, 0.34), (0.86, 0.0)),
                pitch=held((0.86, 0.0), (1.00, 0.0), (1.76, 0.0), (2.10, 10.0)),
                hooked=held((0.10, 0.0), (0.30, 0.9), (0.66, 0.2), (0.90, 0.0), (1.30, 0.1), (1.76, 0.2), (2.10, 1.2)),
                splayed=held((0.10, 0.6), (0.66, 0.9), (0.96, 0.5), (1.76, 0.2), (2.10, -0.4)),
                elbow_out=held((0.80, 0.0), (1.00, 44.0), (1.76, 50.0), (2.10, 36.0)))
-DRAGGED = dict(foot_y=held((0.88, 0.0), (1.00, 0.20), (1.14, 0.25), (1.50, 0.25), (1.58, 0.12), (1.70, 0.29), (1.82, 0.22), (1.94, 0.30)),
+DRAGGED = dict(foot_y=held((0.88, 0.0), (1.00, 0.10), (1.14, 0.13), (1.50, 0.13), (1.58, 0.02), (1.70, 0.18), (1.82, 0.11), (1.94, 0.18)),
                foot_x=held((0.88, 0.0), (1.04, 0.12), (1.50, 0.13), (1.94, 0.16)),
                foot_yaw=held((0.88, 0.0), (1.04, 40.0), (1.94, 52.0)),
                pitch=held((0.10, -10.0), (0.46, -24.0), (0.74, -4.0), (0.94, 22.0), (1.08, 34.0), (1.50, 34.0), (1.58, 10.0),
@@ -367,9 +365,9 @@ def death(t):
         step = trod(t, _reeled, (0.0, back), [(0.12 + late, 0.30 + late, STEPPED)])
         z, tip = _skip(t, 0.12 + late, 0.30 + late, 0.06)
         return dict(arm, **_foot(HEEL + d.pop("pitch") + 16.0 * tip, z, foot_y=step + d.pop("foot_y"), **d))
-    left, right = limb(0.05, True, REELED + 0.04), limb(0.0, False, REELED - 0.03)
-    left["hand_y"] += trod(t, _reeled, (0.0, REELED), [(0.14, 0.86, STEPPED)])
-    right["hand_y"] += trod(t, _reeled, (0.0, REELED), [(0.10, 0.82, STEPPED)])
+    left, right = limb(0.05, True, REELED + 0.04), limb(0.0, False, REELED + 0.01)
+    left["hand_y"] += trod(t, _reeled, (0.0, REELED), [(0.10, 0.86, STEPPED)])
+    right["hand_y"] += trod(t, _reeled, (0.0, REELED), [(0.06, 0.82, STEPPED)])
     out.update(sided(left, right))
     return _crouched(out)
 
