@@ -62,7 +62,7 @@ def _hinged(along_, hinge):
 
 
 def _leg(c, hips, pelvis):
-    """The left leg's bones, reaching from the posed pelvis to where the foot is put."""
+    """The left leg's bones, reaching from the posed pelvis to where the foot is put, and how far short they fall."""
     flat = turn(Z, c("foot_yaw"))
     foot = flat @ turn(OUTWARD, c("foot_pitch")) @ turn(TOEWARD, c("foot_roll"))
     pivot = BALL if c("foot_pitch") > 0 else HEEL
@@ -82,7 +82,7 @@ def _leg(c, hips, pelvis):
     hinge = S.normalize(np.cross(thigh, shin))
     return {"thigh_l": _hinged(thigh, hinge) @ _hinged(body.THIGH, rest).T,
             "shin_l": _hinged(shin, hinge) @ _hinged(body.SHIN, rest).T,
-            "foot_l": foot, "toe_l": foot @ turn(OUTWARD, -c("toe")), "overreach": reach - d}
+            "foot_l": foot, "toe_l": foot @ turn(OUTWARD, -c("toe"))}, reach - d
 
 
 def _arm(c, chest):
@@ -119,9 +119,9 @@ def solve(controls):
     for side, m in (("_l", SAME), ("_r", FLIP)):
         def sided(name):
             return c(name + side)
-        limbs = dict(_arm(sided, m @ chest @ m), **_leg(sided, m @ hips @ m, (PELVIS + moves["hips"]) * np.diag(m)))
-        overreach = max(overreach, limbs.pop("overreach"))
-        out.update({name[:-2] + side: m @ r @ m for name, r in limbs.items()})
+        leg, short = _leg(sided, m @ hips @ m, (PELVIS + moves["hips"]) * np.diag(m))
+        overreach = max(overreach, short)
+        out.update({name[:-2] + side: m @ r @ m for name, r in dict(_arm(sided, m @ chest @ m), **leg).items()})
     return out, moves, overreach
 
 

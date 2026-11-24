@@ -123,7 +123,7 @@ def main():
                 for ob in [ob for ob in bpy.context.scene.objects if ob.type == "MESH"]:
                     rig.bind(ob, skeleton)
                 pose.strike(skeleton, clips.POSES[opt("--pose")])
-            turnaround(opt("--clay"), views, opt("--zoom", "full"), 40)
+            turnaround(opt("--clay"), views, opt("--zoom", "pose" if opt("--pose") else "full"), 40)
         return
     assert count <= LODS[0], "over the triangle budget"
 

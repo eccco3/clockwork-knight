@@ -39,7 +39,7 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 - `tools/knight/` builds the knight; `tools/build_hall.py` and `scripts/hall_build.gd` build the hall.
 - `assets/textures/knight/face_paint.png` is baked from `head.py` by the knight build.
 - Only `KnightShadow`, a 4,700-triangle copy from `tools/knight/shadow.py`, casts the knight's shadows.
-- `tools/grinner/` builds the first enemy and bakes its textures into the GLB; `import_lods.gd` sets the distances of its four detail levels. Shot shows it on `dev/stage.tscn` with `call=stand:res://assets/models/grinner.glb`, or `spread:` for the detail levels.
+- `tools/grinner/` builds the first enemy, its rig and hand-keyed clips; `import_grinner.gd` sets its detail distances and adds the AnimationTree. `scripts/grinner.gd` walks it. Shot shows it on `dev/stage.tscn`: `call=stand:res://assets/models/grinner.glb`, `stand:res://dev/waddler.tscn` waddling, or `spread:` its detail levels.
 
 ## Repository
 
