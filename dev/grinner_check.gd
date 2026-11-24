@@ -2,7 +2,7 @@ extends SceneTree
 ## Dev check (not used at runtime):  godot --headless --fixed-fps 60 --path . --script res://dev/grinner_check.gd
 ## Plays each of the grinner's moves through its AnimationTree and prints, in seconds since the move was
 ## asked for, when it wound up, struck, and came back to its gait, and how far its root motion took it.
-## Then cuts a flinch into each wind-up, and a death into a pounce.
+## Then cuts a flinch into each wind-up, and into a pounce in mid leap a flinch, which it ignores, and a death.
 
 const STEP := 1.0 / 60.0
 

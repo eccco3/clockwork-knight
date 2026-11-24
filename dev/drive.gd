@@ -19,14 +19,15 @@ extends Harness
 ##   track:<frames>                  prints the knight's body, ankles, balls and pelvis each frame
 ##   fps                             prints frames per second and process time
 ##   perf:start, perf:stop           frame times; run with --disable-vsync --max-fps 0
-##   hide:<node name>, call:<method on the scene root>
+##   hide:<node name>
+##   call:<method>[:<argument>]      on the scene root, as dev/shot.tscn's call=
+##   tell:<node>:<method>            on a node named as cam: names them, e.g. tell:Grinner:pounce
 ##   set:<node path or name pattern>:<property>:<value>, env:<property>:<value>,
 ##   vp:<property>:<value>, rs:<RenderingServer method>:<args...>   what-if switches
 ##   quit                            writes the contact sheet and quits
 ## side=dx,dy,dz puts a camera at that offset from the player, looking at her from lookh metres up
 ## (default 1.0) with fov degrees (default 40), instead of the orbit camera. tile=WxH and cols=N
-## shape the sheet. who=<group> watches the first node of that group in the player's place.
-## lamps=baked drops the hall's live character lights.
+## shape the sheet. lamps=baked drops the hall's live character lights.
 ## Replace godot with python -I dev/quiet.py to run on a hidden desktop.
 
 var _events: Array = []
@@ -62,7 +63,7 @@ func _ready() -> void:
 
 
 func _player() -> Node3D:
-	return get_tree().get_first_node_in_group(args.get("who", "player"))
+	return get_tree().get_first_node_in_group("player")
 
 
 ## A scripted camera's shot. While it glides in, it blends from the shot before, which keeps moving.
@@ -205,7 +206,11 @@ func _physics_process(dt: float) -> void:
 				else:
 					print("hide: no node ", ev[1])
 			"call":
-				scene.call(ev[1])
+				scene.callv(ev[1], [":".join(ev.slice(2))] if ev.size() > 2 else [])
+			"tell":
+				var n := _subject(ev[1])
+				if n:
+					n.call(ev[2])
 			"set":
 				var found := [scene.get_node(ev[1])] if ev[1].contains("/") else scene.find_children(ev[1], "", true, false)
 				if found.is_empty():

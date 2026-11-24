@@ -3,8 +3,9 @@ extends Node3D
 ## A grinner: the model, whose own AnimationTree (built by tools/grinner/import_grinner.gd) blends its idle
 ## into its waddle and plays its moves, and the travelling that their root motion does.
 ##
-## pounce() leaps four metres ahead and swipe() strikes in place; each winds up first, and only then can
-## flinch() cut in. striking() is true while the claws can hit. die() cuts into anything and stays down.
+## pounce() leaps four metres ahead and swipe() strikes in place. Each winds up first; flinch() cuts into the
+## wind-up, and does nothing once the leap or swipe has begun. striking() is true while the claws can hit.
+## die() cuts into anything and stays down.
 
 const MODEL := preload("res://assets/models/grinner.glb")
 const GAIT := &"parameters/Gait/blend_position"
@@ -48,7 +49,8 @@ func swipe() -> void:
 
 
 func flinch() -> void:
-	_playback.travel(&"Flinch")
+	if move() == &"Gait" or winding_up():
+		_playback.travel(&"Flinch")
 
 
 func die() -> void:
