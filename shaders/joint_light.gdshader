@@ -16,10 +16,13 @@ uniform float moving_energy = 3.5;
 // The share of a joint's streaks alight at once.
 uniform float rest_share = 0.3;
 uniform float moving_share = 0.9;
+// A bend pulls a streak longer. Past this length, in metres, it thins out, and at twice it the streak is gone.
+uniform float snaps_at = 0.045;
 
 varying float energy;
 varying float cycle;
 varying float along;
+varying vec3 from_eye;
 
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -32,6 +35,7 @@ void vertex() {
 	float alight = step(hash(vec2(UV2.y, floor(beat))), mix(rest_share, moving_share, joint.x));
 	along = mix(UV.x, 1.0 - UV.x, step(0.5, fract(UV2.y * 8.0)));
 	vec3 to_eye = CAMERA_POSITION_WORLD - VERTEX;
+	from_eye = -to_eye;
 	float pixel = 2.0 * dot(-to_eye, CAMERA_DIRECTION_WORLD) / (abs(PROJECTION_MATRIX[1][1]) * VIEWPORT_SIZE.y);
 	float drawn = max(width, pixel * min_pixels);
 	energy = alight * mix(rest_energy, moving_energy, joint.x) * width / drawn;
@@ -45,5 +49,8 @@ void fragment() {
 	float runner = behind > 0.0 ? exp(-behind * 3.5) : exp(behind * 30.0);
 	float thread = 0.3 * sin(cycle * PI);
 	float ends = smoothstep(0.0, 0.12, along) * smoothstep(1.0, 0.88, along);
-	ALBEDO = color * energy * core * core * (thread + runner) * ends;
+	// from_eye is the streak's centre line, so it moves the streak's whole length as along goes from 0 to 1
+	float pulled = (length(dFdx(from_eye)) + length(dFdy(from_eye))) / (abs(dFdx(along)) + abs(dFdy(along)) + 1e-9);
+	float whole = smoothstep(2.0 * snaps_at, snaps_at, pulled);
+	ALBEDO = color * energy * core * core * (thread + runner) * ends * whole;
 }

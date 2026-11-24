@@ -2,7 +2,8 @@ class_name JointLight
 extends MeshInstance3D
 ## Faint streaks of white light across the air gaps between a figure's jointed parts, brighter and
 ## quicker while a joint turns. They are thin cards on the figure's skeleton, one end riding each
-## part, drawn by shaders/joint_light.gdshader. They light nothing.
+## part, so a bend pulls them across the gap it opens. shaders/joint_light.gdshader draws them. They
+## light nothing.
 ##
 ## A joint is a bone that carries a rigid piece of the body, and its nearest ancestor that carries
 ## one. Its streaks bridge the two pieces where they come within REACH and both surfaces face away
@@ -79,10 +80,12 @@ var _state := PackedVector2Array()
 
 
 ## Lights the joints of `bones` on `body`, a mesh skinned to `skeleton` whose every piece rides one bone.
+## Make it once the skeleton is posed, and add it beside `body`: it is laid out in the body's space.
 func _init(skeleton: Skeleton3D, body: MeshInstance3D, bones: PackedInt32Array) -> void:
 	name = "JointLight"
 	_skeleton = skeleton
 	skin = body.skin
+	layers = body.layers
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var material := ShaderMaterial.new()
 	material.shader = SHADER
@@ -107,6 +110,10 @@ func _init(skeleton: Skeleton3D, body: MeshInstance3D, bones: PackedInt32Array) 
 	_state.resize(_chains.size())
 	for chain in _chains:
 		_turns.append(_turn(chain))
+
+
+func _enter_tree() -> void:
+	skeleton = get_path_to(_skeleton)
 
 
 func _process(dt: float) -> void:

@@ -107,16 +107,11 @@ func _ready() -> void:
 		"eye": Looks.glass_eye(Color(0.10, 0.22, 0.19), Color(0.56, 0.44, 0.19), 0.385, 0.335),
 	})
 	_setup_extras()
-	var t0 := Time.get_ticks_usec()
-	var jl := JointLight.new(skel, mesh, anim.bones)
-	skel.add_child(jl)
-	print("joint light ms ", (Time.get_ticks_usec() - t0) / 1000.0, " joints ", jl._chains.size(), " streaks ", jl.mesh.get_faces().size() / 6 if jl.mesh else 0)
-	for c in jl._chains:
-		print("  ", skel.get_bone_name(c[0]))
 	mesh.extra_cull_margin = 0.15
 	for v: VisualInstance3D in find_children("*", "VisualInstance3D", true, false):
 		v.layers = Layers.CHARACTERS
 	_apply_pose(0.0)
+	skel.add_child(JointLight.new(skel, mesh, anim.bones))
 
 
 func _find(n: Node, type: String) -> Node:
