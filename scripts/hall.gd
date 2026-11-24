@@ -6,14 +6,21 @@ extends Node3D
 ##   in a character's shadow, so characters still cast shadows on the baked floor;
 ## - with `character_lights`, the chandeliers, sconces and windows also light characters directly,
 ##   so lacquer and brass keep their highlights. Without it, characters get only bounced light.
+## Every shadowed light costs GPU time, so a chandelier casts shadows only while it is the nearest
+## to some member of the `characters` group. A chandelier up to `SHADOW_HANDOVER` metres further
+## away than the nearest keeps a fading shadow, so walking between two hands the shadow over.
 
 const LIGHTMAP := "res://assets/lightmaps/hall.lmbake"
 const CHARACTER_LIGHTS := &"character_lights"
 const SHADOW_LIGHTS := &"shadow_lights"
+const CHARACTERS := &"characters"
 const SCENERY_LAYER := 1
 const CHARACTER_LAYER := 2
+const SHADOW_HANDOVER := 2.0
 
 static var character_lights := true
+
+var _shadow_lights: Array[Light3D] = []
 
 
 func _ready() -> void:
@@ -33,6 +40,7 @@ func _ready() -> void:
 			l.add_sibling(minus)
 			_keep_live(minus, SCENERY_LAYER)
 			_keep_live(l, SCENERY_LAYER | characters)
+			_shadow_lights.append(l)
 		elif characters:
 			_keep_live(l, characters)
 		else:
@@ -44,3 +52,24 @@ func _keep_live(l: Light3D, lit_layers: int) -> void:
 	l.light_cull_mask = lit_layers
 	l.shadow_caster_mask = CHARACTER_LAYER
 	l.light_size = 0.0
+
+
+func _process(_dt: float) -> void:
+	var opacity := PackedFloat32Array()
+	opacity.resize(_shadow_lights.size())
+	var distance := PackedFloat32Array()
+	distance.resize(_shadow_lights.size())
+	for c: Node3D in get_tree().get_nodes_in_group(CHARACTERS):
+		var nearest := INF
+		for i in _shadow_lights.size():
+			distance[i] = c.global_position.distance_to(_shadow_lights[i].global_position)
+			nearest = minf(nearest, distance[i])
+		for i in _shadow_lights.size():
+			opacity[i] = maxf(opacity[i], 1.0 - smoothstep(0.0, SHADOW_HANDOVER, distance[i] - nearest))
+	for i in _shadow_lights.size():
+		var l := _shadow_lights[i]
+		var casts := opacity[i] > 0.0
+		if l.shadow_enabled != casts:
+			l.shadow_enabled = casts
+		if l.shadow_opacity != opacity[i]:
+			l.shadow_opacity = opacity[i]

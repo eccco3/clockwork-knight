@@ -56,6 +56,7 @@ var _rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
+	add_to_group(Hall.CHARACTERS)
 	model = MODEL.instantiate()
 	add_child(model)
 	skel = _find(model, "Skeleton3D")
