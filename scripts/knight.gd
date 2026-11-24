@@ -159,7 +159,7 @@ func _setup_extras() -> void:
 			_legs_mask[b] = 0.5
 		elif n.ends_with("_l") or n.ends_with("_r"):
 			if n.begins_with("thigh") or n.begins_with("calf") or n.begins_with("foot") or n.begins_with("ball") \
-					or n.begins_with("poleyn"):
+					or n.begins_with("poleyn") or n.begins_with("skirt"):
 				_legs_mask[b] = 1.0
 	_rng.seed = 20261122
 

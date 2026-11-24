@@ -244,19 +244,6 @@ Model unfinished automata at different stages, from bare mechanism to painted fi
 
 Not started. Needs the clocks, benches and tools.
 
-## Knight: cover her seat
-
-### Task description
-
-Cover the knight's seat a little more, standing and in every clip, rolls above all. Try two ways: a short skirt of plates or tassets hanging from her belt, and reshaped hip armour that reaches lower behind. Each must not catch her thighs in the run, roll, jump or attacks; check clearance in every clip. Deliver painted turnarounds and roll contact sheets of both beside the current armour, and the dev picks.
-
-### Open questions
-
-- None. The dev picks between the two.
-
-### Status
-
-Not started. Shares the knight's builder with her shoulder and hand items.
 ## Knight: shoulder, chest and wrist clearance
 
 ### Task description
