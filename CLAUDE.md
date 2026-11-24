@@ -32,6 +32,7 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 - Lightmap alone: `godot --editor --path . res://scenes/hall.tscn -- bake-lightmaps` opens the editor for about seven minutes; add `draft` for a one-minute preview. Rebake after changing the hall's geometry or lamps.
 - Hall scene after editing `scripts/hall_build.gd`: `godot --headless --path . --script res://scripts/hall_build.gd -- scene`.
 - Knight: `blender --background --python tools/knight/build_knight.py -- --out assets/models/knight.glb` (about 80 s), then `godot --path . --headless --import`.
+- Grinner: `blender --background --python tools/grinner/build_grinner.py -- --out assets/models/grinner.glb` (about seven minutes), then import. `--shots dev/shots/grinner` adds turnarounds; `--clay a.png` alone previews the bare mesh.
 - Never combine `--only` with `--out`: it overwrites the full model with a partial one.
 - Run: `godot --path .`
 - Scripted play and screenshots: `dev/drive.tscn` with `--fixed-fps 60`; `dev/shot.tscn` photographs a scene. Both take `lamps=baked` to drop the live character lights.
@@ -47,6 +48,7 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 - `addons/lightmap_bake` presses the editor's bake button, the only way Godot bakes lightmaps.
 - `tools/knight/` builds the knight from signed-distance sculpts (`head.py`, `mesher.py`); `tools/build_hall.py` and `scripts/hall_build.gd` build the hall.
 - `assets/textures/knight/face_paint.png` is baked from `head.py` by the knight build.
+- `tools/grinner/` builds the first enemy the same way and bakes its textures into the GLB; `import_lods.gd` sets the distances of its four detail levels. `dev/grinner_stage.tscn` shows it.
 
 ## Repository
 

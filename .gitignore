@@ -8,6 +8,10 @@ __pycache__/
 /assets/models/*.unwrap_cache
 /assets/lightmaps/
 
+# The grinner's baked textures, unpacked from grinner.glb when Godot imports it
+/assets/models/*.png
+/assets/models/*.png.import
+
 # Poly Haven downloads, restored by tools/fetch_assets.ps1
 /assets/textures/*/*.jpg
 /assets/hdri/*.hdr
