@@ -147,11 +147,16 @@ Not started. Needs the dev; the workshop items build the room.
 
 The building is a clockmaker's house and workshop. Build the workshop's structure onto the hall: its width equals the hall's length, it is three times as long as it is wide, and a door in one of the hall's long walls joins them. A studio apartment fills one back corner as a closed room whose interior is not seen yet. Floor, walls, roof, beams and collision, matching the hall's construction, built by the same tools as the hall. Lighting comes later.
 
+Keep it coarse, to get a feel for the space; each dimension is one tunable constant.
+
 ### Open questions
 
-- Which long wall gets the door, and where along it?
-- How tall is the workshop, and how large is the apartment's corner?
-- Does the apartment show a door into the workshop?
+None.
+
+- The door is a set of double doors in one of the hall's long walls (perpendicular to the fire wall); the agent picks which wall and where along it, and reports why. The hall's windows on that wall face into the workshop now: decide what happens to them and show it.
+- The workshop is about as tall as the hall. The roofline may change later.
+- The apartment is about a third of the workshop's width and a quarter of its length, to be tuned.
+- The apartment shows a closed door into the workshop.
 
 ### Status
 
@@ -165,7 +170,7 @@ Give the workshop windows onto the same foggy day the hall shows, and finish its
 
 ### Open questions
 
-- How many windows, and on which walls?
+None. Windows along both of the workshop's long walls, every few metres; none on the hall side or the apartment's walls.
 
 ### Status
 
@@ -189,11 +194,11 @@ Not started. Needs the windows and surfaces; it rebakes the hall, so nothing els
 
 ### Task description
 
-Research real clockmakers' and automaton makers' workshops: benches, machines, tools, storage and how work flows between them. Write the findings into the workshop builder as a layout: where benches, machines, shelves and clutter zones go, with walkable aisles for the knight. Block it out with simple shapes and collision, and deliver overhead and eye-level screenshots.
+Research real clockmakers' and automaton makers' workshops: benches, machines, tools, storage and how work flows between them. Write the findings into the workshop builder as a layout: where benches, machines, shelves and clutter zones go, with walkable aisles for the knight. Block it out with simple shapes and collision, coarse like the walls (this is for planning, not finish), and deliver overhead and eye-level screenshots.
 
 ### Open questions
 
-- Dense clutter with narrow aisles, or open floor around the benches?
+None. Dense around the edges and the benches, with one or two clear aisles about the knight's width plus a margin.
 
 ### Status
 
@@ -207,7 +212,7 @@ Model original clocks of many kinds for the workshop: longcase, bracket and wall
 
 ### Open questions
 
-- Do clocks tick and pendulums swing, or are they still for now?
+None. Pendulums swing and a few clocks tick audibly: cheap looping animation on a handful of them.
 
 ### Status
 
