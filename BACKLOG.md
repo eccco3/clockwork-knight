@@ -1,19 +1,5 @@
 # Backlog
 
-## Playtest launcher
-
-### Task description
-
-Give the dev one Windows taskbar button that starts a playtest. A click opens a small picker listing main and each worktree that can run the game, newest commit first, with its branch, commit subject and age; main is preselected, so Enter plays it. Before launching, fast-forward a clean main from `origin/main`, restore missing built models or lightmaps by copying them from the main checkout, and import if needed. Show failures in the picker instead of a vanishing console. Pin it with its own icon.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started.
-
 ## Test lower render scale
 
 ### Task description
@@ -108,11 +94,11 @@ Rig the grinner with clean deformation at the reversed knees and hips, the long 
 
 ### Open questions
 
-- Are original hand-keyed clips acceptable, or should a downloaded motion library be adapted?
+- None. The dev chose original hand-keyed clips over an adapted motion library.
 
 ### Status
 
-Not started.
+Not started. Starts once the refined sculpt is merged.
 
 ## Enemy: attack animations
 

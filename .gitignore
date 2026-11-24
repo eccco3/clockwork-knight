@@ -16,6 +16,10 @@ __pycache__/
 /assets/textures/*/*.jpg
 /assets/hdri/*.hdr
 
+# The playtest launcher, built by tools/playtest/install.ps1
+/tools/playtest/playtest.exe
+/tools/playtest/playtest.ico
+
 # Animation library formats the knight build does not read
 /tools/downloads/**/*.fbx
 /tools/downloads/**/*.blend

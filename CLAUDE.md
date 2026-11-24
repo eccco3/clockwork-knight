@@ -8,7 +8,7 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 
 - Godot 4.7.2: `toolchain\godot\Godot_v4.7.2-stable_win64_console.exe`
 - Blender 4.5.16: `toolchain\blender\blender.exe`
-- Both are Windows-native: run them from PowerShell, not WSL.
+- Both are Windows-native: use PowerShell, not WSL.
 - System `python` is a hanging Store stub. Use `toolchain\blender\4.5\python\bin\python.exe -I`.
 
 ## Build and run
@@ -18,10 +18,10 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 - Hall scene after editing `scripts/hall_build.gd`: `godot --headless --path . --script res://scripts/hall_build.gd -- scene`.
 - Knight: `blender --background --python tools/knight/build_knight.py -- --out assets/models/knight.glb` (80 s), then `godot --path . --headless --import`.
 - Grinner: `blender --background --python tools/grinner/build_grinner.py -- --out assets/models/grinner.glb` (seven minutes), then import. `--shots dev/shots/grinner` adds turnarounds; `--clay a.png` alone previews the bare mesh.
-- Never combine `--only` with `--out`: it overwrites the full model with a partial one.
-- Run: `godot --path .`
+- Never combine `--only` with `--out`: it overwrites the full model.
+- Run: `godot --path .`. Playtest picker to pin: `tools\playtest\install.ps1` in the main checkout; `playtest.ps1 -DryRun` tests it.
 - Scripted play and screenshots: `dev/drive.tscn` with `--fixed-fps 60`; `dev/shot.tscn` photographs a scene. Both take `lamps=baked` to drop the live character lights.
-- Never open Godot windows on the dev's screen for tests or bakes, unless he is playtesting: replace `godot` with `toolchain\blender\4.5\python\bin\python.exe -I dev\quiet.py`, which runs it on a hidden desktop with the same arguments. Put `--timing` first for GPU timing runs: it waits until no other Godot or Blender runs and holds other launches off.
+- Never open Godot windows on the dev's screen for tests or bakes, unless he is playtesting: replace `godot` with `toolchain\blender\4.5\python\bin\python.exe -I dev\quiet.py`, which runs it on a hidden desktop. Put `--timing` first for GPU timing runs: it waits until no other Godot or Blender runs and holds other launches off.
 - The game caps at 60 fps (`run/max_fps`). Frame times: `dev/drive.tscn` events `perf:start` and `perf:stop`, run with `--disable-vsync --max-fps 0`.
 - Fast sculpt iteration: `tools/knight/preview_head.py` renders clay turnarounds.
 
@@ -44,7 +44,7 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 
 - `tools/check_docs.sh` enforces the four documentation rules in `DEV.md`; `tools/hooks/pre-commit` runs it. After cloning: `git config core.hooksPath tools/hooks`.
 - First-party means everything git tracks except `tools/downloads/`.
-- Git ignores `toolchain/`, `.godot/`, `dev/shots/`, the Poly Haven files, which `tools/fetch_assets.ps1` restores, and the built models `assets/models/*.glb` and lightmap `assets/lightmaps/`, which `tools/build_models.ps1` restores.
+- Git ignores `toolchain/`, `.godot/`, `dev/shots/`, the Poly Haven files (`tools/fetch_assets.ps1`) and the built models and lightmap (`tools/build_models.ps1`).
 - Commit with Windows git, not WSL.
 
 ## Downloads
