@@ -176,6 +176,38 @@ Stand Rosalyn in the hall and have her speak as the knight comes near. Check tha
 
 Not started.
 
+## Plan the Clockmaker with the dev
+
+### Task description
+
+Plan the Clockmaker with the dev in the main chat; this is not a subagent task. She is an ordinary human woman: brilliant, spacey and amnesiac. Her likeness comes from the dev's wife, who will model for reference, aged from about 30 to 55. Decide how her likeness is captured (photo sets, a phone scan or photogrammetry), how she is aged, her build, clothes and voice, and her part in the story. Then split the plan into sculpt, rig, animation and placement items like Rosalyn's.
+
+### Open questions
+
+- Do reference photos and scans stay out of git?
+- How does her amnesia show in play?
+- What is her name?
+
+### Status
+
+Not started. Needs the dev.
+
+## Plan the opening scene with the dev
+
+### Task description
+
+Plan the game's opening scene with the dev in the main chat; this is not a subagent task. The knight wakes up in the workshop. Decide where she lies, what she sees first, who is there, how control passes to the player, how the scene teaches the controls and how it leads into the hall. Then split the plan into backlog items for the scene, camera, animation and any dialogue.
+
+### Open questions
+
+- Is the waking a cutscene, played, or both?
+- Is the Clockmaker there, and does she remember building the knight?
+- Does the knight know what she is?
+
+### Status
+
+Not started. Needs the dev; the workshop items build the room.
+
 ## Outdoors: soften the light on her helmet
 
 ### Task description
