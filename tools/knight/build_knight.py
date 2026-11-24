@@ -18,7 +18,7 @@ from sculpt import sdf as S, mesher, gen, bl, build
 from sculpt.bl import opt
 from sculpt.sdf import V
 from sculpt.gen import Frame
-from knight import head, shadow
+from knight import head, roll, shadow
 
 DL = os.path.join(os.path.dirname(HERE), "downloads")
 REF_RIG = os.path.join(DL, "ual2", "Universal Animation Library 2[Standard]", "Female Mannequin", "Unreal-Godot", "Mannequin_F.glb")
@@ -811,6 +811,7 @@ def export(arm, body, path, extra=()):
 def main():
     t0 = time.time()
     arm, J, T = load_rig()
+    roll.tuck_opening(arm, bpy.data.actions["Roll"])
     add_bones(arm, J, T)
     only = opt("--only")
     only = only.split(",") if only else None

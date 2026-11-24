@@ -297,20 +297,6 @@ Make the knight's hands a little more feminine in 	ools/knight/build_knight.py: 
 ### Status
 
 Not started. Shares the builder with the natural shoulder, so one runs after the other.
-## Knight: roll starts less like a dive
-
-### Task description
-
-The start of her dodge-roll reads as a dive. Make it begin as a tuck, low and close to the ground, keeping the roll's distance, timing and the window in which she can act again. `scripts/player.gd` plays the clip by root motion with `ROLL_START`, `ROLL_SCALE` and `ROLL_RATE`; `scripts/knight_animator.gd` blends it. Deliver contact sheets before and after.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started.
-
 ## Minion: sculpt the model
 
 ### Task description
