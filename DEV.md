@@ -14,7 +14,9 @@ All tasks that would take more than a minute are processed into backlog items, e
 2. Commit and push to the remote without asking.
 3. If appropriate, recommend the dev to execute /clear or /compact before the next task.
 
-Never ask the dev whether to commit or push: commit and push whenever work is done.
+Never ask the dev whether to commit, merge or push: commit, merge and push whenever work is done. Only regressions are not merged.
+
+Claude Code's auto-memory is not used: what Claude needs to remember goes into Claude's notes in the CLAUDE.md.
 
 You can proactively solve tech debt yourself. If a big refactor is needed, you can add it to the backlog.
 </immutable without the dev's blessing>
