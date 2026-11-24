@@ -273,20 +273,6 @@ The start of her dodge-roll reads as a dive. Make it begin as a tuck, low and cl
 
 Not started.
 
-## Knight: attack mid-jump
-
-### Task description
-
-Let her attack while airborne. An attack pressed in the air plays a slash suited to the air and keeps her jump's motion, and she lands into her normal landing. `scripts/player.gd` handles states and buffering, and `scripts/knight_animator.gd` plays clips. Deliver a contact sheet of a jump attack.
-
-### Open questions
-
-- None. If she lands mid-slash, she finishes it on the ground.
-
-### Status
-
-Not started.
-
 ## Minion: sculpt the model
 
 ### Task description
