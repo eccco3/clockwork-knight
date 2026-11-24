@@ -342,6 +342,19 @@ Faint streaks of white light sprinkle across the air gaps between the knight's j
 
 Not started.
 
+## Faces: separate ratings for men and women
+
+### Task description
+
+Split the face-rating tool into two: one rates women's faces and one men's, each with its own pool, answers file and learned direction, and its own launcher entry. The face kit has no sex labels, so find a direction in the shape coefficients that separates female from male faces. Use known differences such as brow ridge, jaw and nose size, and confirm it with grids of each end. If that is unclear, add a short labelling pass for the dev. Each pool samples clearly on its side, with the same spread as now.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. No ratings exist yet.
 ## Faces: crisper features and use in a figure
 
 ### Task description
