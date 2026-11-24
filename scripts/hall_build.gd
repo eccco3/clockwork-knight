@@ -288,7 +288,7 @@ func _scene() -> void:
 
 	# --- collision ----------------------------------------------------------
 	var body := StaticBody3D.new()
-	body.collision_layer = 1
+	body.collision_layer = Layers.SCENERY
 	body.collision_mask = 0
 	_add(body, null, "Collision")
 	var i := 0

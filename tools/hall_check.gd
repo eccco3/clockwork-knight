@@ -21,7 +21,7 @@ func _run() -> void:
 		for zi in range(-23, 24):
 			var x := xi * 0.5
 			var z := zi * 0.5
-			var q := PhysicsRayQueryParameters3D.create(Vector3(x, 3.0, z), Vector3(x, -3.0, z), 1)
+			var q := PhysicsRayQueryParameters3D.create(Vector3(x, 3.0, z), Vector3(x, -3.0, z), Layers.SCENERY)
 			var hit := space.intersect_ray(q)
 			n += 1
 			if hit.is_empty() or (absf(x) <= 4.0 and absf(z) <= 7.0 and absf(hit.position.y) > 0.001):
@@ -38,7 +38,7 @@ func _run() -> void:
 				var p := PhysicsShapeQueryParameters3D.new()
 				p.shape = cap
 				p.transform = Transform3D(Basis.IDENTITY, Vector3(xi * 0.25, y, zi * 0.25))
-				p.collision_mask = 1
+				p.collision_mask = Layers.SCENERY
 				tested += 1
 				if not space.intersect_shape(p, 1).is_empty():
 					blocked += 1
@@ -46,7 +46,7 @@ func _run() -> void:
 						print("  blocked at ", p.transform.origin)
 	print("capsule probes in play area: ", tested, "  blocked: ", blocked)
 	for d in [Vector3.RIGHT, Vector3.LEFT, Vector3.FORWARD, Vector3.BACK, Vector3.UP]:
-		var q2 := PhysicsRayQueryParameters3D.create(Vector3(0, 1.0, 0), Vector3(0, 1.0, 0) + d * 40.0, 1)
+		var q2 := PhysicsRayQueryParameters3D.create(Vector3(0, 1.0, 0), Vector3(0, 1.0, 0) + d * 40.0, Layers.SCENERY)
 		var h2 := space.intersect_ray(q2)
 		print("ray ", d, " -> ", h2.get("position", "MISS"))
 	print("spawn: ", hall.get_node("PlayerSpawn").global_transform)

@@ -1,10 +1,10 @@
 # Backlog
 
-## Playtest launcher
+## Playtest: choose the scene
 
 ### Task description
 
-Give the dev one Windows taskbar button that starts a playtest. A click opens a small picker listing main and each worktree that can run the game, newest commit first, with its branch, commit subject and age; main is preselected, so Enter plays it. Before launching, fast-forward a clean main from `origin/main`, restore missing built models or lightmaps by copying them from the main checkout, and import if needed. Show failures in the picker instead of a vanishing console. Pin it with its own icon.
+Let the playtest launcher's picker choose which scene to play, as well as which checkout: the hall (`scenes/main.tscn`) and the outdoors (`scenes/outdoors.tscn`) for now, defaulting to the hall and remembering the last choice. Each playable scene says it is one, for example in a list or a folder, so a new scene, such as the workshop, appears without editing the launcher; dev stages stay out. Launch the chosen scene directly, keeping cursor capture and the hint working as in `scripts/app.gd`.
 
 ### Open questions
 
@@ -12,7 +12,7 @@ Give the dev one Windows taskbar button that starts a playtest. A click opens a 
 
 ### Status
 
-Not started.
+Not started. Wait for the dev-harness item, which reorganises `dev/` and the stages.
 
 ## Test lower render scale
 
@@ -28,20 +28,6 @@ After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% wit
 
 Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 °C; 50% gave 43 W and 70 °C.
 
-## Tech debt: input, layers and app keys
-
-### Task description
-
-`Player.setup_input()` builds the input map in code, so the editor shows none and `dev/drive.gd` must call it first. Define it in `project.godot`, and delete CLAUDE.md's Controls list, which repeats it and already misses K for the roll. Name the physics and render layers there too: replace the bare 1s and 2s in four scripts, and the knight's borrowed `Hall.CHARACTER_LAYER`, with shared constants the grinner's hit layers can join. Move Esc, F11 and cursor capture out of `player.gd` into one place with the H hint. Delete the unused `scenes/player.tscn`. Check play and scripted runs behave as before.
-
-### Open questions
-
-- Should the outdoors scene show the controls hint too?
-
-### Status
-
-Not started. Do it before the grinner's combat adds hit layers. It changes a line or two in files the other tech-debt items edit, so run it first or alone.
-
 ## Tech debt: one dev harness
 
 ### Task description
@@ -52,7 +38,7 @@ Not started. Do it before the grinner's combat adds hit layers. It changes a lin
 
 - What separates `dev/` from `tools/`, and should they merge? Both hold scripts that are not the game: `dev/` the harnesses and stages, `tools/` the builders, but also probes and checks such as `tools/hall_check.gd`.
 - Which tools should go, and which merge? For example, `dev/inspect_knight.gd` and `tools/knight/inspect_glb.py` both list a model's meshes, bones and clips, and nothing uses either.
-- Delete `screenshots/`: seven unreferenced images, 14 MB, taken before the bake and the waxed wood?
+- Delete `screenshots/`, seven unreferenced images, 14 MB? The dev said yes.
 
 ### Status
 
@@ -86,20 +72,6 @@ Not started. Do it before the workshop extends these builders; it cannot run bes
 
 Not started. Do it before Rosalyn's sculpt, so her build starts from shared materials. The shared sculpt toolkit, which also changed `build_knight.py`, is on main.
 
-## Enemy: refine the sculpt
-
-### Task description
-
-Fix the grinner's weak spots before it is rigged: ragged geometry where the mouth pinches shut at each corner, which reads as cracks up the cheeks; a rough crease where jaw meets neck; a ragged hairline; and coarse, angular ears. Give the teeth their own texture variety and stop the limbs' paint mirroring. The grin stays fixed, so the mouth needs no cavity. Deliver before and after turnarounds of the head.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. The model is merged; see `tools/grinner/`.
-
 ## Enemy: rig and waddle
 
 ### Task description
@@ -108,11 +80,11 @@ Rig the grinner with clean deformation at the reversed knees and hips, the long 
 
 ### Open questions
 
-- Are original hand-keyed clips acceptable, or should a downloaded motion library be adapted?
+- None. The dev chose original hand-keyed clips over an adapted motion library.
 
 ### Status
 
-Not started.
+Not started. Starts once the grinner's sculpt fixes in progress are merged. The dev will rework the face later; the face has no bones, so rigging need not wait.
 
 ## Enemy: attack animations
 
@@ -350,3 +322,59 @@ Model unfinished automata at different stages, from bare mechanism to painted fi
 ### Status
 
 Not started. Needs the clocks, benches and tools.
+
+## Hall: dimmer fire highlight on the floor
+
+### Task description
+
+The fire's highlight on the floor in front of the hearth is too bright. Tone it down, keeping the hearth's warmth in the room. The agent chooses how. Deliver before and after screenshots from a few positions.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Low priority. It shares the fire's lights with the fire-shadow item, so run them together or one after the other. The fire is the hall's only live light; its key light is built in `scripts/hall_build.gd` and flickers through `scripts/hall_fire_light.gd`.
+
+## Hall: steadier fire shadows
+
+### Task description
+
+The fire casts a pronounced shadow that looks twitchy. Soften its shadows or calm how much they dance, or both; the agent chooses how. Deliver short before and after captures, or contact sheets, of a shadow over a few seconds.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Low priority. Shares the fire's lights with the floor highlight item.
+
+## Hall: doorframe shimmer
+
+### Task description
+
+The inside of the hall's doorframe shimmers. Find the cause, for example aliasing, z-fighting, a lightmap seam or the material, and fix it at its source. The agent chooses how. Deliver before and after captures that show the shimmer.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Low priority. If the fix changes the hall's geometry, the lightmap needs a rebake, so it cannot run beside other hall or baking work.
+
+## Clicking to recapture the cursor attacks
+
+### Task description
+
+After Esc frees the cursor, the click that captures it again also starts an attack. That click should only recapture. `scripts/app.gd` captures the cursor; `scripts/player.gd` buffers the attack. The old reset of `_buf_attack` never worked, because the physics step reads the press after it.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Low priority.

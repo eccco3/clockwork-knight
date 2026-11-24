@@ -22,8 +22,6 @@ const FINISHER_FREE_AT := 1.05       ## clip time in the third swing after which
 
 enum State { GROUND, AIR, ROLL, ATTACK }
 
-@export var capture_mouse := true
-
 var knight: Knight
 var camera: CameraRig
 var state := State.GROUND
@@ -48,9 +46,8 @@ var _prev_hvel := Vector3.ZERO
 
 func _ready() -> void:
 	add_to_group("player")
-	setup_input()
-	collision_layer = 2
-	collision_mask = 1
+	collision_layer = Layers.CHARACTERS
+	collision_mask = Layers.SCENERY
 	floor_snap_length = 0.25
 	floor_max_angle = deg_to_rad(50.0)
 	var col := CollisionShape3D.new()
@@ -83,62 +80,6 @@ func _ready() -> void:
 	fill.shadow_enabled = false
 	fill.position = Vector3(0.5, 0.5, 0.3)
 	camera.camera.add_child(fill)
-	if capture_mouse and OS.get_cmdline_user_args().is_empty() and DisplayServer.get_name() != "headless":
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-
-
-static func setup_input() -> void:
-	if InputMap.has_action("move_forward"):
-		return
-	var keys := {
-		"move_forward": [KEY_W, KEY_UP], "move_back": [KEY_S, KEY_DOWN],
-		"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT],
-		"jump": [KEY_SPACE], "roll": [KEY_SHIFT, KEY_Q, KEY_K], "attack": [KEY_J, KEY_F],
-		"walk": [KEY_CTRL], "walk_toggle": [KEY_C],
-		"look_left": [], "look_right": [], "look_up": [], "look_down": [],
-	}
-	var buttons := {"jump": [JOY_BUTTON_A], "roll": [JOY_BUTTON_B], "attack": [JOY_BUTTON_X, JOY_BUTTON_RIGHT_SHOULDER],
-		"walk_toggle": [JOY_BUTTON_LEFT_STICK]}
-	var mouse := {"attack": MOUSE_BUTTON_LEFT, "roll": MOUSE_BUTTON_RIGHT}
-	var axes := {
-		"move_left": [JOY_AXIS_LEFT_X, -1.0], "move_right": [JOY_AXIS_LEFT_X, 1.0],
-		"move_forward": [JOY_AXIS_LEFT_Y, -1.0], "move_back": [JOY_AXIS_LEFT_Y, 1.0],
-		"look_left": [JOY_AXIS_RIGHT_X, -1.0], "look_right": [JOY_AXIS_RIGHT_X, 1.0],
-		"look_up": [JOY_AXIS_RIGHT_Y, -1.0], "look_down": [JOY_AXIS_RIGHT_Y, 1.0],
-	}
-	for a in keys:
-		InputMap.add_action(a, 0.2)
-		for k in keys[a]:
-			var e := InputEventKey.new()
-			e.physical_keycode = k
-			InputMap.action_add_event(a, e)
-		for b in buttons.get(a, []):
-			var e := InputEventJoypadButton.new()
-			e.button_index = b
-			InputMap.action_add_event(a, e)
-		if mouse.has(a):
-			var e := InputEventMouseButton.new()
-			e.button_index = mouse[a]
-			InputMap.action_add_event(a, e)
-		if axes.has(a):
-			var e := InputEventJoypadMotion.new()
-			e.axis = axes[a][0]
-			e.axis_value = axes[a][1]
-			InputMap.action_add_event(a, e)
-
-
-func _unhandled_input(e: InputEvent) -> void:
-	if e is InputEventKey and e.pressed and not e.echo:
-		if e.physical_keycode == KEY_ESCAPE:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-		elif e.physical_keycode == KEY_F11:
-			var w := get_window()
-			w.mode = Window.MODE_WINDOWED if w.mode == Window.MODE_FULLSCREEN else Window.MODE_FULLSCREEN
-	elif e is InputEventMouseButton and e.pressed and capture_mouse and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED \
-			and e.button_index == MOUSE_BUTTON_LEFT:
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-		_buf_attack = 0.0
-		get_viewport().set_input_as_handled()
 
 
 func _dir(yaw: float) -> Vector3:
