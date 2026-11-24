@@ -29,7 +29,7 @@ func _ready() -> void:
 	var shape := SphereShape3D.new()
 	shape.radius = 0.16
 	_arm.shape = shape
-	_arm.collision_mask = 1
+	_arm.collision_mask = Layers.SCENERY
 	_arm.margin = 0.02
 	add_child(_arm)
 	camera = Camera3D.new()

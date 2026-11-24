@@ -56,7 +56,7 @@ var _rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
-	add_to_group(Hall.CHARACTERS)
+	add_to_group(Layers.CHARACTER_GROUP)
 	model = MODEL.instantiate()
 	add_child(model)
 	skel = _find(model, "Skeleton3D")
@@ -78,7 +78,7 @@ func _ready() -> void:
 	_setup_extras()
 	mesh.extra_cull_margin = 0.15
 	for v: VisualInstance3D in find_children("*", "VisualInstance3D", true, false):
-		v.layers = Hall.CHARACTER_LAYER
+		v.layers = Layers.CHARACTERS
 	_apply_pose(0.0)
 
 

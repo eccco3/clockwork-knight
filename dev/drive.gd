@@ -37,7 +37,6 @@ func _ready() -> void:
 		var i := a.find("=")
 		if i > 0:
 			_args[a.substr(0, i)] = a.substr(i + 1)
-	Player.setup_input()
 	Hall.character_lights = _args.get("lamps", "characters") != "baked"
 	var tr := Tracker.new()
 	tr.host = self
@@ -46,8 +45,6 @@ func _ready() -> void:
 	var packed: PackedScene = load(_args.get("scene", "res://dev/stage.tscn"))
 	_scene = packed.instantiate()
 	add_child(_scene)
-	if _player():
-		_player().set("capture_mouse", false)
 	print("load: scene ready at %d ms" % Time.get_ticks_msec())
 	RenderingServer.frame_post_draw.connect(func(): print("load: first frame at %d ms" % Time.get_ticks_msec()), CONNECT_ONE_SHOT)
 	for e in String(_args.get("do", "")).split(";", false):
