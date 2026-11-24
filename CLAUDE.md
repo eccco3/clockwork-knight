@@ -1,7 +1,5 @@
 The dev's rules, which bind every session, are in @DEV.md.
 
-<Claude's notes>
-
 ## Tools
 
 Everything the project needs is in this folder. `toolchain/` is third-party and hidden from Godot by `.gdignore`.
@@ -50,5 +48,3 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 ## Downloads
 
 All CC0: Quaternius Universal Animation Library 1 and 2 (hand-keyed, not mocap); Poly Haven scans and sky (`tools/fetch_assets.ps1` lists ids).
-
-</Claude's notes>
