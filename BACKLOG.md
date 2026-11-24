@@ -262,12 +262,11 @@ Not started. Shares the knight's builder with her hand and seat items.
 
 ### Task description
 
-Build a small clockwork soldier as `assets/models/minion.glb` from a new `tools/minion/` builder on the shared sculpt toolkit: an adult man, short and stocky, carrying a short spear. He needs far less human likeness than the knight or Rosalyn; a simple, readable, mechanical design is right, since many share the field. Give him detail levels and a cheap shadow stand-in from the start. Deliver clay and painted turnarounds beside the knight's.
+Build a small clockwork soldier as `assets/models/minion.glb` from a new `tools/minion/` builder on the shared sculpt toolkit: an adult man two-thirds the knight's height, a regular, reasonably strong-looking soldier (not stocky), carrying a short spear. He is the knight's ally; the grinners are the enemy's minions. He needs far less human likeness than the knight or Rosalyn; a simple, readable, mechanical design is right, since many share the field. Give him detail levels and a cheap shadow stand-in from the start. Deliver clay and painted turnarounds beside the knight's.
 
 ### Open questions
 
-- How tall is he, and what is his triangle budget at full detail?
-- Is he an ally of the knight, an enemy, or are there both kinds?
+- None. About 12,000 triangles at full detail.
 
 ### Status
 
