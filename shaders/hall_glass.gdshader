@@ -1,6 +1,6 @@
 // Leaded diamond-pane window on a foggy day. Opaque: each hand-blown pane passes a slightly
 // different share of the flat white fog outside, under a glossy surface that mirrors the firelight.
-// The light the windows throw into the hall comes from the FogLight spots in hall_build.gd.
+// The light the windows throw into the hall comes from the FogLight spots of builders/hall_scene.gd.
 shader_type spatial;
 render_mode cull_disabled;
 

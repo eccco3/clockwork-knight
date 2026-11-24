@@ -1,7 +1,7 @@
 """Great hall generator. Run:  blender --background --python tools/build_hall.py
 Writes assets/models/hall.glb (+ .import with external material mapping) and
 assets/models/hall_layout.json (colliders, candle/light/glass positions for the Godot side)."""
-import bpy, sys, os, json, time, importlib
+import bpy, sys, os, json, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -22,21 +22,14 @@ for name, size, grain in [
 ]:
     defmat(name, size, grain)
 
-import hall_shell, hall_fireplace
-mods = [hall_shell, hall_fireplace]
-try:
-    import hall_props
-    mods.append(hall_props)
-except ImportError:
-    hall_props = None
+import hall_shell, hall_fireplace, hall_props
 
 t0 = time.time()
 bpy.ops.wm.read_factory_settings(use_empty=True)
 b = Builder(seed=11)
 hall_shell.build_shell(b)
 hall_fireplace.build_fireplace(b)
-if hall_props:
-    hall_props.build_props(b)
+hall_props.build_props(b)
 b.mark('spawn', (0, 0, 5.5))
 objs = b.build_objects()
 print("built %d mesh objects, %d tris in %.1fs" % (len(objs), b.tris, time.time() - t0))
@@ -71,6 +64,6 @@ with open(imp, 'w', newline='\n') as f:
             'nodes/root_type=""\nnodes/root_name=""\nnodes/apply_root_scale=true\nnodes/root_scale=1.0\n'
             'meshes/ensure_tangents=true\nmeshes/generate_lods=false\nmeshes/create_shadow_meshes=true\nmeshes/light_baking=2\n'
             'meshes/lightmap_texel_size=0.04\nmeshes/force_disable_compression=false\nskins/use_named_skins=true\n'
-            'animation/import=false\nimport_script/path="res://scripts/hall_import.gd"\n_subresources={\n"materials": {\n' + sub + '\n}\n}\n')
+            'animation/import=false\nimport_script/path="res://builders/hall_import.gd"\n_subresources={\n"materials": {\n' + sub + '\n}\n}\n')
 print("materials:", mats)
 print("done in %.1fs" % (time.time() - t0))

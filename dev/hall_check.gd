@@ -1,5 +1,5 @@
 extends SceneTree
-## Dev check (not used at runtime):  godot --headless --path . --script tools/hall_check.gd
+## Dev check (not used at runtime):  godot --headless --path . --script res://dev/hall_check.gd
 ## Verifies floor height, wall positions and that a player-sized capsule fits everywhere in the
 ## declared clear play area (|x| <= 4, |z| <= 7).
 
