@@ -14,20 +14,6 @@ After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% wit
 
 Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 °C; 50% gave 43 W and 70 °C.
 
-## Tech debt: input, layers and app keys
-
-### Task description
-
-`Player.setup_input()` builds the input map in code, so the editor shows none and `dev/drive.gd` must call it first. Define it in `project.godot`, and delete CLAUDE.md's Controls list, which repeats it and already misses K for the roll. Name the physics and render layers there too: replace the bare 1s and 2s in four scripts, and the knight's borrowed `Hall.CHARACTER_LAYER`, with shared constants the grinner's hit layers can join. Move Esc, F11 and cursor capture out of `player.gd` into one place with the H hint. Delete the unused `scenes/player.tscn`. Check play and scripted runs behave as before.
-
-### Open questions
-
-- Should the outdoors scene show the controls hint too?
-
-### Status
-
-Not started. Do it before the grinner's combat adds hit layers. It changes a line or two in files the other tech-debt items edit, so run it first or alone.
-
 ## Tech debt: one dev harness
 
 ### Task description
