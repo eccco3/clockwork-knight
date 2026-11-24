@@ -355,15 +355,15 @@ Faint streaks of white light sprinkle across the air gaps between the knight's j
 
 Not started.
 
-## Faces: a morphable model
+## Faces: crisper features and use in a figure
 
 ### Task description
 
-Build a 3D morphable model of human faces, so code can generate many plausible faces that don't exist: a mean head plus uncorrelated shape components found by PCA over registered scans, sampled from a Gaussian at about 0.5 to 0.8 sigma and mirrored for symmetry. Use a permissively licensed source, such as MakeHuman/MPFB targets or ICT-FaceKit, never research-only models like FLAME or Basel. Fit the result onto the sculpt toolkit's head topology, so figures can use it. Deliver a grid of 25 sampled faces, rendered identically.
+The morphable model in `tools/faces/` has ragged ears, slightly jagged nostril edges and outer eye corners, a soft lip groove with no edge loop, and dark smudges under the flat neck cut. Add a lip rail like Rosalyn's, handle the ears' undercuts, and speed up `scan.Solid.field`. Then wire a sampled face into a figure build, with its field for baking and hidden tests and a neck join, and add the model to `build_models.ps1`. Deliver the grid again and a figure wearing a sampled face.
 
 ### Open questions
 
-- None. The agent reports each candidate source's licence before using it.
+- None.
 
 ### Status
 
@@ -381,4 +381,4 @@ Add a `dev/` tool that shows the dev two faces from the morphable model side by 
 
 ### Status
 
-Not started. Needs the morphable model, and the dev's time to rate.
+Not started. Needs the dev's time to rate.
