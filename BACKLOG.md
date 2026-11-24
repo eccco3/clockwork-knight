@@ -367,7 +367,7 @@ Add a `dev/` tool that shows the dev two faces from the morphable model side by 
 
 ### Open questions
 
-- Does the dev rate in one sitting or several short ones?
+- None. The dev rates in several short sittings, so the tool saves every answer at once and resumes where he left off.
 
 ### Status
 
