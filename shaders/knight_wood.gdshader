@@ -12,13 +12,16 @@ uniform float ring_wobble : hint_range(0.0, 2.0) = 0.6;
 uniform float fiber_strength : hint_range(0.0, 1.0) = 0.22;
 uniform float pore_strength : hint_range(0.0, 1.0) = 0.35;
 uniform float figure_strength : hint_range(0.0, 1.0) = 0.25;
-uniform float roughness_min : hint_range(0.0, 1.0) = 0.24;
-uniform float roughness_max : hint_range(0.0, 1.0) = 0.50;
-uniform float coat : hint_range(0.0, 1.0) = 0.5;
+// The finish. The defaults are oiled, waxed wood: a broad sheen and no film. Lacquer is a coat over
+// a smoother surface. Godot keeps a coat glossy at any coat_roughness, so it cannot stand in for wax.
+uniform float roughness_min : hint_range(0.0, 1.0) = 0.36;
+uniform float roughness_max : hint_range(0.0, 1.0) = 0.56;
+uniform float coat : hint_range(0.0, 1.0) = 0.0;
 uniform float coat_roughness : hint_range(0.0, 1.0) = 0.14;
 uniform float bump : hint_range(0.0, 2.0) = 0.5;
 uniform float paint : hint_range(0.0, 1.0) = 1.0;
-// Lacquer painted on the face: a texture projected from the front. paint_origin is the grain-space
+uniform float paint_roughness : hint_range(0.0, 1.0) = 0.42;
+// Paint on the face: a texture projected from the front. paint_origin is the grain-space
 // position of the head frame's origin; paint_size is (half width, bottom, top) in metres. Zero = off.
 uniform sampler2D paint_tex : source_color, hint_default_white, filter_linear_mipmap_anisotropic, repeat_disable;
 uniform vec3 paint_origin = vec3(0.0);
@@ -93,7 +96,8 @@ void fragment() {
 	ALBEDO = col * mix(vec3(1.0), tint, paint);
 
 	float painted = clamp((1.0 - min(tint.r, min(tint.g, tint.b))) * 2.0, 0.0, 1.0) * paint;
-	ROUGHNESS = clamp(mix(roughness_max, roughness_min, late) + pore * 0.18 - painted * 0.10, 0.03, 1.0);
+	float rough = mix(roughness_max, roughness_min, late) + pore * 0.18;
+	ROUGHNESS = clamp(mix(rough, paint_roughness, painted), 0.03, 1.0);
 	SPECULAR = 0.5;
 	CLEARCOAT = coat;
 	CLEARCOAT_ROUGHNESS = coat_roughness;

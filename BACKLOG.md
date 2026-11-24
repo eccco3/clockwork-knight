@@ -29,20 +29,6 @@ The knight's shadows cost about 0.8 ms of GPU time, but not because of her trian
 
 Not started. Scripted play: 6.8 ms with three shadowed chandeliers, 6.3 ms with only the middle one, 6.6 ms with dual paraboloids, 6.0 ms with none.
 
-## Knight: less glossy wood
-
-### Task description
-
-Make the knight's wooden body less polished; leave the armour as it is. Today `shaders/knight_wood.gdshader` gives the wood a roughness of 0.24 to 0.50 under a half-strength clear coat at 0.14 roughness, so it reads as varnished. Aim for oiled or waxed wood: a soft, broad sheen that shows the finish without sharp reflections. The painted brows and lips lose their gloss too, but the paint must stay as vivid and readable as now. Compare before and after screenshots in the hall, close up and at play distance; `dev/shots/face/` holds today's face.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started.
-
 ## Enemy: sculpt the model
 
 ### Task description
