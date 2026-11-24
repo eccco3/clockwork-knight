@@ -295,7 +295,7 @@ Let her attack while airborne. An attack pressed in the air plays a slash suited
 
 ### Open questions
 
-- Does landing during the slash cut it short, or does she finish it on the ground?
+- None. If she lands mid-slash, she finishes it on the ground.
 
 ### Status
 
@@ -305,7 +305,65 @@ Not started.
 
 ### Task description
 
-Her run feels floaty. Find out why, for example acceleration, deceleration, turning, the clip's bounce or its speed against her ground speed, and make her run feel planted and responsive. Constants are at the top of `scripts/player.gd`, and the gait blend is in `scripts/knight.gd`. Record before and after with the scripted-play harness, including starts, stops and sharp turns.
+Her run is floaty: a valid style, but not the one the dev wants. Retune it to feel planted, weighty and responsive, for example through acceleration, deceleration, turning, the clip's bounce and its stride against her ground speed. Constants are at the top of `scripts/player.gd`, and the gait blend is in `scripts/knight.gd`. Record before and after with the scripted-play harness, including starts, stops and sharp turns.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started.
+
+## Minion: sculpt the model
+
+### Task description
+
+Build a small clockwork soldier as `assets/models/minion.glb` from a new `tools/minion/` builder on the shared sculpt toolkit: an adult man, short and stocky, carrying a short spear. He needs far less human likeness than the knight or Rosalyn; a simple, readable, mechanical design is right, since many share the field. Give him detail levels and a cheap shadow stand-in from the start. Deliver clay and painted turnarounds beside the knight's.
+
+### Open questions
+
+- How tall is he, and what is his triangle budget at full detail?
+- Is he an ally of the knight, an enemy, or are there both kinds?
+
+### Status
+
+Not started.
+
+## Minion: rig and animation
+
+### Task description
+
+Rig the minion simply, with few bones, and hand-key an idle, a march, a spear thrust, a flinch and a death in Blender, played through Godot's AnimationTree like the grinner's so that dozens can run cheaply. Mark the thrust's hit window in the clip. Deliver contact sheets of each.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Needs the minion's sculpt.
+
+## Battles: intelligent multi-unit fights
+
+### Task description
+
+Make fights between groups outdoors, in the shape of a MOBA lane: waves of minions and grinners advance, meet and fight, with the knight among them. Units pick targets sensibly, hold formation, surround without stacking, spread their attacks over time, and retreat or regroup when losing. Keep it cheap enough for 40 units at 60 fps, for example with staggered thinking and simple avoidance. Record a scripted battle and measure its CPU time.
+
+### Open questions
+
+- Which sides exist, and who fights whom?
+- Do waves spawn on a timer, and what ends a run?
+
+### Status
+
+Not started. Needs the minion's animation and the grinner's behaviour and combat.
+
+## Knight: light between her joints
+
+### Task description
+
+Faint streaks of white light sprinkle across the air gaps between the knight's jointed parts. They are translucent and faint at rest, and brighter and more striking while the joint moves. They light nothing around them. Make them cheap, for example a shader on thin cards or particles driven by each joint's angular speed. Deliver captures at rest and mid-swing.
 
 ### Open questions
 
