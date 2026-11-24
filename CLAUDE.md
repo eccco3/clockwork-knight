@@ -1,7 +1,5 @@
 The dev's rules, which bind every session, are in @DEV.md.
 
-<Claude's notes>
-
 ## Tools
 
 Everything the project needs is in this folder. `toolchain/` is third-party and hidden from Godot by `.gdignore`.
@@ -14,8 +12,8 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 ## Build and run
 
 - All models, the Godot import and the hall's lightmap: `tools\build_models.ps1`. Needed after cloning.
-- Lightmap alone: `godot --editor --path . res://scenes/hall.tscn -- bake-lightmaps` runs the editor for about six minutes; add `draft` for a one-minute preview. Rebake after changing the hall's geometry or lamps.
-- Hall scene after editing `scripts/hall_build.gd`: `godot --headless --path . --script res://scripts/hall_build.gd -- scene`.
+- Lightmap alone: `godot --editor --path . res://scenes/hall.tscn -- bake-lightmaps` runs the editor about six minutes; add `draft` for a one-minute preview. Rebake after changing the hall's geometry or lamps.
+- Hall materials, then scene: `godot --headless --path . --script res://builders/hall_materials.gd`, then `hall_scene.gd`.
 - Knight: `blender --background --python tools/knight/build_knight.py -- --out assets/models/knight.glb` (80 s), then `godot --path . --headless --import`.
 - Grinner: `blender --background --python tools/grinner/build_grinner.py -- --out assets/models/grinner.glb` (seven minutes), then import. `--shots dir` adds turnarounds; `--clay a.png` alone previews the bare mesh.
 - Rosalyn: likewise (`rosalyn`, seven minutes); `--detail 0.7` halves her triangles. Her model's root, `scripts/rosalyn.gd`, dresses her.
@@ -31,12 +29,12 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 - `project.godot` holds the input map and names the layers; `scripts/layers.gd` gives code the same names.
 - The `App` autoload, `scripts/app.gd`, holds the keys Esc, F11 and H, cursor capture and the controls hint for playable scenes.
 - `scenes/outdoors.tscn` builds the grinner's foggy ground on load; drive and shot take `scene=res://scenes/outdoors.tscn`.
-- `dev/` runs the game to test it; `tools/`, hidden from Godot, builds and fetches assets.
+- `dev/` tests the game; `builders/` builds in Godot; `tools/`, hidden from Godot, builds and fetches assets.
 - `scripts/` holds the player controller, animator and camera rig; `looks.gd` makes the wood, metal and eye materials in each figure's colours.
-- The hall's lamps are baked. `scripts/hall.gd` replaces them at runtime with lights that reach only the Characters layer and with cancelling pairs that leave character shadows on the baked floor. Only the fire lights the hall live.
+- The hall's lamps are baked. `scripts/hall.gd` turns lamps marked `lights_characters` into lights for the Characters layer only, and `shadows_characters` into cancelling pairs leaving character shadows on the baked floor. Only the fire lights the hall live.
 - `addons/lightmap_bake` presses the editor's bake button, the only way Godot bakes lightmaps.
 - `tools/sculpt/` is the characters' shared toolkit.
-- `tools/knight/` builds the knight, `assets/textures/knight/face_paint.png` and its placement `face_paint.json`; `tools/build_hall.py` and `scripts/hall_build.gd` build the hall.
+- `tools/knight/` builds the knight, `assets/textures/knight/face_paint.png` and its placement `face_paint.json`; `tools/build_hall.py` and `builders/hall_*.gd` build the hall.
 - Only `KnightShadow`, a 4,700-triangle copy from `tools/knight/shadow.py`, casts the knight's shadows.
 - `tools/grinner/` builds the first enemy, its rig and hand-keyed clips; `import_grinner.gd` sets its detail distances and adds the AnimationTree. `scripts/grinner.gd` walks it. Shot shows it on `dev/stage.tscn`: `call=stand:res://assets/models/grinner.glb`, `stand:res://dev/waddler.tscn` waddling, or `spread:` its detail levels.
 
@@ -50,5 +48,3 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 ## Downloads
 
 All CC0: Quaternius Universal Animation Library 1 and 2 (hand-keyed, not mocap); Poly Haven scans and sky (`tools/fetch_assets.ps1` lists ids).
-
-</Claude's notes>

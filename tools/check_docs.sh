@@ -31,16 +31,11 @@ check_global() {
 	done
 }
 
+# Claude's notes are all of CLAUDE.md after its first line, which points to DEV.md.
 check_notes() {
 	awk -v limit="$NOTES_LIMIT" '
-		{ sub(/\r$/, "") }
-		/^<\/Claude.s notes>$/ { open = 0; closed = 1 }
-		open { n += NF }
-		/^<Claude.s notes>$/ { open = 1; seen = 1 }
-		END {
-			if (!seen || !closed) print "CLAUDE.md: the <Claude'"'"'s notes> block is missing"
-			else if (n > limit) printf "CLAUDE.md: Claude'"'"'s notes have %d words (limit %d)\n", n, limit
-		}' CLAUDE.md
+		NR > 1 { n += NF }
+		END { if (n > limit) printf "CLAUDE.md: Claude'"'"'s notes have %d words (limit %d)\n", n, limit }' CLAUDE.md
 }
 
 check_backlog() {

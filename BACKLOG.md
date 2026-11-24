@@ -14,11 +14,24 @@ After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% wit
 
 Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 °C; 50% gave 43 W and 70 °C.
 
-## Tech debt: hall builders
+## Enemy: attack animations
 
 ### Task description
 
-`scripts/hall_build.gd` is an offline builder among the runtime scripts, and does two jobs: about 200 lines write materials, the rest assembles the scene. Split them, and move them and the import hook out of `scripts/`, and `tools/hall_check.gd` to `dev/`. Let layout marks say which lights reach or shadow characters, instead of matching the names "Chandelier" and "Sconce". Drop the fallback that lets `build_hall.py` build a bare hall when `hall_props` fails to import. Share the two `hall_cloth` shaders, identical but for two lines, through an include. Prove the rebuilt `hall.glb`, `hall.tscn` and materials match the old ones.
+Animate two attacks with root motion: a pounce that leaps about 4 m at the knight after a 0.6 s wind-up and rakes with one claw, and a twin-claw swipe made in place after a 0.4 s wind-up. Each has a readable wind-up, a hit window marked in the clip, and a recovery. Add a flinch and a death, and blend all of them with the waddle and idle in the AnimationTree. Deliver contact sheets of each.
+
+### Open questions
+
+- None. A hit during a wind-up interrupts it; once the leap or swipe starts, it commits.
+
+### Status
+
+Not started.
+## Enemy: behaviour and combat
+
+### Task description
+
+Extend `scripts/grinner.gd`, which now only plays the idle and waddle: it waddles straight at the knight, pounces from mid range and swipes up close, with cooldowns. Add the least combat both sides need: health, sword hits that land on grinners, claw hits on the knight, and reactions. A grinner dies to three hits, and flinches only when hit during a wind-up. When the knight's health runs out she collapses, the screen fades and the scene restarts. Place three grinners in `scenes/outdoors.tscn` and record a scripted fight.
 
 ### Open questions
 
@@ -26,53 +39,20 @@ Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W w
 
 ### Status
 
-Not started. Do it before the workshop extends these builders; it cannot run beside other hall or baking work. The `ns_` comments in `hall_import.gd` and `hall_props.py` are stale: four lights cast shadows, not five, and the live chandeliers draw only characters into shadow maps.
-
-## Enemy: attack animations
-
-### Task description
-
-Animate two attacks with root motion: a pounce that leaps at the knight and rakes with one claw, and a twin-claw swipe made in place. Each has a readable wind-up, a hit window marked in the clip, and a recovery. Add a flinch and a death, and blend all of them with the waddle and idle in the AnimationTree. Deliver contact sheets of each.
-
-### Open questions
-
-- How far does the pounce travel, and how long is the warning before each attack?
-- Can a grinner be staggered out of an attack?
-
-### Status
-
-Not started.
-
-## Enemy: behaviour and combat
-
-### Task description
-
-Extend `scripts/grinner.gd`, which now only plays the idle and waddle: it waddles toward the knight, pounces from mid range and uses the twin-claw swipe up close, with cooldowns. Add the least combat both sides need: health, sword hits that land on grinners, claw hits that land on the knight, and a reaction to each. Place three grinners in the hall and record a scripted fight.
-
-### Open questions
-
-- What happens when the knight's health runs out?
-- How many hits does a grinner take?
-- Must grinners path around furniture now, or is a straight approach enough?
-
-### Status
-
-Not started.
-
+Not started. Enemies only appear outside; see the crowd item.
 ## Enemy: crowd performance test
 
 ### Task description
 
-Add a `dev/` scene that spawns a chosen number of grinners around the knight, and run it with the scripted-play harness at 1, 5, 10, 20 and 40. Record frame time, GPU time, CPU time spent on scripts and animation, triangles and draw calls. Find where 60 fps breaks and where GPU time crosses 6.5 ms. Then cut the largest costs, for example shadows and update rate for distant grinners, and report before and after.
+Add a `dev/` scene that spawns a chosen number of grinners around the knight outdoors, and run it with the scripted-play harness at 1, 6, 12, 24 and 40. Record frame time, GPU time, CPU time spent on scripts and animation, triangles and draw calls. Find where 60 fps breaks and where GPU time crosses 6.5 ms. Then cut the largest costs, for example shadows and update rate for distant grinners, and report before and after.
 
 ### Open questions
 
-- What is the largest number of enemies that should be on screen at once?
+- None. Up to 12 grinners on screen; later, up to 40 allies and enemies in all.
 
 ### Status
 
 Not started. For comparison, one knight costs the GPU about 0.25 ms at mid distance.
-
 ## Rosalyn: sculpt the model
 
 ### Task description
@@ -265,11 +245,11 @@ Model unfinished automata at different stages, from bare mechanism to painted fi
 
 Not started. Needs the clocks, benches and tools.
 
-## Hall: doorframe shimmer
+## Knight: shoulders and hands
 
 ### Task description
 
-The inside of the hall's doorframe shimmers. Find the cause, for example aliasing, z-fighting, a lightmap seam or the material, and fix it at its source. The agent chooses how. Deliver before and after captures that show the shimmer.
+Make the knight's shoulder joint, where the upper arm meets the shoulder, and her hands more humanlike in `tools/knight/build_knight.py`, keeping her fingers as they are. The shoulder should read as a rounded ball joint under a cap, not a hinge between blocks, and the palms and backs of the hands should have a human hand's proportions and padding. Check deformation in her clips, and deliver clay and painted close-ups before and after.
 
 ### Open questions
 
@@ -277,4 +257,60 @@ The inside of the hall's doorframe shimmers. Find the cause, for example aliasin
 
 ### Status
 
-Not started. Low priority. If the fix changes the hall's geometry, the lightmap needs a rebake, so it cannot run beside other hall or baking work.
+Not started.
+
+## Knight: body texture on her trunk
+
+### Task description
+
+Her narrow trunk under the chest and abdomen armour is textured like the armour. Give it the texture of her body instead, the wood of her arms and legs, in `tools/knight/build_knight.py` and the looks in `scripts/knight.gd`. Deliver painted turnarounds before and after.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started.
+
+## Knight: roll starts less like a dive
+
+### Task description
+
+The start of her dodge-roll reads as a dive. Make it begin as a tuck, low and close to the ground, keeping the roll's distance, timing and the window in which she can act again. `scripts/player.gd` plays the clip by root motion with `ROLL_START`, `ROLL_SCALE` and `ROLL_RATE`; `scripts/knight_animator.gd` blends it. Deliver contact sheets before and after.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started.
+
+## Knight: attack mid-jump
+
+### Task description
+
+Let her attack while airborne. An attack pressed in the air plays a slash suited to the air and keeps her jump's motion, and she lands into her normal landing. `scripts/player.gd` handles states and buffering, and `scripts/knight_animator.gd` plays clips. Deliver a contact sheet of a jump attack.
+
+### Open questions
+
+- Does landing during the slash cut it short, or does she finish it on the ground?
+
+### Status
+
+Not started.
+
+## Knight: a less floaty run
+
+### Task description
+
+Her run feels floaty. Find out why, for example acceleration, deceleration, turning, the clip's bounce or its speed against her ground speed, and make her run feel planted and responsive. Constants are at the top of `scripts/player.gd`, and the gait blend is in `scripts/knight.gd`. Record before and after with the scripted-play harness, including starts, stops and sharp turns.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started.

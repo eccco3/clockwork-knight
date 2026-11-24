@@ -277,11 +277,13 @@ def _corner_posts(b):
 def door_wall(b):
     with b.grp('walls'), b.at(WALLS['D']):
         tb = lambda a=0.09: b.vary(BEAM, a)
-        _plaster_wall(b, HW, [(0, DOOR_W, 0, DOOR_H)], 0)
+        jw, lh = 0.22, 0.3          # jamb post width, lintel height
+        # the timber frame fills the plaster opening, so no plaster face lies in a timber face
+        ow, oh = DOOR_W + 2 * jw, DOOR_H + lh
+        _plaster_wall(b, HW, [(0, ow, 0, oh)], 0)
         _gable(b)
         _gable_frame(b)
         _corner_posts(b)
-        jw = 0.22
         for sx in (-1, 1):
             a = DOOR_W / 2 + jw
             _plinth(b, min(sx * a, sx * HW), max(sx * a, sx * HW))
@@ -295,7 +297,7 @@ def door_wall(b):
             # door jamb posts
             b.box((jw, DOOR_H + 0.1, 0.5), 'wood_beam', pos=(sx * (DOOR_W / 2 + jw / 2), (DOOR_H + 0.1) / 2, -0.12), bevel=0.02, grain=1, tint=tb(0.05))
         # lintel
-        b.box((DOOR_W + 2 * jw + 0.3, 0.3, 0.52), 'wood_beam', pos=(0, DOOR_H + 0.15, -0.12), bevel=0.022, grain=0, tint=tb(0.05))
+        b.box((ow + 0.3, lh, 0.52), 'wood_beam', pos=(0, DOOR_H + lh / 2, -0.12), bevel=0.022, grain=0, tint=tb(0.05))
         # carved lintel: chamfered label with a row of rosettes
         b.box((DOOR_W + 0.3, 0.035, 0.03), 'wood_beam', pos=(0, DOOR_H + 0.27, 0.14), bevel=0.012, grain=0, tint=tb(0.05))
         b.box((DOOR_W + 0.3, 0.035, 0.03), 'wood_beam', pos=(0, DOOR_H + 0.03, 0.14), bevel=0.012, grain=0, tint=tb(0.05))
@@ -309,7 +311,7 @@ def door_wall(b):
             b.ball(0.028, 'wood_beam', 8, 5, tint=tb(0.05), M=T(x, DOOR_H + 0.15, 0.158), sy=0.6)
         # studs above lintel
         for k in range(-2, 3):
-            b.box((0.13, EH - DOOR_H - 0.3, 0.15), 'wood_beam', pos=(k * 0.5, (EH + DOOR_H + 0.3) / 2, -0.025), bevel=0.01, grain=1, tint=tb())
+            b.box((0.13, EH - oh, 0.15), 'wood_beam', pos=(k * 0.5, (EH + oh) / 2, -0.025), bevel=0.01, grain=1, tint=tb())
         # arched head spandrels (four-centred arch)
         ys = DOOR_H - 0.42
         for sx in (-1, 1):
@@ -352,7 +354,7 @@ def door_wall(b):
         # threshold stone
         b.box((DOOR_W + 0.5, 0.05, 0.6), 'stone', pos=(0, 0.012, -0.05), bevel=0.02, tint=(0.85, 0.83, 0.8))
         # blocking behind the door (keeps the dusk out)
-        b.box((DOOR_W + 0.4, DOOR_H + 0.4, 0.2), 'mortar', pos=(0, DOOR_H / 2, -0.5), bevel=0, tint=(0.1, 0.09, 0.08))
+        b.box((ow + 0.4, oh + 0.2, 0.2), 'mortar', pos=(0, (oh + 0.2) / 2, -0.5), bevel=0, tint=(0.1, 0.09, 0.08))
         b.col((2 * HW, EH + 5.5, WT + 0.4), pos=(0, (EH + 5.5) / 2, -WT / 2 - 0.2 + 0.03))
         for sx in (-1, 1):
             b.col((HW - DOOR_W / 2, WAINS + 0.05, 0.1), pos=(sx * (DOOR_W / 2 + (HW - DOOR_W / 2) / 2), (WAINS + 0.05) / 2, 0.05))
