@@ -2,15 +2,16 @@
 
 Fifty bones stand on the sculpt's landmarks: a root, five up the middle, and on each side an arm of four,
 fourteen in the hand and a leg of four. Paired bones are described on the left and end in _l; their twins
-end in _r. The skin is a field over the rest pose: `weights` gives any point its bones, so every mesh of
-the figure binds by where its points lie, at each detail level and after the head is resculpted.
+end in _r. A kind of grinner that bites has one more, the jaw. The skin is a field over the rest pose:
+`weights` gives any point its bones, so every mesh of the figure binds by where its points lie, at each
+detail level and after the head is resculpted.
 """
 import bpy
 import numpy as np
 from sculpt import sdf as S
 from sculpt.sdf import V
 from sculpt.num import smoothstep, along
-from . import body
+from . import body, head as skull
 from .body import HIP, KNEE, ANKLE, SHOULDER, ELBOW, WRIST, NECK_A, NECK_B, NECK_R, HF, THIGH, SHIN, FORE
 
 MIRROR = V(-1, 1, 1)
@@ -53,15 +54,16 @@ BONES = list(_both_sides([
     ("thigh_l", "hips", HIP, KNEE), ("shin_l", "thigh_l", KNEE, ANKLE), ("foot_l", "shin_l", ANKLE, BALL),
     ("toe_l", "foot_l", BALL, TOE_TIP)]))
 NAMES = [bone[0] for bone in BONES]
+JAW = ("jaw", "head", skull.from_head(skull.JAW_HINGE), skull.from_head(skull.CHIN))
 MOST = 4                                       # bones that may hold one vertex
 
 
-def armature(name):
+def armature(name, jaw=False):
     ob = bpy.data.objects.new(name, bpy.data.armatures.new(name))
     bpy.context.scene.collection.objects.link(ob)
     bpy.context.view_layer.objects.active = ob
     bpy.ops.object.mode_set(mode="EDIT")
-    for bone, parent, head, tail in BONES:
+    for bone, parent, head, tail in BONES + [JAW] * jaw:
         b = ob.data.edit_bones.new(bone)
         b.head, b.tail = head, tail
         if parent:
@@ -74,10 +76,11 @@ def bind(ob, rig):
     """Skin a mesh of the figure to the rig by where its points stand."""
     co = np.empty(len(ob.data.vertices) * 3)
     ob.data.vertices.foreach_get("co", co)
-    w = weights(co.reshape(-1, 3))
+    jaw = JAW[0] in rig.data.bones
+    w = weights(co.reshape(-1, 3), jaw)
     w[w < np.sort(w, axis=1)[:, -MOST, None]] = 0.0
     w /= w.sum(1, keepdims=True)
-    for k, name in enumerate(NAMES):
+    for k, name in enumerate(NAMES + [JAW[0]] * jaw):
         group = ob.vertex_groups.new(name=name)
         for i in np.nonzero(w[:, k])[0]:
             group.add([int(i)], float(w[i, k]), "REPLACE")
@@ -146,7 +149,7 @@ def _arm(q):
     return out
 
 
-def _middle(p):
+def _middle(p, jaw):
     up, out = along(p, NECK_A, NECK_B)
     wide = smoothstep(NECK_R + 0.006, NECK_R + 0.030, out)
     spine = _beyond(p, WAIST, CHEST - WAIST, 0.040, 0.040)
@@ -154,19 +157,22 @@ def _middle(p):
     neck = chest * smoothstep(0.0, 0.050, up) * (1.0 - wide * smoothstep(0.070, 0.040, up))      # not the shoulders
     top = np.linalg.norm(NECK_B - NECK_A)
     head = neck * (1.0 - smoothstep(top + 0.010, top - 0.030, up) * (1.0 - wide))                  # the jaw overhangs
-    return _chain(("hips", np.ones(len(p))), ("spine", spine), ("chest", chest), ("neck", neck), ("head", head))
+    holds = [("hips", np.ones(len(p))), ("spine", spine), ("chest", chest), ("neck", neck), ("head", head)]
+    return _chain(*holds, *[(JAW[0], head * skull.jaw(skull.to_head(p)))] * jaw)
 
 
-def weights(p):
-    """An (N, bones) array: each rest-pose point's share in every bone of NAMES, rows summing to one."""
+def weights(p, jaw=False):
+    """An (N, bones) array: each rest-pose point's share in every bone of NAMES, and in the jaw after them if
+    the rig has one, rows summing to one."""
+    names = NAMES + [JAW[0]] * jaw
     q = S.mirror_x(p)
     limbs = dict(_arm(q), **_leg(q))
     held = np.minimum(sum(limbs.values()), 1.0)
-    w = np.zeros((len(p), len(NAMES)))
-    for name, share in _middle(p).items():
-        w[:, NAMES.index(name)] = share * (1.0 - held)
+    w = np.zeros((len(p), len(names)))
+    for name, share in _middle(p, jaw).items():
+        w[:, names.index(name)] = share * (1.0 - held)
     left = p[:, 0] >= 0
     for name, share in limbs.items():
-        w[left, NAMES.index(name)] = share[left]
-        w[~left, NAMES.index(_twin(name))] = share[~left]
+        w[left, names.index(name)] = share[left]
+        w[~left, names.index(_twin(name))] = share[~left]
     return w / w.sum(1, keepdims=True)
