@@ -1,6 +1,7 @@
 extends Node3D
 ## Bare test stage for the knight: a gridded floor (so foot sliding shows), a couple of blocks
-## to bump into, sky lighting and a warm key light.
+## to bump into, sky lighting and a warm key light. With dev/shot.tscn, call=stand:<model path>
+## puts a model in the knight's place, and call=spread:<model path> its detail levels side by side.
 
 func _ready() -> void:
 	var env := Environment.new()
@@ -84,3 +85,17 @@ void fragment() {
 	var m := ShaderMaterial.new()
 	m.shader = sh
 	return m
+
+
+func stand(path: String) -> Node3D:
+	$Player.queue_free()
+	var model: Node3D = load(path).instantiate()
+	add_child(model)
+	return model
+
+
+func spread(path: String) -> void:
+	for mesh: MeshInstance3D in stand(path).find_children("*_lod?", "MeshInstance3D", true, false):
+		mesh.visibility_range_begin = 0.0
+		mesh.visibility_range_end = 0.0
+		mesh.position.x = 1.1 * String(mesh.name).right(1).to_int()
