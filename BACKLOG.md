@@ -117,27 +117,27 @@ Move the parts of `tools/knight/` that any character uses into a new `tools/scul
 
 ### Status
 
-Not started. Wait for the grinner sculpt to merge; the lady sculpt should build on this.
+Not started. Wait for the grinner sculpt to merge; Rosalyn's sculpt should build on this.
 
-## Lady: sculpt the model
+## Rosalyn: sculpt the model
 
 ### Task description
 
-Build a second clockwork woman as `assets/models/lady.glb` from a new `tools/lady/` builder on the shared sculpt toolkit. She is 1.75 m tall with a thin, feminine frame, carved from lacquered light tulipwood with small brass details. Her face is her own, clearly different from the hero's, with attractive features and blonde hair. She wears a modest, off-the-shoulder smocked dress in chartreuse and buttery yellow. Budget: 300,000 triangles if one setting can rebuild her lower later, otherwise 240,000. She tests several entities sharing the hall. Deliver clay and painted turnarounds beside the knight's.
+Build a second clockwork woman as `assets/models/rosalyn.glb` from a new `tools/rosalyn/` builder on the shared sculpt toolkit. She is 1.75 m tall with a thin, feminine frame, carved from lacquered light tulipwood with small brass details. Her face is her own, clearly different from the hero's, with attractive features and blonde hair. She wears a modest, off-the-shoulder smocked dress in chartreuse and buttery yellow. Budget: 300,000 triangles if one setting can rebuild her lower later, otherwise 240,000. She tests several entities sharing the hall. Deliver clay and painted turnarounds beside the knight's.
 
 ### Open questions
 
-- "Lady" is a working name.
+- "Rosalyn" is a working name.
 
 ### Status
 
 Not started. Wait for the shared sculpt toolkit.
 
-## Lady: rig and standing pose
+## Rosalyn: rig and standing pose
 
 ### Task description
 
-Rig the lady: shoulders and upper body for gesturing, fingers, and a face that can speak, with jaw and lips. Skin the dress so the smocked bodice and skirt deform cleanly. Pose her standing with her hands clasped in front of her, and animate a quiet idle on that pose: breathing and small weight shifts. Deliver turnarounds and a contact sheet of the idle.
+Rig Rosalyn: shoulders and upper body for gesturing, fingers, and a face that can speak, with jaw and lips. Skin the dress so the smocked bodice and skirt deform cleanly. Pose her standing with her hands clasped in front of her, and animate a quiet idle on that pose: breathing and small weight shifts. Deliver turnarounds and a contact sheet of the idle.
 
 ### Open questions
 
@@ -148,11 +148,11 @@ Rig the lady: shoulders and upper body for gesturing, fingers, and a face that c
 
 Not started.
 
-## Lady: speech and gestures
+## Rosalyn: speech and gestures
 
 ### Task description
 
-Animate the lady speaking: her mouth moves, and she gestures lightly by moving her upper body and shoulders, and with her hands too, though they mostly stay clasped. Make several looping speech clips that blend with the idle and with each other without repeating visibly, played through Godot's AnimationTree. Deliver contact sheets and a close-up capture of her face while speaking.
+Animate Rosalyn speaking: her mouth moves, and she gestures lightly by moving her upper body and shoulders, and with her hands too, though they mostly stay clasped. Make several looping speech clips that blend with the idle and with each other without repeating visibly, played through Godot's AnimationTree. Deliver contact sheets and a close-up capture of her face while speaking.
 
 ### Open questions
 
@@ -164,11 +164,11 @@ Animate the lady speaking: her mouth moves, and she gestures lightly by moving h
 
 Not started.
 
-## Lady: place her and test two entities
+## Rosalyn: place her and test two entities
 
 ### Task description
 
-Stand the lady in the hall and have her speak as the knight comes near. Check that both characters are lit, shadowed and reflected correctly together, and that the knight cannot walk through her. Measure frame time, GPU time and CPU time for animation with one and with both, in real play, and record a scripted approach and conversation.
+Stand Rosalyn in the hall and have her speak as the knight comes near. Check that both characters are lit, shadowed and reflected correctly together, and that the knight cannot walk through her. Measure frame time, GPU time and CPU time for animation with one and with both, in real play, and record a scripted approach and conversation.
 
 ### Open questions
 
