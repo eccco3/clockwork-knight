@@ -15,6 +15,14 @@ const JOG_STRIDE := 5.000
 const WALK_FULL_AT := 0.9          ## speed at which idle has fully given way to the walk
 const JOG_FROM := 1.5
 const JOG_FULL_AT := 3.8
+## The jog bounds: each foot is down only from JOG_LANDS to JOG_PUSHES_OFF of its half of the cycle,
+## and the pelvis climbs 24 cm in between. Stance plays at her ground speed so the planted foot
+## holds; flight plays JOG_FLIGHT_RATE times faster and keeps JOG_FLIGHT_RISE of its climb, about
+## the arc gravity allows in the shorter flight.
+const JOG_LANDS := 0.025
+const JOG_PUSHES_OFF := 0.185
+const JOG_FLIGHT_RATE := 2.3
+const JOG_FLIGHT_RISE := 0.22
 
 var model: Node3D
 var skel: Skeleton3D
@@ -34,6 +42,7 @@ var action_t := 0.0
 var _walk := 0.0
 var _jog := 0.0
 var _phase := 0.0
+var _jog_takeoff := 0.0              ## pelvis height (its parent's z) as a foot leaves the ground
 var _idle_t := 0.0
 var _action_rate := 1.0
 var action_weight := 1.0
@@ -79,6 +88,9 @@ func _ready() -> void:
 	_tmp = anim.new_pose()
 	_tmp2 = anim.new_pose()
 	_carry = anim.new_pose()
+	var jog_len := anim.length("Jog_Fwd")
+	_jog_takeoff = (anim.sample("Jog_Fwd", JOG_LANDS * jog_len, _tmp).z
+		+ anim.sample("Jog_Fwd", JOG_PUSHES_OFF * jog_len, _tmp).z) * 0.5
 	Looks.dress(mesh, {
 		"wood_light": Looks.oiled_wood(Color(0.70, 0.47, 0.24), Color(0.44, 0.25, 0.11)),
 		"wood_face": Looks.face_wood(Color(0.76, 0.55, 0.34), Color(0.58, 0.38, 0.20),
@@ -187,11 +199,19 @@ func tick(dt: float) -> Vector3:
 				_action_rate = 1.0
 			else:
 				stop(_action_fade_out)
-	# stride phase advances so the planted foot matches the ground speed
+	# stride phase advances so the planted foot matches the ground speed, and hurries through flight
 	if speed > 0.02:
-		_phase = fposmod(_phase + dt * speed / (lerpf(WALK_STRIDE, JOG_STRIDE, _jog) * maxf(_walk, 0.05)), 1.0)
+		var rate := speed / (lerpf(WALK_STRIDE, JOG_STRIDE, _jog) * maxf(_walk, 0.05))
+		_phase = fposmod(_phase + dt * rate * (1.0 + (JOG_FLIGHT_RATE - 1.0) * _jog * _jog_flight()), 1.0)
 	_idle_t = fposmod(_idle_t + dt, anim.length("Idle"))
 	return rm
+
+
+## How airborne the jog is at the current stride phase: 0 while a foot is planted, 1 in flight,
+## easing over the last and first few hundredths of flight.
+func _jog_flight() -> float:
+	var h := fposmod(_phase, 0.5)
+	return 1.0 - smoothstep(JOG_LANDS - 0.03, JOG_LANDS, h) + smoothstep(JOG_PUSHES_OFF, JOG_PUSHES_OFF + 0.03, h)
 
 
 # ------------------------------------------------------------------ pose
@@ -218,6 +238,7 @@ func _locomotion(into: Array[Quaternion]) -> Vector3:
 		var p := anim.sample("Walk", _phase * anim.length("Walk"), _tmp)
 		if _jog > 0.0:
 			var pj := anim.sample("Jog_Fwd", _phase * anim.length("Jog_Fwd"), _tmp2)
+			pj.z -= maxf(pj.z - _jog_takeoff, 0.0) * (1.0 - JOG_FLIGHT_RISE) * _jog_flight()
 			anim.blend(_tmp, _tmp2, _jog)
 			p = p.lerp(pj, _jog)
 		anim.blend(into, _tmp, _walk)

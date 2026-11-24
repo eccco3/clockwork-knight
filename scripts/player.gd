@@ -5,10 +5,12 @@ extends CharacterBody3D
 
 const WALK_SPEED := 1.3
 const RUN_SPEED := 4.6
-const ACCEL := 20.0
-const DECEL := 24.0
+const ACCEL := 32.0
+const DECEL := 40.0
+const CORNER_RATE := 14.0
+const CORNER_MAX := deg_to_rad(130.0)
 const AIR_ACCEL := 5.0
-const TURN_RATE := 11.0
+const TURN_RATE := 16.0
 const JUMP_VELOCITY := 7.3
 const ROLL_RATE := 1.12
 const ROLL_SCALE := 0.74
@@ -117,8 +119,7 @@ func _physics_process(dt: float) -> void:
 
 	match state:
 		State.GROUND:
-			var goal := wish * want_speed
-			hvel = hvel.move_toward(goal, (ACCEL if goal.length() > hvel.length() else DECEL) * dt)
+			hvel = _run(hvel, wish * want_speed, dt)
 			_face_rate = TURN_RATE
 			if wish != Vector3.ZERO:
 				_face_goal = atan2(wish.x, wish.z)
@@ -185,6 +186,16 @@ func _physics_process(dt: float) -> void:
 		want_lean = Vector2(clampf(local.z * 0.006, -0.10, 0.12), clampf(-local.x * 0.007, -0.14, 0.14))
 	_lean = _lean.lerp(want_lean, 1.0 - exp(-dt * 7.0))
 	knight.basis = Basis(Vector3.UP, facing) * Basis(Vector3.RIGHT, _lean.x) * Basis(Vector3.BACK, _lean.y)
+
+
+## Ground velocity toward `goal`. Into a corner she swings her heading round at speed; past
+## CORNER_MAX she brakes through a standstill, planting and pushing off the other way.
+func _run(hvel: Vector3, goal: Vector3, dt: float) -> Vector3:
+	var rate := ACCEL if goal.length() > hvel.length() else DECEL
+	if hvel.length() < 0.5 or goal == Vector3.ZERO or hvel.angle_to(goal) > CORNER_MAX:
+		return hvel.move_toward(goal, rate * dt)
+	var heading := hvel.normalized().slerp(goal.normalized(), 1.0 - exp(-CORNER_RATE * dt))
+	return heading * move_toward(hvel.length(), goal.length(), rate * dt)
 
 
 func _start_jump() -> void:
