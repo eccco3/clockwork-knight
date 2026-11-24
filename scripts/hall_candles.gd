@@ -1,5 +1,5 @@
 extends MultiMeshInstance3D
-## Candle flames: one billboarded quad per wick, instanced. Points are baked in by hall_build.gd.
+## Candle flames: one billboarded quad per wick, instanced. Points are baked in by builders/hall_scene.gd.
 
 @export var points := PackedVector3Array()
 @export var flame_mesh: Mesh

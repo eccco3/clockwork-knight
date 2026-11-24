@@ -12,7 +12,7 @@ BOOK_COLS = [(0.35, 0.08, 0.07), (0.1, 0.16, 0.3), (0.12, 0.25, 0.14), (0.4, 0.2
 
 
 def clutter(fn):
-    """Small dressing goes into a group that does not cast shadows (keeps shadow passes cheap)."""
+    """Small dressing goes into an ns_ group, which casts no shadows (see builders/hall_import.gd)."""
     def w(b, *a, **k):
         with b.grp('ns_clutter'):
             return fn(b, *a, **k)
@@ -206,7 +206,8 @@ def chandelier(b, x, z, y=4.78):
         ringp = [(0.05 * math.cos(TAU * k / 12), gy + 0.03 + 0.05 * math.sin(TAU * k / 12), 0) for k in range(12)]
         b.sweep(ringp, circ_prof(0.009, 5), 'iron', closed=True, up=(0, 0, 1))
         chain(b, (0, gy + 0.07, 0), (0, APEX - 0.44 - y, 0), 0.11, 0.009)
-        b.mark('light', (0, -0.35, 0), name='Chandelier', color=WARM, energy=2.6, range=13.0, shadow=True, size=0.0, fog=0.3)
+        b.mark('light', (0, -0.35, 0), name='Chandelier', color=WARM, energy=2.6, range=13.0, shadow=True, size=0.7, fog=0.3,
+               lights_characters=True, shadows_characters=True)
         b.mark('light', (0, 0.9, 0), name='ChandelierUp', color=WARM, energy=0.9, range=7.0, shadow=False, size=0.0, fog=0.0, specular=0.0)
 
 
@@ -223,7 +224,8 @@ def sconce(b, light=True):
         with b.at(T(0, 0.012, 0)):
             candle(b, 0.17, 0.019)
     if light:
-        b.mark('light', (0, 0.28, 0.62), name='Sconce', color=WARM, energy=0.5, range=4.6, shadow=False, size=0.0, fog=0.08)
+        b.mark('light', (0, 0.28, 0.62), name='Sconce', color=WARM, energy=0.5, range=4.6, shadow=False, size=0.0, fog=0.08,
+               lights_characters=True)
 
 
 def candle_stand(b, h=1.45):

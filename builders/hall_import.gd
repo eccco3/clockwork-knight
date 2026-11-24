@@ -1,8 +1,9 @@
 @tool
 extends EditorScenePostImport
 ## Post-import hook for assets/models/hall.glb: meshes whose name starts with "ns_" are fine
-## dressing (floor boards, masonry facing, books, tableware, ironwork...) and do not cast shadows,
-## which keeps the five shadow passes cheap.
+## dressing (floor boards, masonry facing, books, tableware, ironwork...) and do not cast shadows.
+## Four lights cast shadows, and the chandeliers draw only characters into theirs, so this keeps
+## the fire's shadow map, the one that draws the hall, cheap.
 
 
 func _post_import(scene: Node) -> Object:
