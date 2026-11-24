@@ -76,6 +76,6 @@ $shortcut = (New-Object -ComObject WScript.Shell).CreateShortcut((Join-Path $Sho
 $shortcut.TargetPath = $exe
 $shortcut.WorkingDirectory = $PSScriptRoot
 $shortcut.IconLocation = "$exe,0"
-$shortcut.Description = 'Play the main checkout or a worktree'
+$shortcut.Description = 'Play a scene from the main checkout or a worktree'
 $shortcut.Save()
 "Shortcut: $($shortcut.FullName)"

@@ -1,19 +1,5 @@
 # Backlog
 
-## Playtest: choose the scene
-
-### Task description
-
-Let the playtest launcher's picker choose which scene to play, as well as which checkout: the hall (`scenes/main.tscn`) and the outdoors (`scenes/outdoors.tscn`) for now, defaulting to the hall and remembering the last choice. Each playable scene says it is one, for example in a list or a folder, so a new scene, such as the workshop, appears without editing the launcher; dev stages stay out. Launch the chosen scene directly, keeping cursor capture and the hint working as in `scripts/app.gd`.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started.
-
 ## Test lower render scale
 
 ### Task description

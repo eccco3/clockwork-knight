@@ -27,9 +27,9 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 
 ## Where things are
 
-- `scenes/main.tscn` is the playable scene; `scripts/main.gd` adds the hall and player.
+- Playable scenes carry `metadata/playable`, their playtest picker title; `scenes/main.tscn` adds the hall and player (`scripts/main.gd`).
 - `project.godot` holds the input map and names the layers; `scripts/layers.gd` gives code the same names.
-- The `App` autoload, `scripts/app.gd`, holds the keys Esc, F11 and H, cursor capture and the controls hint; `HINT_SCENES` lists the scenes that show it.
+- The `App` autoload, `scripts/app.gd`, holds the keys Esc, F11 and H, cursor capture and the controls hint for playable scenes.
 - `scenes/outdoors.tscn` builds the grinner's foggy ground on load; drive and shot take `scene=res://scenes/outdoors.tscn`.
 - `dev/` runs the game to test it; `tools/`, hidden from Godot, builds and fetches assets.
 - `scripts/` holds the player controller, animator and camera rig; `looks.gd` makes the wood, metal and eye materials in each figure's colours.
