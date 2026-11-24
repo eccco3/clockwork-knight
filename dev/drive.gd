@@ -11,7 +11,7 @@ extends Harness
 ##   shot:<name>                     full frame -> prefix_name.png
 ##   snap, snaps:<n>:<interval>      tiles for the contact sheet prefix_sheet.png
 ##   yaw/pitch:<radians>, dist:<m>   the orbit camera
-##   track:<frames>                  prints the knight's foot positions each frame
+##   track:<frames>                  prints the knight's body, ankles, balls and pelvis each frame
 ##   fps                             prints frames per second and process time
 ##   perf:start, perf:stop           frame times; run with --disable-vsync --max-fps 0
 ##   hide:<node name>, call:<method on the scene root>
@@ -158,8 +158,9 @@ class Tracker extends Node:
 		host._track -= 1
 		var pl: Node3D = host._player()
 		var sk: Skeleton3D = pl.knight.skel
-		var out := "track %.3f" % host._t
-		for n in ["foot_l", "foot_r"]:
+		var p := pl.global_position
+		var out := "track %.3f  body %.3f %.3f %.3f" % [host._t, p.x, p.y, p.z]
+		for n in ["foot_l", "foot_r", "ball_l", "ball_r", "pelvis"]:
 			var g: Vector3 = (sk.global_transform * sk.get_bone_global_pose(sk.find_bone(n))).origin
 			out += "  %s %.3f %.3f %.3f" % [n, g.x, g.y, g.z]
 		print(out)
