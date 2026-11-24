@@ -99,11 +99,11 @@ Animate Rosalyn speaking without moving her mouth, which is wood: she speaks thr
 
 Not started.
 
-## Rosalyn: mouth shapes
+## Rosalyn: a moving mouth
 
 ### Task description
 
-Give Rosalyn's wooden mouth stop-motion style replacement shapes. Carve a small set of rigid lacquered lip pieces, one per mouth shape (closed, open, wide, rounded, teeth-together and so on), and swap or pivot them in time with her speech. No wood bends. Time the shapes from her lines, and judge it on close-up captures beside the still-mouthed speech. If it looks strange, it is dropped, and she keeps speaking with a still mouth.
+Try two ways for Rosalyn's wooden mouth to move with her speech, where no wood visibly bends. First, lips that part: a jaw bone turns a few degrees, opening the lip parting onto the dark pocket behind it, moving the skin about a millimetre. Second, stop-motion style shapes: a small set of rigid lacquered lip pieces (closed, open, wide, rounded and so on), swapped or pivoted. Deliver close-up captures of both beside her still-mouthed speech. The dev picks; if neither works, she keeps the still mouth.
 
 ### Open questions
 
