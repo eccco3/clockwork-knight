@@ -4,4 +4,5 @@
 
 [node name="Taste" type="Node"]
 script = ExtResource("1")
-metadata/dev_tool = "Face rating"
+sex = "women"
+metadata/dev_tool = "Face rating: women"

@@ -1,9 +1,9 @@
 extends Harness
-## Teaches the face tools the dev's taste: shows two faces from tools/faces/pool side by side and asks
-## which he prefers. tools/faces/rate.py chooses the pairs and saves each answer at once, so he can
-## close the window at any time and carry on later.
+## Teaches the face tools the dev's taste in the faces of one sex: shows two from that sex's pool in
+## tools/faces/pool side by side and asks which he prefers. tools/faces/rate.py chooses the pairs and
+## saves each answer at once, so he can close the window at any time and carry on later.
 ##
-##   godot --path . res://dev/taste.tscn
+##   godot --path . res://dev/taste_women.tscn      or taste_men.tscn
 ##
 ## Left arrow or A, or a click on the left face, picks it; right arrow or D the right one; Backspace
 ## takes back the last answer. auto=<n> answers n pairs at random and quits, shot=<png> photographs
@@ -14,6 +14,7 @@ const RATE := "res://tools/faces/rate.py"
 const KEYS := "←  or  A   ·   click a face   ·   D  or  →          Backspace  undo"
 const BACKGROUND := Color(0.11, 0.12, 0.14)
 
+@export_enum("women", "men") var sex := "women"
 var _pipe: FileAccess
 var _errors: FileAccess
 var _faces: Array[TextureRect] = []
@@ -22,7 +23,7 @@ var _status: Label
 
 func _ready() -> void:
 	_build()
-	var command := ["-I", ProjectSettings.globalize_path(RATE)]
+	var command := ["-I", ProjectSettings.globalize_path(RATE), "--sex", sex]
 	if args.has("answers"):
 		command += ["--answers", args["answers"]]
 	var rate := OS.execute_with_pipe(ProjectSettings.globalize_path(PYTHON), command)
@@ -100,8 +101,8 @@ func _read() -> void:
 		return
 	for i in 2:
 		_faces[i].texture = ImageTexture.create_from_image(Image.load_from_file(shown[["left", "right"][i]]))
-	_status.text = "%d answers      direction settled %d%%      re-shown pairs answered alike: %d of %d" % [
-		shown["answers"], roundi(100.0 * shown["settled"]), shown["agreed"], shown["repeats"]]
+	_status.text = "%s:  %d answers      direction settled %d%%      re-shown pairs answered alike: %d of %d" % [
+		sex.capitalize(), shown["answers"], roundi(100.0 * shown["settled"]), shown["agreed"], shown["repeats"]]
 
 
 func _fail(message: String) -> void:

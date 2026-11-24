@@ -40,7 +40,7 @@ Everything the project needs is here; `.gdignore` hides third-party `toolchain/`
 - `tools/sculpt/` is the characters' shared toolkit.
 - `tools/knight/` builds the knight, `assets/textures/knight/face_paint.png` and its placement `face_paint.json`; `tools/build_hall.py` and `builders/hall_*.gd` build the hall.
 - Only `KnightShadow`, a 4,700-triangle copy from `tools/knight/shadow.py`, casts the knight's shadows.
-- `tools/faces/`: the face model from ICT-FaceKit, and the dev's taste (`dev/taste.tscn`); see `build_faces.py`.
+- `tools/faces/`: the ICT-FaceKit face model, the dev's taste per sex (`dev/taste_*.tscn`); see `build_faces.py`.
 - `tools/grinner/` builds the first enemy, its rig and hand-keyed clips; `import_grinner.gd` sets its detail distances and adds the AnimationTree. `scripts/grinner.gd` walks it. Shot shows it on `dev/stage.tscn`: `call=stand:res://assets/models/grinner.glb`, `stand:res://dev/waddler.tscn` waddling, or `spread:` its detail levels.
 
 ## Repository
