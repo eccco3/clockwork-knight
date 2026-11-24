@@ -271,20 +271,6 @@ Model unfinished automata at different stages, from bare mechanism to painted fi
 
 Not started. Needs the clocks, benches and tools.
 
-## Knight: body texture on her trunk
-
-### Task description
-
-Her narrow trunk under the chest and abdomen armour is textured like the armour. Give it the texture of her body instead, the wood of her arms and legs, in `tools/knight/build_knight.py` and the looks in `scripts/knight.gd`. Deliver painted turnarounds before and after.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started.
-
 ## Knight: roll starts less like a dive
 
 ### Task description

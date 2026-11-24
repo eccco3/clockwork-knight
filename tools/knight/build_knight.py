@@ -196,12 +196,13 @@ def torso(J):
     mid = 0.5 * (o + i)
     v, f = gen.tube(np.concatenate([mid[0, 1:-1], mid[:, -1], mid[-1, -2:0:-1]]), 0.0032, 8)
     add("culet_rim", "pelvis", "brass", v, f)
-    # inner core of pale wood, seen only through the gaps between the lames
+    # her trunk, turned from the pale wood of her limbs, seen only through the gaps between the lames
     for name, bone, pts, cy in (
             ("core_lower", "spine_01", [(1.040, 0.0), (1.041, 0.066), (1.100, 0.074), (1.185, 0.070), (1.198, 0.060), (1.199, 0.0)], -0.026),
             ("core_upper", "spine_02", [(1.165, 0.0), (1.166, 0.062), (1.200, 0.072), (1.290, 0.078), (1.315, 0.068), (1.316, 0.0)], -0.028)):
         v, f = gen.lathe(gen.turned(pts), 32, sy=0.78)
-        add(name, bone, "wood_dark", v + V(0, cy, 0), f)
+        axis = Frame(V(0, cy, 0))
+        add(name, bone, "wood_light", axis.w(v), f, grain=axis)
     # belt with a gear buckle
     v, f = gen.lathe_ring([(1.022, 0.150), (1.022, 0.1565), (1.030, 0.1585), (1.046, 0.1585), (1.054, 0.1565), (1.054, 0.150)],
                           56, sy=0.70)
