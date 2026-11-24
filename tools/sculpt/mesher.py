@@ -70,11 +70,22 @@ def _cast(f, o, d, tmax, coarse=40, fine=14):
     return o + d * t[:, None], found
 
 
-def wrap(f, a, b, extent, dims, relax=10, tmax=None, density=None, snap=None, snap_inner=None):
+class Rail:
+    """A ring of the lattice held on a feature while the rest relaxes, so the feature gets an edge loop.
+
+    ring: the loop's index along the lattice's third axis. g: points -> metres, zero on the feature's curve
+    and growing away from the feature into the surface the loop borders."""
+
+    def __init__(self, ring, g):
+        self.ring, self.g = ring, g
+
+
+def wrap(f, a, b, extent, dims, relax=10, tmax=None, density=None, snap=None, snap_inner=None, rails=(), warp=None):
     """Mesh sculpt f. a,b: inner axis segment (inside the shape). extent: rough
     half-size (x,y,z) of the shape about the segment midpoint. dims: lattice
     resolution (nx,ny,nz). density: optional p -> weight; quads shrink where
-    it is large. Returns verts (N,3), quads (Q,4), normals (N,3)."""
+    it is large. rails: rings held on features. warp: optional reshaping of the unit sphere
+    the lattice starts on. Returns verts (N,3), quads (Q,4), normals (N,3)."""
     a = np.asarray(a, dtype=np.float64)
     b = np.asarray(b, dtype=np.float64)
     unit, quads = cube_lattice(*dims)
@@ -86,7 +97,7 @@ def wrap(f, a, b, extent, dims, relax=10, tmax=None, density=None, snap=None, sn
         z * np.sqrt(1 - x * x / 2 - y * y / 2 + x * x * y * y / 3)], axis=1)
     extent = np.asarray(extent, dtype=np.float64)
     mid = 0.5 * (a + b)
-    p = mid + sph * extent
+    p = mid + (sph if warp is None else warp(sph)) * extent
     if tmax is None:
         tmax = float(extent.max()) * 2.2
 
@@ -113,7 +124,40 @@ def wrap(f, a, b, extent, dims, relax=10, tmax=None, density=None, snap=None, sn
             q[bad] = _cast(f, o[bad], d[bad], tmax)[0]
         return q
 
+    def slide(g, q, goal, place, steps=7):
+        """Newton steps moving q along grad g to g = goal; `place` puts each step back where it belongs."""
+        grad = np.zeros_like(q)
+        for _ in range(steps):
+            gq = g(q)
+            for i in range(3):
+                e = np.zeros(3)
+                e[i] = 5e-5
+                grad[:, i] = (g(q + e) - g(q - e)) / 1e-4
+            n2 = np.maximum((grad * grad).sum(-1), 1e-9)
+            q = place(q - grad * ((gq - goal) / n2)[:, None])
+        return q, S.normalize(grad)
+
+    lattice = np.rint((unit + 1.0) / 2.0 * np.array(dims)).astype(np.int64)
+    side = np.flatnonzero((lattice[:, 0] % dims[0] == 0) | (lattice[:, 1] % dims[1] == 0))
+    columns = side[np.lexsort(lattice[side].T[::-1])].reshape(-1, dims[2] + 1)
+    held = columns[:, [r.ring for r in rails]].T.ravel()
+
+    def settle(steps):
+        """Slide the rails onto their curves. Returns the direction each point's g grows in."""
+        def g(q):
+            return np.concatenate([r.g(x) for r, x in zip(rails, np.split(q, len(rails)))])
+        p[held], away = slide(g, p[held], 0.0, project, steps)
+        return away
+
     p = project(p, local=False)
+    if rails:                                                   # spread the rings between the rails evenly
+        settle(7)
+        rings = sorted({0, dims[2]} | {r.ring for r in rails})
+        for lo, hi in zip(rings[:-1], rings[1:]):
+            k = np.arange(lo + 1, hi)
+            t = ((k - lo) / (hi - lo))[None, :, None]
+            p[columns[:, k]] = p[columns[:, [lo]]] * (1.0 - t) + p[columns[:, [hi]]] * t
+        p[side] = project(p[side], local=False)
     for _ in range(relax):
         acc = np.zeros_like(p)
         if density is None:
@@ -128,23 +172,15 @@ def wrap(f, a, b, extent, dims, relax=10, tmax=None, density=None, snap=None, sn
             np.add.at(tot, edges[:, 0], w)
             np.add.at(tot, edges[:, 1], w)
         p = project(0.5 * p + 0.5 * acc / tot[:, None])
+        if rails:
+            settle(1)
+    away = settle(7) if rails else None
     n = S.gradient(f, p)
+    if rails:
+        n[held] = S.gradient(f, p[held] + away * 5e-4)
     feats = [] if snap is None else (list(snap) if isinstance(snap, (list, tuple)) else [(snap, snap_inner, 5e-4)])
     e0, e1 = edges[:, 0], edges[:, 1]
     target = 1.2e-4
-
-    def slide(g, q, goal, place):
-        """Newton steps moving q along grad g to g = goal; `place` puts each step back where it belongs."""
-        grad = np.zeros_like(q)
-        for _ in range(7):
-            gq = g(q)
-            for i in range(3):
-                e = np.zeros(3)
-                e[i] = 5e-5
-                grad[:, i] = (g(q + e) - g(q - e)) / 1e-4
-            n2 = np.maximum((grad * grad).sum(-1), 1e-9)
-            q = place(q - grad * ((gq - goal) / n2)[:, None])
-        return q, S.normalize(grad)
 
     for g, inner, n_off in feats:
         # Put a clean edge loop on a feature curve g = 0 (g > 0 is the kept side):

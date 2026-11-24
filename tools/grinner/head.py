@@ -3,11 +3,13 @@
 Head frame as the knight's: origin between the eyes at the centre of the skull, +y out of the face,
 +z up, metres; the sculpt is symmetric in x. `field` is the form the game mesh is fitted to,
 `detail` adds hair strands and creases for the normal map, `paint` colours surface points.
+`wrap` meshes the head, with edge loops along the cut of the hair.
 The teeth and eyeballs are separate small meshes made by `teeth` and `eyeball`.
 """
 import numpy as np
-from sculpt import sdf as S
+from sculpt import sdf as S, mesher
 from sculpt.sdf import V
+from sculpt.mesher import Rail
 from . import body
 from sculpt.num import smoothstep, bump, noise3, fbm, mix
 
@@ -39,8 +41,9 @@ EAR = V(0.0740, -0.0170, -0.0050)
 EAR_R = S.euler(z=24.0)
 HAIR_C, HAIR_R = V(0, -0.015, 0.032), V(0.0820, 0.1000, 0.0930)
 WHORL = S.normalize(V(0.10, -0.42, 0.90))      # the crown the hair falls from
-HAIRLINE_AZ = np.radians([0, 35, 62, 85, 105, 125, 150, 180])
-HAIRLINE_Z = np.array([0.0355, 0.0345, 0.0300, 0.0200, 0.0100, -0.0200, -0.0420, -0.0500])
+HAIRLINE_AZ = np.radians([0, 35, 62, 85, 100, 112, 130, 150, 180])
+HAIRLINE_Z = np.array([0.0390, 0.0380, 0.0330, 0.0250, 0.0225, 0.0130, -0.0170, -0.0400, -0.0480])
+FRINGE = 0.0035                                # the roll of the hair's cut edge
 
 
 def _aperture(q):
@@ -69,14 +72,22 @@ def _mouth(q):
     return g, th, rho, zm, hh
 
 
-def _hairline(q, rough=True):
-    az = np.arctan2(q[:, 0], q[:, 1] - HAIR_C[1])
-    z = np.interp(az, HAIRLINE_AZ, HAIRLINE_Z)
-    if rough:                                                    # the fringe hangs in uneven locks
-        lock = noise3(np.stack([az * 7.0, np.zeros(len(az)), np.zeros(len(az))], axis=1)) - 0.5
-        fine = noise3(np.stack([az * 23.0, np.ones(len(az)), np.zeros(len(az))], axis=1)) - 0.5
-        z = z + (0.010 * lock + 0.004 * fine) * smoothstep(2.6, 1.2, az)
-    return z
+def _azimuth(q):
+    """Angle round the head from straight ahead, in the mirrored frame."""
+    return np.arctan2(q[:, 0], q[:, 1] - HAIR_C[1])
+
+
+def _hairline(q):
+    """Height of the hair's cut edge."""
+    return np.interp(_azimuth(q), HAIRLINE_AZ, HAIRLINE_Z)
+
+
+def _wisps(q):
+    """How far the uneven locks of the fringe hang below the cut edge."""
+    az = _azimuth(q)
+    lock = noise3(np.stack([az * 7.0, np.zeros(len(az)), np.zeros(len(az))], axis=1))
+    fine = noise3(np.stack([az * 23.0, np.ones(len(az)), np.zeros(len(az))], axis=1))
+    return (0.0060 * lock + 0.0030 * fine) * smoothstep(2.6, 1.2, az)
 
 
 def _parts(p, fine=True):
@@ -160,9 +171,10 @@ def _parts(p, fine=True):
     d = S.smin(d, cord, 0.014)
     d = S.smin(d, S.ellipsoid(p, V(0, 0.0240, -0.0780), V(0.0240, 0.0320, 0.0120)), 0.022)       # soft under the chin
     # ---- hair: a heavy bowl cut, the fringe low over the brows
-    shell = S.ellipsoid(p, HAIR_C, HAIR_R)
-    hair = S.smax(shell, _hairline(q) - z, 0.0035)
-    hair = hair - _strands(p, fine)
+    line = _hairline(q)
+    hair = S.smax(S.ellipsoid(p, HAIR_C, HAIR_R), line - z, FRINGE) - _strands(p, fine)
+    if fine:                                                    # thin locks lie on the skin below the cut
+        hair = np.minimum(hair, S.smax(d - 0.0011, line - _wisps(q) - z, 0.0008))
     P["hair"], P["flesh"] = hair, d
     d = S.smin(d, hair, 0.0030)
     P["d"] = S.smax(d, -0.128 - z, 0.004)
@@ -245,6 +257,38 @@ def lip_inner(p):
 
 
 FEATURES = [(lid_edge, lid_inner, 5e-4), (lip_edge, lip_inner, 5e-4)]
+RES = (32, 30, 50)                             # lattice: across the face, front to back, up
+HAIR_RING = 32                                 # the lowest of the three rings along the cut of the hair
+LEAN = 0.42                                    # the top of the lattice leans back as the cut of the hair does
+
+
+def rails(sub=1):
+    """Edge loops along the cut of the hair: on the skin below it, on its roll and on the hair above."""
+    def cut(k, up, at):
+        return Rail((HAIR_RING + k) * sub, lambda p: up * (p[:, 2] - _hairline(S.mirror_x(p))) - at)
+    return [cut(0, -1.0, FRINGE), cut(1, 1.0, 0.0008), cut(2, 1.0, 0.0045)]
+
+
+def _lean(u):
+    """Tilt the upper half of the lattice's starting sphere backward."""
+    return u + np.outer(LEAN * u[:, 1] * smoothstep(0.0, 0.5, u[:, 2]), V(0, 0, 1))
+
+
+def wrap(sub=1):
+    """The head's quad mesh: verts, quads, normals and lattice points."""
+    dims = tuple(r * sub for r in RES)
+    v, q, n = mesher.wrap(field, V(0, -0.012, 0.050), V(0, -0.024, -0.050), (0.095, 0.125, 0.150), dims,
+                          relax=14, density=density, snap=FEATURES, rails=rails(sub), warp=_lean)
+    unit = mesher.cube_lattice(*dims)[0]
+    return v, q, n, np.rint((unit + 1.0) / 2.0 * np.array(dims)).astype(np.int64)
+
+
+def seam(a, b, n=1):
+    """One island, opened down the back of the skull."""
+    def on(c):
+        i, j, k = c[:, 0], c[:, 1], c[:, 2]
+        return (i == RES[0] * n // 2) & ((j == 0) | ((j <= RES[1] * n // 2) & ((k == 0) | (k == RES[2] * n))))
+    return on(a) & on(b)
 
 
 # ---------------------------------------------------------------- paint
@@ -316,14 +360,19 @@ def paint(p):
 # ---------------------------------------------------------------- teeth and eyeballs
 
 TEETH = 26                                     # per row: a third more than a mouth holds
+TOOTH = (0.0048, 0.0125)                       # the room each tooth has on the chart: across, and gum to biting edge
+CHART = (TEETH * TOOTH[0], 2 * TOOTH[1])       # the chart's size: a cell per tooth, a row of cells per row of teeth
+LAP = 0.004                                    # of a cell: each tooth laps its neighbours', so the chart packs whole
 IVORY = V(0.78, 0.745, 0.63)
+AGED = V(0.70, 0.60, 0.38)
 STAIN = V(0.42, 0.33, 0.20)
+ROT = V(0.24, 0.20, 0.17)
 GUM = V(0.42, 0.17, 0.20)
 
 
 def teeth():
-    """Both rows as separate pegs on the tooth ellipse. Returns verts, quads, normals and chart coordinates
-    (u across a tooth, v from gum to biting edge); every tooth shares the one chart."""
+    """Both rows as separate pegs on the tooth ellipse. Returns verts, quads, normals and chart coordinates:
+    within a tooth's own cell of the chart, u across it and v from gum to biting edge."""
     rng = np.random.default_rng(11)
     us = np.array([-1.0, -0.55, 0.0, 0.55, 1.0])
     vs = np.array([0.0, 0.5, 0.86, 1.0, 1.15])
@@ -354,7 +403,8 @@ def teeth():
             base = len(verts) * 25
             verts.append(P.reshape(-1, 3))
             normals.append(n.reshape(-1, 3))
-            chart.append(np.stack([(U + 1.0) / 2.0, Vv / 1.15], axis=-1).reshape(-1, 2))
+            within = np.stack([(U + 1.0) / 2.0, Vv / 1.15], axis=-1).reshape(-1, 2)
+            chart.append((np.array((k, row < 0)) - LAP + (1.0 + 2.0 * LAP) * within) / (TEETH, 2))
             for i in range(4):
                 for j in range(4):
                     a, b, c, e = base + i * 5 + j, base + (i + 1) * 5 + j, base + (i + 1) * 5 + j + 1, base + i * 5 + j + 1
@@ -363,12 +413,36 @@ def teeth():
 
 
 def teeth_paint(c):
-    u, v = c[:, 0], c[:, 1] * 1.15
-    col = np.tile(IVORY, (len(c), 1))
-    col = mix(col, STAIN, 0.55 * smoothstep(0.62, 1.0, np.abs(2.0 * u - 1.0)) + 0.35 * smoothstep(0.55, 0.0, v))
-    col = mix(col, GUM, smoothstep(0.24, 0.16, v))
+    """Every tooth wears differently: its cell of the chart draws its own yellowing, stains, gum line, chip
+    and crack."""
+    cell = c * (TEETH, 2)
+    tooth = np.floor(cell)
+    u, v = np.clip((cell - tooth + LAP) / (1.0 + 2.0 * LAP), 0.0, 1.0).T
+    v = v * 1.15
+    across = np.abs(2.0 * u - 1.0)
+    number = tooth[:, 0] + TEETH * tooth[:, 1]
+
+    def draw(k):
+        """A number in 0..1 for each tooth, different for every k."""
+        return noise3(np.stack([number, np.full(len(c), float(k)), np.zeros(len(c))], axis=1))
+    grain = noise3(np.stack([u * 5.0, v * 7.0, number * 3.7], axis=1))
+    col = mix(np.tile(IVORY, (len(c), 1)), AGED, 0.75 * draw(1) * (0.6 + 0.8 * grain))
+    stain = (0.25 + 0.60 * draw(2)) * smoothstep(0.62, 1.0, across) + (0.15 + 0.45 * draw(3)) * smoothstep(0.55, 0.0, v)
+    stain = stain + 0.5 * smoothstep(0.55, 0.75, noise3(np.stack([u * 9.0, v * 4.0, number * 1.3 + 40.0], axis=1))) * draw(4)
+    col = mix(col, STAIN, stain)
+    col = mix(col, ROT, 0.75 * smoothstep(0.86, 0.90, draw(5)) * (0.5 + 0.5 * grain))
+    crack = smoothstep(0.016, 0.004, np.abs(u - (0.25 + 0.5 * draw(6)) - 0.05 * np.sin(9.0 * v + 6.0 * draw(7))))
+    col = mix(col, ROT, 0.7 * crack * smoothstep(0.60, 0.70, draw(8)) * smoothstep(0.25 + 0.4 * draw(9), 0.55 + 0.4 * draw(9), v))
+    chip = 0.16 * draw(10) * smoothstep(0.50, 0.60, draw(11)) * np.clip(1.0 - np.abs(u - (0.2 + 0.6 * draw(12))) / 0.22, 0, 1)
+    worn = smoothstep(1.0 - chip - 0.02, 1.0 - chip + 0.02, v) * (chip > 0.01)
     col = mix(col, V(0.62, 0.60, 0.55), 0.5 * smoothstep(0.88, 1.0, v))
-    return col, np.full(len(c), 0.24), np.zeros(len(c))
+    col = mix(col, STAIN * 0.8, 0.85 * worn)
+    line = 0.13 + 0.12 * draw(13) + 0.10 * across ** 2
+    tartar = smoothstep(line + 0.14, line + 0.02, v) * (0.3 + 0.7 * draw(14))
+    col = mix(col, STAIN * V(1.1, 1.0, 0.7), 0.6 * tartar)
+    gum = smoothstep(line + 0.03, line - 0.03, v)
+    col = mix(col, GUM * (0.8 + 0.4 * draw(15))[:, None], gum)
+    return col, 0.24 + 0.30 * np.clip(stain + tartar, 0, 1) * (1.0 - gum) + 0.10 * gum + 0.3 * worn, np.zeros(len(c))
 
 
 def eyeball(rings=9, segs=20):
