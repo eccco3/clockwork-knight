@@ -19,7 +19,9 @@ try {
   Invoke-Step 'hall' $blender @('--background', '--python-exit-code', '1', '--python', 'tools/build_hall.py')
   Invoke-Step 'knight' $blender @('--background', '--python-exit-code', '1', '--python', 'tools/knight/build_knight.py',
     '--', '--out', 'assets/models/knight.glb')
-  foreach ($model in 'hall', 'knight') {
+  Invoke-Step 'grinner' $blender @('--background', '--python-exit-code', '1', '--python', 'tools/grinner/build_grinner.py',
+    '--', '--out', 'assets/models/grinner.glb')
+  foreach ($model in 'hall', 'knight', 'grinner') {
     if (-not (Test-Path "assets\models\$model.glb")) { throw "$model.glb was not written" }
   }
   Invoke-Step 'import' $godot @('--path', '.', '--headless', '--import')

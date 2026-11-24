@@ -29,21 +29,19 @@ The knight's shadows cost about 0.8 ms of GPU time, but not because of her trian
 
 Not started. Scripted play: 6.8 ms with three shadowed chandeliers, 6.3 ms with only the middle one, 6.6 ms with dual paraboloids, 6.0 ms with none.
 
-## Enemy: sculpt the model
+## Enemy: refine the sculpt
 
 ### Task description
 
-Build the first enemy as `assets/models/grinner.glb` from a new `tools/grinner/` builder that follows the knight's sculpt pipeline. It reads as a ten-year-old boy, wrong in five ways: a smile too wide for the face, pitch-black eyes, arms that reach past the knees, claws, and legs whose knees and hips bend backwards. Budget: 40,000 triangles at full detail (the knight has 303,000), detail levels down to 5,000, at most four materials, and textures baked from the sculpt instead of procedural shaders.
+Fix the grinner's weak spots before it is rigged: ragged geometry where the mouth pinches shut at each corner, which reads as cracks up the cheeks; a rough crease where jaw meets neck; a ragged hairline; and coarse, angular ears. Give the teeth their own texture variety and stop the limbs' paint mirroring. Deepen the mouth into a cavity if the jaw is to open wide. Deliver before and after turnarounds of the head.
 
 ### Open questions
 
-- What does it wear, and what are its skin and colouring?
-- Is 40,000 triangles right, or should close views get more?
-- "Grinner" is a working name.
+- Should the jaw open wide, or is a fixed smile with small movement enough?
 
 ### Status
 
-Not started.
+Not started. The model is merged; see `tools/grinner/`.
 
 ## Enemy: rig and waddle
 
