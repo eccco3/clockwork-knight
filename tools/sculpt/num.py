@@ -1,6 +1,6 @@
-"""Small numeric helpers shared by the grinner's sculpts and paints."""
+"""Small numeric helpers shared by sculpts and paints."""
 import numpy as np
-from knight import sdf as S
+from . import sdf as S
 
 
 def smoothstep(a, b, x):

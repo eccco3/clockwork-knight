@@ -144,6 +144,18 @@ def mirror_x(p):
     return q
 
 
+def hug(f, c, ex, ey, n=40, a0=0.0, a1=np.pi, rmax=0.3, off=0.0008):
+    """Points on the surface of `f` along rays from the inside point `c`, fanned in the plane (ex, ey)."""
+    a = np.linspace(a0, a1, n)
+    d = np.outer(np.cos(a), ex) + np.outer(np.sin(a), ey)
+    lo, hi = np.zeros(n), np.full(n, rmax)
+    for _ in range(34):
+        mid = 0.5 * (lo + hi)
+        inside = f(np.asarray(c) + d * mid[:, None]) < 0
+        lo, hi = np.where(inside, mid, lo), np.where(inside, hi, mid)
+    return np.asarray(c) + d * (0.5 * (lo + hi) + off)[:, None]
+
+
 def gradient(f, p, eps=2e-5):
     g = np.empty_like(p)
     for i in range(3):

@@ -49,6 +49,14 @@ def smooth_profile(pts, sub=4):
     return out
 
 
+def turned(pts, sub=3):
+    """A smooth profile whose ends stay on the axis where the control points put them."""
+    p = smooth_profile(pts, sub)
+    p[0, 1] = 0.0 if pts[0][1] == 0 else p[0, 1]
+    p[-1, 1] = 0.0 if pts[-1][1] == 0 else p[-1, 1]
+    return p
+
+
 def arc(cz, r, a0, a1, n):
     """Profile points on a circle in the (z, r) plane, angles in degrees measured from +z."""
     a = np.radians(np.linspace(a0, a1, n))

@@ -1,7 +1,13 @@
-"""Blender-side helpers: numpy mesh -> object, preview rendering."""
-import bpy, bmesh
+"""Blender-side helpers: script arguments, numpy mesh -> object, images, turnarounds, GLB export."""
+import bpy, bmesh, math, os, sys
 import numpy as np
 from mathutils import Vector, Matrix
+
+argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+
+
+def opt(name, default=None):
+    return argv[argv.index(name) + 1] if name in argv else default
 
 
 def reset_scene():
@@ -102,10 +108,71 @@ def render(path):
     bpy.ops.render.render(write_still=True)
 
 
+def save_image(path, px, colour=True):
+    """Write (H, W, 3 or 4) floats, bottom row first, as a PNG. Returns the image, named after the file."""
+    path = os.path.abspath(path)
+    img = bpy.data.images.new(os.path.splitext(os.path.basename(path))[0], px.shape[1], px.shape[0], alpha=False)
+    rgba = np.ones(px.shape[:2] + (4,), dtype=np.float32)
+    rgba[..., :px.shape[2]] = px
+    img.pixels.foreach_set(rgba.ravel())
+    img.filepath_raw = path
+    img.file_format = "PNG"
+    img.save()
+    img.colorspace_settings.name = "sRGB" if colour else "Non-Color"
+    return img
+
+
+def studio(heights, energies, key=(1.0, 0.93, 0.85)):
+    """Key, fill and rim lights for `turnaround`, at the given heights and energies."""
+    return [("key", (1.2, -3.0, heights[0]), energies[0], 2.0, key),
+            ("fill", (-2.5, -2.0, heights[1]), energies[1], 3.0, (0.8, 0.88, 1.0)),
+            ("rim", (0.5, 3.0, heights[2]), energies[2], 2.0, (1, 1, 1))]
+
+
+def turnaround(path, views, target, scale, res, lights, samples=48):
+    """One render per view in degrees (camera and lights orbit `target` together), stitched side by side."""
+    setup_cycles(samples)
+    path = os.path.abspath(path)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    pivot = bpy.data.objects.new("turntable", None)
+    bpy.context.scene.collection.objects.link(pivot)
+    pivot.location = (target[0], target[1], 0)
+    t0 = (0, 0, target[2])
+    rig = [light(name, loc, energy, size, colour, t0) for name, loc, energy, size, colour in lights]
+    rig.append(camera_ortho((0, -6.0, target[2]), t0, scale, res))
+    for o in rig:
+        o.parent = pivot
+    tiles = []
+    for i, yaw in enumerate(views):
+        pivot.rotation_euler = (0, 0, math.radians(-yaw))
+        tmp = path + ".%d.png" % i
+        render(tmp)
+        img = bpy.data.images.load(tmp)
+        tiles.append(np.array(img.pixels[:], dtype=np.float32).reshape(img.size[1], img.size[0], 4))
+        bpy.data.images.remove(img)
+        os.remove(tmp)
+    bpy.data.images.remove(save_image(path, np.concatenate(tiles, axis=1)))
+    for o in rig + [pivot]:
+        bpy.data.objects.remove(o, do_unlink=True)
+    print("SHOT", path)
+
+
+def export_glb(path, objects, active=None, **options):
+    bpy.ops.object.select_all(action="DESELECT")
+    for ob in objects:
+        ob.select_set(True)
+    if active is not None:
+        bpy.context.view_layer.objects.active = active
+    path = os.path.abspath(path)
+    bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_normals=True,
+                              export_texcoords=True, export_materials="EXPORT", export_yup=True, export_apply=False,
+                              **options)
+    print("EXPORTED", path, "%.1f MB" % (os.path.getsize(path) / 1e6))
+
+
 def mesh_object(name, verts, faces, normals=None, colors=None, hard=False, thickness=0.0, sharp=38.0, bevel=0.0):
     """numpy mesh -> object. hard=True welds, fixes winding and marks creases; soft meshes keep
     their vertex order so per-vertex normals / colours can be attached."""
-    import math
     me = bpy.data.meshes.new(name)
     me.from_pydata([tuple(map(float, v)) for v in verts], [], [tuple(int(i) for i in f) for f in faces])
     if hard:

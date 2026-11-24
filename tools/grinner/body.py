@@ -6,11 +6,11 @@ Each part offers a field (the game mesh is fitted to it), a detail field (baked 
 a paint (albedo, roughness, metallic at surface points) and the polycube that meshes it.
 """
 import numpy as np
-from knight import sdf as S
-from knight.sdf import V
-from knight.gen import Frame
-from .lattice import Box
-from .sculpt import smoothstep, bump, lerp, noise3, fbm, along, mix
+from sculpt import sdf as S
+from sculpt.sdf import V
+from sculpt.gen import Frame
+from sculpt.lattice import Box
+from sculpt.num import smoothstep, bump, lerp, noise3, fbm, along, mix
 
 UP, DOWN, FWD, BACK, LEFT = V(0, 0, 1), V(0, 0, -1), V(0, -1, 0), V(0, 1, 0), V(1, 0, 0)
 
