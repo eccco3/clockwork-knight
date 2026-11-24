@@ -14,6 +14,19 @@ After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% wit
 
 Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 °C; 50% gave 43 W and 70 °C.
 
+## Grinner: a flatter rump
+
+### Task description
+
+Make the grinner's rump a little flatter, in the sculpt and the shorts over it, in `tools/grinner/body.py`. The shorts' seat still has a fixed bulge shaped for the old, further-back thigh from before the knees were straightened. Keep the hips' width and the shorts' hang, and check the seat in the idle and waddle. Deliver side and back turnarounds before and after.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started.
 ## Enemy: attack animations
 
 ### Task description
@@ -258,6 +271,19 @@ Model unfinished automata at different stages, from bare mechanism to painted fi
 
 Not started. Needs the clocks, benches and tools.
 
+## Knight: cover her seat
+
+### Task description
+
+Cover the knight's seat a little more, standing and in every clip, rolls above all. Try two ways: a short skirt of plates or tassets hanging from her belt, and reshaped hip armour that reaches lower behind. Each must not catch her thighs in the run, roll, jump or attacks; check clearance in every clip. Deliver painted turnarounds and roll contact sheets of both beside the current armour, and the dev picks.
+
+### Open questions
+
+- None. The dev picks between the two.
+
+### Status
+
+Not started. Shares the knight's builder with her shoulder and hand items.
 ## Knight: a natural shoulder
 
 ### Task description
