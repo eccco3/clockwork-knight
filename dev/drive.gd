@@ -10,7 +10,12 @@ extends Harness
 ##   press/release/tap:<action>      input actions; tap releases after 0.08 s
 ##   shot:<name>                     full frame -> prefix_name.png
 ##   snap, snaps:<n>:<interval>      tiles for the contact sheet prefix_sheet.png
-##   yaw/pitch:<radians>, dist:<m>   the orbit camera
+##   yaw/pitch:<radians>, dist:<m>   the orbit camera; its yaw still steers her movement
+##   cam:<at>:<eye>:<seconds>        a scripted camera blends from the last shot, over that many seconds
+##                                   (0 cuts), to look at <at> from <eye>. Each is x,y,z, or a node:
+##                                   player, or a name or class with an optional #index, raised lookh
+##                                   metres, +h or +dx,dy,dz. <eye> may be +dx,dy,dz from <at>.
+##   cam:orbit                       back to the orbit camera
 ##   track:<frames>                  prints the knight's body, ankles, balls and pelvis each frame
 ##   fps                             prints frames per second and process time
 ##   perf:start, perf:stop           frame times; run with --disable-vsync --max-fps 0
@@ -31,7 +36,8 @@ var _pending_snaps := 0
 var _snap_dt := 0.1
 var _snap_next := 0.0
 var _cam: Camera3D
-var _side := Vector3.ZERO
+var _view: Shot
+var _subjects := {}
 var _busy := false
 var _track := 0
 var _perf: Perf
@@ -51,21 +57,96 @@ func _ready() -> void:
 		_events.append([float(p[0]), p.slice(1)])
 	_events.sort_custom(func(a, b): return a[0] < b[0])
 	if args.has("side"):
-		_side = vector(args["side"])
-		_cam = add_camera(40)
+		_cut_to(PackedStringArray(["player", "+" + args["side"], "0"]))
 
 
 func _player() -> Node3D:
 	return get_tree().get_first_node_in_group("player")
 
 
-func _process(_dt: float) -> void:
-	if _cam:
+## A scripted camera's shot. While it glides in, it blends from the shot before, which keeps moving.
+class Shot:
+	var at: String
+	var eye: String
+	var start: float
+	var glide: float
+	var prev: Shot
+
+
+func _cut_to(spec: PackedStringArray) -> void:
+	if spec[0] == "orbit":
+		_view = null
 		var pl := _player()
-		if pl:
-			var at := pl.global_position + Vector3(0, float(args.get("lookh", "1.0")), 0)
-			_cam.look_at_from_position(at + _side, at)
-			_cam.make_current()
+		if pl and pl.get("camera"):
+			pl.camera.camera.make_current()
+		return
+	var s := Shot.new()
+	s.at = spec[0]
+	s.eye = spec[1]
+	s.start = _t
+	s.glide = float(spec[2])
+	s.prev = _view
+	var cur := get_viewport().get_camera_3d()
+	if not _view and cur:
+		s.prev = Shot.new()
+		s.prev.eye = _format(cur.global_position)
+		s.prev.at = _format(cur.global_position - cur.global_basis.z * 3.0)
+	if not _cam:
+		_cam = add_camera(40)
+	_view = s
+
+
+func _format(v: Vector3) -> String:
+	return "%f,%f,%f" % [v.x, v.y, v.z]
+
+
+## The shot's eye and look point now.
+func _pose(s: Shot) -> Array[Vector3]:
+	var at := _point(s.at, Vector3.ZERO)
+	var eye := _point(s.eye, at)
+	var k := smoothstep(0.0, 1.0, (_t - s.start) / s.glide) if s.glide > 0.0 else 1.0
+	if k >= 1.0:
+		s.prev = null
+	if s.prev:
+		var from := _pose(s.prev)
+		return [from[0].lerp(eye, k), from[1].lerp(at, k)]
+	return [eye, at]
+
+
+## x,y,z; +dx,dy,dz from base; or a node's origin raised lookh metres, or +h, or +dx,dy,dz.
+func _point(spec: String, base: Vector3) -> Vector3:
+	if spec.begins_with("+"):
+		return base + vector(spec.substr(1))
+	if spec.split(",")[0].is_valid_float():
+		return vector(spec)
+	var p := spec.split("+")
+	var n := _subject(p[0])
+	var off := Vector3.UP * float(args.get("lookh", "1.0"))
+	if p.size() > 1:
+		off = vector(p[1]) if p[1].contains(",") else Vector3.UP * float(p[1])
+	return (n.global_position if n else Vector3.ZERO) + off
+
+
+func _subject(spec: String) -> Node3D:
+	if spec == "player":
+		return _player()
+	if not _subjects.has(spec) or not is_instance_valid(_subjects[spec]):
+		var p := spec.split("#")
+		var found := scene.find_children("*", "Node3D", true, false).filter(func(n: Node) -> bool:
+			var sc: Script = n.get_script()
+			return n.name.match(p[0]) or n.is_class(p[0]) or (sc != null and sc.get_global_name() == p[0]))
+		var i := int(p[1]) if p.size() > 1 else 0
+		_subjects[spec] = found[i] if i < found.size() else null
+		if not _subjects[spec]:
+			print("cam: no node ", spec)
+	return _subjects[spec]
+
+
+func _process(_dt: float) -> void:
+	if _view:
+		var pose := _pose(_view)
+		_cam.look_at_from_position(pose[0], pose[1])
+		_cam.make_current()
 
 
 ## Actions go in as events, as real input does, so handlers see them.
@@ -110,6 +191,8 @@ func _physics_process(dt: float) -> void:
 						pl.camera.pitch = float(ev[1])
 					else:
 						pl.camera.distance = float(ev[1])
+			"cam":
+				_cut_to(ev.slice(1))
 			"track":
 				_track = int(ev[1])
 			"fps":
