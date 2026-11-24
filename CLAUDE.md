@@ -27,10 +27,12 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 
 ## Where things are
 
-- `scenes/main.tscn` is the playable scene; `scripts/main.gd` adds the hall, player and hint.
+- `scenes/main.tscn` is the playable scene; `scripts/main.gd` adds the hall and player.
+- `project.godot` holds the input map and names the layers; `scripts/layers.gd` gives code the same names.
+- The `App` autoload, `scripts/app.gd`, holds the keys Esc, F11 and H, cursor capture and the controls hint; `HINT_SCENES` lists the scenes that show it.
 - `scenes/outdoors.tscn` builds the grinner's foggy ground on load; drive and shot take `scene=res://scenes/outdoors.tscn`.
 - `scripts/` holds the player controller, animator and camera rig; `shaders/` the wood, metal and eye shaders.
-- The hall's lamps are baked. `scripts/hall.gd` replaces them at runtime with lights that reach only characters (render layer 2) and with cancelling pairs that leave character shadows on the baked floor. Only the fire lights the hall live.
+- The hall's lamps are baked. `scripts/hall.gd` replaces them at runtime with lights that reach only the Characters layer and with cancelling pairs that leave character shadows on the baked floor. Only the fire lights the hall live.
 - `addons/lightmap_bake` presses the editor's bake button, the only way Godot bakes lightmaps.
 - `tools/sculpt/` is the characters' shared toolkit: shapes, meshers, unwrapping, baking, turnarounds, GLB export.
 - `tools/knight/` builds the knight; `tools/build_hall.py` and `scripts/hall_build.gd` build the hall.
@@ -44,16 +46,6 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 - First-party means everything git tracks except `tools/downloads/`.
 - Git ignores `toolchain/`, `.godot/`, `dev/shots/`, the Poly Haven files, which `tools/fetch_assets.ps1` restores, and the built models `assets/models/*.glb` and lightmap `assets/lightmaps/`, which `tools/build_models.ps1` restores.
 - Commit with Windows git, not WSL.
-
-## Controls
-
-Keyboard and mouse, then gamepad:
-
-- Move: WASD or arrows; left stick. Walk: hold Ctrl or toggle C; L3.
-- Jump: Space; A. Dodge-roll: Shift, Q or right mouse; B.
-- Attack (three-hit combo): left mouse, J or F; X or RB.
-- Look: mouse; right stick. Zoom 0.55 m to 6 m: mouse wheel.
-- Esc frees the cursor, F11 is fullscreen, H hides the hint.
 
 ## Downloads
 
