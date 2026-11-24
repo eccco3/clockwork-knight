@@ -264,17 +264,3 @@ Model unfinished automata at different stages, from bare mechanism to painted fi
 ### Status
 
 Not started. Needs the clocks, benches and tools.
-
-## Hall: doorframe shimmer
-
-### Task description
-
-The inside of the hall's doorframe shimmers. Find the cause, for example aliasing, z-fighting, a lightmap seam or the material, and fix it at its source. The agent chooses how. Deliver before and after captures that show the shimmer.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. Low priority. If the fix changes the hall's geometry, the lightmap needs a rebake, so it cannot run beside other hall or baking work.
