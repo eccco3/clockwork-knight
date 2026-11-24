@@ -1,9 +1,10 @@
 extends Node
 ## Keys that belong to the application rather than to play, and the controls hint. Esc frees the
 ## cursor and a click captures it again, F11 toggles fullscreen and H hides the hint. The cursor
-## is captured for mouse look while an orbit camera is in play.
+## is captured for mouse look while an orbit camera is in play. The hint shows while a playable
+## scene is in the tree: one whose root has metadata/playable, its title in the playtest picker.
 
-const HINT_SCENES: Array[String] = ["res://scenes/main.tscn", "res://scenes/outdoors.tscn"]
+const PLAYABLE := &"playable"
 const HINT := "WASD  move      Ctrl  walk  (C toggles)      Space  jump      Shift / RMB  dodge-roll      LMB  attack ×3\n" \
 	+ "Mouse  look      Wheel  zoom      Esc  free cursor      F11  fullscreen      H  hide this\n" \
 	+ "Gamepad:  stick move · right stick look · A jump · B roll · X attack"
@@ -17,12 +18,15 @@ var _hint_on := true
 func _ready() -> void:
 	_build_hint()
 	get_tree().node_added.connect(_on_node_added)
+	# the scene Godot starts with is in the tree before autoloads are ready
+	if get_tree().current_scene:
+		_on_node_added(get_tree().current_scene)
 
 
 func _on_node_added(node: Node) -> void:
 	if node is CameraRig:
 		_add_camera.call_deferred(node)
-	if node.scene_file_path in HINT_SCENES:
+	if node.has_meta(PLAYABLE):
 		_hint.visible = true
 		_hint.modulate.a = 1.0
 		_hint_t = 0.0
