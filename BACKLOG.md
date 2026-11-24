@@ -14,6 +14,33 @@ After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% wit
 
 Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 °C; 50% gave 43 W and 70 °C.
 
+## Grinner: upright upper body
+
+### Task description
+
+The grinner's upper body leans so far forward that it looks about to fall over. Stand it upright over its hips, in the sculpt's rest pose and in the shared stance its clips use, keeping the reversed knees, long arms and claws. Rebind the rig, re-key the idle and waddle to the new stance, and keep feet planted. Deliver turnarounds and a waddle contact sheet before and after.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Comes before the attack animations, which are paused for it.
+
+## Grinner: a more human face
+
+### Task description
+
+Make the grinner's face a bit more human. Its grin's width should sit about halfway between a normal human smile and its current width, and its jaw should be a little less elongated. Keep it unsettling, and keep the face without bones, so the rig needs no change. Work in `tools/grinner/head.py`. Deliver face close-ups and turnarounds before and after.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started.
 ## Enemy: attack animations
 
 ### Task description
