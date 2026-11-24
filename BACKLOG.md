@@ -273,20 +273,6 @@ Model unfinished automata at different stages, from bare mechanism to painted fi
 
 Not started. Needs the clocks, benches and tools.
 
-## Knight: shoulders and hands
-
-### Task description
-
-Make the knight's shoulder joint, where the upper arm meets the shoulder, and her hands more humanlike in `tools/knight/build_knight.py`, keeping her fingers as they are. The shoulder should read as a rounded ball joint under a cap, not a hinge between blocks, and the palms and backs of the hands should have a human hand's proportions and padding. Check deformation in her clips, and deliver clay and painted close-ups before and after.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started.
-
 ## Knight: body texture on her trunk
 
 ### Task description

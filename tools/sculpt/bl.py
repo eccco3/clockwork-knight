@@ -161,21 +161,22 @@ def studio(heights, energies, key=(1.0, 0.93, 0.85)):
 
 
 def turnaround(path, views, target, scale, res, lights, samples=48):
-    """One render per view in degrees (camera and lights orbit `target` together), stitched side by side."""
+    """One render per view (camera and lights orbit `target` together), stitched side by side. A view is a
+    yaw in degrees, or (yaw, pitch) to look down on the target from `pitch` degrees above."""
     setup_cycles(samples)
     path = os.path.abspath(path)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     pivot = bpy.data.objects.new("turntable", None)
     bpy.context.scene.collection.objects.link(pivot)
-    pivot.location = (target[0], target[1], 0)
-    t0 = (0, 0, target[2])
-    rig = [light(name, loc, energy, size, colour, t0) for name, loc, energy, size, colour in lights]
-    rig.append(camera_ortho((0, -6.0, target[2]), t0, scale, res))
+    pivot.location = target
+    rig = [light(name, (loc[0], loc[1], loc[2] - target[2]), energy, size, colour) for name, loc, energy, size, colour in lights]
+    rig.append(camera_ortho((0, -6.0, 0), (0, 0, 0), scale, res))
     for o in rig:
         o.parent = pivot
     tiles = []
-    for i, yaw in enumerate(views):
-        pivot.rotation_euler = (0, 0, math.radians(-yaw))
+    for i, view in enumerate(views):
+        yaw, pitch = (*np.atleast_1d(view), 0.0)[:2]
+        pivot.rotation_euler = (math.radians(-pitch), 0, math.radians(-yaw))
         tmp = path + ".%d.png" % i
         render(tmp)
         tiles.append(read_image(tmp))
