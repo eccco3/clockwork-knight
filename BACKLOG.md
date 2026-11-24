@@ -12,7 +12,7 @@ Let the playtest launcher's picker choose which scene to play, as well as which 
 
 ### Status
 
-Not started. Wait for the dev-harness item, which reorganises `dev/` and the stages.
+Not started.
 
 ## Test lower render scale
 
@@ -28,27 +28,11 @@ After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% wit
 
 Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 °C; 50% gave 43 W and 70 °C.
 
-## Tech debt: one dev harness
-
-### Task description
-
-`dev/drive.gd` and `dev/shot.gd` both parse arguments, load a scene, apply `lamps=baked`, place a camera and save PNGs. Share that code, keeping their command lines in CLAUDE.md working. Delete `scripts/hall_perf.gd`, a probe among the runtime scripts; drive's `perf`, `set`, `env`, `vp` and `rs` events do its job. Fold `dev/grinner_stage` into `dev/stage`, which sets up the same sky and sun. Update drive's header, which omits `track`, `fps`, `hide`, `call`, `lookh` and `fov`. Prove nothing changed: the same commands give matching shots and perf output before and after.
-
-### Open questions
-
-- What separates `dev/` from `tools/`, and should they merge? Both hold scripts that are not the game: `dev/` the harnesses and stages, `tools/` the builders, but also probes and checks such as `tools/hall_check.gd`.
-- Which tools should go, and which merge? For example, `dev/inspect_knight.gd` and `tools/knight/inspect_glb.py` both list a model's meshes, bones and clips, and nothing uses either.
-- Delete `screenshots/`, seven unreferenced images, 14 MB? The dev said yes.
-
-### Status
-
-Not started. Do it before the crowd performance test adds a `dev/` scene.
-
 ## Tech debt: hall builders
 
 ### Task description
 
-`scripts/hall_build.gd` is an offline builder among the runtime scripts, and does two jobs: about 200 lines write materials, the rest assembles the scene. Split them, and keep them with the hall's import hook and `tools/hall_check.gd` outside `scripts/`, as the grinner's import script is. Let layout marks say which lights reach or shadow characters, instead of matching the names "Chandelier" and "Sconce". Drop the fallback that lets `build_hall.py` build a bare hall when `hall_props` fails to import. Share the two `hall_cloth` shaders, identical but for two lines, through an include. Prove the rebuilt `hall.glb`, `hall.tscn` and materials match the old ones.
+`scripts/hall_build.gd` is an offline builder among the runtime scripts, and does two jobs: about 200 lines write materials, the rest assembles the scene. Split them, and move them and the import hook out of `scripts/`, and `tools/hall_check.gd` to `dev/`. Let layout marks say which lights reach or shadow characters, instead of matching the names "Chandelier" and "Sconce". Drop the fallback that lets `build_hall.py` build a bare hall when `hall_props` fails to import. Share the two `hall_cloth` shaders, identical but for two lines, through an include. Prove the rebuilt `hall.glb`, `hall.tscn` and materials match the old ones.
 
 ### Open questions
 
