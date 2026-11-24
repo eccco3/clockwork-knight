@@ -28,20 +28,6 @@ Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W w
 
 Not started. Do it before the workshop extends these builders; it cannot run beside other hall or baking work. The `ns_` comments in `hall_import.gd` and `hall_props.py` are stale: four lights cast shadows, not five, and the live chandeliers draw only characters into shadow maps.
 
-## Enemy: rig and waddle
-
-### Task description
-
-Rig the grinner with clean deformation at the reversed knees and hips, the long arms and the claws, in at most 50 bones. The grin is fixed, so the face needs no bones. Animate an idle and a slow waddle by hand in Blender, because the downloaded humanoid clips do not fit these proportions. Play them through Godot's built-in AnimationTree, not the knight's scripted blender, so that many can run cheaply. Deliver turnarounds and a contact sheet of the waddle.
-
-### Open questions
-
-- None. The dev chose original hand-keyed clips over an adapted motion library.
-
-### Status
-
-Not started. Starts once the grinner's sculpt fixes in progress are merged. The dev will rework the face later; the face has no bones, so rigging need not wait.
-
 ## Enemy: attack animations
 
 ### Task description
@@ -61,7 +47,7 @@ Not started.
 
 ### Task description
 
-Add `scripts/grinner.gd`: it waddles toward the knight, pounces from mid range and uses the twin-claw swipe up close, with cooldowns. Add the least combat both sides need: health, sword hits that land on grinners, claw hits that land on the knight, and a reaction to each. Place three grinners in the hall and record a scripted fight.
+Extend `scripts/grinner.gd`, which now only plays the idle and waddle: it waddles toward the knight, pounces from mid range and uses the twin-claw swipe up close, with cooldowns. Add the least combat both sides need: health, sword hits that land on grinners, claw hits that land on the knight, and a reaction to each. Place three grinners in the hall and record a scripted fight.
 
 ### Open questions
 
@@ -279,34 +265,6 @@ Model unfinished automata at different stages, from bare mechanism to painted fi
 
 Not started. Needs the clocks, benches and tools.
 
-## Hall: dimmer fire highlight on the floor
-
-### Task description
-
-The fire's highlight on the floor in front of the hearth is too bright. Tone it down, keeping the hearth's warmth in the room. The agent chooses how. Deliver before and after screenshots from a few positions.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. Low priority. It shares the fire's lights with the fire-shadow item, so run them together or one after the other. The fire is the hall's only live light; its key light is built in `scripts/hall_build.gd` and flickers through `scripts/hall_fire_light.gd`.
-
-## Hall: steadier fire shadows
-
-### Task description
-
-The fire casts a pronounced shadow that looks twitchy. Soften its shadows or calm how much they dance, or both; the agent chooses how. Deliver short before and after captures, or contact sheets, of a shadow over a few seconds.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. Low priority. Shares the fire's lights with the floor highlight item.
-
 ## Hall: doorframe shimmer
 
 ### Task description
@@ -320,17 +278,3 @@ The inside of the hall's doorframe shimmers. Find the cause, for example aliasin
 ### Status
 
 Not started. Low priority. If the fix changes the hall's geometry, the lightmap needs a rebake, so it cannot run beside other hall or baking work.
-
-## Clicking to recapture the cursor attacks
-
-### Task description
-
-After Esc frees the cursor, the click that captures it again also starts an attack. That click should only recapture. `scripts/app.gd` captures the cursor; `scripts/player.gd` buffers the attack. The old reset of `_buf_attack` never worked, because the physics step reads the press after it.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. Low priority.

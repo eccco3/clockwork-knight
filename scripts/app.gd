@@ -2,7 +2,7 @@ extends Node
 ## Keys that belong to the application rather than to play, and the controls hint. Esc frees the
 ## cursor and a click captures it again, F11 toggles fullscreen and H hides the hint. The cursor
 ## is captured for mouse look while an orbit camera is in play. The hint shows while a playable
-## scene is in the tree: one whose root has metadata/playable, its title in the playtest picker.
+## scene is running: one whose root has metadata/playable, its title in the playtest picker.
 
 const PLAYABLE := &"playable"
 const HINT := "WASD  move      Ctrl  walk  (C toggles)      Space  jump      Shift / RMB  dodge-roll      LMB  attack ×3\n" \
@@ -26,7 +26,7 @@ func _ready() -> void:
 func _on_node_added(node: Node) -> void:
 	if node is CameraRig:
 		_add_camera.call_deferred(node)
-	if node.has_meta(PLAYABLE):
+	if node.has_meta(PLAYABLE) and node == get_tree().current_scene:	# not under a harness's scene
 		_hint.visible = true
 		_hint.modulate.a = 1.0
 		_hint_t = 0.0
@@ -84,7 +84,12 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_H:
 				_hint_on = not _hint_on
 				_hint_t = 0.0
-	elif e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT and _cameras > 0 \
+
+
+## The recapturing click arrives in _input, ahead of the scene's _unhandled_input, so it is
+## consumed before the player can read it as an attack.
+func _input(e: InputEvent) -> void:
+	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT and _cameras > 0 \
 			and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		get_viewport().set_input_as_handled()
