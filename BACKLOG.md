@@ -28,19 +28,6 @@ The grinner's upper body leans so far forward that it looks about to fall over. 
 
 Not started. Comes before the attack animations, which are paused for it.
 
-## Grinner: a more human face
-
-### Task description
-
-Make the grinner's face a bit more human. Its grin's width should sit about halfway between a normal human smile and its current width, and its jaw should be a little less elongated. Keep it unsettling, and keep the face without bones, so the rig needs no change. Work in `tools/grinner/head.py`. Deliver face close-ups and turnarounds before and after.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started.
 ## Enemy: attack animations
 
 ### Task description
@@ -53,7 +40,8 @@ Animate two attacks with root motion: a pounce that leaps about 4 m at the knigh
 
 ### Status
 
-Not started.
+Paused for the upright posture. Branch `worktree-agent-ab16faaf0a806d2b0` holds a first pass to resume from: four clips in `tools/grinner/moves.py`, a state-machine AnimationTree, hit-window markers, `Grinner` methods and `dev/grinner_check.gd`. Its body values and `keys.BEARING` need re-keying to the new stance.
+
 ## Enemy: behaviour and combat
 
 ### Task description
@@ -84,7 +72,7 @@ Not started. For comparison, one knight costs the GPU about 0.25 ms at mid dista
 
 ### Task description
 
-Rig Rosalyn: shoulders and upper body for gesturing, fingers, and a face that can speak, with jaw and lips. Skin the dress so the smocked bodice and skirt deform cleanly. Pose her standing with her hands clasped in front of her, and animate a quiet idle on that pose: breathing and small weight shifts. Deliver turnarounds and a contact sheet of the idle.
+Rig Rosalyn: shoulders and upper body for gesturing, fingers, and her head and neck. Her wooden face does not deform. Skin the dress so the smocked bodice and skirt deform cleanly. Pose her standing with her hands clasped in front of her, and animate a quiet idle on that pose: breathing and small weight shifts. Deliver turnarounds and a contact sheet of the idle.
 
 ### Open questions
 
@@ -99,17 +87,30 @@ Not started.
 
 ### Task description
 
-Animate Rosalyn speaking: her mouth moves, and she gestures lightly by moving her upper body and shoulders, and with her hands too, though they mostly stay clasped. Make several looping speech clips that blend with the idle and with each other without repeating visibly, played through Godot's AnimationTree. Deliver contact sheets and a close-up capture of her face while speaking.
+Rosalyn is voiced. Animate her speaking her lines without moving her mouth, which is wood: she speaks through head tilts, her eyes and brows, and gestures lightly by moving her upper body and shoulders, and with her hands too, though they mostly stay clasped. Make several looping speech clips that blend with the idle and with each other without repeating visibly, played through Godot's AnimationTree. Deliver contact sheets and a close-up capture of her face while speaking.
 
 ### Open questions
 
-- Is there recorded or synthesised speech to match the mouth to, or only a generic talking motion?
 - Does she turn her head to follow the knight?
 - Are her words shown as text?
 
 ### Status
 
 Not started.
+
+## Rosalyn: a moving mouth
+
+### Task description
+
+Try two ways for Rosalyn's wooden mouth to move with her speech, where no wood visibly bends. First, lips that part: a jaw bone turns a few degrees, opening the lip parting onto the dark pocket behind it, moving the skin about a millimetre. Second, stop-motion style shapes: a few rigid lacquered lip pieces, swapped or pivoted. Time both to her voice. Deliver both in motion, with sound, beside her still-mouthed speech: close-up videos from Godot's movie writer and a playable scene that switches between the three. The dev picks; if neither works, she keeps the still mouth.
+
+### Open questions
+
+- How many shapes, and are they swapped meshes or pieces on pivots?
+
+### Status
+
+Not started. Comes after speech and gestures.
 
 ## Rosalyn: place her and test two entities
 
