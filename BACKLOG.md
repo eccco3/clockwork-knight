@@ -12,7 +12,7 @@ After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% wit
 
 ### Status
 
-Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 °C; 50% gave 43 W and 70 °C.
+Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 Â°C; 50% gave 43 W and 70 Â°C.
 
 ## Grinner: a variant on all fours
 
@@ -303,20 +303,6 @@ Make fights between groups outdoors, in the shape of a MOBA lane: waves of minio
 
 Not started. Needs the minion's animation and the grinner's behaviour and combat.
 
-## Knight: light between her joints
-
-### Task description
-
-Faint streaks of white light sprinkle across the air gaps between the knight's jointed parts. They are translucent and faint at rest, and brighter and more striking while the joint moves. They light nothing around them. Make them cheap, for example a shader on thin cards or particles driven by each joint's angular speed. Deliver captures at rest and mid-swing.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started.
-
 ## Faces: crisper features and use in a figure
 
 ### Task description
@@ -335,7 +321,7 @@ Not started.
 
 ### Task description
 
-Add a `dev/` tool that shows the dev two faces from the morphable model side by side, rendered identically, and records which he prefers in about two seconds per pair. Fit a Bradley–Terry model over the shape coefficients, picking each next pair where the model is least sure, so 100 to 200 comparisons should be enough. Re-show about 5% of pairs to measure his consistency. Then sample faces along the learned direction, keep the best, and offer them for figures such as Rosalyn and the Clockmaker.
+Add a `dev/` tool that shows the dev two faces from the morphable model side by side, rendered identically, and records which he prefers in about two seconds per pair. Fit a Bradleyâ€“Terry model over the shape coefficients, picking each next pair where the model is least sure, so 100 to 200 comparisons should be enough. Re-show about 5% of pairs to measure his consistency. Then sample faces along the learned direction, keep the best, and offer them for figures such as Rosalyn and the Clockmaker.
 
 ### Open questions
 
