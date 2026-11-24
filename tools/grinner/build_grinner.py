@@ -1,7 +1,7 @@
 """Builds the grinner: sculpts every piece, bakes its textures from the sculpt, exports GLB with detail levels.
 
   blender --background --python build_grinner.py -- [--out grinner.glb] [--shots dir] [--size 2048]
-          [--clay a.png] [--only a,b] [--sub 2] [--wire] [--views 0,-40,-90,180] [--zoom full|head|face|hand|legs]
+          [--clay a.png] [--only a,b] [--sub 2] [--wire] [--views 0,-40,-90,180] [--zoom full|upper|head|face|ear|hand|legs|foot]
 
 --clay alone renders the bare game mesh, for judging forms quickly. --out and --shots run the whole build.
 Rest pose in Blender space: +X is the figure's left, -Y is forward, +Z up. Unrigged.
@@ -25,24 +25,11 @@ def in_head(f):
     return lambda p: f(head.to_head(p))
 
 
-HEAD_RES = (32, 30, 44)
 HEAD_FLIP = np.array([-1.0, -1.0, 1.0])
 
 
-def head_seam(a, b, n=1):
-    """One island, opened down the back of the skull."""
-    def on(c):
-        i, j, k = c[:, 0], c[:, 1], c[:, 2]
-        return (i == HEAD_RES[0] * n // 2) & ((j == 0) | ((j <= HEAD_RES[1] * n // 2) & ((k == 0) | (k == HEAD_RES[2] * n))))
-    return on(a) & on(b)
-
-
 def wrap_head(sub):
-    dims = tuple(r * sub for r in HEAD_RES)
-    v, q, n = mesher.wrap(head.field, V(0, -0.012, 0.050), V(0, -0.024, -0.050), (0.095, 0.125, 0.150), dims,
-                          relax=14, density=head.density, snap=head.FEATURES)
-    unit = mesher.cube_lattice(*dims)[0]
-    lat = np.rint((unit + 1.0) / 2.0 * np.array(dims)).astype(np.int64)
+    v, q, n, lat = head.wrap(sub)
     return head.from_head(v), q, n * HEAD_FLIP, lat
 
 
@@ -60,7 +47,7 @@ SPECS = {
                    paint=body.shorts_paint, seam=body.shorts_seam, mirror=False, grain=0.28, pitch=0.0024,
                    grain_tint=0.12, boost=0.9, hidden=either(under(on_left(body.leg), 0.002), under(body.shirt, 0.003))),
     "head": dict(SKIN, mesh=wrap_head, field=in_head(head.field), detail=in_head(head.detail), paint=in_head(head.paint),
-                 seam=head_seam, mirror=False, hidden=under(body.shirt, 0.003), boost=1.45, favour=in_head(head.face)),
+                 seam=head.seam, mirror=False, hidden=under(body.shirt, 0.003), boost=1.45, favour=in_head(head.face)),
 }
 
 
@@ -68,7 +55,7 @@ def small_parts():
     """Teeth, collar and eyeballs: made by formula, painted through a chart instead of from a sculpt."""
     v, q, n, chart = head.teeth()
     out = [dict(name="teeth", mat="skin", v=head.from_head(v), q=q, n=n * HEAD_FLIP, chart=chart, paint=head.teeth_paint,
-                mirror=False, size=(0.0048, 0.0125), boost=3.0)]
+                mirror=False, size=head.CHART, boost=3.0)]
     v, q, n, chart = body.collar()
     out.append(dict(name="collar", mat="cloth", v=v, q=q, n=n, chart=chart, paint=body.collar_paint, mirror=False,
                     size=(0.29, 0.05), boost=1.0, grain=0.22, pitch=0.0020, grain_tint=0.10))
@@ -80,8 +67,8 @@ def small_parts():
 
 ZOOMS = {"full": ((0, 0.02, 0.63), 1.36, (640, 900)), "upper": ((0, -0.05, 1.00), 0.72, (720, 720)),
          "head": ((0, -0.10, 1.125), 0.34, (720, 720)), "face": ((0, -0.10, 1.10), 0.17, (720, 720)),
-         "hand": ((0.42, -0.19, 0.36), 0.26, (720, 720)), "legs": ((0, 0.06, 0.30), 0.70, (720, 720)),
-         "foot": ((0.09, -0.03, 0.06), 0.30, (720, 720))}
+         "ear": ((0.073, -0.091, 1.122), 0.085, (720, 720)), "hand": ((0.42, -0.19, 0.36), 0.26, (720, 720)),
+         "legs": ((0, 0.06, 0.30), 0.70, (720, 720)), "foot": ((0.09, -0.03, 0.06), 0.30, (720, 720))}
 
 
 def turnaround(path, views, zoom, samples=48):
