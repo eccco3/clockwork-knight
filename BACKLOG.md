@@ -374,7 +374,7 @@ Not started.
 
 ### Task description
 
-The women's pool doesn't read as women: `sexes.py`'s measured direction is mostly head size. Add a launcher tool where the dev labels about 100 random faces woman, man or unclear in a few seconds each. Learn the female-male direction from those labels and replace the measured one. Rebuild both pools further along it. Give the renders a simple hair shape and brows. Show clearly different pairs before the near-even ones. Discard the existing women's answers.
+The women's pool doesn't read as women: `sexes.py`'s measured direction is mostly head size. Add a launcher tool where the dev labels about 100 random faces woman, man, androgynous or unclear in a few seconds each. Learn the female-male direction from those labels, androgynous faces marking its middle, and replace the measured one. Rebuild both pools further along it. Give the renders a simple hair shape and brows. Show clearly different pairs before the near-even ones. Discard the existing women's answers.
 
 ### Open questions
 
