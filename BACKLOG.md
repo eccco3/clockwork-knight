@@ -370,6 +370,19 @@ The morphable model in `tools/faces/` has ragged ears, slightly jagged nostril e
 
 Not started.
 
+## Faces: sex from the dev's labels
+
+### Task description
+
+The women's pool doesn't read as women: `sexes.py`'s measured direction is mostly head size. Add a launcher tool where the dev labels about 100 random faces woman, man or unclear in a few seconds each. Learn the female-male direction from those labels and replace the measured one. Rebuild both pools further along it. Give the renders a simple hair shape and brows. Show clearly different pairs before the near-even ones. Discard the existing women's answers.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started.
 ## Faces: learn the dev's taste
 
 ### Task description
@@ -382,4 +395,4 @@ Add a `dev/` tool that shows the dev two faces from the morphable model side by 
 
 ### Status
 
-Built, with women and men rated apart: the dev rates from the playtest launcher's two face rating tools, then `build_faces.py -- --sex women --best` (or men) makes the final faces.
+Paused until the labels item rebuilds the pools. Built, with women and men rated apart: the dev rates from the playtest launcher's two face rating tools, then `build_faces.py -- --sex women --best` (or men) makes the final faces.
