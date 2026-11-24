@@ -27,20 +27,6 @@ Make a second kind of grinner that moves on all fours, much faster than the walk
 ### Status
 
 Not started. Comes after the walking grinner's attack animations.
-## Dev: record clips to MP4
-
-### Task description
-
-Clips are recorded with Godot's movie writer to AVI, then encoded to H.264 MP4 by scratch scripts through Blender's built-in FFmpeg. Make that one committed command in `dev/` or `tools/`: it runs a `dev/drive.tscn` script on the hidden desktop with `--write-movie`, encodes the MP4, and deletes the AVI. Re-record the hall and outdoors clips with today's models as its test.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started.
-
 ## Enemy: behaviour and combat
 
 ### Task description
