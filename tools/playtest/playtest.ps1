@@ -1,12 +1,16 @@
-# Picks the main checkout or a worktree, readies it and starts the game windowed. -DryRun prints the
-# picker's entries and the steps it would take for -Pick (a branch or folder; main by default).
-param([switch]$DryRun, [string]$Pick)
+# Picks the main checkout or a worktree and one of its playable scenes, readies the checkout and starts
+# the scene windowed. A scene is playable when its root node has metadata/playable, the title listed
+# here; a checkout without any offers its main scene. The scene last played is remembered per user.
+# -DryRun prints the picker's entries and the steps it would take for -Pick (a branch or folder; main
+# by default) and -Scene (a title or res:// path; the remembered one by default).
+param([switch]$DryRun, [string]$Pick, [string]$Scene)
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Windows.Forms, System.Drawing
 try { [Console]::OutputEncoding = [Text.Encoding]::UTF8 } catch {}
 
 $script:Report = { param($line) Write-Host $line }
 $script:Notes = 0
+$script:LastScene = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'Clockwork Knight\playtest scene.txt'
 
 function Write-Report([string]$line) { & $script:Report $line }
 function Write-Note([string]$line) { $script:Notes++; Write-Report "Note: $line" }
@@ -88,12 +92,51 @@ function Copy-MissingAssets([string]$from, [string]$to) {
   }
 }
 
+function Get-ProjectFiles([string]$dir) {
+  Get-ChildItem -LiteralPath $dir -Directory |
+    Where-Object { -not $_.Name.StartsWith('.') -and -not (Test-Path (Join-Path $_.FullName '.gdignore')) } |
+    Get-ChildItem -Recurse -File
+}
+
+function Get-PlayableTitle([string]$scene) {
+  $root = [regex]::Match([IO.File]::ReadAllText($scene), '(?ms)^\[node .*?(?=^\[|\z)').Value
+  if ($root -match '(?m)^metadata/playable = "(.*)"\r?$') { $Matches[1] }
+}
+
+function New-Scene([string]$title, [string]$path, [string]$main) {
+  [pscustomobject]@{ Title = $title; Path = $path; IsMain = $path -eq $main }
+}
+
+function Get-Scenes([string]$dir) {
+  $main = if ((Get-Content -Raw -LiteralPath (Join-Path $dir 'project.godot')) -match '(?m)^run/main_scene="(.*)"') { $Matches[1] }
+  $scenes = foreach ($file in Get-ProjectFiles $dir | Where-Object Extension -eq '.tscn') {
+    $title = Get-PlayableTitle $file.FullName
+    if ($title) { New-Scene $title ('res://' + $file.FullName.Substring($dir.Length + 1).Replace('\', '/')) $main }
+  }
+  if (-not $scenes) { $scenes = New-Scene ([IO.Path]::GetFileNameWithoutExtension($main)) $main $main }
+  @($scenes) | Sort-Object @{ e = 'IsMain'; Descending = $true }, Title
+}
+
+function Find-Scene($scenes, [string]$name) {
+  $scenes | Where-Object { $name -in $_.Title, $_.Path } | Select-Object -First 1
+}
+
+function Get-DefaultScene($scenes, [string]$wanted) {
+  $found = Find-Scene $scenes $wanted
+  if ($found) { $found } else { @($scenes)[0] }
+}
+
+function Get-LastScene { Get-Content -LiteralPath $script:LastScene -TotalCount 1 -ErrorAction SilentlyContinue }
+
+function Save-LastScene($scene) {
+  New-Item -ItemType Directory -Force (Split-Path $script:LastScene) | Out-Null
+  Set-Content -LiteralPath $script:LastScene $scene.Path
+}
+
 function Get-ImportReason([string]$dir) {
   $classes = Get-Item -LiteralPath (Join-Path $dir '.godot\global_script_class_cache.cfg') -ErrorAction SilentlyContinue
   if (-not $classes) { return 'no import cache' }
-  $files = Get-ChildItem -LiteralPath $dir -Directory |
-    Where-Object { -not $_.Name.StartsWith('.') -and -not (Test-Path (Join-Path $_.FullName '.gdignore')) } |
-    Get-ChildItem -Recurse -File | Where-Object Extension -in '.gd', '.import'
+  $files = Get-ProjectFiles $dir | Where-Object Extension -in '.gd', '.import'
   foreach ($file in $files) {
     $name = $file.FullName.Substring($dir.Length + 1)
     if ($file.Extension -eq '.gd') {
@@ -114,18 +157,18 @@ function Get-ImportReason([string]$dir) {
   }
 }
 
-function Start-Playtest($checkout, $main) {
+function Start-Playtest($checkout, $main, $scene) {
   $godot = Join-Path $main.Path 'toolchain\godot\Godot_v4.7.2-stable_win64.exe'
   $console = Join-Path $main.Path 'toolchain\godot\Godot_v4.7.2-stable_win64_console.exe'
   foreach ($exe in $godot, $console) { if (-not (Test-Path $exe)) { throw "Missing toolchain: $exe" } }
-  Write-Report "$($checkout.Branch) in $($checkout.Path)"
+  Write-Report "$($scene.Title) from $($checkout.Branch) in $($checkout.Path)"
   if ($checkout.IsMain) {
     try { Update-Checkout $checkout.Path } catch { Write-Note "not updated: $_" }
   }
   Copy-MissingAssets $main.Path $checkout.Path
   $reason = Get-ImportReason $checkout.Path
   if ($reason) { Invoke-Step "import ($reason)" { Invoke-Hidden $console @('--headless', '--path', $checkout.Path, '--import') } }
-  $arguments = @('--path', "`"$($checkout.Path)`"")
+  $arguments = @('--path', "`"$($checkout.Path)`"", "`"$($scene.Path)`"")
   Invoke-Step "run $godot $arguments" { Start-Process $godot -ArgumentList $arguments -WorkingDirectory $checkout.Path }
 }
 
@@ -146,9 +189,11 @@ function Show-Picker {
   $log = New-Object Windows.Forms.TextBox -Property @{
     Multiline = $true; ReadOnly = $true; ScrollBars = 'Vertical'; Dock = 'Bottom'; Height = 110
   }
-  $play = New-Object Windows.Forms.Button -Property @{ Text = 'Play'; Dock = 'Right'; Width = 110 }
-  $bar = New-Object Windows.Forms.Panel -Property @{ Dock = 'Bottom'; Height = 36; Padding = '4, 4, 4, 4' }
-  $bar.Controls.Add($play)
+  $label = New-Object Windows.Forms.Label -Property @{ Text = '&Scene'; AutoSize = $true; Anchor = 'None'; TabIndex = 0 }
+  $sceneBox = New-Object Windows.Forms.ComboBox -Property @{ DropDownStyle = 'DropDownList'; Width = 240; Anchor = 'None'; TabIndex = 1 }
+  $play = New-Object Windows.Forms.Button -Property @{ Text = 'Play'; Width = 110; Height = 30; TabIndex = 2 }
+  $bar = New-Object Windows.Forms.FlowLayoutPanel -Property @{ Dock = 'Bottom'; Height = 40; FlowDirection = 'RightToLeft'; Padding = '2, 2, 2, 2' }
+  $bar.Controls.AddRange(@($play, $sceneBox, $label))
   $form.Controls.AddRange(@($list, $log, $bar))
   $form.AcceptButton = $play
   $form.Add_KeyDown({ if ($_.KeyCode -eq 'Escape') { $form.Close() } })
@@ -165,15 +210,36 @@ function Show-Picker {
     }
   } catch { Write-Report "Failed: $_" }
 
-  $play.Add_Click({
+  $sceneCache = @{}
+  $wanted = @{ Path = Get-LastScene }
+  $showScenes = {
     if (-not $list.SelectedItems.Count) { return }
-    $list.Enabled = $play.Enabled = $false
+    try {
+      $path = $list.SelectedItems[0].Tag.Path
+      if (-not $sceneCache[$path]) { $sceneCache[$path] = @(Get-Scenes $path) }
+      $scenes = $sceneCache[$path]
+      $chosen = Get-DefaultScene $scenes $wanted.Path
+      $sceneBox.Items.Clear()
+      $sceneBox.Items.AddRange([object[]]$scenes.Title)
+      $sceneBox.Tag = $scenes
+      $sceneBox.SelectedIndex = [array]::IndexOf([object[]]$scenes.Path, $chosen.Path)
+    } catch { Write-Report "Failed: $_" }
+  }
+  $list.Add_SelectedIndexChanged($showScenes)
+  $sceneBox.Add_SelectionChangeCommitted({ $wanted.Path = $sceneBox.Tag[$sceneBox.SelectedIndex].Path })
+  & $showScenes
+
+  $play.Add_Click({
+    if (-not $list.SelectedItems.Count -or $sceneBox.SelectedIndex -lt 0) { return }
+    $scene = $sceneBox.Tag[$sceneBox.SelectedIndex]
+    $list.Enabled = $sceneBox.Enabled = $play.Enabled = $false
     $script:Notes = 0
     try {
-      Start-Playtest $list.SelectedItems[0].Tag $main
+      Start-Playtest $list.SelectedItems[0].Tag $main $scene
+      Save-LastScene $scene
       if ($script:Notes) { Write-Report 'Game started.' } else { $form.Close() }
     } catch { Write-Report "Failed: $_" }
-    $list.Enabled = $play.Enabled = $true
+    $list.Enabled = $sceneBox.Enabled = $play.Enabled = $true
   })
   $list.Add_DoubleClick({ $play.PerformClick() })
   $form.Add_Shown({ if ($list.SelectedItems.Count) { $list.SelectedItems[0].EnsureVisible() }; $list.Focus() })
@@ -187,7 +253,13 @@ if ($DryRun) {
     Out-String -Width 200 | Write-Host
   $checkout = if ($Pick) { $checkouts | Where-Object { $Pick -in $_.Branch, $_.Path } | Select-Object -First 1 } else { $main }
   if (-not $checkout) { throw "No checkout matches $Pick" }
-  Start-Playtest $checkout $main
+  $scenes = @(Get-Scenes $checkout.Path)
+  $default = Get-DefaultScene $scenes (Get-LastScene)
+  $scenes | Format-Table @{ n = ' '; e = { if ($_.Path -eq $default.Path) { '>' } } }, Title, Path |
+    Out-String -Width 200 | Write-Host
+  $chosen = if ($Scene) { Find-Scene $scenes $Scene } else { $default }
+  if (-not $chosen) { throw "No playable scene in $($checkout.Branch) matches $Scene" }
+  Start-Playtest $checkout $main $chosen
 } else {
   Show-Picker
 }
