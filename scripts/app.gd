@@ -84,7 +84,12 @@ func _unhandled_input(e: InputEvent) -> void:
 			KEY_H:
 				_hint_on = not _hint_on
 				_hint_t = 0.0
-	elif e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT and _cameras > 0 \
+
+
+## The recapturing click arrives in _input, ahead of the scene's _unhandled_input, so it is
+## consumed before the player can read it as an attack.
+func _input(e: InputEvent) -> void:
+	if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT and _cameras > 0 \
 			and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		get_viewport().set_input_as_handled()

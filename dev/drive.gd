@@ -68,21 +68,29 @@ func _process(_dt: float) -> void:
 			_cam.make_current()
 
 
+## Actions go in as events, as real input does, so handlers see them.
+func _send(action: String, pressed: bool) -> void:
+	var e := InputEventAction.new()
+	e.action = action
+	e.pressed = pressed
+	Input.parse_input_event(e)
+
+
 func _physics_process(dt: float) -> void:
 	_t += dt
 	for r in _release.duplicate():
 		if _t >= r[0]:
-			Input.action_release(r[1])
+			_send(r[1], false)
 			_release.erase(r)
 	while not _events.is_empty() and _events[0][0] <= _t:
 		var ev: PackedStringArray = _events.pop_front()[1]
 		match ev[0]:
 			"press":
-				Input.action_press(ev[1])
+				_send(ev[1], true)
 			"release":
-				Input.action_release(ev[1])
+				_send(ev[1], false)
 			"tap":
-				Input.action_press(ev[1])
+				_send(ev[1], true)
 				_release.append([_t + 0.08, ev[1]])
 			"shot":
 				_shot(ev[1])
