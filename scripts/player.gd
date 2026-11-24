@@ -86,8 +86,14 @@ func _dir(yaw: float) -> Vector3:
 	return Vector3(sin(yaw), 0.0, cos(yaw))
 
 
+## Attacks are read from events, so a click that something else consumes never reaches here.
+func _unhandled_input(e: InputEvent) -> void:
+	if e.is_action_pressed("attack", false, true):
+		_buf_attack = BUFFER
+
+
 func _physics_process(dt: float) -> void:
-	_buf_attack = BUFFER if Input.is_action_just_pressed("attack") else _buf_attack - dt
+	_buf_attack -= dt
 	_buf_roll = BUFFER if Input.is_action_just_pressed("roll") else _buf_roll - dt
 	_buf_jump = BUFFER if Input.is_action_just_pressed("jump") else _buf_jump - dt
 	if Input.is_action_just_pressed("walk_toggle"):
