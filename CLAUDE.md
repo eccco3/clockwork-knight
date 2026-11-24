@@ -6,7 +6,7 @@ A roguelite: the workshop and hall are the safe hub; enemies appear only outdoor
 
 ## Tools
 
-Everything the project needs is in this folder. `toolchain/` is third-party and hidden from Godot by `.gdignore`.
+Everything the project needs is here; `.gdignore` hides third-party `toolchain/` from Godot.
 
 - Godot 4.7.2: `toolchain\godot\Godot_v4.7.2-stable_win64_console.exe`
 - Blender 4.5.16: `toolchain\blender\blender.exe`
@@ -40,15 +40,16 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 - `tools/sculpt/` is the characters' shared toolkit.
 - `tools/knight/` builds the knight, `assets/textures/knight/face_paint.png` and its placement `face_paint.json`; `tools/build_hall.py` and `builders/hall_*.gd` build the hall.
 - Only `KnightShadow`, a 4,700-triangle copy from `tools/knight/shadow.py`, casts the knight's shadows.
+- `tools/faces/` learns the face model from ICT-FaceKit; see `build_faces.py`.
 - `tools/grinner/` builds the first enemy, its rig and hand-keyed clips; `import_grinner.gd` sets its detail distances and adds the AnimationTree. `scripts/grinner.gd` walks it. Shot shows it on `dev/stage.tscn`: `call=stand:res://assets/models/grinner.glb`, `stand:res://dev/waddler.tscn` waddling, or `spread:` its detail levels.
 
 ## Repository
 
 - `tools/check_docs.sh` enforces the four documentation rules in `DEV.md`; `tools/hooks/pre-commit` runs it. After cloning: `git config core.hooksPath tools/hooks`.
 - First-party means everything git tracks except `tools/downloads/`.
-- Git ignores `toolchain/`, `.godot/`, `dev/shots/`, the Poly Haven files (`tools/fetch_assets.ps1`) and the built models and lightmap (`tools/build_models.ps1`).
+- Git ignores `toolchain/`, `.godot/`, `dev/shots/`, fetched files (`tools/fetch_assets.ps1`) and built models and lightmap (`tools/build_models.ps1`).
 - Commit with Windows git, not WSL.
 
 ## Downloads
 
-All CC0: Quaternius Universal Animation Library 1 and 2 (hand-keyed, not mocap); Poly Haven scans and sky (`tools/fetch_assets.ps1` lists ids).
+CC0: Quaternius Universal Animation Library 1 and 2 (hand-keyed, not mocap); Poly Haven scans and sky. MIT: ICT-FaceKit heads.

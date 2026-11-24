@@ -1,4 +1,4 @@
-# Downloads the CC0 surface scans and sky HDRI this project uses from Poly Haven.
+# Downloads the third-party files this project builds from: Poly Haven's CC0 surface scans and sky HDRI, and ICT-FaceKit.
 # Re-runnable: skips files that already exist.
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -52,3 +52,16 @@ foreach ($id in $hdris) {
   }
   "{0,-28} {1:N1} MB" -f $id, ((Get-Item $out).Length / 1MB)
 }
+
+# ICT-FaceKit (MIT): the generic head and its 100 identity modes, which tools/faces builds the face model from.
+$kit = 'https://raw.githubusercontent.com/USC-ICT/ICT-FaceKit/da5f95a607f5e6b37755b38d3385d7f2853732e5'
+$kdir = Join-Path $root 'tools\downloads\ict_facekit'
+New-Item -ItemType Directory -Force $kdir | Out-Null
+$shapes = @('generic_neutral_mesh') + (0..99 | ForEach-Object { 'identity{0:d3}' -f $_ })
+foreach ($file in @('LICENSE') + ($shapes | ForEach-Object { "FaceXModel/$_.obj" })) {
+  $out = Join-Path $kdir (Split-Path -Leaf $file)
+  if (Test-Path $out) { continue }
+  Invoke-WebRequest -Uri "$kit/$file" -OutFile "$out.part" -Headers $ua
+  Move-Item "$out.part" $out
+}
+"{0,-28} {1:N0} MB" -f 'ict_facekit', ((Get-ChildItem $kdir -File | Measure-Object Length -Sum).Sum / 1MB)
