@@ -22,3 +22,11 @@ Tools meant for the dev to use directly are added to the playtest launcher.
 
 You can proactively solve tech debt yourself. If a big refactor is needed, you can add it to the backlog.
 </immutable without the dev's blessing>
+
+## Usage limits
+
+The 5-hour limit stops every agent at once, and any Blender or Godot it started keeps running with nobody to stop it.
+
+1. Before starting a run that takes minutes (a character build, a lightmap bake, a clip), the main session checks `get_usage`. At 85% or more of the 5-hour limit, it holds the run until the window resets.
+2. When the usage-limit notice arrives, stop every Blender and Godot process this session or its subagents started, then report what's done and what's left. Partial outputs never get committed.
+3. Subagents can't see usage, so the main session does the checking and the cleanup for them.
