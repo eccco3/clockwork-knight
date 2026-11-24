@@ -271,6 +271,19 @@ Model unfinished automata at different stages, from bare mechanism to painted fi
 
 Not started. Needs the clocks, benches and tools.
 
+## Knight: a natural shoulder
+
+### Task description
+
+Remove the dark socket cup and its brass rim from her shoulders in 	ools/knight/build_knight.py. Each upper arm now ends in a shallow wooden dome only on its inner side, facing her body where the cup was, so the joint still reads across the air gap. Resculpt the rest of the upper arm and shoulder, including the outer face under the pauldron, as a fit but not bulky woman's arm: deltoid, biceps and triceps in gentle relief. Check clearance in every clip, and deliver clay and painted close-ups before and after.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started.
 ## Knight: roll starts less like a dive
 
 ### Task description
