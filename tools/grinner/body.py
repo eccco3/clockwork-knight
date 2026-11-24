@@ -17,7 +17,7 @@ UP, DOWN, FWD, BACK, LEFT = V(0, 0, 1), V(0, 0, -1), V(0, -1, 0), V(0, 1, 0), V(
 # ---------------------------------------------------------------- landmarks (left side)
 
 HIP = V(0.068, 0.020, 0.600)
-KNEE = V(0.084, 0.185, 0.332)                  # behind the hip: the leg folds the wrong way
+KNEE = V(0.080, 0.093, 0.328)                  # behind the hip: the leg folds the wrong way, opened to 157 degrees
 ANKLE = V(0.088, 0.055, 0.062)
 TOE_OUT = np.radians(11.0)
 SHOULDER = V(0.128, 0.002, 0.978)
