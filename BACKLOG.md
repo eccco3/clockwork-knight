@@ -208,20 +208,6 @@ Plan the game's opening scene with the dev in the main chat; this is not a subag
 
 Not started. Needs the dev; the workshop items build the room.
 
-## Outdoors: soften the light on her helmet
-
-### Task description
-
-In the foggy outdoors scene the knight's helmet catches a hard highlight that overcast light should not make. Her materials are right, since the helmet looks good in the hall, so fix the outdoor lighting instead: the sun's 7° angular size and strength, the sky's reflections and the ambient light in `scripts/outdoors.gd` and `shaders/outdoors_sky.gdshader`. Don't change knight materials. Compare screenshots outdoors before and after, standing and turning, check the hall is unchanged and GPU time is not worse.
-
-### Open questions
-
-- Should any direction of sunlight be visible through the fog, or should it be fully overcast?
-
-### Status
-
-In progress in a fanned-out agent.
-
 ## Workshop: walls, door and apartment
 
 ### Task description
