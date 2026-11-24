@@ -1,7 +1,10 @@
 """Builds the clockwork knight: sculpts every piece, binds it to the rig, exports GLB.
 
   blender --background --python build_knight.py -- [--out knight.glb] [--preview a.png]
-          [--pose Action:frame] [--views 0,-40,-90,180] [--zoom head|upper|full] [--only a,b]
+          [--pose Action:frame] [--views 0,-40,-90/30,180] [--zoom head|upper|full|<bone> [--scale 0.34]]
+          [--only a,b]
+
+A view is a yaw, or yaw/pitch to look from above; --zoom <bone> centres on that bone, --scale metres wide.
 
 Rest pose is a T-pose in Blender space: +X is the figure's left, -Y is forward, +Z up.
 Every piece is rigid on one bone; the gaps at the joints are deliberate.
@@ -739,16 +742,19 @@ def set_pose(arm, spec):
     bpy.context.scene.frame_set(int(frame))
 
 
+ZOOMS = {"full": ((0, 0, 0.93), 2.02, (520, 1000)), "upper": ((0, 0, 1.36), 1.05, (640, 640)),
+         "head": ((0, -0.03, 1.66), 0.34, (600, 600))}
+
+
 def preview(arm, path, views, zoom):
-    if zoom == "full":
-        target, scale, res = (0, 0, 0.93), 2.02, (520, 1000)
-    elif zoom == "upper":
-        target, scale, res = (0, 0, 1.36), 1.05, (640, 640)
+    if zoom in ZOOMS:
+        target, scale, res = ZOOMS[zoom]
+        if opt("--pose"):
+            hips = arm.pose.bones["pelvis"].head
+            target = (hips.x, hips.y, target[2] + hips.z - 0.917)
     else:
-        target, scale, res = (0, -0.03, 1.66), 0.34, (600, 600)
-    if opt("--pose"):
-        hips = arm.pose.bones["pelvis"].head
-        target = (hips.x, hips.y, target[2] + hips.z - 0.917)
+        bpy.context.view_layer.update()
+        target, scale, res = tuple(arm.matrix_world @ arm.pose.bones[zoom].head), float(opt("--scale", "0.34")), (600, 600)
     bl.turnaround(path, views, target, scale, res, bl.studio((2.6, 1.2, 2.4), (900, 220, 600)), 40)
 
 
@@ -793,7 +799,7 @@ def main():
     if opt("--pose"):
         set_pose(arm, opt("--pose"))
     if opt("--preview"):
-        views = [float(a) for a in opt("--views", "0,-40,-90,180").split(",")]
+        views = [tuple(float(x) for x in a.split("/")) for a in opt("--views", "0,-40,-90,180").split(",")]
         preview(arm, opt("--preview"), views, opt("--zoom", "full"))
     if opt("--out"):
         caster = shadow.shadow_mesh(body, 3000)
