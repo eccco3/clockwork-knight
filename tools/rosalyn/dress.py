@@ -22,8 +22,8 @@ EASE = 0.0055
 FOLDS = 13                                     # folds round the skirt
 DIAMONDS, DIAMOND_Z = 64, 0.0105               # smocking: cells round the bodice, and their height
 
-CHARTREUSE = V(0.60, 0.74, 0.12)
-SHADOW = V(0.40, 0.54, 0.07)
+CHARTREUSE = V(0.64, 0.72, 0.13)
+SHADOW = V(0.45, 0.53, 0.07)
 BUTTER = V(0.97, 0.88, 0.58)
 
 
@@ -33,7 +33,7 @@ def _round(p):
 
 
 def _skirt(p):
-    """The skirt hanging from the waist over the hips: distance, and how far its folds have opened (0..1)."""
+    """The skirt hanging from the waist over the hips, its folds opening toward the hem."""
     z = p[:, 2]
     hip = smoothstep(Z_WAIST, 0.930, z)
     low = smoothstep(0.930, Z_HEM, z)
@@ -45,7 +45,7 @@ def _skirt(p):
     open_ = smoothstep(1.03, 0.42, z)
     w = FOLDS * th + 1.3 * np.sin(3.0 * th + 0.7) + 0.8 * np.sin(5.0 * th + 2.1 + 2.0 * z)
     fold = (0.5 + 0.5 * np.cos(w)) ** 1.4 - 0.42
-    return (np.hypot(p[:, 0], y) - rx - 0.024 * open_ * fold) * 0.85, open_
+    return (np.hypot(p[:, 0], y) - rx - 0.032 * open_ * fold) * 0.85
 
 
 def _sleeve(q):
@@ -63,7 +63,7 @@ def _cloth(p, fine=True):
     th = _round(p)
     wob = noise3(p * 14.0)
     bodice = S.smax(body.trunk(p) - EASE, Z_WAIST - 0.03 - z, 0.01)
-    skirt, open_ = _skirt(p)
+    skirt = _skirt(p)
     d = S.smin(bodice, S.smax(skirt, z - (Z_WAIST + 0.010), 0.008), 0.016)
     sleeve, s = _sleeve(q)
     d = S.smin(d, sleeve, 0.014)
@@ -71,7 +71,7 @@ def _cloth(p, fine=True):
     frill = smoothstep(Z_NECK - FRILL - 0.004, Z_NECK - FRILL + 0.003, z)
     sash = smoothstep(SASH[0] - 0.002, SASH[0] + 0.001, z) * smoothstep(SASH[1] + 0.002, SASH[1] - 0.001, z)
     d = d - 0.0030 * frill - 0.0026 * sash
-    P = dict(th=th, s=s, sleeve=sleeve, frill=frill, sash=sash, open=open_)
+    P = dict(s=s, sleeve=sleeve, frill=frill, sash=sash)
     if fine:
         a, b = DIAMONDS * th / (2 * np.pi) + z / DIAMOND_Z, DIAMONDS * th / (2 * np.pi) - z / DIAMOND_Z
         on_bodice = smoothstep(SASH[1], SASH[1] + 0.006, z) * (1.0 - frill) * smoothstep(0.004, 0.012, sleeve)

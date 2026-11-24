@@ -27,7 +27,7 @@ AXIS_Y = -0.012                                # the meshing axis stands here, a
 AXIS = (V(0, AXIS_Y, 0.045), V(0, AXIS_Y, -0.105))
 TH_M = 0.292                                   # the corners of the mouth, as an angle round the axis
 MZ, RISE, BOW = -0.0612, 0.0013, 0.0005        # height of the parting, lift at the corners, dip under the cupid's bow
-MH = 0.00045                                   # half the parting's height at the centre
+MH = 0.00035                                   # half the parting's height at the centre
 POCKET = (0.0885, 0.0812)                      # distance of the pocket's back from the axis: centre, corners
 NECK_CUT = -0.0012                             # the head ends this far along the neck from the choker
 
@@ -137,7 +137,6 @@ def _parts(p):
     back = POCKET[0] + (POCKET[1] - POCKET[0]) * np.minimum(s, 1.0) ** 2
     d = S.smax(d, -np.maximum(g, back - r), 0.0004)
     # ---- eyelids: a shell over the eyeball, open across the aperture
-    P["skin"] = d
     ga, across, ph, up, lo = _aperture(q)
     r_eye = S.length(q - EYE)
     upper_side = ph > 0.5 * (up + lo)
@@ -206,7 +205,7 @@ def rails(detail):
         def g(p):
             th, _ = _round(S.mirror_x(p))
             s = np.minimum(th / TH_M, 1.0)
-            stand = MH * np.sqrt(1.0 - s * s) + LIP_STAND + LIP_GAP * smoothstep(TH_M, TH_M + 0.25, th)
+            stand = MH * np.sqrt(1.0 - s * s) + LIP_STAND + LIP_GAP * smoothstep(TH_M, TH_M + 0.09, th)
             return side * (p[:, 2] - _lip_line(th)) - stand
         return g
     ring = round(LIP_RING * dims(detail)[2])
@@ -220,13 +219,20 @@ def wrap(detail=1.0):
     v, q, nrm = mesher.wrap(field, *AXIS, (0.085, 0.105, 0.150), n, relax=14, density=density, snap=FEATURES,
                             rails=rails(detail))
     unit = mesher.cube_lattice(*n)[0]
-    return v, q, nrm, np.rint((unit + 1.0) / 2.0 * np.array(n)).astype(np.int64)
+    lat = np.rint((unit + 1.0) / 2.0 * np.array(n)).astype(np.int64)
+    ring = round(LIP_RING * n[2])
+    mouth = (_round(S.mirror_x(v))[0] < TH_M) & (v[:, 1] > 0)
+    out = S.normalize((v - V(0, AXIS_Y, 0)) * V(1, 1, 0))
+    for k, turn in ((ring - 1, 0.75), (ring, 0.0), (ring + 1, -0.75)):          # the lips' edges turn into the parting,
+        m = mouth & (lat[:, 2] == k)                                            # and the pocket's back faces out of it
+        nrm[m] = S.normalize(out[m] + V(0, 0, turn))
+    return v, q, nrm, lat
 
 
 # ---------------------------------------------------------------- paint
 
-LIP = V(0.88, 0.47, 0.46)
-LIP_DEEP = V(0.68, 0.29, 0.31)
+LIP = V(0.90, 0.53, 0.51)
+LIP_DEEP = V(0.72, 0.35, 0.36)
 MOUTH = V(0.16, 0.07, 0.06)
 BROW = V(0.50, 0.36, 0.20)
 LASH = V(0.20, 0.13, 0.09)

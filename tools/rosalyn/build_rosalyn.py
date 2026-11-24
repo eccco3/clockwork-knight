@@ -1,10 +1,10 @@
 """Builds Rosalyn: sculpts every piece, bakes her dress and hair from the sculpt, exports GLB.
 
   blender --background --python build_rosalyn.py -- [--out rosalyn.glb] [--shots dir] [--detail 1.0] [--size 2048]
-          [--clay a.png] [--only a,b] [--wire] [--views 0,-40,-90,180] [--zoom full,upper,head,face,hand,feet]
+          [--clay a.png] [--only a,b] [--wire] [--views 0,-40,-90,180] [--zoom full,upper,head,face,hand,feet] [--light 1.0]
 
 --clay alone renders the bare game mesh, for judging forms quickly. --out and --shots run the whole build.
---detail scales every lattice, and with it the triangle count: 1.0 fills the budget, 0.7 halves it.
+--detail scales every lattice, and with it the triangle count: 1.0 comes to about 225,000 of her 300,000, 0.7 to half that.
 Rest pose in Blender space: +X is her left, -Y is forward, +Z up. Unrigged.
 
 Her wood, brass and eyes carry the game's solid grain space instead of textures, and the game dresses them
@@ -23,7 +23,8 @@ from sculpt.gen import Frame
 from rosalyn import body, head, hair, dress, trim
 
 NAME = "rosalyn"                                # her working name: every file and object this build makes is called after it
-BUDGET = 300000                                 # triangles at --detail 1.0
+BUDGET = 300000                                 # triangles she may have; --detail 1.0 uses three quarters of them
+CLAY_LIGHT = 0.15                               # pale clay wants the lamps this much dimmer than her wood
 ROOT = os.path.dirname(os.path.dirname(HERE))
 FACE_PAINT = os.path.join(ROOT, "assets", "textures", NAME, "face_paint.png")
 HEAD = body.HEAD
@@ -31,9 +32,9 @@ UPRIGHT = Frame(V(0, 0, 0), body.UP, body.LEFT)
 FACE_GRAIN = V(0.09, 0.05, 0.60)                # the head frame's origin in the face's grain space
 BAKED = {"cloth": dict(grain=bake.weave), "hair": dict(grain=bake.pores)}
 CARVED = {                                      # how Blender previews what the game dresses by name
-    "wood": dict(base=(0.80, 0.63, 0.42), rough=0.30),
-    "wood_face": dict(base=(0.84, 0.68, 0.48), rough=0.30, vertex_color=True),
-    "lacquer": dict(base=(0.90, 0.76, 0.40), rough=0.22),
+    "wood": dict(base=(0.62, 0.44, 0.27), rough=0.30),
+    "wood_face": dict(base=(0.66, 0.48, 0.30), rough=0.30, vertex_color=True),
+    "lacquer": dict(base=(0.72, 0.52, 0.16), rough=0.22),
     "brass": dict(base=(0.86, 0.62, 0.26), rough=0.28, metallic=1.0),
     "eye": dict(base=(1.0, 1.0, 1.0), rough=0.06, vertex_color=True),
 }
@@ -104,17 +105,17 @@ def carve(pieces, seed=11):
     return ob
 
 
-ZOOMS = {"full": ((0, 0, 0.93), 2.02, (520, 1000)), "upper": ((0, 0, 1.36), 1.05, (640, 640)),
+ZOOMS = {"full": ((0, 0, 0.93), 2.02, (520, 1000)), "upper": ((0, 0, 1.36), 1.05, (640, 640)), "neck": ((0, -0.03, 1.44), 0.50, (720, 720)),
          "head": ((0, -0.03, 1.635), 0.34, (600, 600)), "face": ((0, -0.03, 1.605), 0.19, (720, 720)),
          "hand": ((0.36, -0.06, 0.86), 0.30, (720, 720)), "feet": ((0, 0, 0.17), 0.60, (720, 720)),
          "wrist": ((0.35, -0.05, 0.91), 0.12, (720, 720)),
          "eye": ((0.028, -0.08, 1.630), 0.055, (720, 720)), "mouth": ((0, -0.10, 1.570), 0.075, (720, 720))}
 
 
-def turnaround(path, views, zoom, samples=40):
-    """The knight's preview lighting and scale, so the two stand side by side."""
+def turnaround(path, views, zoom, light=1.0, samples=40):
+    """The knight's preview lighting and scale, so the two stand side by side; `light` and --light scale the lamps."""
     target, scale, res = ZOOMS[zoom]
-    dim = float(opt("--light", "1.0"))
+    dim = light * float(opt("--light", "1.0"))
     bl.turnaround(path, views, target, scale, res, bl.studio((2.6, 1.2, 2.4), (900 * dim, 220 * dim, 600 * dim)), samples)
 
 
@@ -135,7 +136,7 @@ def main():
         if opt("--clay"):
             build.clay_objects(pieces, "--wire" in argv, black=("eye",))
             for zoom in zooms:
-                turnaround(opt("--clay").replace(".png", "_%s.png" % zoom), views, zoom)
+                turnaround(opt("--clay").replace(".png", "_%s.png" % zoom), views, zoom, CLAY_LIGHT)
         return
     assert count <= BUDGET * max(detail, 1.0) ** 2, "over the triangle budget"
 
@@ -157,11 +158,11 @@ def main():
                              ("hand", [0, -90, 180, 90])):
             if opt("--zoom") and zoom not in zooms:
                 continue
-            for kind, mats in (("clay", bare), ("painted", wears)):
+            for kind, mats, light in (("clay", bare, CLAY_LIGHT), ("painted", wears, 1.0)):
                 for ob, slots in zip(figure, mats):
                     for k, m in enumerate(slots):
                         ob.data.materials[k] = m
-                turnaround(os.path.join(opt("--shots"), "%s_%s.png" % (kind, zoom)), angles, zoom)
+                turnaround(os.path.join(opt("--shots"), "%s_%s.png" % (kind, zoom)), angles, zoom, light)
     if opt("--out"):
         bl.export_glb(opt("--out"), figure, export_animations=False, export_skins=False, export_tangents=True,
                       export_vertex_color="NONE")

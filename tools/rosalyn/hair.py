@@ -12,13 +12,14 @@ from sculpt.num import smoothstep, noise3, fbm, mix
 from . import head
 
 THICK = 0.0070                                 # how far the hair stands off the skull
+EDGE, SWELL = 0.0024, 0.0300                   # ... at most, along its edge, and how much more three centimetres in
 CENTRE_Y = -0.014                              # the hairline is measured round this upright line
 COIL = V(0, -0.1000, -0.0300)                  # the coil at the nape
 COIL_R = V(0.0440, 0.0300, 0.0380)
 COMB = S.normalize(COIL - V(0, 0.090, 0.000))  # the strands run back along this line toward the coil
 LINE_AZ = np.radians([0, 25, 45, 62, 78, 92, 108, 128, 152, 180])
 LINE_Z = np.array([0.0700, 0.0690, 0.0640, 0.0500, 0.0260, -0.0060, -0.0340, -0.0540, -0.0640, -0.0660])
-ROLL = 0.0032                                  # the round of the hair's edge where it meets the skin
+ROLL = 0.0016                                # the round of the hair's edge where it meets the skin
 RES = (60, 64, 56)                             # lattice at full detail: across, front to back, up
 EDGE_RING = 0.16                               # the upper loop along the edge, as a share of the lattice's height
 LEAN = 0.70                                    # the lattice leans as the hairline does: high at the brow, low at the nape
@@ -63,12 +64,15 @@ def _strands(p, fine=True):
 
 def _parts(p, fine=True):
     q = S.mirror_x(p)
-    d = head.skull(p) - THICK
+    skull = head.skull(p)
+    above = p[:, 2] - _hairline(q)
+    d = skull - THICK
     d = S.smin(d, S.ellipsoid(q, V(0.0560, -0.0320, 0.0040), V(0.0215, 0.0520, 0.0460)), 0.020)     # over the ears
     d = S.smin(d, S.ellipsoid(p, V(0, 0.0340, 0.0790), V(0.0500, 0.0360, 0.0240)), 0.022)           # lifted off the brow
+    d = S.smax(d, skull - EDGE - SWELL * smoothstep(0.0, 0.030, above), 0.004)                      # thin where it starts
     d = S.smin(d, S.ellipsoid(p, COIL, COIL_R), 0.012)
     rise = _strands(p, fine)
-    return dict(d=S.smax(d - rise, _hairline(q) - p[:, 2], ROLL), rise=rise)
+    return dict(d=S.smax(d - rise, -above, ROLL), rise=rise)
 
 
 def field(p):

@@ -20,7 +20,7 @@ UP, DOWN, FWD, BACK, LEFT = V(0, 0, 1), V(0, 0, -1), V(0, -1, 0), V(0, 1, 0), V(
 HEAD = Frame(V(0, -0.022, 1.630), UP, -LEFT)   # between the eyes at the centre of the skull; y out of the face
 NECK_A, NECK_B = V(0, 0.018, 1.440), V(0, -0.004, 1.580)
 NECK_DIR = S.normalize(NECK_B - NECK_A)
-CHOKER = lerp(NECK_A, NECK_B, 0.43)           # where the head's wood meets the body's, under a brass band
+CHOKER = lerp(NECK_A, NECK_B, 0.47)           # where the head's wood meets the body's, under a brass band
 SHOULDER = V(0.150, 0.012, 1.405)
 ELBOW = SHOULDER + S.normalize(V(0.407, 0.050, -0.914)) * 0.285
 WRIST = ELBOW + S.normalize(V(0.300, -0.300, -0.905)) * 0.245
@@ -58,22 +58,39 @@ def trunk(p):
     d = S.smin(S.ellipsoid(p, V(0, 0.004, 1.285), V(0.128, 0.090, 0.165)),
                S.ellipsoid(p, V(0, 0.006, 1.090), V(0.104, 0.076, 0.130)), 0.05)
     d = S.smin(d, S.ellipsoid(p, V(0, 0.016, 0.925), V(0.162, 0.104, 0.125)), 0.06)
-    d = S.smin(d, S.ellipsoid(q, V(0.060, -0.066, 1.258), V(0.046, 0.040, 0.046)), 0.040)
+    d = S.smin(d, S.ellipsoid(q, V(0.060, -0.060, 1.258), V(0.046, 0.037, 0.046)), 0.040)
     d = S.smin(d, S.ellipsoid(q, V(0.078, 0.064, 1.345), V(0.050, 0.018, 0.066), S.euler(z=14)), 0.045)
     return S.ssub(d, S.tube(p, [V(0, 0.100, 1.40), V(0, 0.100, 1.30), V(0, 0.092, 1.16)], 0.0040), 0.022)
 
 
-def torso(p):
-    """Trunk, shoulder girdle, the roots of the arms and the neck, as one form."""
+def _girdle(p):
+    """Trunk, sloping shoulders, the roots of the arms and the neck."""
     q = S.mirror_x(p)
     d = trunk(p)
-    d = S.smin(d, S.cone(q, V(0.040, 0.020, 1.456), SHOULDER + V(-0.016, 0.0, 0.014), 0.028, 0.027), 0.040)
+    d = S.smin(d, S.cone(q, V(0.032, 0.022, 1.476), SHOULDER + V(-0.016, 0.0, 0.020), 0.026, 0.028), 0.045)
     d = S.smin(d, S.sphere(q, SHOULDER + V(-0.002, 0, 0), 0.0405), 0.028)
     d = S.smin(d, upper_arm(q), 0.020)
-    clav = S.tube(q, [V(0.018, -0.044, 1.430), V(0.082, -0.036, 1.440), V(0.150, -0.006, 1.441)], [0.0070, 0.0060, 0.0068])
-    d = S.smin(d, clav, 0.020)
-    d = S.smin(d, neck(p), 0.030)
-    return S.ssub(d, S.sphere(p, V(0, -0.064, 1.448), 0.0100), 0.018)          # the pit of the throat
+    return S.smin(d, neck(p), 0.030)
+
+
+COLLARBONE = [(0.016, 1.431), (0.050, 1.437), (0.085, 1.441), (0.118, 1.439)]      # across and up, breastbone to shoulder
+COLLARBONE_R, COLLARBONE_PROUD = 0.0060, 0.0022
+_collarbone = None
+
+
+def collarbone():
+    """The collarbone's line, laid just under the surface of the upper chest (found once by casting forward)."""
+    global _collarbone
+    if _collarbone is None:
+        sink = BACK * (COLLARBONE_R - COLLARBONE_PROUD)
+        _collarbone = [S.hug(_girdle, V(x, 0.030, z), FWD, UP, 1, 0.0, 0.0, off=0.0)[0] + sink for x, z in COLLARBONE]
+    return _collarbone
+
+
+def torso(p):
+    """The whole torso as one form, with collarbones and the pit of the throat."""
+    d = S.smin(_girdle(p), S.tube(S.mirror_x(p), collarbone(), COLLARBONE_R), 0.012)
+    return S.ssub(d, S.sphere(p, V(0, -0.064, 1.446), 0.0080), 0.020)
 
 
 def chest(p):
@@ -93,8 +110,8 @@ def chest_boxes(detail=1.0):
     """A trunk with an arm stub from each flank and the neck from its top. Lattice: i to her left, j backward, k up."""
     g = chest_grid(detail)
     boxes = [Box((-g["i"], -g["j"], 0), (g["i"], g["j"], g["k"]), 2,
-                 [V(0, 0.004, CHEST_CUT), V(0, 0.006, 1.330), V(0, 0.010, 1.405), V(0, 0.012, 1.448)],
-                 [0.100, 0.112, 0.118, 0.075], [0.066, 0.072, 0.066, 0.046], LEFT, BACK, cap=(0.0, 0.3))]
+                 [V(0, 0.004, CHEST_CUT), V(0, 0.006, 1.330), V(0, 0.010, 1.410), V(0, 0.014, 1.470)],
+                 [0.100, 0.112, 0.112, 0.062], [0.066, 0.072, 0.064, 0.038], LEFT, BACK, cap=(0.0, 0.3))]
     path = [SHOULDER + V(-0.030, 0, 0.004), SHOULDER + UPPER * 0.050, SHOULDER + UPPER * (STUB_TO + 0.002)]
     for side in (1, -1):
         lo = (g["i"] if side > 0 else -g["i"] - g["stub"], -g["arm"], g["k"] - 2 * g["arm"])
@@ -102,7 +119,7 @@ def chest_boxes(detail=1.0):
         boxes.append(Box(lo, hi, 0, [x * V(side, 1, 1) for x in path][::side], 0.024, 0.024, BACK, UP,
                          cap=(0.0, 0.2) if side > 0 else (0.2, 0.0)))
     boxes.append(Box((-g["neck"], -g["neck"], g["k"]), (g["neck"], g["neck"], g["k"] + g["up"]), 2,
-                     [NECK_A + NECK_DIR * 0.012, CHOKER + NECK_DIR * 0.004], 0.030, 0.030, LEFT, BACK, cap=(0.0, 0.2)))
+                     [NECK_A + NECK_DIR * 0.046, CHOKER + NECK_DIR * 0.004], 0.030, 0.030, LEFT, BACK, cap=(0.0, 0.2)))
     return boxes
 
 
@@ -137,8 +154,8 @@ FINGERS = {
     "middle": _digit((0.002, 0.0085, 0.097), 1.5, (0.045, 0.028, 0.023), (13, 21, 12), (0.0078, 0.0067, 0.0059, 0.0050)),
     "index": _digit((0.001, 0.0255, 0.093), 6.0, (0.040, 0.025, 0.022), (10, 18, 11), (0.0076, 0.0066, 0.0058, 0.0049)),
 }
-THUMB = _joints([V(-0.0060, 0.0200, 0.0120), V(-0.0135, 0.0345, 0.0470), V(-0.0185, 0.0440, 0.0770),
-                 V(-0.0215, 0.0490, 0.1030)], (0.0115, 0.0092, 0.0078, 0.0062), root=V(-0.0110, 0.0215, 0.0400))
+THUMB = _joints([V(-0.0060, 0.0200, 0.0120), V(-0.0135, 0.0390, 0.0450), V(-0.0190, 0.0530, 0.0720),
+                 V(-0.0225, 0.0625, 0.0950)], (0.0115, 0.0092, 0.0078, 0.0062), root=V(-0.0110, 0.0240, 0.0400))
 DIGITS = list(FINGERS.values()) + [THUMB]
 
 
