@@ -4,6 +4,7 @@ A clip is a function of phase (0..1 round its loop) returning controls. Its keys
 looping curves that ease from key to key without overshooting, so a held value stays held.
 """
 import numpy as np
+from .body import FINGERS
 
 STRIDE = 0.46                                  # metres walked in one waddle cycle
 PLANTED = 0.64                                 # the share of the cycle each foot stands
@@ -55,7 +56,6 @@ def both(controls):
 
 # ---------------------------------------------------------------- bearing
 
-FINGERS = ("pinky", "ring", "middle", "index")
 _HANGING = dict(foot_x=0.012, spread=4.0, arm_hang=0.75, curl_pinky=24.0, curl_ring=19.0, curl_middle=16.0, curl_index=13.0,
                 thumb_curl=8.0)
 BEARING = dict(sided(dict(_HANGING, foot_yaw=4.0, arm_out=-7.0, elbow=6.0, wrist_curl=8.0),
@@ -142,8 +142,8 @@ def _hand(phase, breath):
     """The arm lolls, and now and then its claws close one after another, little finger first."""
     out = {"curl_" + name: 34.0 * DRUM(phase - 0.025 * k) for k, name in enumerate(FINGERS)}
     out.update(thumb_curl=10.0 * DRUM(phase - 0.09), wrist_curl=5.0 * DRUM(phase - 0.04) + 3.0 * LOLL(phase - 0.08),
-               arm_fwd=4.0 + 2.5 * LOLL(phase), arm_out=1.5 * LOLL(phase + 0.2), elbow=2.0 * LOLL(phase - 0.05),
-               shoulder_up=2.5 * breath)
+               arm_fwd=-5.0 + 2.5 * LOLL(phase), arm_out=-4.0 + 1.5 * LOLL(phase + 0.2), elbow=2.0 * LOLL(phase - 0.05),
+               shoulder_up=3.0 * breath)
     return out
 
 
@@ -151,7 +151,7 @@ def idle(phase):
     breath = BREATH(phase)
     out = {name: curve(phase) for name, curve in STAND.items()}
     out.update(sided(_hand(phase - 0.14, breath), _hand(phase - 0.62, breath)))
-    out.update(hips_z=-0.004 * breath, hips_pitch=2.0 - 0.8 * breath, spine_pitch=-1.4 * breath, chest_pitch=2.0 - 2.2 * breath,
+    out.update(hips_z=-0.004 * breath, hips_pitch=2.0 - 0.8 * breath, spine_pitch=-1.6 * breath, chest_pitch=2.0 - 2.8 * breath,
                head_level=0.6)
     return _borne(out)
 
