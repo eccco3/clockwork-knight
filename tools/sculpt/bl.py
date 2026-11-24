@@ -124,7 +124,7 @@ def save_image(path, px, colour=True):
 
 def read_image(path):
     """A picture file as (H, W, 4) floats, bottom row first."""
-    img = bpy.data.images.load(path)
+    img = bpy.data.images.load(os.path.abspath(path))
     px = np.array(img.pixels[:], dtype=np.float32).reshape(img.size[1], img.size[0], 4)
     bpy.data.images.remove(img)
     return px

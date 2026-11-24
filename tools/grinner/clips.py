@@ -49,6 +49,10 @@ def sided(left, right):
     return out
 
 
+def both(controls):
+    return sided(controls, controls)
+
+
 # ---------------------------------------------------------------- bearing
 
 FINGERS = ("pinky", "ring", "middle", "index")
@@ -171,6 +175,6 @@ POSES = {
     "kick": dict(sided(dict(foot_y=-0.20, foot_z=0.26, foot_pitch=30.0, knee=14.0, arm_out=25.0),
                        dict(arm_out=18.0, arm_fwd=-20.0, foot_pitch=0.0)),
                  hips_x=-0.05, hips_roll=-7.0, hips_z=-0.02, spine_roll=5.0, chest_roll=5.0, hips_pitch=-6.0),
-    "claw": sided(dict(CLAWED, wrist_curl=25.0), dict(SPLAYED, wrist_curl=-20.0)),
-    "splay": sided(dict(SPLAYED, wrist_curl=-20.0), dict(CLAWED, wrist_curl=25.0)),
+    "claw": both(dict(CLAWED, wrist_curl=25.0)),
+    "splay": both(dict(SPLAYED, wrist_curl=-20.0)),
 }
