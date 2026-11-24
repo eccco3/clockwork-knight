@@ -33,11 +33,11 @@ Not started. Scripted play: 6.8 ms with three shadowed chandeliers, 6.3 ms with 
 
 ### Task description
 
-Fix the grinner's weak spots before it is rigged: ragged geometry where the mouth pinches shut at each corner, which reads as cracks up the cheeks; a rough crease where jaw meets neck; a ragged hairline; and coarse, angular ears. Give the teeth their own texture variety and stop the limbs' paint mirroring. Deepen the mouth into a cavity if the jaw is to open wide. Deliver before and after turnarounds of the head.
+Fix the grinner's weak spots before it is rigged: ragged geometry where the mouth pinches shut at each corner, which reads as cracks up the cheeks; a rough crease where jaw meets neck; a ragged hairline; and coarse, angular ears. Give the teeth their own texture variety and stop the limbs' paint mirroring. The grin stays fixed, so the mouth needs no cavity. Deliver before and after turnarounds of the head.
 
 ### Open questions
 
-- Should the jaw open wide, or is a fixed smile with small movement enough?
+- None.
 
 ### Status
 
@@ -47,12 +47,11 @@ Not started. The model is merged; see `tools/grinner/`.
 
 ### Task description
 
-Rig the grinner with clean deformation at the reversed knees and hips, the long arms, the claws and the wide jaw, in at most 50 bones. Animate an idle and a slow waddle by hand in Blender, because the downloaded humanoid clips do not fit these proportions. Play them through Godot's built-in AnimationTree, not the knight's scripted blender, so that many can run cheaply. Deliver turnarounds and a contact sheet of the waddle.
+Rig the grinner with clean deformation at the reversed knees and hips, the long arms and the claws, in at most 50 bones. The grin is fixed, so the face needs no bones. Animate an idle and a slow waddle by hand in Blender, because the downloaded humanoid clips do not fit these proportions. Play them through Godot's built-in AnimationTree, not the knight's scripted blender, so that many can run cheaply. Deliver turnarounds and a contact sheet of the waddle.
 
 ### Open questions
 
 - Are original hand-keyed clips acceptable, or should a downloaded motion library be adapted?
-- Does the face move, or is the smile fixed?
 
 ### Status
 
@@ -189,13 +188,13 @@ In the foggy outdoors scene the knight's helmet catches a hard highlight that ov
 
 ### Status
 
-Not started. The outdoors scene is on branch `worktree-agent-a540b2b1af48a3c2d`, not yet merged.
+In progress in a fanned-out agent.
 
-## Workshop: build the shell
+## Workshop: walls, door and apartment
 
 ### Task description
 
-The building is a clockmaker's house and workshop. Build the workshop onto the hall: its width equals the hall's length, it is three times as long as it is wide, and a door in one of the hall's long walls joins them. A studio apartment fills one back corner of the workshop as a closed room whose interior is not seen yet. Match the hall's construction and materials, give it windows onto the same foggy day, and rebake the lighting. Measure GPU time in both rooms.
+The building is a clockmaker's house and workshop. Build the workshop's structure onto the hall: its width equals the hall's length, it is three times as long as it is wide, and a door in one of the hall's long walls joins them. A studio apartment fills one back corner as a closed room whose interior is not seen yet. Floor, walls, roof, beams and collision, matching the hall's construction, built by the same tools as the hall. Lighting comes later.
 
 ### Open questions
 
@@ -205,19 +204,88 @@ The building is a clockmaker's house and workshop. Build the workshop onto the h
 
 ### Status
 
-Not started. It changes the hall's walls and lightmap, so it cannot run beside other hall or baking work.
+Not started. It changes the hall's walls, so it cannot run beside other hall or baking work.
 
-## Workshop: fill it with clutter
+## Workshop: windows and surfaces
 
 ### Task description
 
-Fill the workshop with a working clockmaker's clutter: clocks of many kinds, workbenches and tables, trinkets, unfinished automata, and the machines and tools a clockmaker builds with. Research what real clockmakers and automaton makers use, then model original versions. The knight must still move through it with correct collision. Keep GPU time in budget with instancing and detail levels.
+Give the workshop windows onto the same foggy day the hall shows, and finish its surfaces: floorboards, plaster, panelling and timber matching the hall's materials, with wear where a craftsman works. Detail the door between the rooms and the apartment's outer walls. Compare screenshots with the hall for consistency.
+
+### Open questions
+
+- How many windows, and on which walls?
+
+### Status
+
+Not started. Needs the workshop's walls.
+
+## Workshop: lamps and bake
+
+### Task description
+
+Light the workshop for close work: bench lamps, hanging lamps and the window daylight. Bake its lighting with the hall's, and give it runtime character lights and shadow handling like the hall's in `scripts/hall.gd`. Check both rooms together through the door. Measure GPU time in each room and looking through the door.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Needs the windows and surfaces; it rebakes the hall, so nothing else may bake at the same time.
+
+## Workshop: research and layout
+
+### Task description
+
+Research real clockmakers' and automaton makers' workshops: benches, machines, tools, storage and how work flows between them. Write the findings into the workshop builder as a layout: where benches, machines, shelves and clutter zones go, with walkable aisles for the knight. Block it out with simple shapes and collision, and deliver overhead and eye-level screenshots.
 
 ### Open questions
 
 - Dense clutter with narrow aisles, or open floor around the benches?
+
+### Status
+
+Not started. Needs the workshop's walls.
+
+## Workshop: clocks
+
+### Task description
+
+Model original clocks of many kinds for the workshop: longcase, bracket and wall clocks, skeleton clocks, and bare movements on benches in various stages of assembly. Share parts between them so they instance well, give each detail levels, and place them following the layout.
+
+### Open questions
+
 - Do clocks tick and pendulums swing, or are they still for now?
 
 ### Status
 
-Not started. Needs the workshop shell.
+Not started. Needs the research and layout.
+
+## Workshop: benches, machines and tools
+
+### Task description
+
+Model original versions of the clockmaker's workbenches, tables, machines and hand tools found in the research, such as lathes, wheel-cutting engines, vises, loupes and parts trays. Place them following the layout, with collision where the knight can touch them, and detail levels throughout.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Needs the research and layout.
+
+## Workshop: automata, trinkets and budget
+
+### Task description
+
+Model unfinished automata at different stages, from bare mechanism to painted figure, and scatter trinkets, parts and works in progress through the clutter zones. Then measure the finished workshop's GPU time, triangles and draw calls, and bring it within budget with instancing, detail levels and culling.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Needs the clocks, benches and tools.
