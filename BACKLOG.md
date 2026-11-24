@@ -49,9 +49,7 @@ Make a second kind of grinner that moves on all fours, much faster than the walk
 
 ### Open questions
 
-- Is it the same model posed and rigged differently, or its own sculpt?
-- How fast is it, and how long are its pounce and bite wind-ups?
-- Does its jaw open for the bite?
+- None. The agent chooses whether it shares the walking grinner's model or has its own sculpt, and sets its speed and wind-ups. Its jaw opens for the bite.
 
 ### Status
 
