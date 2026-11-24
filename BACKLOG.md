@@ -85,7 +85,7 @@ Not started. Do it before the workshop extends these builders; it cannot run bes
 
 ### Status
 
-Not started. Do it before Rosalyn's sculpt, so her build starts from shared materials. Wait for the shared sculpt toolkit to reach main: both change `build_knight.py`.
+Not started. Do it before Rosalyn's sculpt, so her build starts from shared materials. The shared sculpt toolkit, which also changed `build_knight.py`, is on main.
 
 ## Enemy: refine the sculpt
 
