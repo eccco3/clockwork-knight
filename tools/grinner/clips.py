@@ -60,7 +60,7 @@ _HANGING = dict(foot_x=0.012, spread=4.0, arm_hang=0.75, curl_pinky=24.0, curl_r
                 thumb_curl=8.0)
 BEARING = dict(sided(dict(_HANGING, foot_yaw=4.0, arm_out=-7.0, elbow=6.0, wrist_curl=8.0),
                      dict(_HANGING, foot_yaw=7.0, arm_out=-9.0, elbow=13.0, wrist_curl=15.0, shoulder_up=3.0, curl_index=22.0)),
-               hips_z=-0.014, neck_roll=2.0, head_roll=4.0)
+               hips_z=-0.002, neck_roll=2.0, head_roll=4.0)
 
 
 def _borne(controls):
@@ -88,7 +88,7 @@ SWING = dict(arm_fwd=Curve((0.07, -14.0), (0.57, 6.0)),
 ROCK = dict(hips_x=swaying((0.00, 0.004), (0.14, 0.040), (0.30, 0.052), (0.42, 0.042)),
             hips_roll=swaying((0.02, 0.0), (0.18, 6.5), (0.32, 7.5), (0.44, 5.0)),
             hips_yaw=swaying((0.04, -7.0), (0.30, 0.0)),
-            hips_z=twice((0.09, -0.020), (0.34, 0.002)),
+            hips_z=twice((0.09, -0.004), (0.34, 0.010)),
             hips_y=twice((0.10, 0.008), (0.36, -0.006)),
             hips_pitch=twice((0.10, 1.5), (0.36, -1.0)),
             spine_roll=swaying((0.06, 0.0), (0.36, 2.5)),

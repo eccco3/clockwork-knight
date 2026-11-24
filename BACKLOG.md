@@ -14,19 +14,6 @@ After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% wit
 
 Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 °C; 50% gave 43 W and 70 °C.
 
-## Grinner: straighter knees
-
-### Task description
-
-The walking grinner's reversed knees bend to about 110 degrees. Open them to about 155 degrees, in the sculpt's rest pose and in the stance its idle and waddle use, keeping the upright trunk and planted feet. Rebind the rig and re-key the clips. Deliver turnarounds and a waddle contact sheet before and after, with the knee angle measured.
-
-### Open questions
-
-- None. The grinner keeps its height: its legs get shorter.
-
-### Status
-
-Not started. Comes before the attack animations, which re-key to it.
 ## Enemy: attack animations
 
 ### Task description
@@ -39,7 +26,7 @@ Animate two attacks with root motion: a pounce that leaps about 4 m at the knigh
 
 ### Status
 
-Waits for the straighter knees; the upright posture is merged. Branch `worktree-agent-ab16faaf0a806d2b0` holds a first pass to resume from: four clips in `tools/grinner/moves.py`, a state-machine AnimationTree, hit-window markers, `Grinner` methods and `dev/grinner_check.gd`. Its body values and `keys.BEARING` need re-keying to the new stance.
+Ready to resume: the upright posture and straighter knees are merged. Branch `worktree-agent-ab16faaf0a806d2b0` holds a first pass to resume from: four clips in `tools/grinner/moves.py`, a state-machine AnimationTree, hit-window markers, `Grinner` methods and `dev/grinner_check.gd`. Its body values and `keys.BEARING` need re-keying to the new stance.
 
 ## Grinner: a variant on all fours
 
