@@ -16,7 +16,7 @@ All tasks that would take more than a minute are processed into backlog items, e
 
 Never ask the dev whether to commit, merge or push: commit, merge and push whenever work is done. Only regressions are not merged.
 
-Claude Code's auto-memory is not used: what Claude needs to remember goes into Claude's notes in the CLAUDE.md.
+Claude can use CLAUDE.md as memory.
 
 You can proactively solve tech debt yourself. If a big refactor is needed, you can add it to the backlog.
 </immutable without the dev's blessing>
