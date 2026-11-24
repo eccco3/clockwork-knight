@@ -84,7 +84,7 @@ Not started. Do it before the workshop extends these builders; it cannot run bes
 
 ### Status
 
-Not started. Do it before Rosalyn's sculpt, so her build starts from shared materials. It edits `build_knight.py`, so not beside the shared sculpt toolkit.
+Not started. Do it before Rosalyn's sculpt, so her build starts from shared materials. Wait for the shared sculpt toolkit to reach main: both change `build_knight.py`.
 
 ## Enemy: refine the sculpt
 
@@ -171,7 +171,7 @@ Move the parts of `tools/knight/` that any character uses into a new `tools/scul
 
 ### Status
 
-Not started. The grinner sculpt has merged; Rosalyn's sculpt should build on this. It edits `tools/grinner/`, so not beside the grinner's refinement or rig.
+Not started. Wait for the grinner sculpt to merge; Rosalyn's sculpt should build on this.
 
 ## Rosalyn: sculpt the model
 
