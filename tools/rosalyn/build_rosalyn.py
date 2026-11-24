@@ -97,7 +97,11 @@ def carve(pieces, seed=11):
             g = pc["grain"].l(co.reshape(-1, 3) * (P.MIRROR if side else 1.0))
             bl.grain_layers(me, g + pc.get("grain_offset", offset), rng.uniform(0, 1))
             objs.append(ob)
-    return bl.join(objs, NAME.capitalize())
+    ob = bl.join(objs, NAME.capitalize())
+    cut = ob.modifiers.new("ngons", "TRIANGULATE")              # the exporter's tangents need triangles and quads
+    cut.min_vertices, cut.keep_custom_normals = 5, True
+    bpy.ops.object.modifier_apply(modifier=cut.name)
+    return ob
 
 
 ZOOMS = {"full": ((0, 0, 0.93), 2.02, (520, 1000)), "upper": ((0, 0, 1.36), 1.05, (640, 640)),
