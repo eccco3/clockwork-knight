@@ -13,7 +13,7 @@ from sculpt.mesher import Rail
 from . import body
 from sculpt.num import smoothstep, bump, noise3, fbm, mix
 
-H0 = V(0, -0.108, 1.130)                       # head frame origin in the figure's rest pose
+H0 = body.HEAD                                 # head frame origin in the figure's rest pose
 
 
 def to_head(p):
