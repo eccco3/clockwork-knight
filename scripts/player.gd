@@ -1,7 +1,8 @@
 class_name Player
 extends CharacterBody3D
-## The knight's controller: camera-relative movement, jump, dodge-roll and a three-hit sword
-## combo. Rolls and attacks travel by the root motion of their clips, so feet stay planted.
+## The knight's controller: camera-relative movement, jump, dodge-roll, a three-hit sword combo
+## and a slash in the air. Rolls and ground attacks travel by the root motion of their clips, so
+## feet stay planted; the air slash keeps the jump's motion.
 
 const WALK_SPEED := 1.3
 const RUN_SPEED := 4.6
@@ -20,9 +21,15 @@ const BUFFER := 0.22
 
 const SWINGS: Array[String] = ["Sword_Regular_A", "Sword_Regular_B", "Sword_Regular_C"]
 const RECOVER := {"Sword_Regular_A": "Sword_Regular_A_Rec", "Sword_Regular_B": "Sword_Regular_B_Rec"}
-const FINISHER_FREE_AT := 1.05       ## clip time in the third swing after which she can act again
+## In the air she plays the heavy combo's last blow, a leaping overhead cut, from its wind-up; past
+## its follow-through she falls in the jump pose, but if she lands first she finishes it on the ground.
+const AIR_SLASH := "Sword_Heavy_Combo"
+const AIR_SLASH_FROM := 2.3
+const AIR_SLASH_FALLS_AT := 3.1
+## Clip time in a finishing blow after which she can act again.
+const FREE_AT := {"Sword_Regular_C": 1.05, "Sword_Heavy_Combo": 3.0}
 
-enum State { GROUND, AIR, ROLL, ATTACK }
+enum State { GROUND, AIR, ROLL, ATTACK, AIR_ATTACK }
 
 var knight: Knight
 var camera: CameraRig
@@ -147,6 +154,16 @@ func _physics_process(dt: float) -> void:
 			_face_rate = 5.0
 			if on_floor and velocity.y <= 0.01:
 				_land(hvel.length())
+			elif _buf_attack > 0.0:
+				_start_air_attack(wish)
+		State.AIR_ATTACK:
+			_air_t += dt
+			_face_rate = 16.0
+			if on_floor and velocity.y <= 0.01:
+				_land(hvel.length())
+			elif knight.action_t > AIR_SLASH_FALLS_AT:
+				state = State.AIR
+				knight.play("Jump", 0.3, 0.0, 1.0, true)
 		State.ROLL:
 			hvel = _move_basis * Vector3(rm.x, 0.0, rm.z) / dt * ROLL_SCALE
 			_face_rate = 22.0
@@ -209,8 +226,16 @@ func _start_jump() -> void:
 
 
 func _land(hspeed: float) -> void:
+	var stepped_off := _air_t < 0.25 and not _jumped
+	_air_t = 0.0
+	_jumped = false
+	if state == State.AIR_ATTACK:
+		# she finishes the slash on the ground, her legs taking it up where it has got to
+		state = State.ATTACK
+		knight.land_legs()
+		return
 	state = State.GROUND
-	if _air_t < 0.25 and not _jumped:
+	if stepped_off:
 		knight.stop(0.18)
 	elif hspeed > 1.6:
 		knight.play("Jump_Land", 0.07, 4.0 / 30.0, 1.5, false, 0.28)
@@ -218,15 +243,18 @@ func _land(hspeed: float) -> void:
 	else:
 		knight.play("Jump_Land", 0.07, 2.0 / 30.0, 1.25, false, 0.3)
 		knight.action_weight = 0.8          # a lighter landing than the clip's deep crouch
-	_air_t = 0.0
-	_jumped = false
+
+
+## Commits her heading to the stick, or to where she faces, for a move driven by root motion.
+func _aim(wish: Vector3) -> void:
+	if wish != Vector3.ZERO:
+		_face_goal = atan2(wish.x, wish.z)
+	_move_basis = Basis(Vector3.UP, _face_goal)
 
 
 func _start_roll(wish: Vector3) -> void:
 	_buf_roll = 0.0
-	if wish != Vector3.ZERO:
-		_face_goal = atan2(wish.x, wish.z)
-	_move_basis = Basis(Vector3.UP, _face_goal)
+	_aim(wish)
 	state = State.ROLL
 	knight.play("Roll", 0.10, ROLL_START, ROLL_RATE, false, 0.25)
 
@@ -235,14 +263,23 @@ func _start_attack(i: int, wish: Vector3) -> void:
 	_buf_attack = 0.0
 	_queued = false
 	_combo = i
-	if wish != Vector3.ZERO:
-		_face_goal = atan2(wish.x, wish.z)
-	_move_basis = Basis(Vector3.UP, _face_goal)
+	_aim(wish)
 	state = State.ATTACK
 	var clip := SWINGS[i]
 	knight.play(clip, 0.10 if i == 0 else 0.08, 0.0, 1.0, false, 0.35)
 	if RECOVER.has(clip):
 		knight.then(RECOVER[clip])
+
+
+## The jump keeps carrying her; only her upper body swings until she lands.
+func _start_air_attack(wish: Vector3) -> void:
+	_buf_attack = 0.0
+	_queued = false
+	_combo = SWINGS.size() - 1          # a finishing blow: no swing follows it
+	_aim(wish)
+	state = State.AIR_ATTACK
+	knight.play(AIR_SLASH, 0.10, AIR_SLASH_FROM, 1.0, false, 0.35)
+	knight.air_legs = true
 
 
 func _attack_logic(wish: Vector3) -> void:
@@ -263,7 +300,7 @@ func _attack_logic(wish: Vector3) -> void:
 		elif knight.action_t > 0.18 and wish != Vector3.ZERO:
 			knight.stop(0.3)
 			state = State.GROUND
-	elif _combo == SWINGS.size() - 1 and knight.action_t > FINISHER_FREE_AT:
+	elif knight.action_t > FREE_AT.get(cur, INF):
 		if _buf_attack > 0.0:
 			_start_attack(0, wish)
 		elif _buf_roll > 0.0:
