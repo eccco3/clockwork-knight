@@ -53,20 +53,6 @@ Add a `dev/` scene that spawns a chosen number of grinners around the knight out
 ### Status
 
 Not started. For comparison, one knight costs the GPU about 0.25 ms at mid distance.
-## Rosalyn: sculpt the model
-
-### Task description
-
-Build a second clockwork woman as `assets/models/rosalyn.glb` from a new `tools/rosalyn/` builder on the shared sculpt toolkit. She is 1.75 m tall with a thin, feminine frame, carved from lacquered light tulipwood with small brass details. Her face is her own, clearly different from the hero's, with attractive features and blonde hair. She wears a modest, off-the-shoulder smocked dress in chartreuse and buttery yellow. Budget: 300,000 triangles if one setting can rebuild her lower later, otherwise 240,000. She tests several entities sharing the hall. Deliver clay and painted turnarounds beside the knight's.
-
-### Open questions
-
-- "Rosalyn" is a working name.
-
-### Status
-
-Not started. The shared toolkit is `tools/sculpt/`; `tools/grinner/build_grinner.py` shows its sculpt, bake and export pipeline in use.
-
 ## Rosalyn: rig and standing pose
 
 ### Task description
@@ -372,3 +358,31 @@ Faint streaks of white light sprinkle across the air gaps between the knight's j
 ### Status
 
 Not started.
+
+## Faces: a morphable model
+
+### Task description
+
+Build a 3D morphable model of human faces, so code can generate many plausible faces that don't exist: a mean head plus uncorrelated shape components found by PCA over registered scans, sampled from a Gaussian at about 0.5 to 0.8 sigma and mirrored for symmetry. Use a permissively licensed source, such as MakeHuman/MPFB targets or ICT-FaceKit, never research-only models like FLAME or Basel. Fit the result onto the sculpt toolkit's head topology, so figures can use it. Deliver a grid of 25 sampled faces, rendered identically.
+
+### Open questions
+
+- None. The agent reports each candidate source's licence before using it.
+
+### Status
+
+Not started.
+
+## Faces: learn the dev's taste
+
+### Task description
+
+Add a `dev/` tool that shows the dev two faces from the morphable model side by side, rendered identically, and records which he prefers in about two seconds per pair. Fit a Bradley–Terry model over the shape coefficients, picking each next pair where the model is least sure, so 100 to 200 comparisons should be enough. Re-show about 5% of pairs to measure his consistency. Then sample faces along the learned direction, keep the best, and offer them for figures such as Rosalyn and the Clockmaker.
+
+### Open questions
+
+- Does the dev rate in one sitting or several short ones?
+
+### Status
+
+Not started. Needs the morphable model, and the dev's time to rate.

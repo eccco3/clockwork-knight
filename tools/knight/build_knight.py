@@ -11,7 +11,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
-from sculpt import sdf as S, mesher, gen, bl
+from sculpt import sdf as S, mesher, gen, bl, build
 from sculpt.bl import opt
 from sculpt.sdf import V
 from sculpt.gen import Frame
@@ -461,25 +461,6 @@ def legs(J, T):
 FACE_GRAIN = V(0.09, 0.05, 0.60)                # the head frame's origin in the face's grain space
 
 
-def write_face_paint(path, width=1024):
-    """Bake the face lacquer to a PNG (skipped when head.py has not changed since the last bake) and write
-    beside it where the game's wood shader places it: on the head frame, which it finds in grain space."""
-    import hashlib, json
-    with open(os.path.splitext(path)[0] + ".json", "w", newline="\n") as f:
-        json.dump(dict(origin=FACE_GRAIN.tolist(), half_width=head.PAINT_X, bottom=head.PAINT_Z0, top=head.PAINT_Z1), f)
-        f.write("\n")
-    src = open(head.__file__, "rb").read()
-    tag = hashlib.sha1(src + str(width).encode()).hexdigest()
-    stamp = path + ".stamp"
-    if os.path.exists(path) and os.path.exists(stamp) and open(stamp).read() == tag:
-        return
-    rgb = head.paint_texture(width)
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    bl.save_image(path, rgb[::-1])
-    open(stamp, "w").write(tag)
-    print("PAINT", path, rgb.shape)
-
-
 def from_head(p):
     return H0 + np.asarray(p) * V(-1, -1, 1)
 
@@ -738,23 +719,11 @@ def realize(arm, only=None):
                 ang = rng.uniform(0, 2 * np.pi)
                 off = V(np.cos(ang), np.sin(ang), 0) * rng.uniform(0.05, 0.16) + V(0, 0, rng.uniform(-2, 2))
                 g = g + (off if pc["grain_offset"] is None else pc["grain_offset"])
-            li = np.empty(len(me.loops), dtype=np.int64)
-            me.loops.foreach_get("vertex_index", li)
-            uv1 = me.uv_layers.new(name="UVMap")
-            uv2 = me.uv_layers.new(name="UV2")
-            uv1.data.foreach_set("uv", np.stack([g[li, 0], 1.0 - g[li, 1]], axis=1).ravel())
-            uv2.data.foreach_set("uv", np.stack([g[li, 2], np.full(len(li), 1.0 - rng.uniform(0, 1))], axis=1).ravel())
+            bl.grain_layers(me, g, rng.uniform(0, 1))
             vg = ob.vertex_groups.new(name=bone)
             vg.add(list(range(len(me.vertices))), 1.0, "REPLACE")
             objs.append(ob)
-    bpy.ops.object.select_all(action="DESELECT")
-    for o in objs:
-        o.select_set(True)
-    bpy.context.view_layer.objects.active = objs[0]
-    bpy.ops.object.join()
-    body = bpy.context.view_layer.objects.active
-    body.name = "Knight"
-    body.data.name = "Knight"
+    body = bl.join(objs, "Knight")
     mod = body.modifiers.new("Armature", "ARMATURE")
     mod.object = arm
     return body
@@ -830,7 +799,8 @@ def main():
         caster = shadow.shadow_mesh(body, 3000)
         print("SHADOW MESH tris=%d" % len(caster.data.polygons))
         export(arm, body, opt("--out"), [caster])
-        write_face_paint(os.path.join(os.path.dirname(os.path.dirname(HERE)), "assets", "textures", "knight", "face_paint.png"))
+        build.face_paint(os.path.join(os.path.dirname(os.path.dirname(HERE)), "assets", "textures", "knight", "face_paint.png"),
+                         head, FACE_GRAIN)
     print("DONE t=%.1fs" % (time.time() - t0))
 
 

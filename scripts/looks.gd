@@ -6,6 +6,8 @@ class_name Looks
 const WOOD := preload("res://shaders/knight_wood.gdshader")
 const SURFACE := preload("res://shaders/knight_surface.gdshader")
 const EYE := preload("res://shaders/knight_eye.gdshader")
+## The glossy coat that lacquered wood wears.
+const LACQUER := {"coat": 0.9, "coat_roughness": 0.15, "roughness_min": 0.24, "roughness_max": 0.42}
 
 
 ## Replaces each material of `mesh` whose name is a key of `looks`.
@@ -21,20 +23,22 @@ static func oiled_wood(early: Color, late: Color) -> ShaderMaterial:
 	return _wood(early, late, {"ring_density": 135.0, "ring_contrast": 0.55})
 
 
-## Close-grained wood for a face, under the lacquer that the figure's build baked into `paint`.
+## Close-grained wood for a face, under the paint that the figure's build baked into `paint`.
 ## `placement` is the file the build wrote beside that texture, saying where on the head it goes.
-static func face_wood(early: Color, late: Color, paint: Texture2D, placement: JSON) -> ShaderMaterial:
+## `lacquered` coats the face as glossily as lacquered wood.
+static func face_wood(early: Color, late: Color, paint: Texture2D, placement: JSON, lacquered := false) -> ShaderMaterial:
 	var at: Dictionary = placement.data
-	return _wood(early, late, {"ring_density": 170.0, "ring_contrast": 0.30, "pore_strength": 0.12,
+	var finish := {"ring_density": 170.0, "ring_contrast": 0.30, "pore_strength": 0.12,
 		"fiber_strength": 0.12, "figure_strength": 0.10, "bump": 0.05, "paint_tex": paint,
 		"paint_origin": Vector3(at.origin[0], at.origin[1], at.origin[2]),
-		"paint_size": Vector3(at.half_width, at.bottom, at.top)})
+		"paint_size": Vector3(at.half_width, at.bottom, at.top)}
+	return _wood(early, late, finish.merged(LACQUER) if lacquered else finish)
 
 
 ## Wood under a glossy coat of lacquer, as on armour.
 static func lacquered_wood(early: Color, late: Color) -> ShaderMaterial:
-	return _wood(early, late, {"ring_density": 120.0, "ring_contrast": 0.62, "figure_strength": 0.40,
-		"coat": 0.9, "coat_roughness": 0.15, "roughness_min": 0.24, "roughness_max": 0.42, "paint": 0.0})
+	return _wood(early, late, LACQUER.merged({"ring_density": 120.0, "ring_contrast": 0.62,
+		"figure_strength": 0.40, "paint": 0.0}))
 
 
 static func brass(colour: Color) -> ShaderMaterial:
@@ -58,8 +62,12 @@ static func leather(colour: Color, tarnish: Color) -> ShaderMaterial:
 		"streak": 0.0, "grain_scale": 520.0, "bump": 1.4})
 
 
-static func glass_eye() -> ShaderMaterial:
-	return _material(EYE, {})
+## An enamelled glass eye, its iris `inner` round the pupil and `outer` at the rim. `iris_size` and
+## `lid_height` are angles on the eyeball in radians, as the figure's head sculpt has them: the
+## iris's radius, and where the upper lid rests and shades the eye.
+static func glass_eye(outer: Color, inner: Color, iris_size: float, lid_height: float) -> ShaderMaterial:
+	return _material(EYE, {"iris_outer": outer, "iris_inner": inner, "iris_size": iris_size,
+		"lid_height": lid_height})
 
 
 static func _wood(early: Color, late: Color, finish: Dictionary) -> ShaderMaterial:

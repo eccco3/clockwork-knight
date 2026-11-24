@@ -2,8 +2,8 @@
 
 Head frame: origin between the eyes at the centre of the skull, +x to the
 figure's left, +y out of the face, +z up, metres. `field` is the sculpt,
-`paint` the lacquer colour mask (lips, brows, lash line, blush), and
-`paint_texture` bakes that mask as a front projection for the game shader.
+and `paint` the lacquer colour mask (lips, brows, lash line, blush), which
+the build bakes as a front projection for the game shader.
 
 Proportions are life-size (eye line at z = 0, chin at z = -0.110).
 """
@@ -274,24 +274,3 @@ def paint(p):
     lash = lash * np.where(upper_side, 1.0, 0.45 * np.clip((s + 0.2) / 0.8, 0, 1))
     mix(LASH, lash)
     return col
-
-
-def paint_texture(width=1024):
-    """Bake `paint` as seen from the front: (H, W, 3) array, row 0 at z = PAINT_Z1, column 0 at x = -PAINT_X.
-    Each texel is traced back along -y to the first surface it meets."""
-    half = width // 2
-    height = int(round(width * (PAINT_Z1 - PAINT_Z0) / (2 * PAINT_X)))
-    xs = (np.arange(half) + 0.5) / half * PAINT_X
-    zs = PAINT_Z1 - (np.arange(height) + 0.5) / height * (PAINT_Z1 - PAINT_Z0)
-    X, Z = np.meshgrid(xs, zs)
-    x, z = X.ravel(), Z.ravel()
-    y = np.full(len(x), 0.112)
-    live = np.arange(len(x))
-    for _ in range(40):                                         # sphere tracing; converged texels drop out
-        dd = field(np.stack([x[live], y[live], z[live]], axis=1))
-        y[live] -= np.clip(dd, 0.0, None) * 0.85
-        live = live[(dd > 2e-5) & (y[live] > 0.0)]
-        if len(live) == 0:
-            break
-    rgb = paint(np.stack([x, y, z], axis=1)).reshape(height, half, 3)
-    return np.concatenate([rgb[:, ::-1], rgb], axis=1)

@@ -32,6 +32,29 @@ def to_object(name, verts, quads, normals=None, colors=None, collection=None):
     return ob
 
 
+def grain_layers(me, g, seed):
+    """Store a mesh's rest-pose grain space (per vertex, metres, z along the fibres) for the game's solid
+    shaders: UVMap holds x and y, UV2 holds z and the piece's seed."""
+    li = np.empty(len(me.loops), dtype=np.int64)
+    me.loops.foreach_get("vertex_index", li)
+    uv1 = me.uv_layers.new(name="UVMap")
+    uv2 = me.uv_layers.new(name="UV2")
+    uv1.data.foreach_set("uv", np.stack([g[li, 0], 1.0 - g[li, 1]], axis=1).ravel())
+    uv2.data.foreach_set("uv", np.stack([g[li, 2], np.full(len(li), 1.0 - seed)], axis=1).ravel())
+
+
+def join(objs, name):
+    """Several objects as one, called `name`."""
+    bpy.ops.object.select_all(action="DESELECT")
+    for o in objs:
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = objs[0]
+    bpy.ops.object.join()
+    ob = bpy.context.view_layer.objects.active
+    ob.name = ob.data.name = name
+    return ob
+
+
 def clay(name, base=(0.62, 0.42, 0.26), rough=0.45, vertex_color=True, metallic=0.0):
     m = bpy.data.materials.new(name)
     m.use_nodes = True

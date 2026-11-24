@@ -88,7 +88,7 @@ func _ready() -> void:
 		"brass_dark": Looks.dull_brass(Color(0.46, 0.33, 0.15)),
 		"steel": Looks.steel(Color(0.76, 0.77, 0.79), Color(0.36, 0.36, 0.38)),
 		"leather": Looks.leather(Color(0.13, 0.060, 0.032), Color(0.07, 0.03, 0.018)),
-		"eye": Looks.glass_eye(),
+		"eye": Looks.glass_eye(Color(0.10, 0.22, 0.19), Color(0.56, 0.44, 0.19), 0.385, 0.335),
 	})
 	_setup_extras()
 	mesh.extra_cull_margin = 0.15
