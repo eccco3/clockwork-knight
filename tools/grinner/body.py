@@ -485,13 +485,21 @@ def shirt_seam(a, b, n=1):
 
 # ---------------------------------------------------------------- short trousers
 
-def _shorts_base(p):
+SEAT = Frame(HIP, -THIGH, LEFT)                # x outward, y back, z up the thigh
+BUTTOCK = V(-0.018, 0.045, 0.004), V(0.058, 0.047, 0.062)    # in SEAT: over the back of the thigh's top
+
+
+def _shorts_base(p, fine=True):
+    """The shorts before their buttons. Returns distance and distance down the thigh. fine adds the folds under
+    the seat, too small for the game mesh, which reach it through the normal map."""
     q = S.mirror_x(p)
     z = p[:, 2]
     body = S.smin(S.ellipsoid(p, V(0, 0.020, 0.645), V(0.106, 0.083, 0.088)),
-                  S.ellipsoid(q, V(0.050, 0.072, 0.612), V(0.058, 0.052, 0.062)), 0.03)
+                  S.ellipsoid(SEAT.l(q), *BUTTOCK), 0.03)
     wob = fbm(p * V(14.0, 14.0, 9.0)) - 0.5
-    body = body - 0.012 - 0.006 * wob - 0.0035 * bump(z, 0.555, 0.03) * (p[:, 1] > 0.05) * np.sin(2 * np.pi * z / 0.021 + 5.0 * wob)
+    body = body - 0.012 - 0.006 * wob
+    if fine:
+        body = body - 0.0035 * bump(z, 0.555, 0.03) * smoothstep(0.04, 0.06, p[:, 1]) * np.sin(2 * np.pi * z / 0.021 + 5.0 * wob)
     hs, _ = along(q, HIP, KNEE)
     leg_ = S.cone(q, HIP, lerp(HIP, KNEE, 0.85), 0.056, 0.040)
     hem = (HEM - HIP) @ THIGH
@@ -511,7 +519,8 @@ def shorts_parts(p):
 
 
 def shorts(p):
-    return _shorts_base(p)[0]
+    """The shorts the game mesh is fitted to: broad forms only."""
+    return _shorts_base(p, False)[0]
 
 
 def shorts_detail(p):
