@@ -28,20 +28,6 @@ Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W w
 
 Not started. Do it before the workshop extends these builders; it cannot run beside other hall or baking work. The `ns_` comments in `hall_import.gd` and `hall_props.py` are stale: four lights cast shadows, not five, and the live chandeliers draw only characters into shadow maps.
 
-## Tech debt: the knight's materials and script
-
-### Task description
-
-`scripts/knight.gd` builds the knight's eight materials in code, beside her clip state, gait blending and clockwork motions. Move the materials out, so that Rosalyn, also lacquered wood and brass, can reuse the looks with her own colours. The face paint's placement is copied by hand from `build_knight.py` and `head.py` into `knight.gd`; let the build write it once. `knight_wood` and `knight_surface` repeat the same noise and vertex code; share it through a shader include. `tick()` and `_locomotion()` work out the same gait weights twice. Prove nothing changed with matching screenshots in the hall and outdoors, close up and full length.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. Do it before Rosalyn's sculpt, so her build starts from shared materials. The shared sculpt toolkit, which also changed `build_knight.py`, is on main.
-
 ## Enemy: rig and waddle
 
 ### Task description
