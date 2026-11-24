@@ -24,7 +24,7 @@ Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W w
 
 - What separates `dev/` from `tools/`, and should they merge? Both hold scripts that are not the game: `dev/` the harnesses and stages, `tools/` the builders, but also probes and checks such as `tools/hall_check.gd`.
 - Which tools should go, and which merge? For example, `dev/inspect_knight.gd` and `tools/knight/inspect_glb.py` both list a model's meshes, bones and clips, and nothing uses either.
-- Delete `screenshots/`: seven unreferenced images, 14 MB, taken before the bake and the waxed wood?
+- Delete `screenshots/`, seven unreferenced images, 14 MB? The dev said yes.
 
 ### Status
 
@@ -322,3 +322,59 @@ Model unfinished automata at different stages, from bare mechanism to painted fi
 ### Status
 
 Not started. Needs the clocks, benches and tools.
+
+## Hall: dimmer fire highlight on the floor
+
+### Task description
+
+The fire's highlight on the floor in front of the hearth is too bright. Tone it down, keeping the hearth's warmth in the room. The agent chooses how. Deliver before and after screenshots from a few positions.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Low priority. It shares the fire's lights with the fire-shadow item, so run them together or one after the other. The fire is the hall's only live light; its key light is built in `scripts/hall_build.gd` and flickers through `scripts/hall_fire_light.gd`.
+
+## Hall: steadier fire shadows
+
+### Task description
+
+The fire casts a pronounced shadow that looks twitchy. Soften its shadows or calm how much they dance, or both; the agent chooses how. Deliver short before and after captures, or contact sheets, of a shadow over a few seconds.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Low priority. Shares the fire's lights with the floor highlight item.
+
+## Hall: doorframe shimmer
+
+### Task description
+
+The inside of the hall's doorframe shimmers. Find the cause, for example aliasing, z-fighting, a lightmap seam or the material, and fix it at its source. The agent chooses how. Deliver before and after captures that show the shimmer.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Low priority. If the fix changes the hall's geometry, the lightmap needs a rebake, so it cannot run beside other hall or baking work.
+
+## Clicking to recapture the cursor attacks
+
+### Task description
+
+After Esc frees the cursor, the click that captures it again also starts an attack. That click should only recapture. `scripts/app.gd` captures the cursor; `scripts/player.gd` buffers the attack. The old reset of `_buf_attack` never worked, because the physics step reads the press after it.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Low priority.
