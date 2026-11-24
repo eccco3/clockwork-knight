@@ -123,18 +123,15 @@ Not started. Wait for the grinner sculpt to merge; the lady sculpt should build 
 
 ### Task description
 
-Build a second clockwork woman as `assets/models/lady.glb` from a new `tools/lady/` builder that reuses the knight's sculpt pipeline. Her face is her own, clearly different from the hero's, with attractive features. She wears a modest, off-the-shoulder smocked dress. She exists to test several entities sharing the study. Deliver clay and painted turnarounds beside the knight's.
+Build a second clockwork woman as `assets/models/lady.glb` from a new `tools/lady/` builder on the shared sculpt toolkit. She is 1.75 m tall with a thin, feminine frame, carved from lacquered light tulipwood with small brass details. Her face is her own, clearly different from the hero's, with attractive features and blonde hair. She wears a modest, off-the-shoulder smocked dress in chartreuse and buttery yellow. Budget: 300,000 triangles if one setting can rebuild her lower later, otherwise 240,000. She tests several entities sharing the hall. Deliver clay and painted turnarounds beside the knight's.
 
 ### Open questions
 
 - "Lady" is a working name.
-- Is she lacquered wood and brass like the knight, and what colours are the dress and hair?
-- What triangle budget: the knight's 303,000, or less?
-- Is "the study" the hall, or a new room?
 
 ### Status
 
-Not started.
+Not started. Wait for the shared sculpt toolkit.
 
 ## Lady: rig and standing pose
 
@@ -171,7 +168,7 @@ Not started.
 
 ### Task description
 
-Stand the lady in the study and have her speak as the knight comes near. Check that both characters are lit, shadowed and reflected correctly together, and that the knight cannot walk through her. Measure frame time, GPU time and CPU time for animation with one and with both, in real play, and record a scripted approach and conversation.
+Stand the lady in the hall and have her speak as the knight comes near. Check that both characters are lit, shadowed and reflected correctly together, and that the knight cannot walk through her. Measure frame time, GPU time and CPU time for animation with one and with both, in real play, and record a scripted approach and conversation.
 
 ### Open questions
 
@@ -195,3 +192,34 @@ In the foggy outdoors scene the knight's helmet catches a hard highlight that ov
 ### Status
 
 Not started. The outdoors scene is on branch `worktree-agent-a540b2b1af48a3c2d`, not yet merged.
+
+## Workshop: build the shell
+
+### Task description
+
+The building is a clockmaker's house and workshop. Build the workshop onto the hall: its width equals the hall's length, it is three times as long as it is wide, and a door in one of the hall's long walls joins them. A studio apartment fills one back corner of the workshop as a closed room whose interior is not seen yet. Match the hall's construction and materials, give it windows onto the same foggy day, and rebake the lighting. Measure GPU time in both rooms.
+
+### Open questions
+
+- Which long wall gets the door, and where along it?
+- How tall is the workshop, and how large is the apartment's corner?
+- Does the apartment show a door into the workshop?
+
+### Status
+
+Not started. It changes the hall's walls and lightmap, so it cannot run beside other hall or baking work.
+
+## Workshop: fill it with clutter
+
+### Task description
+
+Fill the workshop with a working clockmaker's clutter: clocks of many kinds, workbenches and tables, trinkets, unfinished automata, and the machines and tools a clockmaker builds with. Research what real clockmakers and automaton makers use, then model original versions. The knight must still move through it with correct collision. Keep GPU time in budget with instancing and detail levels.
+
+### Open questions
+
+- Dense clutter with narrow aisles, or open floor around the benches?
+- Do clocks tick and pendulums swing, or are they still for now?
+
+### Status
+
+Not started. Needs the workshop shell.
