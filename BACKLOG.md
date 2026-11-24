@@ -284,11 +284,11 @@ Cover the knight's seat a little more, standing and in every clip, rolls above a
 ### Status
 
 Not started. Shares the knight's builder with her shoulder and hand items.
-## Knight: a natural shoulder
+## Knight: shoulder and chest clearance
 
 ### Task description
 
-Remove the dark socket cup and its brass rim from her shoulders in 	ools/knight/build_knight.py. Each upper arm now ends in a shallow wooden dome only on its inner side, facing her body where the cup was, so the joint still reads across the air gap. Resculpt the rest of the upper arm and shoulder, including the outer face under the pauldron, as a fit but not bulky woman's arm: deltoid, biceps and triceps in gentle relief. Check clearance in every clip, and deliver clay and painted close-ups before and after.
+In the sword clips her upper arm sinks up to 30 mm into her chest and passes through the pauldron, and her right arm reaches her face in `Sword_Regular_B:6`. Lift or reshape the pauldron, and fix the collar bone's travel or the chest's pocket, so the arm clears both. Measure with the builder's `--gaps` before and after, over all 21 clips, and deliver close-ups of the worst poses.
 
 ### Open questions
 
@@ -296,7 +296,8 @@ Remove the dark socket cup and its brass rim from her shoulders in 	ools/knight/
 
 ### Status
 
-Not started.
+Not started. Shares the knight's builder with her hand and seat items.
+
 ## Knight: a more feminine hand
 
 ### Task description

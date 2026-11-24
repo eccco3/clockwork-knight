@@ -2,9 +2,10 @@
 
   blender --background --python build_knight.py -- [--out knight.glb] [--preview a.png]
           [--pose Action:frame] [--views 0,-40,-90/30,180] [--zoom head|upper|full|<bone> [--scale 0.34]]
-          [--only a,b]
+          [--only a,b] [--gaps upperarm,rerebrace/chest,pauldron]
 
 A view is a yaw, or yaw/pitch to look from above; --zoom <bone> centres on that bone, --scale metres wide.
+--gaps prints the least air between the pieces before the slash and those after it, over every frame of every clip.
 
 Rest pose is a T-pose in Blender space: +X is the figure's left, -Y is forward, +Z up.
 Every piece is rigid on one bone; the gaps at the joints are deliberate.
@@ -18,7 +19,7 @@ from sculpt import sdf as S, mesher, gen, bl, build
 from sculpt.bl import opt
 from sculpt.sdf import V
 from sculpt.gen import Frame
-from knight import head, roll, shadow
+from knight import gaps, head, roll, shadow
 
 DL = os.path.join(os.path.dirname(HERE), "downloads")
 REF_RIG = os.path.join(DL, "ual2", "Universal Animation Library 2[Standard]", "Female Mannequin", "Unreal-Godot", "Mannequin_F.glb")
@@ -232,16 +233,27 @@ def limb(name, bone, mat, frame, prof, segs, mitre=None, mirror=True, sy=1.0):
     add(name, bone, mat, frame.w(v), f, grain=frame, mirror=mirror)
 
 
-def band(name, bone, mat, frame, z0, z1, r0, r1, proud=0.0022, segs=32, mirror=True):
-    """Raised band hugging a turned part between z0..z1 where the part's radius goes r0..r1."""
+def girth(f, z, segs):
+    """Radius of the sculpt f, given in its own frame, about that frame's z at height z: one for each of `segs` azimuths."""
+    ring = S.hug(f, V(0, 0, z), V(1, 0, 0), V(0, 1, 0), segs, 0.0, 2 * np.pi * (segs - 1) / segs, off=0.0)
+    return S.length(ring[:, :2])
+
+
+def band(name, bone, mat, frame, along, proud=0.0022, segs=32, mirror=True):
+    """Raised band hugging a part. along: (z, r) stations, r the part's radius there; one radius for a turned
+    part, or `girth` for a sculpted one."""
     e = 0.0015
-    sec = [(z0, r0 - 0.003), (z0, r0 + proud - e), (z0 + e, r0 + proud), (z1 - e, r1 + proud), (z1, r1 + proud - e), (z1, r1 - 0.003)]
-    v, f = gen.lathe_ring(sec, segs)
+    (z0, r0), (z1, r1) = along[0], along[-1]
+    sec = ([(z0, r0 - 0.003), (z0, r0 + proud - e), (z0 + e, r0 + proud)] + [(z, r + proud) for z, r in along[1:-1]]
+           + [(z1 - e, r1 + proud), (z1, r1 + proud - e), (z1, r1 - 0.003)])
+    v, f = gen.lathe_ring([(z, 1.0) for z, _ in sec], segs)
+    v[:, :2] *= np.concatenate([np.broadcast_to(r, segs) for _, r in sec])[:, None]
     add(name, bone, mat, frame.w(v), f, grain=frame, mirror=mirror)
 
 
 def rivets(name, bone, frame, z, r, count, size=0.0028, mirror=True, phase=0.0):
-    for k in range(count):
+    """A ring of rivets at radius r, or at one radius each."""
+    for k, r in enumerate(np.broadcast_to(r, count)):
         a = 2 * np.pi * (k + phase) / count
         o = V(r * np.cos(a), r * np.sin(a), z)
         rf = Frame(frame.w(o), frame.dir(V(np.cos(a), np.sin(a), 0)), frame.dir(V(0, 0, 1)))
@@ -259,23 +271,42 @@ def guard(name, bone, frame, R, thick, theta_max, nu, nv, rim, radii=(1.0, 1.0, 
     add(name + "_rim", bone, "brass", v, f, mirror=True)
 
 
-SHOULDER_BALL = 0.045
+FACE_TURN = np.radians(55)                     # the shoulder's joint face looks this far off the arm's axis, toward her side
+FACE_REACH, FACE_ROUND = 0.036, 0.090          # the face's crown from the joint, and the radius of its shallow dome
 
 
 def arms(J, T):
     sh, el, wr = J["upperarm_l"], J["lowerarm_l"], J["hand_l"]
-    ua = Frame(sh, el - sh, UP)            # local x up, y forward (elbow flexion side), z down the arm
+    ua = Frame(sh, el - sh, UP)            # local x up (her outer side once the arm hangs), y forward (elbow flexion side), z down the arm
     L = np.linalg.norm(el - sh)
-    # a ball about the joint, turning in the socket, on a neck that swells into the sleeve
-    prof = gen.arc(0.0, SHOULDER_BALL, 180, 40, 15) + list(gen.turned(
-        [(0.039, 0.0272), (0.047, 0.0280), (0.058, 0.0345), (0.085, 0.0372), (0.125, 0.0362), (0.165, 0.0334), (L - 0.022, 0.0312),
-         (L - 0.014, 0.0308), (L - 0.0095, 0.0285), (L - 0.0075, 0.019), (L - 0.007, 0.0)]))
-    m = [(V(0, -0.006, L - 0.007), V(0, 0.766, 0.643))]
-    limb("upperarm", "upperarm_l", "wood_light", ua, prof, 32, m)
-    band("rerebrace", "upperarm_l", "wood_dark", ua, 0.060, 0.150, 0.0352, 0.0346, 0.0040)
-    band("rerebrace_trim_a", "upperarm_l", "brass", ua, 0.056, 0.062, 0.0390, 0.0390, 0.0016)
-    band("rerebrace_trim_b", "upperarm_l", "brass", ua, 0.148, 0.154, 0.0386, 0.0386, 0.0016)
-    rivets("rerebrace_rivet", "upperarm_l", ua, 0.105, 0.0392, 6)
+    inward = V(-np.sin(FACE_TURN), 0, -np.cos(FACE_TURN))
+
+    def face(l):
+        """The joint face: a shallow dome over the head of the bone, and nothing behind it."""
+        return np.minimum(S.sphere(l, inward * (FACE_REACH - FACE_ROUND), FACE_ROUND), S.plane(l, inward * 0.020, inward))
+
+    def mitre(l):
+        return S.plane(l, V(0, -0.006, L - 0.007), V(0, 0.766, 0.643))
+
+    def upperarm(l):
+        """A fit woman's upper arm in the arm's frame, ending at the shoulder in a face turned to her body."""
+        d = S.cone(l, V(0, 0, 0.030), V(0, 0, L - 0.030), 0.0295, 0.0300)
+        d = S.smin(d, S.ellipsoid(l, V(0.003, 0, 0.011), V(0.039, 0.041, 0.047)), 0.022)              # deltoid, capping the joint
+        d = S.smin(d, S.cone(l, V(0.008, -0.002, 0.030), V(0.018, -0.003, 0.100), 0.027, 0.012), 0.020)   # and tapering down the outside
+        d = S.smin(d, S.ellipsoid(l, V(-0.003, 0.010, 0.118), V(0.022, 0.023, 0.062)), 0.014)         # biceps
+        d = S.smin(d, S.ellipsoid(l, V(0.003, -0.009, 0.102), V(0.025, 0.025, 0.072)), 0.014)         # triceps
+        d = S.smin(d, S.sphere(l, inward * 0.008, 0.036), 0.012)                                      # the head of the bone
+        d = S.smax(d, face(l), 0.003)
+        d = S.smax(d, S.plane(l, V(0, 0, L - 0.007), V(0, 0, 1)), 0.008)
+        return S.smax(d, mitre(l), 0.005)
+
+    v, f, _ = mesher.wrap(upperarm, V(0, 0, 0.010), V(0, 0, L - 0.030), (0.05, 0.05, 0.5 * L + 0.02), (14, 14, 44), relax=12)
+    add("upperarm", "upperarm_l", "wood_light", ua.w(v), f, normals=ua.dir(S.gradient(upperarm, v)), hard=False, grain=ua, mirror=True)
+    sleeve = [(z, girth(upperarm, z, 32)) for z in np.linspace(0.060, 0.150, 7)]
+    band("rerebrace", "upperarm_l", "wood_dark", ua, sleeve, 0.0040)
+    for trim, zs in (("a", (0.056, 0.062)), ("b", (0.148, 0.154))):
+        band("rerebrace_trim_" + trim, "upperarm_l", "brass", ua, [(z, girth(upperarm, z, 32) + 0.0038) for z in zs], 0.0016)
+    rivets("rerebrace_rivet", "upperarm_l", ua, 0.105, girth(upperarm, 0.105, 6) + 0.0040, 6)
 
     fa = Frame(el, wr - el, UP)
     Lf = np.linalg.norm(wr - el)
@@ -289,20 +320,14 @@ def arms(J, T):
            (0.193, 0.0305), (0.193, 0.024)]
     v, f = gen.lathe_ring(sec, 32)
     add("vambrace", "lowerarm_l", "wood_dark", fa.w(v), f, grain=fa, mirror=True)
-    band("vambrace_trim_a", "lowerarm_l", "brass", fa, 0.034, 0.041, 0.0410, 0.0410, 0.0016)
-    band("vambrace_trim_b", "lowerarm_l", "brass", fa, 0.188, 0.195, 0.0312, 0.0306, 0.0016)
+    band("vambrace_trim_a", "lowerarm_l", "brass", fa, [(0.034, 0.0410), (0.041, 0.0410)], 0.0016)
+    band("vambrace_trim_b", "lowerarm_l", "brass", fa, [(0.188, 0.0312), (0.195, 0.0306)], 0.0016)
     rivets("vambrace_rivet", "lowerarm_l", fa, 0.058, 0.0425, 8)
     sec = [(0.212, 0.022), (0.212, 0.0290), (0.216, 0.0305), (Lf - 0.004, 0.0400), (Lf, 0.0410), (Lf + 0.002, 0.0400),
            (Lf + 0.002, 0.0370), (0.220, 0.022)]
     v, f = gen.lathe_ring(sec, 32)
     add("cuff", "lowerarm_l", "wood_dark", fa.w(v), f, grain=fa, mirror=True)
-    band("cuff_trim", "lowerarm_l", "brass", fa, Lf - 0.003, Lf + 0.0025, 0.0398, 0.0402, 0.0018)
-
-    # the socket: a cup on the collar bone that the ball turns in, cut back where the arm swings across it
-    sf = Frame(sh, -LEFT, UP)                                  # local x up, y back, z into the trunk
-    def sth(az):
-        return np.radians(44 + 11 * np.cos(az - np.radians(135)) - 20 * np.maximum(np.cos(az - np.radians(315)), 0) ** 3)
-    guard("socket", "clavicle_l", sf, SHOULDER_BALL + 0.0062, 0.005, sth, 40, 8, 0.0030)
+    band("cuff_trim", "lowerarm_l", "brass", fa, [(Lf - 0.003, 0.0398), (Lf + 0.0025, 0.0402)], 0.0018)
 
     # floating guards
     pf = Frame(sh + V(0, 0, 0.002), UP, LEFT)                  # local x toward the arm, y back
@@ -379,8 +404,8 @@ def legs(J, T):
            (0.303, 0.0590), (0.303, 0.050)]
     v, f = gen.lathe_ring(sec, 36)
     add("cuisse", "thigh_l", "wood_dark", th.w(v), f, grain=th, mirror=True)
-    band("cuisse_trim_a", "thigh_l", "brass", th, 0.081, 0.089, 0.0772, 0.0772, 0.0018, 36)
-    band("cuisse_trim_b", "thigh_l", "brass", th, 0.298, 0.306, 0.0598, 0.0590, 0.0018, 36)
+    band("cuisse_trim_a", "thigh_l", "brass", th, [(0.081, 0.0772), (0.089, 0.0772)], 0.0018, 36)
+    band("cuisse_trim_b", "thigh_l", "brass", th, [(0.298, 0.0598), (0.306, 0.0590)], 0.0018, 36)
     rivets("cuisse_rivet", "thigh_l", th, 0.108, 0.0795, 8)
 
     nu, nv = 25, 11
@@ -416,8 +441,8 @@ def legs(J, T):
            (0.320, 0.0375), (0.350, 0.0352), (0.353, 0.0338), (0.353, 0.026)]
     v, f = gen.lathe_ring(sec, 36)
     add("greave", "calf_l", "wood_dark", cf.w(v), f, grain=cf, mirror=True)
-    band("greave_trim_a", "calf_l", "brass", cf, 0.036, 0.044, 0.0528, 0.0532, 0.0018, 36)
-    band("greave_trim_b", "calf_l", "brass", cf, 0.348, 0.356, 0.0348, 0.0342, 0.0018, 36)
+    band("greave_trim_a", "calf_l", "brass", cf, [(0.036, 0.0528), (0.044, 0.0532)], 0.0018, 36)
+    band("greave_trim_b", "calf_l", "brass", cf, [(0.348, 0.0348), (0.356, 0.0342)], 0.0018, 36)
     rivets("greave_rivet", "calf_l", cf, 0.064, 0.0565, 8)
 
     kf = Frame(kn + V(0, 0.006, 0), FWD, LEFT)
@@ -726,7 +751,8 @@ def material(name):
     return m
 
 
-def realize(arm, only=None):
+def realize(only=None):
+    """Every piece, and its mirror image, as an object in the rest pose with its bone as its one vertex group."""
     objs = []
     for pc in PIECES:
         if only and not any(pc["name"].startswith(o) for o in only):
@@ -753,20 +779,35 @@ def realize(arm, only=None):
             vg = ob.vertex_groups.new(name=bone)
             vg.add(list(range(len(me.vertices))), 1.0, "REPLACE")
             objs.append(ob)
+    return objs
+
+
+def bind(arm, objs):
     body = bl.join(objs, "Knight")
     mod = body.modifiers.new("Armature", "ARMATURE")
     mod.object = arm
     return body
 
 
-def set_pose(arm, spec):
-    name, frame = spec.split(":")
+def set_pose(arm, name, frame):
     act = bpy.data.actions[name]
     arm.animation_data_create()
     arm.animation_data.action = act
     if hasattr(arm.animation_data, "action_slot") and act.slots:
         arm.animation_data.action_slot = act.slots[0]
     bpy.context.scene.frame_set(int(frame))
+
+
+def every_frame(arm):
+    """Poses the rig in each frame of each clip in turn, yielding its name, and leaves it at rest."""
+    for name in CLIPS:
+        first, last = bpy.data.actions[name].frame_range
+        for frame in range(int(first), int(last) + 1):
+            set_pose(arm, name, frame)
+            yield "%s:%d" % (name, frame)
+    arm.animation_data_clear()
+    for pb in arm.pose.bones:
+        pb.matrix_basis.identity()
 
 
 ZOOMS = {"full": ((0, 0, 0.93), 2.02, (520, 1000)), "upper": ((0, 0, 1.36), 1.05, (640, 640)),
@@ -822,10 +863,14 @@ def main():
     head_pieces(int(opt("--res", "96")))
     clockwork()
     sword()
-    body = realize(arm, only)
+    objs = realize(only)
+    if opt("--gaps"):
+        movers, others = (side.split(",") for side in opt("--gaps").split("/"))
+        gaps.report(arm, objs, movers, others, every_frame(arm))
+    body = bind(arm, objs)
     print("BUILT pieces=%d verts=%d polys=%d  t=%.1fs" % (len(PIECES), len(body.data.vertices), len(body.data.polygons), time.time() - t0))
     if opt("--pose"):
-        set_pose(arm, opt("--pose"))
+        set_pose(arm, *opt("--pose").split(":"))
     if opt("--preview"):
         views = [tuple(float(x) for x in a.split("/")) for a in opt("--views", "0,-40,-90,180").split(",")]
         preview(arm, opt("--preview"), views, opt("--zoom", "full"))
