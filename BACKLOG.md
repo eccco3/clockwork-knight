@@ -244,19 +244,6 @@ Model unfinished automata at different stages, from bare mechanism to painted fi
 
 Not started. Needs the clocks, benches and tools.
 
-## Knight: cover her seat
-
-### Task description
-
-Cover the knight's seat a little more, standing and in every clip, rolls above all. Try two ways: a short skirt of plates or tassets hanging from her belt, and reshaped hip armour that reaches lower behind. Each must not catch her thighs in the run, roll, jump or attacks; check clearance in every clip. Deliver painted turnarounds and roll contact sheets of both beside the current armour, and the dev picks.
-
-### Open questions
-
-- None. The dev picks between the two.
-
-### Status
-
-Not started. Shares the knight's builder with her shoulder and hand items.
 ## Knight: shoulder, chest and wrist clearance
 
 ### Task description
@@ -275,12 +262,11 @@ Not started. Shares the knight's builder with her hand and seat items.
 
 ### Task description
 
-Build a small clockwork soldier as `assets/models/minion.glb` from a new `tools/minion/` builder on the shared sculpt toolkit: an adult man, short and stocky, carrying a short spear. He needs far less human likeness than the knight or Rosalyn; a simple, readable, mechanical design is right, since many share the field. Give him detail levels and a cheap shadow stand-in from the start. Deliver clay and painted turnarounds beside the knight's.
+Build a small clockwork soldier as `assets/models/minion.glb` from a new `tools/minion/` builder on the shared sculpt toolkit: an adult man two-thirds the knight's height, a regular, reasonably strong-looking soldier (not stocky), carrying a short spear. He is the knight's ally; the grinners are the enemy's minions. He needs far less human likeness than the knight or Rosalyn; a simple, readable, mechanical design is right, since many share the field. Give him detail levels and a cheap shadow stand-in from the start. Deliver clay and painted turnarounds beside the knight's.
 
 ### Open questions
 
-- How tall is he, and what is his triangle budget at full detail?
-- Is he an ally of the knight, an enemy, or are there both kinds?
+- None. About 12,000 triangles at full detail.
 
 ### Status
 
@@ -343,19 +329,6 @@ The morphable model in `tools/faces/` has ragged ears, slightly jagged nostril e
 
 Not started.
 
-## Faces: sex from the dev's labels
-
-### Task description
-
-The women's pool doesn't read as women: `sexes.py`'s measured direction is mostly head size. Add a launcher tool where the dev labels about 100 random faces woman, man, androgynous or unclear in a few seconds each. Learn the female-male direction from those labels, androgynous faces marking its middle, and replace the measured one. Rebuild both pools further along it. Give the renders a simple hair shape and brows. Show clearly different pairs before the near-even ones. Discard the existing women's answers.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started.
 ## Faces: learn the dev's taste
 
 ### Task description
@@ -368,4 +341,4 @@ Add a `dev/` tool that shows the dev two faces from the morphable model side by 
 
 ### Status
 
-Paused until the labels item rebuilds the pools. Built, with women and men rated apart: the dev rates from the playtest launcher's two face rating tools, then `build_faces.py -- --sex women --best` (or men) makes the final faces.
+Waits for the dev's labels from the launcher's "Face labels" tool; then `build_faces.py -- --pool` rebuilds the pools. Built, with women and men rated apart: the dev rates from the playtest launcher's two face rating tools, then `build_faces.py -- --sex women --best` (or men) makes the final faces.

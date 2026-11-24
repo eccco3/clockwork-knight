@@ -12,11 +12,12 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from faces import taste
+from faces.files import folder, picture
 from faces.sexes import SEXES
 
 
-def show(session, pair, folder):
-    print(json.dumps(dict(left=taste.picture(pair[0], folder), right=taste.picture(pair[1], folder), **session.status())),
+def show(session, pair, pictures):
+    print(json.dumps(dict(left=picture(pair[0], pictures), right=picture(pair[1], pictures), **session.status())),
           flush=True)
 
 
@@ -26,15 +27,15 @@ def main():
     ap.add_argument("--answers")
     ap.add_argument("--report", action="store_true")
     a = ap.parse_args()
-    folder = taste.pool_folder(a.sex)
-    faces, prior_var = taste.load_pool(folder)
+    pictures = folder(a.sex)
+    faces, prior_var = taste.load_pool(a.sex)
     session = taste.Session(faces, prior_var, taste.Answers(a.answers or taste.answers(a.sex)), np.random.default_rng())
     if a.report:
         print(session.status())
         order = np.argsort(-np.abs(session.posterior.mean))[:8]
         print("strongest components:", ", ".join("%d %+.2f" % (k, session.posterior.mean[k]) for k in order))
         return
-    show(session, session.next(), folder)
+    show(session, session.next(), pictures)
     shown = time.monotonic()
     for line in sys.stdin:
         pick = line.strip()
@@ -45,7 +46,7 @@ def main():
             pair = session.undo()
         else:
             continue
-        show(session, pair, folder)
+        show(session, pair, pictures)
         shown = time.monotonic()
 
 

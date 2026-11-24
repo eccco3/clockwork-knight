@@ -2,11 +2,11 @@
 
   blender --background --python build_knight.py -- [--out knight.glb] [--preview a.png]
           [--pose Action:frame] [--views 0,-40,-90/30,180] [--zoom head|upper|full|<bone> [--scale 0.34]]
-          [--only a,b] [--gaps upperarm,rerebrace/chest,pauldron]
+          [--only a,b] [--gaps upperarm,rerebrace/chest,pauldron] [--seat culet|skirt|wrap]
 
 A view is a yaw, or yaw/pitch to look from above; --zoom <bone> centres on that bone, --scale metres wide.
 --gaps prints the least air between the pieces before the slash and those after it, over every frame of every clip,
-or in the --pose alone.
+or in the --pose alone. --seat picks what covers her seat; SEAT holds the default.
 
 Rest pose is a T-pose in Blender space: +X is the figure's left, -Y is forward, +Z up.
 Every piece is rigid on one bone; the gaps at the joints are deliberate.
@@ -20,6 +20,7 @@ from sculpt import sdf as S, mesher, gen, bl, build
 from sculpt.bl import opt
 from sculpt.sdf import V
 from sculpt.gen import Frame
+from sculpt.num import smoothstep
 from knight import gaps, head, roll, shadow
 
 DL = os.path.join(os.path.dirname(HERE), "downloads")
@@ -35,6 +36,14 @@ UP, FWD, LEFT, BACK, DOWN = V(0, 0, 1), V(0, -1, 0), V(1, 0, 0), V(0, 1, 0), V(0
 H0 = V(0, -0.020, 1.655)                       # head frame origin (between the eyes, skull centre)
 GRIP = V(-0.740, 0.062, 1.4155)                # sword grip centre in the rest pose (right hand): the hollow of her fist
 BLADE_DIR = V(0.0, -1.0, 0.0)
+
+# What covers her seat. "culet": a lame across her back. "skirt": plates hinged under her fauld, each swinging
+# with its thigh. "wrap": her tassets carried on round the back of her thighs.
+SEAT = opt("--seat", "culet")
+FAULD = Frame(V(0, 0.008, 0)), V(1.07, 0.70, 1)    # the axis her fauld is turned on, and how it is pressed oval
+SKIRT = {"back": (3, 36), "side": (40, 73)}        # each left plate's span round the fauld, in degrees from the middle of her back
+HUNG_Z, HUNG_R = 0.954, 0.1715                     # where the culet or the skirt hangs from under the fauld: height, and radius before pressing
+SKIRT_SWING = (np.radians(-30), np.radians(100))   # how far a plate swings in under her and out
 
 PIECES = []
 
@@ -117,6 +126,17 @@ def add_bones(arm, J, T):
         new("pauldron_" + s, "clavicle_" + s, J["upperarm_" + s], T["upperarm_" + s], like="upperarm_" + s)
         new("couter_" + s, "upperarm_" + s, J["lowerarm_" + s], T["lowerarm_" + s], like="lowerarm_" + s)
         new("poleyn_" + s, "thigh_" + s, J["calf_" + s], T["calf_" + s], like="calf_" + s)
+        if SEAT == "skirt":                     # a hinge along each plate's top edge, the bone pointing at the knee
+            axis, oval = FAULD
+            for plate_, span in SKIRT.items():
+                a = sx * np.radians(np.mean(span))
+                hinge = axis.w(V(HUNG_R * np.sin(a), HUNG_R * np.cos(a), HUNG_Z) * oval)
+                along = V(np.cos(a), -np.sin(a), 0) * oval
+                along /= np.linalg.norm(along)
+                to_knee = J["calf_" + s] - hinge
+                to_knee -= along * np.dot(to_knee, along)
+                to_knee /= np.linalg.norm(to_knee)
+                new("skirt_%s_%s" % (plate_, s), "pelvis", hinge, hinge + to_knee * 0.05).align_roll(tuple(np.cross(along, to_knee)))
     new("weapon_r", "hand_r", GRIP, GRIP + BLADE_DIR * 0.10)
     new("key", "spine_03", V(0, 0.100, 1.400), V(0, 0.140, 1.400))
     for n, c in GEARS.items():
@@ -128,6 +148,12 @@ def add_bones(arm, J, T):
             c.target, c.subtarget = arm, src + s
             c.target_space = c.owner_space = "LOCAL"
             c.influence = 0.5
+        for plate_ in SKIRT if SEAT == "skirt" else ():      # a plate turns on its hinge to follow the knee, as far as it may swing
+            pb = arm.pose.bones["skirt_%s_%s" % (plate_, s)]
+            c = pb.constraints.new("LOCKED_TRACK")
+            c.target, c.subtarget, c.track_axis, c.lock_axis = arm, "calf_" + s, "TRACK_Y", "LOCK_X"
+            c = pb.constraints.new("LIMIT_ROTATION")
+            c.owner_space, c.use_limit_x, (c.min_x, c.max_x) = "LOCAL", True, SKIRT_SWING
     bpy.ops.object.mode_set(mode="OBJECT")
 
 
@@ -199,29 +225,17 @@ def torso(J):
     v, f, n = mesher.wrap(pelvis, V(-0.012, 0.01, 1.005), V(0.012, 0.01, 1.005), (0.16, 0.11, 0.12), (40, 26, 30), relax=10)
     add("pelvis", "pelvis", "wood_dark", v, f, normals=n, hard=False)
     # fauld: two flared lames hanging from the belt
+    axis, oval = FAULD
     for k, sec in enumerate((
             [(0.984, 0.158), (0.984, 0.1715), (0.988, 0.1730), (1.016, 0.1640), (1.020, 0.1625), (1.020, 0.150)],
             [(0.946, 0.166), (0.946, 0.1800), (0.950, 0.1815), (0.990, 0.1745), (0.994, 0.1730), (0.994, 0.160)])):
-        v, f = gen.lathe_ring(sec, 64, sx=1.07, sy=0.70)
-        add("fauld_%d" % k, "pelvis", "wood_dark", v + V(0, 0.008, 0), f)
+        v, f = gen.lathe_ring(sec, 64, sx=oval[0], sy=oval[1])
+        add("fauld_%d" % k, "pelvis", "wood_dark", axis.w(v), f)
         z0, r0 = sec[1][0] + 0.004, sec[2][1]
         v, f = gen.lathe_ring([(z0 - 0.003, r0 - 0.004), (z0 - 0.003, r0 - 0.0002), (z0, r0 + 0.0014), (z0 + 0.003, r0 - 0.0002),
-                               (z0 + 0.003, r0 - 0.004)], 64, sx=1.07, sy=0.70)
-        add("fauld_bead_%d" % k, "pelvis", "brass", v + V(0, 0.008, 0), f)
-    # culet: a third lame across the back only, deepest at the centre
-    A, Zv = np.meshgrid(np.radians(np.linspace(-80, 80, 41)), np.linspace(0, 1, 6), indexing="ij")
-
-    def cul(dr):
-        z = 0.954 - (0.058 - 0.022 * (A / np.radians(80)) ** 2) * Zv
-        r = 0.1715 + dr + 0.011 * Zv
-        return np.stack([1.07 * r * np.sin(A), 0.008 + 0.70 * r * np.cos(A), z], axis=-1)
-
-    o, i = cul(0.0), cul(-0.005)
-    v, f = gen.patch(o, i)
-    add("culet", "pelvis", "wood_dark", v, f)
-    mid = 0.5 * (o + i)
-    v, f = gen.tube(np.concatenate([mid[0, 1:-1], mid[:, -1], mid[-1, -2:0:-1]]), 0.0032, 8)
-    add("culet_rim", "pelvis", "brass", v, f)
+                               (z0 + 0.003, r0 - 0.004)], 64, sx=oval[0], sy=oval[1])
+        add("fauld_bead_%d" % k, "pelvis", "brass", axis.w(v), f)
+    skirt() if SEAT == "skirt" else culet()
     # her trunk, turned from the pale wood of her limbs, seen only through the gaps between the lames
     for name, bone, pts, cy in (
             ("core_lower", "spine_01", [(1.040, 0.0), (1.041, 0.066), (1.100, 0.074), (1.185, 0.070), (1.198, 0.060), (1.199, 0.0)], -0.026),
@@ -246,6 +260,38 @@ def torso(J):
     add("neck", "neck_01", "wood_light", nf.w(v), f, grain=nf)
     v, f = gen.lathe_ring([(1.472, 0.052), (1.472, 0.064), (1.480, 0.0665), (1.487, 0.064), (1.487, 0.052)], 40, sy=0.92)
     add("gorget", "spine_03", "brass", v + V(0, 0.010, 0), f)
+
+
+def culet():
+    """A third lame across the back only, deepest at the centre."""
+    A, Zv = np.meshgrid(np.radians(np.linspace(-80, 80, 41)), np.linspace(0, 1, 6), indexing="ij")
+    axis, oval = FAULD
+
+    def cul(dr):
+        z = HUNG_Z - (0.058 - 0.022 * (A / np.radians(80)) ** 2) * Zv
+        r = HUNG_R + dr + 0.011 * Zv
+        return np.stack([r * np.sin(A), r * np.cos(A), z], axis=-1) * oval
+
+    plate("culet", "pelvis", cul(0.0), cul(-0.005), 0.0032, axis, hung=True)
+
+
+def skirt():
+    """Scalloped plates in the culet's place, from the middle of her back round to each side."""
+    U, Zv = np.meshgrid(np.linspace(0, 1, 15), np.linspace(0, 1, 9), indexing="ij")
+    axis, oval = FAULD
+    for name, (a0, a1) in SKIRT.items():
+        A = np.radians(a0 + (a1 - a0) * U)
+
+        def scallop(dr):
+            z = HUNG_Z - (0.104 - 0.030 * np.abs(2 * U - 1) ** 2.6) * Zv
+            r = HUNG_R + dr + 0.012 * Zv + 0.003 * np.sin(np.pi * Zv)
+            return np.stack([r * np.sin(A), r * np.cos(A), z], axis=-1) * oval
+
+        o = scallop(0.0)
+        bone = "skirt_%s_l" % name
+        plate("skirt_" + name, bone, o, scallop(-0.005), 0.0032, axis, mirror=True, hung=True)
+        for k, (iu, iv, size) in enumerate(((3, 2, 0.0042), (11, 2, 0.0042), (7, 6, 0.0060))):
+            stud("skirt_%s_rivet_%d" % (name, k), bone, axis, o[iu, iv], o[iu, iv] / oval ** 2 * V(1, 1, 0), size, size * 0.7)
 
 
 # ============================================================== limbs
@@ -276,14 +322,33 @@ def band(name, bone, mat, frame, along, proud=0.0022, segs=32, mirror=True):
     add(name, bone, mat, frame.w(v), f, grain=frame, mirror=mirror)
 
 
+def stud(name, bone, frame, at, out, size, height, mirror=True):
+    """A brass rivet head at `at`, rising along `out`, both in the frame."""
+    rf = Frame(frame.w(at), frame.dir(out), frame.dir(V(0, 0, 1)))
+    v, f = gen.dome(size, height, 8, 2)
+    add(name, bone, "brass", rf.w(v), f, mirror=mirror)
+
+
 def rivets(name, bone, frame, z, r, count, size=0.0028, mirror=True, phase=0.0):
     """A ring of rivets at radius r, or at one radius each."""
     for k, r in enumerate(np.broadcast_to(r, count)):
         a = 2 * np.pi * (k + phase) / count
-        o = V(r * np.cos(a), r * np.sin(a), z)
-        rf = Frame(frame.w(o), frame.dir(V(np.cos(a), np.sin(a), 0)), frame.dir(V(0, 0, 1)))
-        v, f = gen.dome(size, size * 0.6, 8, 2)
-        add("%s_%d" % (name, k), bone, "brass", rf.w(v), f, mirror=mirror)
+        stud("%s_%d" % (name, k), bone, frame, V(r * np.cos(a), r * np.sin(a), z), V(np.cos(a), np.sin(a), 0), size,
+             size * 0.6, mirror)
+
+
+def plate(name, bone, outer, inner, rim, frame, mirror=False, hung=False):
+    """Plate of dark wood between two grids in the frame, their columns running from its top edge down, edged
+    in brass: all round, or on its three free sides if it is `hung` from under another piece."""
+    v, f = gen.patch(outer, inner)
+    add(name, bone, "wood_dark", frame.w(v), f, grain=frame, mirror=mirror)
+    mid = 0.5 * (outer + inner)
+    if hung:
+        loop = np.concatenate([mid[0, 1:-1], mid[:, -1], mid[-1, -2:0:-1]])
+    else:
+        loop = np.concatenate([mid[:-1, 0], mid[-1, :-1], mid[:0:-1, -1], mid[0, :0:-1]])
+    v, f = gen.tube(frame.w(loop), rim, 8, closed=not hung)
+    add(name + "_rim", bone, "brass", v, f, mirror=mirror)
 
 
 def guard(name, bone, frame, R, thick, theta_max, nu, nv, rim, radii=(1.0, 1.0, 1.0)):
@@ -433,28 +498,30 @@ def legs(J, T):
     band("cuisse_trim_b", "thigh_l", "brass", th, [(0.298, 0.0598), (0.306, 0.0590)], 0.0018, 36)
     rivets("cuisse_rivet", "thigh_l", th, 0.108, 0.0795, 8)
 
-    nu, nv = 25, 11
+    # tasset: from the inner front of her thigh round its outside; the wrap carries it on behind her, where it ducks
+    # under the culet's end, domes over her seat about the hip, hangs lower, and rounds off toward her other thigh
+    span, studs = 122, [(4, 1, 0.0042, 0.0030), (12, 1, 0.0042, 0.0030), (20, 1, 0.0042, 0.0030), (12, 8, 0.0060, 0.0042)]
+    if SEAT == "wrap":
+        span, studs = 240, studs + [(30, 8, 0.0042, 0.0030), (39, 8, 0.0042, 0.0030)]
+    nu, nv = 1 + round(span / 5.08), 11
     uu, vv = np.meshgrid(np.linspace(0, 1, nu), np.linspace(0, 1, nv), indexing="ij")
-    az = np.radians(-34 + 122 * uu)
-    zb = 0.205 - 0.075 * np.abs(2 * uu - 1) ** 2.4
-    zz = -0.006 + (zb + 0.006) * vv
+    turn = -34 + span * uu
+    az = np.radians(turn)
+    zt = -0.006 + 0.040 * smoothstep(88, 102, turn) - 0.082 * smoothstep(128, 156, turn) + 0.015 * smoothstep(184, 206, turn)
+    zb = (0.205 - 0.075 * np.abs(2 * np.minimum((turn + 34) / 122, 1) - 1) ** 2.4 + 0.038 * smoothstep(88, 143, turn)
+          - 0.075 * np.clip((turn - 150) / 56, 0, 1) ** 2.4)
+    zz = zt + (zb - zt) * vv
+    above = np.maximum(-0.006 - zz, 0)          # how far a point of the dome stands over the tasset's own top edge
+    snug = 0.0045 * smoothstep(92, 125, turn)   # behind her it sits closer to the thigh, to pass inside the culet
 
     def tas(R):
-        r = R - 0.034 * zz + 0.004 * np.sin(np.pi * vv)
+        r = np.sqrt((R - snug) ** 2 - above * above) - 0.034 * zz + 0.004 * np.sin(np.pi * vv)
         return np.stack([(r - 0.009) * np.sin(az), r * np.cos(az), zz], axis=-1)
 
-    o, i = tas(0.0935), tas(0.0885)
-    v, f = gen.patch(o, i)
-    add("tasset", "thigh_l", "wood_dark", th.w(v), f, grain=th, mirror=True)
-    mid = 0.5 * (o + i)
-    loop = np.concatenate([mid[:-1, 0], mid[-1, :-1], mid[:0:-1, -1], mid[0, :0:-1]])
-    v, f = gen.tube(th.w(loop), 0.0034, 8, closed=True)
-    add("tasset_rim", "thigh_l", "brass", v, f, mirror=True)
-    for k, (iu, iv) in enumerate(((4, 1), (12, 1), (20, 1), (12, 8))):
-        pt, nrm = o[iu, iv], o[iu, iv] * V(1, 1, 0)
-        rf = Frame(th.w(pt), th.dir(nrm), th.dir(V(0, 0, 1)))
-        dv, df = gen.dome(0.0042 if k < 3 else 0.0060, 0.0030 if k < 3 else 0.0042, 8, 2)
-        add("tasset_rivet_%d" % k, "thigh_l", "brass", rf.w(dv), df, mirror=True)
+    o = tas(0.0935)
+    plate("tasset", "thigh_l", o, tas(0.0885), 0.0034, th, mirror=True)
+    for k, (iu, iv, size, height) in enumerate(studs):
+        stud("tasset_rivet_%d" % k, "thigh_l", th, o[iu, iv], o[iu, iv] * V(1, 1, 0), size, height)
 
     cf = Frame(kn, an - kn, LEFT)
     Lc = np.linalg.norm(an - kn)
