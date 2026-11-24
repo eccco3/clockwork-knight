@@ -94,6 +94,28 @@ def pores(u, v, pitch):
     return np.sin(a) * np.sin(b), np.cos(a) * np.sin(b), np.sin(a) * np.cos(b)
 
 
+def front_view(field, paint, half_width, bottom, top, width=1024, front=0.112):
+    """`paint` (points -> RGB) as seen from the front of a sculpt that faces +y and is symmetric in x:
+    (H, W, 3), row 0 at z = top, column 0 at x = -half_width. Each texel is traced back from y = front
+    along -y to the first surface it meets."""
+    half = width // 2
+    height = int(round(width * (top - bottom) / (2 * half_width)))
+    xs = (np.arange(half) + 0.5) / half * half_width
+    zs = top - (np.arange(height) + 0.5) / height * (top - bottom)
+    X, Z = np.meshgrid(xs, zs)
+    x, z = X.ravel(), Z.ravel()
+    y = np.full(len(x), front)
+    live = np.arange(len(x))
+    for _ in range(40):                                         # sphere tracing; converged texels drop out
+        dd = field(np.stack([x[live], y[live], z[live]], axis=1))
+        y[live] -= np.clip(dd, 0.0, None) * 0.85
+        live = live[(dd > 2e-5) & (y[live] > 0.0)]
+        if len(live) == 0:
+            break
+    rgb = paint(np.stack([x, y, z], axis=1)).reshape(height, half, 3)
+    return np.concatenate([rgb[:, ::-1], rgb], axis=1)
+
+
 def dilate(img, filled, steps):
     """Bleed filled texels outward so filtering never reaches an empty one."""
     img, filled = img.copy(), filled.copy()

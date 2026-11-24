@@ -56,7 +56,7 @@ def sides(pc):
     """The piece's instances: (verts, faces, normals) for itself and, if paired, its mirror image."""
     yield pc["v"], pc["q"], pc["n"]
     if pc["mirror"]:
-        yield pc["v"] * MIRROR, [f[::-1] for f in pc["q"]], pc["n"] * MIRROR
+        yield pc["v"] * MIRROR, [f[::-1] for f in pc["q"]], None if pc["n"] is None else pc["n"] * MIRROR
 
 
 def triangles(pieces):

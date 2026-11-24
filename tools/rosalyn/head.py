@@ -14,36 +14,41 @@ from . import body
 
 HEAD = body.HEAD
 
-EYE = V(0.0320, 0.0530, 0.0000)                # eyeball centre (mirrored)
-EYE_R = 0.0155
+EYE = V(0.0278, 0.0515, 0.0000)                # eyeball centre (mirrored)
+EYE_R = 0.0170
 LID_T = 0.0016
-AP_W, AP_UP, AP_LO, AP_TILT = 1.04, 0.400, 0.300, 0.100    # almond eyes, the outer corners lifted
-IRIS = 0.40                                    # iris radius on the eyeball (rad), for the eye's look
+LID_REACH = 0.0060                             # the opening is cut through whatever stands this far before the eyeball
+AP_OUT, AP_IN = 1.04, 0.66                     # the opening's reach toward the temple and toward the nose (rad)
+AP_UP, AP_LO, AP_TILT = 0.345, 0.320, 0.095    # large almond eyes, the outer corners lifted
+IRIS = 0.40                                    # iris radius on the eyeball (rad): the lids rest on its top and bottom
+EYE_TURN = 0.5 * (AP_OUT - AP_IN)              # each eyeball is turned out this far (rad), to look from the middle of its opening
 
 AXIS_Y = -0.012                                # the meshing axis stands here, and the mouth is measured round it
 AXIS = (V(0, AXIS_Y, 0.045), V(0, AXIS_Y, -0.105))
 TH_M = 0.292                                   # the corners of the mouth, as an angle round the axis
-MZ, RISE, BOW = -0.0612, 0.0020, 0.0007        # height of the parting, lift at the corners, dip under the cupid's bow
+MZ, RISE, BOW = -0.0612, 0.0013, 0.0005        # height of the parting, lift at the corners, dip under the cupid's bow
 MH = 0.00045                                   # half the parting's height at the centre
 POCKET = (0.0885, 0.0812)                      # distance of the pocket's back from the axis: centre, corners
-NECK_CUT = -0.006                              # the head ends this far along the neck from the choker
+NECK_CUT = -0.0012                             # the head ends this far along the neck from the choker
 
 PAINT_X, PAINT_Z0, PAINT_Z1 = 0.064, -0.100, 0.044          # the front-projected paint texture covers this
 
 
 def _aperture(q):
-    """Angular eye opening in the mirrored frame: < 0 inside (metres on the eyeball)."""
+    """Angular eye opening in the mirrored frame: g < 0 inside (metres on the eyeball), the place across it
+    (-1 inner corner .. 1 outer corner), the height on the eyeball and the heights of the two lids there."""
     d = q - EYE
     r = np.maximum(S.length(d), 1e-9)
     th = np.arctan2(d[:, 0], d[:, 1])
     ph = np.arcsin(np.clip(d[:, 2] / r, -1, 1))
-    s = th / AP_W
+    reach = np.where(th > 0, AP_OUT, AP_IN)
+    s = th / reach
     s2 = np.clip(1.0 - s * s, 0.0, 1.0)
-    up = AP_UP * s2 ** 0.68 * (1.0 - 0.18 * s) + AP_TILT * s
-    lo = -AP_LO * s2 ** 0.80 * (1.0 + 0.26 * s) + AP_TILT * s
+    up = AP_UP * s2 ** 0.52 * (1.0 - 0.20 * s) + AP_TILT * s
+    lo = -AP_LO * s2 ** 0.58 * (1.0 + 0.28 * s) + AP_TILT * s
     g = np.maximum(ph - up, lo - ph)
-    g = np.where(np.abs(s) < 1.0, g, np.hypot((np.abs(s) - 1.0) * AP_W, ph - AP_TILT * np.sign(s)) + 0.004)
-    return g * EYE_R, th, ph, up, lo
+    g = np.where(np.abs(s) < 1.0, g, np.hypot((np.abs(s) - 1.0) * reach, ph - AP_TILT * np.sign(s)) + 0.004)
+    return g * EYE_R, s, ph, up, lo
 
 
 def _round(q):
@@ -54,7 +59,7 @@ def _round(q):
 def _lip_line(th):
     """Height of the parting at an angle round the axis; past the corners it runs on level round the head."""
     s = np.minimum(th / TH_M, 1.0)
-    return MZ + RISE * s * s - BOW * np.exp(-(s / 0.22) ** 2) + 0.010 * smoothstep(TH_M, 2.0, th)
+    return MZ + RISE * s ** 3 - BOW * np.exp(-(s / 0.30) ** 2) + 0.010 * smoothstep(TH_M, 2.0, th)
 
 
 def _mouth(q):
@@ -68,30 +73,37 @@ def _mouth(q):
     return g, s, hh, r
 
 
+def skull(p):
+    """The bare skull: what her hair lies on."""
+    return S.smin(S.ellipsoid(p, V(0, -0.012, 0.024), V(0.0715, 0.0910, 0.0860)),
+                  S.ellipsoid(p, V(0, 0.016, -0.036), V(0.0500, 0.0625, 0.0660)), 0.034)
+
+
 def _parts(p):
     q = S.mirror_x(p)
     P = {}
     # ---- skull and the large masses of the face
-    cran = S.ellipsoid(p, V(0, -0.012, 0.024), V(0.0715, 0.0910, 0.0860))
-    face = S.ellipsoid(p, V(0, 0.016, -0.036), V(0.0500, 0.0625, 0.0660))
-    d = S.smin(cran, face, 0.034)
+    d = skull(p)
     jaw = S.tube(q, [V(0.000, 0.0650, -0.0905), V(0.0090, 0.0590, -0.0890), V(0.0205, 0.0350, -0.0800),
-                     V(0.0315, 0.0060, -0.0650), V(0.0405, -0.0100, -0.0370), V(0.0470, -0.0150, -0.0050)],
-                 [0.0104, 0.0100, 0.0098, 0.0100, 0.0118, 0.0124])
+                     V(0.0305, 0.0060, -0.0650), V(0.0385, -0.0100, -0.0370), V(0.0455, -0.0150, -0.0050)],
+                 [0.0104, 0.0100, 0.0098, 0.0100, 0.0116, 0.0124])
     d = S.smin(d, jaw, 0.024)
     chin = S.ellipsoid(p, V(0, 0.0695, -0.0940), V(0.0100, 0.0098, 0.0105))
     d = S.smin(d, chin, 0.014)
     muzzle = S.ellipsoid(p, V(0, 0.0490, -0.0610), V(0.0280, 0.0320, 0.0235))
     d = S.smin(d, muzzle, 0.024)
-    malar = S.ellipsoid(q, V(0.0365, 0.0465, -0.0235), V(0.0215, 0.0225, 0.0235))
+    malar = S.ellipsoid(q, V(0.0360, 0.0480, -0.0215), V(0.0210, 0.0225, 0.0230))
     d = S.smin(d, malar, 0.032)
-    zyg = S.ellipsoid(q, V(0.0510, 0.0210, -0.0150), V(0.0150, 0.0260, 0.0115))
+    zyg = S.ellipsoid(q, V(0.0495, 0.0210, -0.0150), V(0.0150, 0.0260, 0.0115))
     d = S.smin(d, zyg, 0.028)
-    brow = S.ellipsoid(q, V(0.0300, 0.0590, 0.0225), V(0.0250, 0.0110, 0.0090), S.euler(z=-14, y=8))
+    brow = S.ellipsoid(q, V(0.0280, 0.0590, 0.0225), V(0.0250, 0.0110, 0.0090), S.euler(z=-14, y=8))
     d = S.smin(d, brow, 0.020)
+    d = S.smin(d, S.ellipsoid(p, V(0, 0.0590, 0.0240), V(0.0170, 0.0110, 0.0110)), 0.020)        # smooth between the brows
     # ---- eye sockets: shallow, deepest beside the bridge
-    sock = S.ellipsoid(q, V(0.0270, 0.0860, 0.0050), V(0.0205, 0.0205, 0.0105), S.euler(y=-10))
+    sock = S.ellipsoid(q, V(0.0245, 0.0875, 0.0030), V(0.0205, 0.0205, 0.0118), S.euler(y=-10))
     d = S.ssub(d, sock, 0.016)
+    d = S.ssub(d, S.ellipsoid(q, V(0.0440, 0.0790, 0.0010), V(0.0120, 0.0170, 0.0100)), 0.012)   # back to the temple
+    d = S.ssub(d, S.ellipsoid(q, V(0.0128, 0.0800, -0.0035), V(0.0080, 0.0150, 0.0100)), 0.006)  # in beside the nose
     nasion = S.ellipsoid(p, V(0, 0.0885, 0.0030), V(0.0190, 0.0110, 0.0095))
     d = S.ssub(d, nasion, 0.011)
     # ---- nose: short, a slim scooped bridge and a small tip turned a little up
@@ -105,15 +117,15 @@ def _parts(p):
     nose = S.smin(S.smin(S.smin(lobe, tip, 0.0065), ala, 0.0055), col, 0.0045)
     nose = S.smin(nose, bridge, 0.0065)
     d = S.smin(d, nose, 0.0055)
-    nostril = S.ellipsoid(q, V(0.0052, 0.0838, -0.0400), V(0.0025, 0.0042, 0.0022), S.euler(z=-25, x=14))
+    nostril = S.ellipsoid(q, V(0.0050, 0.0856, -0.0398), V(0.0021, 0.0036, 0.0014), S.euler(z=-25, x=22))
     P["nostril"] = nostril
-    d = S.ssub(d, nostril, 0.0028)
+    d = S.ssub(d, nostril, 0.0020)
     # ---- lips: a cupid's bow over a fuller lower lip, the corners tucked up into the cheeks
-    up_l = S.ellipsoid(q, V(0.0078, 0.0812, -0.0572), V(0.0126, 0.0060, 0.0056), S.euler(z=-27, y=9))
-    up_c = S.ellipsoid(p, V(0, 0.0842, -0.0590), V(0.0048, 0.0046, 0.0040))
+    up_l = S.ellipsoid(q, V(0.0078, 0.0796, -0.0570), V(0.0126, 0.0056, 0.0056), S.euler(z=-27, y=9))
+    up_c = S.ellipsoid(p, V(0, 0.0820, -0.0588), V(0.0048, 0.0046, 0.0040))
     upper = S.smin(up_l, up_c, 0.003)
-    lower = S.ellipsoid(q, V(0.0060, 0.0798, -0.0676), V(0.0116, 0.0076, 0.0070), S.euler(z=-25))
-    lower = S.smin(lower, S.ellipsoid(p, V(0, 0.0812, -0.0680), V(0.0084, 0.0074, 0.0066)), 0.004)
+    lower = S.ellipsoid(q, V(0.0060, 0.0778, -0.0678), V(0.0116, 0.0066, 0.0070), S.euler(z=-25))
+    lower = S.smin(lower, S.ellipsoid(p, V(0, 0.0786, -0.0682), V(0.0084, 0.0066, 0.0066)), 0.004)
     P["upper_lip"], P["lower_lip"] = upper, lower
     d = S.smin(d, S.smin(upper, lower, 0.0012), 0.0022)
     phil = S.tube(p, [V(0, 0.0868, -0.0440), V(0, 0.0876, -0.0520)], [0.0018, 0.0022])
@@ -125,24 +137,24 @@ def _parts(p):
     back = POCKET[0] + (POCKET[1] - POCKET[0]) * np.minimum(s, 1.0) ** 2
     d = S.smax(d, -np.maximum(g, back - r), 0.0004)
     # ---- eyelids: a shell over the eyeball, open across the aperture
-    ga, th, ph, up, lo = _aperture(q)
+    P["skin"] = d
+    ga, across, ph, up, lo = _aperture(q)
     r_eye = S.length(q - EYE)
     upper_side = ph > 0.5 * (up + lo)
     fade = np.clip((ga - 0.0025) / np.where(upper_side, 0.0100, 0.0050), 0.0, 1.0)
     shell = r_eye - (EYE_R + LID_T - 0.0065 * fade * fade * (3.0 - 2.0 * fade))
     d = S.smin(d, shell, 0.0080)
-    fold_r = 0.0020 * np.clip(1.0 - (np.abs(th / AP_W) / 0.95) ** 4, 0.0, 1.0)
+    fold_r = 0.0020 * np.clip(1.0 - (np.abs(across) / 0.95) ** 4, 0.0, 1.0)
     fold = np.hypot(r_eye - (EYE_R + LID_T + 0.0016), (ph - (up + 0.23)) * (EYE_R + LID_T)) - fold_r
-    fold = np.where(fold_r > 1e-5, fold, 1.0)
-    d = S.ssub(d, fold, 0.0020)
-    cut = np.maximum(np.maximum(ga, r_eye - (EYE_R + 0.0045)), (EYE_R - 0.0012) - r_eye)
+    fold = np.where(fold_r > 1e-5, fold, 1.0)                   # the lid's crease, which only the paint draws
+    cut = np.maximum(np.maximum(ga, r_eye - (EYE_R + LID_REACH)), (EYE_R - 0.0012) - r_eye)
     d = S.smax(d, -cut, 0.0005)
     P["fold"], P["r_eye"] = fold, r_eye
-    P["lid_g"], P["lid_ph"], P["lid_up"], P["lid_lo"], P["lid_th"] = ga, ph, up, lo, th
-    # ---- neck, soft under the chin, cut off inside the choker
+    P["lid_g"], P["lid_ph"], P["lid_up"], P["lid_lo"], P["lid_s"] = ga, ph, up, lo, across
+    # ---- soft under the chin, and on the neck the torso gives her, cut off inside the choker
     w = HEAD.w(p)
-    d = S.smin(d, body.neck(w), 0.022)
     d = S.smin(d, S.ellipsoid(p, V(0, 0.0250, -0.0850), V(0.0230, 0.0300, 0.0110)), 0.022)
+    d = S.smin(d, body.torso(w), 0.022)
     P["d"] = S.smax(d, (body.CHOKER + body.NECK_DIR * NECK_CUT - w) @ body.NECK_DIR, 0.002)
     return P
 
@@ -167,7 +179,7 @@ def density(p):
 def lid_edge(p):
     """> 0 on the lids, < 0 in the eye opening."""
     q = S.mirror_x(p)
-    return np.maximum(_aperture(q)[0], S.length(q - EYE) - (EYE_R + 0.006))
+    return np.maximum(_aperture(q)[0], S.length(q - EYE) - (EYE_R + LID_REACH + 0.0015))
 
 
 def lid_inner(p):
@@ -213,16 +225,16 @@ def wrap(detail=1.0):
 
 # ---------------------------------------------------------------- paint
 
-LIP = V(0.93, 0.60, 0.58)
-LIP_DEEP = V(0.74, 0.40, 0.40)
+LIP = V(0.88, 0.47, 0.46)
+LIP_DEEP = V(0.68, 0.29, 0.31)
 MOUTH = V(0.16, 0.07, 0.06)
-BROW = V(0.62, 0.47, 0.27)
-LASH = V(0.26, 0.17, 0.11)
-SHADE = V(0.86, 0.70, 0.60)
-BLUSH = V(1.0, 0.80, 0.76)
-BROW_PTS = np.array([(0.0150, 0.0218), (0.0220, 0.0250), (0.0300, 0.0274), (0.0380, 0.0284), (0.0455, 0.0268),
-                     (0.0525, 0.0226)])
-BROW_W = np.array([0.0015, 0.0018, 0.0017, 0.0014, 0.0009, 0.0003])
+BROW = V(0.50, 0.36, 0.20)
+LASH = V(0.20, 0.13, 0.09)
+SHADE = V(0.84, 0.66, 0.56)
+BLUSH = V(1.0, 0.74, 0.70)
+BROW_PTS = np.array([(0.0140, 0.0222), (0.0210, 0.0254), (0.0290, 0.0278), (0.0370, 0.0288), (0.0445, 0.0272),
+                     (0.0515, 0.0230)])
+BROW_W = np.array([0.0018, 0.0021, 0.0020, 0.0016, 0.0011, 0.0004])
 
 
 def _brow(x, z):
@@ -256,19 +268,27 @@ def paint(p):
     col = mix(col, V(0.50, 0.33, 0.26), np.clip(1.0 - (P["nostril"] + 0.0006) / 0.0014, 0, 1) * 0.8)
     col = mix(col, BROW, _brow(q[:, 0], q[:, 2]) * 0.85 * front)
     g = P["lid_g"]
-    s = P["lid_th"] / AP_W
+    s = P["lid_s"]
     upper_side = P["lid_ph"] > 0.5 * (P["lid_up"] + P["lid_lo"])
     on_lid = (P["r_eye"] < EYE_R + 0.0045) & (g > -0.0006)
     col = mix(col, SHADE, 0.55 * np.exp(-np.maximum(g, 0) / 0.0034) * upper_side * on_lid * (np.abs(s) < 1.08))
     col = mix(col, SHADE, 0.45 * np.clip(1.0 - (P["fold"] + 0.0012) / 0.0010, 0, 1) * on_lid)
-    lw = np.where(upper_side, 0.0009 + 0.0012 * np.clip((s + 0.3) / 1.3, 0, 1), 0.0005)
+    lw = np.where(upper_side, 0.0011 + 0.0015 * np.clip((s + 0.3) / 1.3, 0, 1), 0.0006)
     lash = np.clip(1.0 - (g - 0.0002) / lw, 0, 1) * on_lid
     return mix(col, LASH, lash * np.where(upper_side, 1.0, 0.40 * np.clip((s + 0.2) / 0.8, 0, 1)))
 
 
 # ---------------------------------------------------------------- eyeballs
 
-def eyeball(rings=14, segs=32):
-    """The front of one eyeball about the origin, looking along +z. Returns verts, faces and normals."""
-    v, faces = gen.lathe(gen.arc(0.0, EYE_R, 0, 112, rings), segs)
-    return v, faces, S.normalize(v)
+PUPIL = 0.15                                   # pupil radius on the eyeball (rad)
+EYE_RINGS = (0.0, 0.07, PUPIL - 0.01, PUPIL + 0.01, 0.27, IRIS - 0.02, IRIS + 0.02, 0.56, 0.76, 1.0, 1.28, 1.6, 1.95)
+
+
+def eyeball(segs=32):
+    """The front of one eyeball about the origin, looking along +z, with rings on the edges of pupil and iris.
+    Returns verts, faces, normals and the colours Blender previews it in; the game's eye look draws its own."""
+    v, faces = gen.lathe([(EYE_R * np.cos(a), EYE_R * np.sin(a)) for a in EYE_RINGS], segs)
+    off = np.arccos(np.clip(v[:, 2] / EYE_R, -1, 1))
+    tint = np.where((off < PUPIL)[:, None], V(0.02, 0.02, 0.02), np.where((off < IRIS)[:, None], V(0.24, 0.42, 0.58),
+                                                                           V(0.90, 0.88, 0.84)))
+    return v, faces, S.normalize(v), tint

@@ -7,7 +7,7 @@ with edge loops ringing the neck, shoulders, arms and every finger. `cells` scal
 build's one detail setting.
 """
 import numpy as np
-from sculpt import sdf as S
+from sculpt import sdf as S, mesher
 from sculpt.sdf import V
 from sculpt.gen import Frame
 from sculpt.lattice import Box
@@ -20,7 +20,7 @@ UP, DOWN, FWD, BACK, LEFT = V(0, 0, 1), V(0, 0, -1), V(0, -1, 0), V(0, 1, 0), V(
 HEAD = Frame(V(0, -0.022, 1.630), UP, -LEFT)   # between the eyes at the centre of the skull; y out of the face
 NECK_A, NECK_B = V(0, 0.018, 1.440), V(0, -0.004, 1.580)
 NECK_DIR = S.normalize(NECK_B - NECK_A)
-CHOKER = lerp(NECK_A, NECK_B, 0.36)            # where the head's wood meets the body's, under a brass band
+CHOKER = lerp(NECK_A, NECK_B, 0.43)           # where the head's wood meets the body's, under a brass band
 SHOULDER = V(0.160, 0.012, 1.408)
 ELBOW = SHOULDER + S.normalize(V(0.407, 0.050, -0.914)) * 0.285
 WRIST = ELBOW + S.normalize(V(0.300, -0.300, -0.905)) * 0.245
@@ -30,7 +30,7 @@ HIP = V(0.082, 0.014, 0.905)
 KNEE = V(0.078, 0.000, 0.500)
 ANKLE = V(0.072, 0.022, 0.082)
 TOE_OUT = np.radians(9.0)
-ARM_FROM, STUB_TO = 0.085, 0.130               # along the upper arm: the arm piece starts, the torso's stub ends
+ARM_FROM, STUB_TO = 0.105, 0.135              # along the upper arm: the arm piece starts, the torso's stub ends
 CHEST_CUT = 1.235                              # the torso piece ends here, well under the bodice
 
 
@@ -53,34 +53,33 @@ def upper_arm(q):
 
 
 def trunk(p):
-    """The torso without neck or arms: ribs, waist, hips and a modest bust."""
+    """The torso without neck or arms: ribs, waist, hips, shoulder blades and a modest bust."""
     q = S.mirror_x(p)
     d = S.smin(S.ellipsoid(p, V(0, 0.004, 1.285), V(0.128, 0.090, 0.165)),
                S.ellipsoid(p, V(0, 0.006, 1.090), V(0.104, 0.076, 0.130)), 0.05)
     d = S.smin(d, S.ellipsoid(p, V(0, 0.016, 0.925), V(0.162, 0.104, 0.125)), 0.06)
-    d = S.smin(d, S.ellipsoid(q, V(0.064, -0.074, 1.262), V(0.050, 0.044, 0.048)), 0.030)
-    return d
+    d = S.smin(d, S.ellipsoid(q, V(0.060, -0.066, 1.258), V(0.046, 0.040, 0.046)), 0.040)
+    d = S.smin(d, S.ellipsoid(q, V(0.078, 0.064, 1.345), V(0.050, 0.018, 0.066), S.euler(z=14)), 0.045)
+    return S.ssub(d, S.tube(p, [V(0, 0.100, 1.40), V(0, 0.100, 1.30), V(0, 0.092, 1.16)], 0.0040), 0.022)
 
 
 def torso(p):
     """Trunk, shoulder girdle, the roots of the arms and the neck, as one form."""
     q = S.mirror_x(p)
     d = trunk(p)
-    d = S.smin(d, S.cone(q, V(0.030, 0.016, 1.452), SHOULDER + V(-0.012, 0.0, 0.012), 0.033, 0.029), 0.035)
+    d = S.smin(d, S.cone(q, V(0.040, 0.020, 1.456), SHOULDER + V(-0.016, 0.0, 0.014), 0.028, 0.027), 0.040)
     d = S.smin(d, S.sphere(q, SHOULDER + V(-0.002, 0, 0), 0.0425), 0.028)
     d = S.smin(d, upper_arm(q), 0.020)
-    clav = S.tube(q, [V(0.017, -0.048, 1.430), V(0.082, -0.040, 1.441), V(0.150, -0.008, 1.442)], [0.0085, 0.0072, 0.0078])
-    d = S.smin(d, clav, 0.014)
-    d = S.smin(d, S.ellipsoid(q, V(0.078, 0.070, 1.345), V(0.050, 0.022, 0.066), S.euler(z=14)), 0.035)
-    d = S.ssub(d, S.tube(p, [V(0, 0.108, 1.42), V(0, 0.104, 1.30), V(0, 0.092, 1.16)], 0.0075), 0.030)
+    clav = S.tube(q, [V(0.018, -0.044, 1.430), V(0.082, -0.036, 1.440), V(0.150, -0.006, 1.441)], [0.0070, 0.0060, 0.0068])
+    d = S.smin(d, clav, 0.020)
     d = S.smin(d, neck(p), 0.030)
-    return S.ssub(d, S.sphere(p, V(0, -0.062, 1.447), 0.0105), 0.014)          # the pit of the throat
+    return S.ssub(d, S.sphere(p, V(0, -0.064, 1.448), 0.0100), 0.018)          # the pit of the throat
 
 
 def chest(p):
     """The torso piece: bare shoulders, collarbones and back, ending inside the choker, the sleeves and the bodice."""
     q = S.mirror_x(p)
-    d = S.smax(torso(p), (p - CHOKER - NECK_DIR * 0.003) @ NECK_DIR, 0.002)
+    d = S.smax(torso(p), (p - CHOKER - NECK_DIR * 0.0012) @ NECK_DIR, 0.001)
     d = S.smax(d, (q - SHOULDER) @ UPPER - STUB_TO, 0.003)
     return S.smax(d, CHEST_CUT - p[:, 2], 0.004)
 
@@ -119,12 +118,17 @@ def _digit(base, spread, lengths, curls, radii):
     return _joints(pts, radii)
 
 
-def _joints(pts, r):
+def _joints(pts, r, root=None):
+    """A digit's flesh through its four joint points, and the line its lattice follows, which leaves the
+    palm at `root` (by default just behind the first joint)."""
     mcp, pip, dip, tip = pts
     flesh = ([mcp, lerp(mcp, pip, 0.5), pip, lerp(pip, dip, 0.5), dip, lerp(dip, tip, 0.6), tip],
              [r[0], 0.46 * (r[0] + r[1]), 1.04 * r[1], 0.46 * (r[1] + r[2]), 1.03 * r[2], 0.98 * r[3], 0.80 * r[3]])
-    spine = [mcp - S.normalize(pip - mcp) * 0.008, pip, dip, tip + S.normalize(tip - dip) * 0.5 * r[3]]
-    return dict(flesh=flesh, spine=spine, spine_r=[0.7 * r[0], 0.7 * r[1], 0.7 * r[2], 0.5 * r[3]])
+    end = tip + S.normalize(tip - dip) * 0.5 * r[3]
+    if root is None:
+        return dict(flesh=flesh, spine=[mcp - S.normalize(pip - mcp) * 0.008, pip, dip, end],
+                    spine_r=[0.7 * r[0], 0.7 * r[1], 0.7 * r[2], 0.5 * r[3]])
+    return dict(flesh=flesh, spine=[root, pip, dip, end], spine_r=[0.7 * r[1], 0.7 * r[1], 0.7 * r[2], 0.5 * r[3]])
 
 
 FINGERS = {
@@ -133,11 +137,8 @@ FINGERS = {
     "middle": _digit((0.002, 0.0085, 0.097), 1.5, (0.045, 0.028, 0.023), (13, 21, 12), (0.0078, 0.0067, 0.0059, 0.0050)),
     "index": _digit((0.001, 0.0255, 0.093), 6.0, (0.040, 0.025, 0.022), (10, 18, 11), (0.0076, 0.0066, 0.0058, 0.0049)),
 }
-_t0 = V(-0.004, 0.0240, 0.020)
-_t1 = _t0 + S.normalize(V(-0.30, 0.62, 0.72)) * 0.042
-_t2 = _t1 + S.normalize(V(-0.34, 0.48, 0.81)) * 0.032
-_t3 = _t2 + S.normalize(V(-0.40, 0.36, 0.84)) * 0.028
-THUMB = _joints([_t0, _t1, _t2, _t3], (0.0108, 0.0086, 0.0075, 0.0060))
+THUMB = _joints([V(-0.0060, 0.0200, 0.0120), V(-0.0135, 0.0345, 0.0470), V(-0.0185, 0.0440, 0.0770),
+                 V(-0.0215, 0.0490, 0.1030)], (0.0115, 0.0092, 0.0078, 0.0062), root=V(-0.0110, 0.0215, 0.0400))
 DIGITS = list(FINGERS.values()) + [THUMB]
 
 
@@ -149,10 +150,10 @@ def arm(p):
     d = S.smin(d, fore, 0.014)
     d = S.smin(d, S.ellipsoid(l, V(0, 0, 0.002), V(0.0135, 0.0220, 0.026)), 0.012)
     d = S.smin(d, S.sphere(l, V(0.0085, -0.0185, -0.004), 0.0072), 0.006)          # head of the ulna
-    palm = S.smin(S.ellipsoid(l, V(0, 0, 0.024), V(0.0120, 0.0255, 0.028)),
-                  S.box(l, V(-0.001, 0.0005, 0.062), V(0.0092, 0.0335, 0.034), 0.0090), 0.014)
-    palm = S.smin(palm, S.ellipsoid(l, V(-0.0075, 0.0225, 0.037), V(0.0100, 0.0140, 0.028)), 0.010)
-    palm = S.smin(palm, S.ellipsoid(l, V(-0.0060, -0.0240, 0.040), V(0.0085, 0.0105, 0.030)), 0.010)
+    palm = S.smin(S.ellipsoid(l, V(0, 0, 0.032), V(0.0122, 0.0285, 0.034)),
+                  S.box(l, V(-0.001, 0.0005, 0.068), V(0.0092, 0.0330, 0.027), 0.0090), 0.018)
+    palm = S.smin(palm, S.ellipsoid(l, V(-0.0085, 0.0235, 0.036), V(0.0105, 0.0150, 0.030)), 0.012)
+    palm = S.smin(palm, S.ellipsoid(l, V(-0.0060, -0.0225, 0.042), V(0.0085, 0.0105, 0.032)), 0.012)
     palm = S.ssub(palm, S.ellipsoid(l, V(-0.0195, -0.002, 0.055), V(0.010, 0.017, 0.026)), 0.010)
     flesh = None
     for g in DIGITS:
@@ -168,8 +169,8 @@ def arm(p):
 def arm_grid(detail):
     c = lambda n, least=1: cells(n, detail, least)
     f, web, pad = c(4, 2), c(2), c(2)
-    return dict(f=f, web=web, pad=pad, wide=4 * f + 3 * web, thick=f + 2 * pad, k=c(128), finger=c(34), thumb=c(27),
-                at=c(110))
+    return dict(f=f, web=web, pad=pad, wide=4 * f + 3 * web, thick=f + 2 * pad, k=c(128), finger=c(34), thumb=c(30),
+                at=c(115))
 
 
 def arm_boxes(detail=1.0):
@@ -242,3 +243,21 @@ def leg_boxes(detail=1.0):
             Box((0, g["at"], g["k"]), (g["i"], g["at"] + g["shin"], g["k"] + g["up"]), 2,
                 [ANKLE + V(0, 0, -0.024), lerp(KNEE, ANKLE, 0.5), KNEE, lerp(KNEE, HIP, 0.10)],
                 [0.016, 0.024, 0.030, 0.032], [0.016, 0.024, 0.030, 0.032], out, toe, cap=(0.0, 0.5))]
+
+
+# ---------------------------------------------------------------- slipper
+
+def shoe(p):
+    """A lacquered slipper: the foot's own shape a little larger, open over the instep."""
+    l = to_foot(p)
+    top = 0.036 + 0.016 * smoothstep(0.0, -0.045, l[:, 1]) + 0.050 * smoothstep(0.055, 0.075, l[:, 1])
+    d = S.smax(foot(l) - 0.0026, l[:, 2] - top, 0.0022)
+    return S.smax(d, -l[:, 2], 0.002)
+
+
+def shoe_wrap(detail=1.0):
+    n = (cells(16, detail, 4), cells(36, detail, 4), cells(12, detail, 4))
+    v, q, nrm = mesher.wrap(shoe, from_foot((0, -0.034, 0.020))[0], from_foot((0, 0.105, 0.013))[0], (0.05, 0.11, 0.04),
+                            n, relax=8)
+    unit = mesher.cube_lattice(*n)[0]
+    return v, q, nrm, np.rint((unit + 1.0) / 2.0 * np.array(n)).astype(np.int64)

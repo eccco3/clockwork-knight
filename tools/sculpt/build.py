@@ -74,6 +74,25 @@ def textures(pieces, mats, size, folder, prefix):
     return painted, clay
 
 
+def face_paint(path, head, origin, width=1024):
+    """Bake a head's lacquer (head.paint over head.field, as far as head.PAINT_X, PAINT_Z0 and PAINT_Z1) to a
+    PNG, unless the head's source has not changed since the last bake, and write beside it where the game's
+    wood shader places it: on the head frame, whose origin lies at `origin` in the face's grain space."""
+    import hashlib, json
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(os.path.splitext(path)[0] + ".json", "w", newline="\n") as f:
+        json.dump(dict(origin=list(origin),half_width=head.PAINT_X, bottom=head.PAINT_Z0, top=head.PAINT_Z1), f)
+        f.write("\n")
+    tag = hashlib.sha1(open(head.__file__, "rb").read() + str(width).encode()).hexdigest()
+    stamp = path + ".stamp"
+    if os.path.exists(path) and os.path.exists(stamp) and open(stamp).read() == tag:
+        return
+    rgb = bake.front_view(head.field, head.paint, head.PAINT_X, head.PAINT_Z0, head.PAINT_Z1, width)
+    bl.save_image(path, rgb[::-1])
+    open(stamp, "w").write(tag)
+    print("PAINT", path, rgb.shape)
+
+
 def assemble(name, pieces, order, mats):
     """Every piece and its mirror image as one mesh, with a slot per material name in `order`."""
     v, tris, tuv, n, slot, at = [], [], [], [], [], 0
