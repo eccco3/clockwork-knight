@@ -72,20 +72,6 @@ Not started. Do it before the workshop extends these builders; it cannot run bes
 
 Not started. Do it before Rosalyn's sculpt, so her build starts from shared materials. The shared sculpt toolkit, which also changed `build_knight.py`, is on main.
 
-## Enemy: refine the sculpt
-
-### Task description
-
-Fix the grinner's weak spots before it is rigged: ragged geometry where the mouth pinches shut at each corner, which reads as cracks up the cheeks; a rough crease where jaw meets neck; a ragged hairline; and coarse, angular ears. Give the teeth their own texture variety and stop the limbs' paint mirroring. The grin stays fixed, so the mouth needs no cavity. Deliver before and after turnarounds of the head.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. The model is merged; see `tools/grinner/`.
-
 ## Enemy: rig and waddle
 
 ### Task description
@@ -98,7 +84,7 @@ Rig the grinner with clean deformation at the reversed knees and hips, the long 
 
 ### Status
 
-Not started. Starts once the refined sculpt is merged.
+Not started. Starts once the grinner's sculpt fixes in progress are merged. The dev will rework the face later; the face has no bones, so rigging need not wait.
 
 ## Enemy: attack animations
 
