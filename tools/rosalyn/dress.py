@@ -22,8 +22,8 @@ EASE = 0.0055
 FOLDS = 13                                     # folds round the skirt
 DIAMONDS, DIAMOND_Z = 64, 0.0105               # smocking: cells round the bodice, and their height
 
-CHARTREUSE = V(0.66, 0.77, 0.21)
-SHADOW = V(0.47, 0.60, 0.13)
+CHARTREUSE = V(0.60, 0.74, 0.12)
+SHADOW = V(0.40, 0.54, 0.07)
 BUTTER = V(0.97, 0.88, 0.58)
 
 
@@ -67,7 +67,7 @@ def _cloth(p, fine=True):
     d = S.smin(bodice, S.smax(skirt, z - (Z_WAIST + 0.010), 0.008), 0.016)
     sleeve, s = _sleeve(q)
     d = S.smin(d, sleeve, 0.014)
-    d = S.smin(d, S.ellipsoid(q, V(0.150, 0.012, 1.300), V(0.042, 0.046, 0.045)), 0.020)        # cloth across the armpit
+    d = S.smin(d, S.ellipsoid(q, SHOULDER + V(-0.004, 0.0, -0.105), V(0.042, 0.046, 0.045)), 0.020)        # cloth across the armpit
     frill = smoothstep(Z_NECK - FRILL - 0.004, Z_NECK - FRILL + 0.003, z)
     sash = smoothstep(SASH[0] - 0.002, SASH[0] + 0.001, z) * smoothstep(SASH[1] + 0.002, SASH[1] - 0.001, z)
     d = d - 0.0030 * frill - 0.0026 * sash
@@ -123,7 +123,7 @@ def boxes(detail=1.0):
     out = [Box((-g["i"], -g["j"], 0), (g["i"], g["j"], g["k"]), 2,
                [V(0, 0.012, Z_HEM), V(0, 0.014, 0.930), V(0, 0.008, Z_WAIST), V(0, 0.004, 1.250), V(0, 0.004, Z_NECK)],
                [0.240, 0.130, 0.085, 0.100, 0.100], [0.210, 0.085, 0.058, 0.068, 0.068], LEFT, BACK, cap=(0.0, 0.0))]
-    path = [V(0.100, 0.012, 1.300), SHOULDER + UPPER * 0.110, SHOULDER + UPPER * (CUFF + 0.012)]
+    path = [SHOULDER + V(-0.055, 0.0, -0.105), SHOULDER + UPPER * 0.110, SHOULDER + UPPER * (CUFF + 0.012)]
     for side in (1, -1):
         lo = (g["i"] if side > 0 else -g["i"] - g["sleeve"], -g["arm"], g["k"] - 2 * g["arm"])
         hi = (lo[0] + g["sleeve"], g["arm"], g["k"])

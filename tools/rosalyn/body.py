@@ -21,7 +21,7 @@ HEAD = Frame(V(0, -0.022, 1.630), UP, -LEFT)   # between the eyes at the centre 
 NECK_A, NECK_B = V(0, 0.018, 1.440), V(0, -0.004, 1.580)
 NECK_DIR = S.normalize(NECK_B - NECK_A)
 CHOKER = lerp(NECK_A, NECK_B, 0.43)           # where the head's wood meets the body's, under a brass band
-SHOULDER = V(0.160, 0.012, 1.408)
+SHOULDER = V(0.150, 0.012, 1.405)
 ELBOW = SHOULDER + S.normalize(V(0.407, 0.050, -0.914)) * 0.285
 WRIST = ELBOW + S.normalize(V(0.300, -0.300, -0.905)) * 0.245
 UPPER, FORE = S.normalize(ELBOW - SHOULDER), S.normalize(WRIST - ELBOW)
@@ -68,7 +68,7 @@ def torso(p):
     q = S.mirror_x(p)
     d = trunk(p)
     d = S.smin(d, S.cone(q, V(0.040, 0.020, 1.456), SHOULDER + V(-0.016, 0.0, 0.014), 0.028, 0.027), 0.040)
-    d = S.smin(d, S.sphere(q, SHOULDER + V(-0.002, 0, 0), 0.0425), 0.028)
+    d = S.smin(d, S.sphere(q, SHOULDER + V(-0.002, 0, 0), 0.0405), 0.028)
     d = S.smin(d, upper_arm(q), 0.020)
     clav = S.tube(q, [V(0.018, -0.044, 1.430), V(0.082, -0.036, 1.440), V(0.150, -0.006, 1.441)], [0.0070, 0.0060, 0.0068])
     d = S.smin(d, clav, 0.020)
