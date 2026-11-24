@@ -287,20 +287,6 @@ Let her attack while airborne. An attack pressed in the air plays a slash suited
 
 Not started.
 
-## Knight: a less floaty run
-
-### Task description
-
-Her run is floaty: a valid style, but not the one the dev wants. Retune it to feel planted, weighty and responsive, for example through acceleration, deceleration, turning, the clip's bounce and its stride against her ground speed. Constants are at the top of `scripts/player.gd`, and the gait blend is in `scripts/knight.gd`. Record before and after with the scripted-play harness, including starts, stops and sharp turns.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started.
-
 ## Minion: sculpt the model
 
 ### Task description
