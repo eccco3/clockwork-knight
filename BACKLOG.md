@@ -26,12 +26,13 @@ Animate two attacks with root motion: a pounce that leaps about 4 m at the knigh
 
 ### Status
 
-Not started.
+Ready to resume: the upright posture is merged. Branch `worktree-agent-ab16faaf0a806d2b0` holds a first pass to resume from: four clips in `tools/grinner/moves.py`, a state-machine AnimationTree, hit-window markers, `Grinner` methods and `dev/grinner_check.gd`. Its body values and `keys.BEARING` need re-keying to the new stance.
+
 ## Enemy: behaviour and combat
 
 ### Task description
 
-Extend `scripts/grinner.gd`, which now only plays the idle and waddle: it waddles straight at the knight, pounces from mid range and swipes up close, with cooldowns. Add the least combat both sides need: health, sword hits that land on grinners, claw hits on the knight, and reactions. A grinner dies to three hits, and flinches only when hit during a wind-up. When the knight's health runs out she collapses, the screen fades and the scene restarts. Place three grinners in `scenes/outdoors.tscn` and record a scripted fight.
+Extend `scripts/grinner.gd`, which now only plays the idle and waddle: it waddles straight at the knight, pounces from mid range and swipes up close, with cooldowns. Add the least combat both sides need: health, sword hits that land on grinners, claw hits on the knight, and reactions. A grinner dies to three hits, and flinches only when hit during a wind-up. When the knight's health runs out she collapses, the screen fades and the scene restarts. Replace the stand-in pacing grinners in `scripts/outdoors.gd` with three real ones and record a scripted fight.
 
 ### Open questions
 
@@ -57,7 +58,7 @@ Not started. For comparison, one knight costs the GPU about 0.25 ms at mid dista
 
 ### Task description
 
-Rig Rosalyn: shoulders and upper body for gesturing, fingers, and a face that can speak, with jaw and lips. Skin the dress so the smocked bodice and skirt deform cleanly. Pose her standing with her hands clasped in front of her, and animate a quiet idle on that pose: breathing and small weight shifts. Deliver turnarounds and a contact sheet of the idle.
+Rig Rosalyn: shoulders and upper body for gesturing, fingers, and her head and neck. Her wooden face does not deform. Skin the dress so the smocked bodice and skirt deform cleanly. Pose her standing with her hands clasped in front of her, and animate a quiet idle on that pose: breathing and small weight shifts. Deliver turnarounds and a contact sheet of the idle.
 
 ### Open questions
 
@@ -72,17 +73,30 @@ Not started.
 
 ### Task description
 
-Animate Rosalyn speaking: her mouth moves, and she gestures lightly by moving her upper body and shoulders, and with her hands too, though they mostly stay clasped. Make several looping speech clips that blend with the idle and with each other without repeating visibly, played through Godot's AnimationTree. Deliver contact sheets and a close-up capture of her face while speaking.
+Rosalyn is voiced. Animate her speaking her lines without moving her mouth, which is wood: she speaks through head tilts, her eyes and brows, and gestures lightly by moving her upper body and shoulders, and with her hands too, though they mostly stay clasped. Make several looping speech clips that blend with the idle and with each other without repeating visibly, played through Godot's AnimationTree. Deliver contact sheets and a close-up capture of her face while speaking.
 
 ### Open questions
 
-- Is there recorded or synthesised speech to match the mouth to, or only a generic talking motion?
 - Does she turn her head to follow the knight?
 - Are her words shown as text?
 
 ### Status
 
 Not started.
+
+## Rosalyn: a moving mouth
+
+### Task description
+
+Try two ways for Rosalyn's wooden mouth to move with her speech, where no wood visibly bends. First, lips that part: a jaw bone turns a few degrees, opening the lip parting onto the dark pocket behind it, moving the skin about a millimetre. Second, stop-motion style shapes: a few rigid lacquered lip pieces, swapped or pivoted. Time both to her voice. Deliver both in motion, with sound, beside her still-mouthed speech: close-up videos from Godot's movie writer and a playable scene that switches between the three. The dev picks; if neither works, she keeps the still mouth.
+
+### Open questions
+
+- How many shapes, and are they swapped meshes or pieces on pivots?
+
+### Status
+
+Not started. Comes after speech and gestures.
 
 ## Rosalyn: place her and test two entities
 
@@ -273,20 +287,6 @@ The start of her dodge-roll reads as a dive. Make it begin as a tuck, low and cl
 
 Not started.
 
-## Knight: attack mid-jump
-
-### Task description
-
-Let her attack while airborne. An attack pressed in the air plays a slash suited to the air and keeps her jump's motion, and she lands into her normal landing. `scripts/player.gd` handles states and buffering, and `scripts/knight_animator.gd` plays clips. Deliver a contact sheet of a jump attack.
-
-### Open questions
-
-- None. If she lands mid-slash, she finishes it on the ground.
-
-### Status
-
-Not started.
-
 ## Minion: sculpt the model
 
 ### Task description
@@ -367,7 +367,7 @@ Add a `dev/` tool that shows the dev two faces from the morphable model side by 
 
 ### Open questions
 
-- Does the dev rate in one sitting or several short ones?
+- None. The dev rates in several short sittings, so the tool saves every answer at once and resumes where he left off.
 
 ### Status
 

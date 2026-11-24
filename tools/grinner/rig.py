@@ -15,9 +15,9 @@ from .body import HIP, KNEE, ANKLE, SHOULDER, ELBOW, WRIST, NECK_A, NECK_B, NECK
 
 MIRROR = V(-1, 1, 1)
 PELVIS = V(0, HIP[1], HIP[2])
-WAIST, CHEST = V(0, 0.005, 0.735), V(0, -0.011, 0.860)
+WAIST, CHEST = V(0, 0.015, 0.734), V(0, 0.015, 0.860)
 CROWN = NECK_B + V(0, -0.020, 0.130)
-STERNUM = V(0.026, -0.052, 0.985)              # the collarbone's inner end
+STERNUM = V(0.026, -0.009, 0.989)             # the collarbone's inner end
 UPPER = S.normalize(ELBOW - SHOULDER)
 FINGERWARD = HF.dir(V(0, 0, 1))
 KNUCKLES = HF.w(V(0, 0, 0.086))

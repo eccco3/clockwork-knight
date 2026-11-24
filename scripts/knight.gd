@@ -46,6 +46,9 @@ var _jog_takeoff := 0.0              ## pelvis height (its parent's z) as a foot
 var _idle_t := 0.0
 var _action_rate := 1.0
 var action_weight := 1.0
+## Whether her legs and pelvis hold the jump's pose under the action, as while she attacks in the air.
+## `play()` clears it; `land_legs()` hands them to the action.
+var air_legs := false
 var _action_loop := false
 var _action_next := ""
 var _action_next_loop := false
@@ -58,6 +61,7 @@ var _tmp2: Array[Quaternion]
 var _grip := {}
 var _carry: Array[Quaternion]
 var _carry_mask := PackedFloat32Array()
+var _legs_mask := PackedFloat32Array()
 var _gears := []
 var _key := -1
 var _eyes := []
@@ -146,6 +150,17 @@ func _setup_extras() -> void:
 		var b := skel.find_bone(pair[0])
 		if b >= 0:
 			_carry_mask[b] = pair[1]
+	# the pelvis half keeps the jump, so the action's twist still reaches the hips
+	_legs_mask.resize(skel.get_bone_count())
+	_legs_mask.fill(0.0)
+	for b in skel.get_bone_count():
+		var n := skel.get_bone_name(b)
+		if n == "pelvis":
+			_legs_mask[b] = 0.5
+		elif n.ends_with("_l") or n.ends_with("_r"):
+			if n.begins_with("thigh") or n.begins_with("calf") or n.begins_with("foot") or n.begins_with("ball") \
+					or n.begins_with("poleyn"):
+				_legs_mask[b] = 1.0
 	_rng.seed = 20261122
 
 
@@ -159,9 +174,17 @@ func play(clip: String, blend := 0.12, start := 0.0, rate := 1.0, loop := false,
 	action_t = start
 	_action_rate = rate
 	action_weight = 1.0
+	air_legs = false
 	_action_next = ""
 	_action_loop = loop
 	_action_fade_out = fade_out
+
+
+## Give her legs and pelvis back to the action, blended over `blend` seconds.
+func land_legs(blend := 0.1) -> void:
+	if air_legs:
+		anim.inertialize(blend)
+		air_legs = false
 
 
 ## Queue a clip that takes over, without a blend, when the current one ends.
@@ -226,6 +249,9 @@ func _apply_pose(dt: float) -> void:
 		var p2 := anim.sample(action, action_t, _tmp)
 		anim.blend(_pose, _tmp, action_weight)
 		pos = pos.lerp(p2, action_weight)
+		if air_legs:
+			pos = anim.sample("Jump", fposmod(_clock, anim.length("Jump")), _tmp)
+			anim.blend(_pose, _tmp, 1.0, _legs_mask)
 	for b in _grip:
 		_pose[b] = _grip[b]
 	anim.apply(_pose, pos, dt)

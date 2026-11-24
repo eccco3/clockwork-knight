@@ -60,7 +60,7 @@ _HANGING = dict(foot_x=0.012, spread=4.0, arm_hang=0.75, curl_pinky=24.0, curl_r
                 thumb_curl=8.0)
 BEARING = dict(sided(dict(_HANGING, foot_yaw=4.0, arm_out=-7.0, elbow=6.0, wrist_curl=8.0),
                      dict(_HANGING, foot_yaw=7.0, arm_out=-9.0, elbow=13.0, wrist_curl=15.0, shoulder_up=3.0, curl_index=22.0)),
-               hips_z=-0.014, hips_pitch=3.0, neck_roll=2.0, head_roll=4.0)
+               hips_z=-0.014, neck_roll=2.0, head_roll=4.0)
 
 
 def _borne(controls):
@@ -95,7 +95,7 @@ ROCK = dict(hips_x=swaying((0.00, 0.004), (0.14, 0.040), (0.30, 0.052), (0.42, 0
             chest_roll=swaying((0.09, 0.0), (0.39, 3.0)),
             spine_yaw=swaying((0.08, 4.0), (0.33, 0.0)),
             chest_yaw=swaying((0.10, 5.0), (0.35, 0.0)),
-            chest_pitch=twice((0.14, 2.5), (0.40, 0.5)),
+            chest_pitch=twice((0.14, 1.5), (0.40, -0.5)),
             head_pitch=twice((0.17, 1.0), (0.42, -3.0)),
             head_roll=swaying((0.14, 0.0), (0.44, -2.5)))
 
@@ -151,7 +151,7 @@ def idle(phase):
     breath = BREATH(phase)
     out = {name: curve(phase) for name, curve in STAND.items()}
     out.update(sided(_hand(phase - 0.14, breath), _hand(phase - 0.62, breath)))
-    out.update(hips_z=-0.004 * breath, hips_pitch=2.0 - 0.8 * breath, spine_pitch=-1.6 * breath, chest_pitch=2.0 - 2.8 * breath,
+    out.update(hips_z=-0.004 * breath, hips_pitch=0.8 - 0.8 * breath, spine_pitch=-1.6 * breath, chest_pitch=1.0 - 2.8 * breath,
                head_level=0.6)
     return _borne(out)
 
