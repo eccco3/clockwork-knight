@@ -87,11 +87,10 @@ Not started.
 
 ### Task description
 
-Animate Rosalyn speaking without moving her mouth, which is wood: she speaks through head tilts, her eyes and brows, and gestures lightly by moving her upper body and shoulders, and with her hands too, though they mostly stay clasped. Make several looping speech clips that blend with the idle and with each other without repeating visibly, played through Godot's AnimationTree. Deliver contact sheets and a close-up capture of her face while speaking.
+Rosalyn is voiced. Animate her speaking her lines without moving her mouth, which is wood: she speaks through head tilts, her eyes and brows, and gestures lightly by moving her upper body and shoulders, and with her hands too, though they mostly stay clasped. Make several looping speech clips that blend with the idle and with each other without repeating visibly, played through Godot's AnimationTree. Deliver contact sheets and a close-up capture of her face while speaking.
 
 ### Open questions
 
-- Is there recorded or synthesised speech to match the mouth to, or only a generic talking motion?
 - Does she turn her head to follow the knight?
 - Are her words shown as text?
 
@@ -103,12 +102,11 @@ Not started.
 
 ### Task description
 
-Try two ways for Rosalyn's wooden mouth to move with her speech, where no wood visibly bends. First, lips that part: a jaw bone turns a few degrees, opening the lip parting onto the dark pocket behind it, moving the skin about a millimetre. Second, stop-motion style shapes: a small set of rigid lacquered lip pieces (closed, open, wide, rounded and so on), swapped or pivoted. Deliver close-up captures of both beside her still-mouthed speech. The dev picks; if neither works, she keeps the still mouth.
+Try two ways for Rosalyn's wooden mouth to move with her speech, where no wood visibly bends. First, lips that part: a jaw bone turns a few degrees, opening the lip parting onto the dark pocket behind it, moving the skin about a millimetre. Second, stop-motion style shapes: a small set of rigid lacquered lip pieces (closed, open, wide, rounded and so on), swapped or pivoted. Time both to her voice. Deliver close-up captures of both beside her still-mouthed speech. The dev picks; if neither works, she keeps the still mouth.
 
 ### Open questions
 
 - How many shapes, and are they swapped meshes or pieces on pivots?
-- What times them: recorded speech, or her text?
 
 ### Status
 
