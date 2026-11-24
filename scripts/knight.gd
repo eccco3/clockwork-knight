@@ -117,12 +117,13 @@ func _setup_materials() -> void:
 	eye.shader = EYE
 	var mats := {
 		"wood_light": _wood(Color(0.70, 0.47, 0.24), Color(0.44, 0.25, 0.11),
-			{"ring_density": 135.0, "ring_contrast": 0.55, "coat": 0.35, "coat_roughness": 0.20}),
+			{"ring_density": 135.0, "ring_contrast": 0.55}),
 		"wood_face": _wood(Color(0.76, 0.55, 0.34), Color(0.58, 0.38, 0.20),
 			{"ring_density": 170.0, "ring_contrast": 0.30, "pore_strength": 0.12, "fiber_strength": 0.12,
-			"figure_strength": 0.10, "coat": 0.3, "coat_roughness": 0.24, "roughness_min": 0.34, "roughness_max": 0.50, "bump": 0.05,
-			# the lacquer texture: FACE_GRAIN in tools/knight/build_knight.py, PAINT_* in tools/knight/head.py
+			"figure_strength": 0.10, "bump": 0.05,
+			# the paint texture: FACE_GRAIN in tools/knight/build_knight.py, PAINT_* in tools/knight/head.py
 			"paint_tex": FACE_PAINT, "paint_origin": Vector3(0.09, 0.05, 0.60), "paint_size": Vector3(0.064, -0.100, 0.044)}),
+		# the armour is lacquered
 		"wood_dark": _wood(Color(0.27, 0.155, 0.085), Color(0.085, 0.045, 0.026),
 			{"ring_density": 120.0, "ring_contrast": 0.62, "figure_strength": 0.40, "coat": 0.9,
 			"coat_roughness": 0.15, "roughness_min": 0.24, "roughness_max": 0.42, "paint": 0.0}),
