@@ -458,12 +458,16 @@ def legs(J, T):
 
 # ============================================================== head
 
-FACE_GRAIN = V(0.09, 0.05, 0.60)                # scripts/knight.gd passes the same value to the wood shader
+FACE_GRAIN = V(0.09, 0.05, 0.60)                # the head frame's origin in the face's grain space
 
 
 def write_face_paint(path, width=1024):
-    """Bake the face lacquer to a PNG (skipped when head.py has not changed since the last bake)."""
-    import hashlib
+    """Bake the face lacquer to a PNG (skipped when head.py has not changed since the last bake) and write
+    beside it where the game's wood shader places it: on the head frame, which it finds in grain space."""
+    import hashlib, json
+    with open(os.path.splitext(path)[0] + ".json", "w", newline="\n") as f:
+        json.dump(dict(origin=FACE_GRAIN.tolist(), half_width=head.PAINT_X, bottom=head.PAINT_Z0, top=head.PAINT_Z1), f)
+        f.write("\n")
     src = open(head.__file__, "rb").read()
     tag = hashlib.sha1(src + str(width).encode()).hexdigest()
     stamp = path + ".stamp"

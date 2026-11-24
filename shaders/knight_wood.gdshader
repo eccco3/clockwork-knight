@@ -27,37 +27,10 @@ uniform sampler2D paint_tex : source_color, hint_default_white, filter_linear_mi
 uniform vec3 paint_origin = vec3(0.0);
 uniform vec3 paint_size = vec3(0.0);
 
-varying vec3 gpos;
-varying float gseed;
-
-float hash13(vec3 p) {
-	p = fract(p * 0.1031);
-	p += dot(p, p.zyx + 31.32);
-	return fract((p.x + p.y) * p.z);
-}
-
-float vnoise(vec3 p) {
-	vec3 i = floor(p);
-	vec3 f = fract(p);
-	f = f * f * (3.0 - 2.0 * f);
-	float a = mix(mix(hash13(i), hash13(i + vec3(1, 0, 0)), f.x), mix(hash13(i + vec3(0, 1, 0)), hash13(i + vec3(1, 1, 0)), f.x), f.y);
-	float b = mix(mix(hash13(i + vec3(0, 0, 1)), hash13(i + vec3(1, 0, 1)), f.x), mix(hash13(i + vec3(0, 1, 1)), hash13(i + vec3(1, 1, 1)), f.x), f.y);
-	return mix(a, b, f.z);
-}
-
-// two value-noise lattices at an angle to each other, so thresholded spots are not square
-float rnoise(vec3 p) {
-	vec3 r = vec3(0.80 * p.x - 0.60 * p.y, 0.60 * p.x + 0.80 * p.y, p.z) * 1.37 + 17.3;
-	return 0.5 * (vnoise(p) + vnoise(r));
-}
+#include "knight_grain.gdshaderinc"
 
 float fbm(vec3 p) {
 	return vnoise(p) * 0.5 + vnoise(p * 2.03 + 7.1) * 0.3 + vnoise(p * 4.1 + 13.7) * 0.2;
-}
-
-void vertex() {
-	gpos = vec3(UV, UV2.x);
-	gseed = UV2.y;
 }
 
 void fragment() {
@@ -103,19 +76,5 @@ void fragment() {
 	CLEARCOAT_ROUGHNESS = coat_roughness;
 
 	// relief: late wood stands a hair proud, pores are pits
-	float h = (late * 0.5 + (fib - 0.5) * 0.35 * fib_aa - pore * 1.2) * 0.00012 * bump;
-	vec3 dpx = dFdx(VERTEX);
-	vec3 dpy = dFdy(VERTEX);
-	float dhx = dFdx(h);
-	float dhy = dFdy(h);
-	vec3 r1 = cross(dpy, NORMAL);
-	vec3 r2 = cross(NORMAL, dpx);
-	float det = dot(dpx, r1);
-	vec3 grad = sign(det) * (dhx * r1 + dhy * r2);
-	vec3 nn = abs(det) * NORMAL - grad;
-	float l2 = dot(nn, nn);
-	// degenerate derivatives (sub-pixel triangles) would give NaN, which bloom turns into a white flare
-	if (l2 > 1e-24 && l2 < 1e24) {
-		NORMAL = nn * inversesqrt(l2);
-	}
+	NORMAL = relief((late * 0.5 + (fib - 0.5) * 0.35 * fib_aa - pore * 1.2) * 0.00012 * bump, VERTEX, NORMAL);
 }

@@ -1,14 +1,12 @@
 class_name Knight
 extends Node3D
-## The clockwork knight's body: materials, animation state, and the little mechanical motions
+## The clockwork knight's body: her colours, animation state, and the little mechanical motions
 ## (turning chest gears, the winding key, glancing eyes). The controller drives it through
 ## `speed`, `play()` / `stop()` and `tick()`.
 
 const MODEL := preload("res://assets/models/knight.glb")
-const WOOD := preload("res://shaders/knight_wood.gdshader")
-const SURFACE := preload("res://shaders/knight_surface.gdshader")
-const EYE := preload("res://shaders/knight_eye.gdshader")
 const FACE_PAINT := preload("res://assets/textures/knight/face_paint.png")
+const FACE_PAINT_PLACEMENT := preload("res://assets/textures/knight/face_paint.json")
 
 ## Natural ground speed and cycle length of the gait clips (measured from their root motion).
 const WALK_NATURAL := 0.975
@@ -24,10 +22,17 @@ var mesh: MeshInstance3D
 var anim := KnightAnimator.new()
 
 ## Horizontal speed in m/s, set by the controller.
-var speed := 0.0
+var speed := 0.0:
+	set(value):
+		speed = value
+		_walk = clampf(speed / WALK_FULL_AT, 0.0, 1.0)
+		_jog = smoothstep(JOG_FROM, JOG_FULL_AT, speed)
 var action := ""
 var action_t := 0.0
 
+## How far idle has given way to the walk, and the walk to the jog, at this speed (0..1).
+var _walk := 0.0
+var _jog := 0.0
 var _phase := 0.0
 var _idle_t := 0.0
 var _action_rate := 1.0
@@ -74,7 +79,17 @@ func _ready() -> void:
 	_tmp = anim.new_pose()
 	_tmp2 = anim.new_pose()
 	_carry = anim.new_pose()
-	_setup_materials()
+	Looks.dress(mesh, {
+		"wood_light": Looks.oiled_wood(Color(0.70, 0.47, 0.24), Color(0.44, 0.25, 0.11)),
+		"wood_face": Looks.face_wood(Color(0.76, 0.55, 0.34), Color(0.58, 0.38, 0.20),
+			FACE_PAINT, FACE_PAINT_PLACEMENT),
+		"wood_dark": Looks.lacquered_wood(Color(0.27, 0.155, 0.085), Color(0.085, 0.045, 0.026)),
+		"brass": Looks.brass(Color(0.90, 0.70, 0.34)),
+		"brass_dark": Looks.dull_brass(Color(0.46, 0.33, 0.15)),
+		"steel": Looks.steel(Color(0.76, 0.77, 0.79), Color(0.36, 0.36, 0.38)),
+		"leather": Looks.leather(Color(0.13, 0.060, 0.032), Color(0.07, 0.03, 0.018)),
+		"eye": Looks.glass_eye(),
+	})
 	_setup_extras()
 	mesh.extra_cull_margin = 0.15
 	for v: VisualInstance3D in find_children("*", "VisualInstance3D", true, false):
@@ -90,56 +105,6 @@ func _find(n: Node, type: String) -> Node:
 		if r:
 			return r
 	return null
-
-
-# ------------------------------------------------------------------ materials
-
-func _wood(early: Color, late: Color, p: Dictionary) -> ShaderMaterial:
-	var m := ShaderMaterial.new()
-	m.shader = WOOD
-	m.set_shader_parameter("color_early", early)
-	m.set_shader_parameter("color_late", late)
-	for k in p:
-		m.set_shader_parameter(k, p[k])
-	return m
-
-
-func _surface(albedo: Color, p: Dictionary) -> ShaderMaterial:
-	var m := ShaderMaterial.new()
-	m.shader = SURFACE
-	m.set_shader_parameter("albedo", albedo)
-	for k in p:
-		m.set_shader_parameter(k, p[k])
-	return m
-
-
-func _setup_materials() -> void:
-	var eye := ShaderMaterial.new()
-	eye.shader = EYE
-	var mats := {
-		"wood_light": _wood(Color(0.70, 0.47, 0.24), Color(0.44, 0.25, 0.11),
-			{"ring_density": 135.0, "ring_contrast": 0.55}),
-		"wood_face": _wood(Color(0.76, 0.55, 0.34), Color(0.58, 0.38, 0.20),
-			{"ring_density": 170.0, "ring_contrast": 0.30, "pore_strength": 0.12, "fiber_strength": 0.12,
-			"figure_strength": 0.10, "bump": 0.05,
-			# the paint texture: FACE_GRAIN in tools/knight/build_knight.py, PAINT_* in tools/knight/head.py
-			"paint_tex": FACE_PAINT, "paint_origin": Vector3(0.09, 0.05, 0.60), "paint_size": Vector3(0.064, -0.100, 0.044)}),
-		# the armour is lacquered
-		"wood_dark": _wood(Color(0.27, 0.155, 0.085), Color(0.085, 0.045, 0.026),
-			{"ring_density": 120.0, "ring_contrast": 0.62, "figure_strength": 0.40, "coat": 0.9,
-			"coat_roughness": 0.15, "roughness_min": 0.24, "roughness_max": 0.42, "paint": 0.0}),
-		"brass": _surface(Color(0.90, 0.70, 0.34), {"roughness": 0.26, "tarnish": 0.30}),
-		"brass_dark": _surface(Color(0.46, 0.33, 0.15), {"roughness": 0.42, "tarnish": 0.5}),
-		"steel": _surface(Color(0.76, 0.77, 0.79), {"roughness": 0.30, "tarnish": 0.10, "streak": 0.95,
-			"tarnish_color": Color(0.36, 0.36, 0.38), "roughness_var": 0.12}),
-		"leather": _surface(Color(0.13, 0.060, 0.032), {"metallic": 0.0, "roughness": 0.60, "tarnish": 0.4,
-			"tarnish_color": Color(0.07, 0.03, 0.018), "streak": 0.0, "grain_scale": 520.0, "bump": 1.4}),
-		"eye": eye,
-	}
-	for s in mesh.mesh.get_surface_count():
-		var src := mesh.mesh.surface_get_material(s)
-		if src and mats.has(src.resource_name):
-			mesh.set_surface_override_material(s, mats[src.resource_name])
 
 
 # ------------------------------------------------------------------ rig extras
@@ -223,12 +188,8 @@ func tick(dt: float) -> Vector3:
 			else:
 				stop(_action_fade_out)
 	# stride phase advances so the planted foot matches the ground speed
-	var wj := clampf((speed - JOG_FROM) / (JOG_FULL_AT - JOG_FROM), 0.0, 1.0)
-	wj = wj * wj * (3.0 - 2.0 * wj)
-	var stride := lerpf(WALK_STRIDE, JOG_STRIDE, wj)
-	var ww := clampf(speed / WALK_FULL_AT, 0.0, 1.0)
 	if speed > 0.02:
-		_phase = fposmod(_phase + dt * speed / (stride * maxf(ww, 0.05)), 1.0)
+		_phase = fposmod(_phase + dt * speed / (lerpf(WALK_STRIDE, JOG_STRIDE, _jog) * maxf(_walk, 0.05)), 1.0)
 	_idle_t = fposmod(_idle_t + dt, anim.length("Idle"))
 	return rm
 
@@ -252,18 +213,15 @@ func _apply_pose(dt: float) -> void:
 
 
 func _locomotion(into: Array[Quaternion]) -> Vector3:
-	var ww := clampf(speed / WALK_FULL_AT, 0.0, 1.0)
-	var wj := clampf((speed - JOG_FROM) / (JOG_FULL_AT - JOG_FROM), 0.0, 1.0)
-	wj = wj * wj * (3.0 - 2.0 * wj)
 	var pos := anim.sample("Idle", _idle_t, into)
-	if ww > 0.0:
+	if _walk > 0.0:
 		var p := anim.sample("Walk", _phase * anim.length("Walk"), _tmp)
-		if wj > 0.0:
+		if _jog > 0.0:
 			var pj := anim.sample("Jog_Fwd", _phase * anim.length("Jog_Fwd"), _tmp2)
-			anim.blend(_tmp, _tmp2, wj)
-			p = p.lerp(pj, wj)
-		anim.blend(into, _tmp, ww)
-		pos = pos.lerp(p, ww)
+			anim.blend(_tmp, _tmp2, _jog)
+			p = p.lerp(pj, _jog)
+		anim.blend(into, _tmp, _walk)
+		pos = pos.lerp(p, _walk)
 	if carry > 0.0:
 		anim.blend(into, _carry, carry, _carry_mask)
 	return pos
