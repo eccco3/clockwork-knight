@@ -28,19 +28,6 @@ The grinner's upper body leans so far forward that it looks about to fall over. 
 
 Not started. Comes before the attack animations, which are paused for it.
 
-## Grinner: a more human face
-
-### Task description
-
-Make the grinner's face a bit more human. Its grin's width should sit about halfway between a normal human smile and its current width, and its jaw should be a little less elongated. Keep it unsettling, and keep the face without bones, so the rig needs no change. Work in `tools/grinner/head.py`. Deliver face close-ups and turnarounds before and after.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started.
 ## Enemy: attack animations
 
 ### Task description
