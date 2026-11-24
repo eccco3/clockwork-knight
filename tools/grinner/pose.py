@@ -95,7 +95,7 @@ def _arm(c, chest):
         at = hand @ turn(BACK_OF_HAND, fan * c("spread"))
         for k, share in enumerate(CURL, 1):
             at = out["%s_%d_l" % (name, k)] = at @ turn(ACROSS_PALM, -share * c("curl_" + name))
-    out["thumb_1_l"] = hand @ turn(BACK_OF_HAND, -c("thumb_in")) @ turn(THUMB_HINGE, 0.5 * c("thumb_curl"))
+    out["thumb_1_l"] = hand @ turn(BACK_OF_HAND, c("thumb_in")) @ turn(THUMB_HINGE, 0.5 * c("thumb_curl"))
     out["thumb_2_l"] = out["thumb_1_l"] @ turn(THUMB_HINGE, c("thumb_curl"))
     return out
 

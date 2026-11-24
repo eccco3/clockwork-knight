@@ -160,7 +160,7 @@ CLIPS = {"Idle": (idle, 180), "Waddle": (waddle, 48)}
 
 # ---------------------------------------------------------------- poses that test the skin
 
-CLAWED = dict(curl_pinky=70.0, curl_ring=70.0, curl_middle=70.0, curl_index=70.0, thumb_curl=55.0, thumb_in=10.0)
+CLAWED = dict(curl_pinky=70.0, curl_ring=70.0, curl_middle=70.0, curl_index=70.0, thumb_curl=70.0, thumb_in=20.0)
 SPLAYED = dict(curl_pinky=-8.0, curl_ring=-8.0, curl_middle=-8.0, curl_index=-8.0, spread=16.0, thumb_in=-25.0)
 POSES = {
     "crouch": dict(sided(dict(CLAWED, arm_fwd=55.0, elbow=70.0, foot_x=0.03, foot_yaw=12.0, knee=8.0),
