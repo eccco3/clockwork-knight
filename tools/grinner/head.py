@@ -6,10 +6,10 @@ Head frame as the knight's: origin between the eyes at the centre of the skull, 
 The teeth and eyeballs are separate small meshes made by `teeth` and `eyeball`.
 """
 import numpy as np
-from knight import sdf as S
-from knight.sdf import V
+from sculpt import sdf as S
+from sculpt.sdf import V
 from . import body
-from .sculpt import smoothstep, bump, noise3, fbm, mix
+from sculpt.num import smoothstep, bump, noise3, fbm, mix
 
 H0 = V(0, -0.108, 1.130)                       # head frame origin in the figure's rest pose
 

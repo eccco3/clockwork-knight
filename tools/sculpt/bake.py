@@ -6,8 +6,8 @@ coloured there by the piece's paint; the sculpt's gradient becomes the normal. G
 sculpt (weave, pores) is added in texture space, where its scale is even.
 """
 import numpy as np
-from knight import sdf as S
-from .sculpt import chunked
+from . import sdf as S
+from .num import chunked
 
 REACH = 0.006                                   # how far the detailed sculpt may sit from the game mesh
 

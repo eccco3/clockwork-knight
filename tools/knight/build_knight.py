@@ -6,14 +6,16 @@
 Rest pose is a T-pose in Blender space: +X is the figure's left, -Y is forward, +Z up.
 Every piece is rigid on one bone; the gaps at the joints are deliberate.
 """
-import bpy, sys, os, math, time
+import bpy, sys, os, time
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
-from knight import sdf as S, mesher, head, gen, bl, shadow
-from knight.sdf import V
-from knight.gen import Frame
+from sculpt import sdf as S, mesher, gen, bl
+from sculpt.bl import opt
+from sculpt.sdf import V
+from sculpt.gen import Frame
+from knight import head, shadow
 
 DL = os.path.join(os.path.dirname(HERE), "downloads")
 REF_RIG = os.path.join(DL, "ual2", "Universal Animation Library 2[Standard]", "Female Mannequin", "Unreal-Godot", "Mannequin_F.glb")
@@ -29,10 +31,6 @@ H0 = V(0, -0.020, 1.655)                       # head frame origin (between the 
 GRIP = V(-0.722, 0.060, 1.404)                 # sword grip centre in the rest pose (right hand)
 BLADE_DIR = V(0.0, -1.0, 0.0)
 
-argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-def opt(name, default=None):
-    return argv[argv.index(name) + 1] if name in argv else default
-
 PIECES = []
 rng = np.random.default_rng(7)
 
@@ -42,25 +40,6 @@ def add(name, bone, mat, verts, faces, normals=None, colors=None, hard=True, gra
     PIECES.append(dict(name=name, bone=bone, mat=mat, verts=np.asarray(verts, dtype=np.float64), faces=faces,
                        normals=normals, colors=colors, hard=hard, grain=grain or Frame(V(0, 0, 0)),
                        mirror=mirror, thickness=thickness, sharp=sharp, bevel=bevel, grain_offset=grain_offset))
-
-
-def turned(pts, sub=3):
-    p = gen.smooth_profile(pts, sub)
-    p[0, 1] = 0.0 if pts[0][1] == 0 else p[0, 1]
-    p[-1, 1] = 0.0 if pts[-1][1] == 0 else p[-1, 1]
-    return p
-
-
-def hug(f, c, ex, ey, n=40, a0=0.0, a1=np.pi, rmax=0.3, off=0.0008):
-    """Points on the surface of SDF `f` along rays from the inside point `c`, fanned in the plane (ex, ey)."""
-    a = np.linspace(a0, a1, n)
-    d = np.outer(np.cos(a), ex) + np.outer(np.sin(a), ey)
-    lo, hi = np.zeros(n), np.full(n, rmax)
-    for _ in range(34):
-        mid = 0.5 * (lo + hi)
-        inside = f(np.asarray(c) + d * mid[:, None]) < 0
-        lo, hi = np.where(inside, mid, lo), np.where(inside, hi, mid)
-    return np.asarray(c) + d * (0.5 * (lo + hi) + off)[:, None]
 
 
 # ============================================================== rig
@@ -161,7 +140,7 @@ def torso(J):
     v, f, n = mesher.wrap(chest, V(0, -0.015, 1.345), V(0, -0.015, 1.430), (0.16, 0.13, 0.11), (44, 32, 32),
                           relax=10, snap=win_edge)
     add("chest", "spine_03", "wood_dark", v, f, normals=n, hard=False)
-    loop = hug(chest, V(0, -0.015, 1.3075), LEFT, FWD, 72, 0.0, 2 * np.pi * 71 / 72, off=0.0005)
+    loop = S.hug(chest, V(0, -0.015, 1.3075), LEFT, FWD, 72, 0.0, 2 * np.pi * 71 / 72, off=0.0005)
     v, f = gen.tube(loop, 0.0036, 8, closed=True)
     add("chest_rim", "spine_03", "brass", v, f)
 
@@ -171,7 +150,7 @@ def torso(J):
                                     (1.275, 0.1160), (1.287, 0.1130), (1.2925, 0.1030), (1.2935, 0.0)], -0.030),
         ("lame_lower", "spine_01", [(1.070, 0.0), (1.071, 0.1040), (1.077, 0.1175), (1.092, 0.1215), (1.130, 0.1130),
                                     (1.160, 0.1070), (1.172, 0.1035), (1.1775, 0.0940), (1.1785, 0.0)], -0.026)):
-        v, f = gen.lathe(turned(pts), 48, sy=0.80)
+        v, f = gen.lathe(gen.turned(pts), 48, sy=0.80)
         add(name, bone, "wood_dark", v + V(0, cy, 0), f)
         z0 = pts[2][0] + 0.004
         r0 = pts[2][1] + 0.004
@@ -219,7 +198,7 @@ def torso(J):
     for name, bone, pts, cy in (
             ("core_lower", "spine_01", [(1.040, 0.0), (1.041, 0.066), (1.100, 0.074), (1.185, 0.070), (1.198, 0.060), (1.199, 0.0)], -0.026),
             ("core_upper", "spine_02", [(1.165, 0.0), (1.166, 0.062), (1.200, 0.072), (1.290, 0.078), (1.315, 0.068), (1.316, 0.0)], -0.028)):
-        v, f = gen.lathe(turned(pts), 32, sy=0.78)
+        v, f = gen.lathe(gen.turned(pts), 32, sy=0.78)
         add(name, bone, "wood_dark", v + V(0, cy, 0), f)
     # belt with a gear buckle
     v, f = gen.lathe_ring([(1.022, 0.150), (1.022, 0.1565), (1.030, 0.1585), (1.046, 0.1585), (1.054, 0.1565), (1.054, 0.150)],
@@ -233,7 +212,7 @@ def torso(J):
 
     # neck and gorget ring
     nf = Frame(J["neck_01"], J["Head"] - J["neck_01"], LEFT)
-    v, f = gen.lathe(turned([(-0.004, 0.0), (-0.003, 0.046), (0.004, 0.0495), (0.016, 0.0455), (0.034, 0.0405),
+    v, f = gen.lathe(gen.turned([(-0.004, 0.0), (-0.003, 0.046), (0.004, 0.0495), (0.016, 0.0455), (0.034, 0.0405),
                              (0.052, 0.0395), (0.062, 0.0340), (0.0665, 0.020), (0.068, 0.0)]), 32)
     add("neck", "neck_01", "wood_light", nf.w(v), f, grain=nf)
     v, f = gen.lathe_ring([(1.472, 0.052), (1.472, 0.064), (1.480, 0.0665), (1.487, 0.064), (1.487, 0.052)], 40, sy=0.92)
@@ -271,7 +250,7 @@ def arms(J, T):
     sh, el, wr = J["upperarm_l"], J["lowerarm_l"], J["hand_l"]
     ua = Frame(sh, el - sh, UP)            # local x up, y forward (elbow flexion side), z down the arm
     L = np.linalg.norm(el - sh)
-    prof = gen.arc(0.006, 0.041, 180, 58, 9) + list(turned(
+    prof = gen.arc(0.006, 0.041, 180, 58, 9) + list(gen.turned(
         [(0.034, 0.0318), (0.046, 0.0338), (0.085, 0.0372), (0.125, 0.0362), (0.165, 0.0334), (L - 0.022, 0.0312),
          (L - 0.014, 0.0308), (L - 0.0095, 0.0285), (L - 0.0075, 0.019), (L - 0.007, 0.0)]))
     m = [(V(0, -0.006, L - 0.007), V(0, 0.766, 0.643))]
@@ -283,7 +262,7 @@ def arms(J, T):
 
     fa = Frame(el, wr - el, UP)
     Lf = np.linalg.norm(wr - el)
-    prof = turned([(0.0070, 0.0), (0.0075, 0.019), (0.0095, 0.0275), (0.014, 0.0305), (0.030, 0.0338), (0.070, 0.0358),
+    prof = gen.turned([(0.0070, 0.0), (0.0075, 0.019), (0.0095, 0.0275), (0.014, 0.0305), (0.030, 0.0338), (0.070, 0.0358),
                    (0.120, 0.0328), (0.180, 0.0278), (0.235, 0.0246), (Lf - 0.016, 0.0240), (Lf - 0.010, 0.0225),
                    (Lf - 0.0085, 0.015), (Lf - 0.008, 0.0)])
     m = [(V(0, -0.006, 0.0070), V(0, 0.766, -0.643))]
@@ -359,7 +338,7 @@ def legs(J, T):
     hip, kn, an = J["thigh_l"], J["calf_l"], J["foot_l"]
     th = Frame(hip, kn - hip, LEFT)            # local x left, y forward, z down the leg
     L = np.linalg.norm(kn - hip)
-    prof = gen.arc(0.004, 0.062, 180, 62, 10) + list(turned(
+    prof = gen.arc(0.004, 0.062, 180, 62, 10) + list(gen.turned(
         [(0.040, 0.0600), (0.065, 0.0690), (0.105, 0.0735), (0.170, 0.0705), (0.250, 0.0625), (0.330, 0.0540),
          (L - 0.024, 0.0500), (L - 0.014, 0.0490), (L - 0.0090, 0.0450), (L - 0.0070, 0.030), (L - 0.0065, 0.0)]))
     limb("thigh", "thigh_l", "wood_light", th, prof, 36, [(V(0, 0.008, L - 0.0065), V(0, -0.766, 0.643))])
@@ -396,7 +375,7 @@ def legs(J, T):
 
     cf = Frame(kn, an - kn, LEFT)
     Lc = np.linalg.norm(an - kn)
-    prof = turned([(0.0070, 0.0), (0.0075, 0.030), (0.0095, 0.0420), (0.016, 0.0460), (0.050, 0.0495), (0.110, 0.0525),
+    prof = gen.turned([(0.0070, 0.0), (0.0075, 0.030), (0.0095, 0.0420), (0.016, 0.0460), (0.050, 0.0495), (0.110, 0.0525),
                    (0.170, 0.0495), (0.250, 0.0410), (0.330, 0.0330), (Lc - 0.058, 0.0305), (Lc - 0.042, 0.0295),
                    (Lc - 0.037, 0.0270), (Lc - 0.0348, 0.016), (Lc - 0.034, 0.0)])
     limb("calf", "calf_l", "wood_light", cf, prof, 36, [(V(0, 0.008, 0.0070), V(0, -0.766, -0.643))])
@@ -439,7 +418,7 @@ def legs(J, T):
     add("foot", "foot_l", "wood_dark", v, f, normals=n, hard=False, mirror=True)
     # lame edges across the instep, and the ankle ball
     for k, y in enumerate((0.006, -0.040, -0.086)):
-        loop = hug(foot, V(x, y, 0.030), LEFT, UP, 28, np.radians(-22), np.radians(202), off=0.0002)
+        loop = S.hug(foot, V(x, y, 0.030), LEFT, UP, 28, np.radians(-22), np.radians(202), off=0.0002)
         v, f = gen.tube(loop, 0.0026, 8)
         add("sabaton_band_%d" % k, "foot_l", "brass", v, f, mirror=True)
     af = Frame(an, UP, LEFT)
@@ -491,14 +470,8 @@ def write_face_paint(path, width=1024):
     if os.path.exists(path) and os.path.exists(stamp) and open(stamp).read() == tag:
         return
     rgb = head.paint_texture(width)
-    px = np.ones((rgb.shape[0], rgb.shape[1], 4), dtype=np.float32)
-    px[..., :3] = rgb[::-1]
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    img = bpy.data.images.new("face_paint", rgb.shape[1], rgb.shape[0], alpha=False)
-    img.pixels = px.ravel()
-    img.filepath_raw = path
-    img.file_format = "PNG"
-    img.save()
+    bl.save_image(path, rgb[::-1])
     open(stamp, "w").write(tag)
     print("PAINT", path, rgb.shape)
 
@@ -682,9 +655,9 @@ def sword():
         ff = Frame(sf.w((sx * 0.098, 0, 0.066)), sf.dir((sx, 0, 0.3)), sf.dir((0, 1, 0)))
         v, f = gen.lathe(gen.arc(0.003, 0.0070, 180, 0, 9), 12)
         add("guard_finial_%d" % sx, "weapon_r", "brass", ff.w(v), f)
-    v, f = gen.lathe(turned([(0.040, 0.0), (0.041, 0.0125), (0.046, 0.0150), (0.054, 0.0150), (0.060, 0.0120), (0.061, 0.0)], 2), 16, sy=0.72)
+    v, f = gen.lathe(gen.turned([(0.040, 0.0), (0.041, 0.0125), (0.046, 0.0150), (0.054, 0.0150), (0.060, 0.0120), (0.061, 0.0)], 2), 16, sy=0.72)
     add("guard_block", "weapon_r", "brass", sf.w(v), f)
-    v, f = gen.lathe(turned([(-0.052, 0.0), (-0.051, 0.0110), (-0.040, 0.0118), (-0.010, 0.0132), (0.020, 0.0128),
+    v, f = gen.lathe(gen.turned([(-0.052, 0.0), (-0.051, 0.0110), (-0.040, 0.0118), (-0.010, 0.0132), (0.020, 0.0128),
                              (0.040, 0.0116), (0.042, 0.0)], 3), 20, sy=0.82)
     add("grip", "weapon_r", "leather", sf.w(v), f, grain=sf)
     for z in (-0.046, -0.016, 0.014, 0.038):
@@ -793,10 +766,7 @@ def set_pose(arm, spec):
     bpy.context.scene.frame_set(int(frame))
 
 
-def preview(arm, body, path, views, zoom):
-    """Turntable: one render per view (camera and lights orbit together), stitched side by side."""
-    bl.setup_cycles(40)
-    path = os.path.abspath(path)
+def preview(arm, path, views, zoom):
     if zoom == "full":
         target, scale, res = (0, 0, 0.93), 2.02, (520, 1000)
     elif zoom == "upper":
@@ -806,32 +776,7 @@ def preview(arm, body, path, views, zoom):
     if opt("--pose"):
         hips = arm.pose.bones["pelvis"].head
         target = (hips.x, hips.y, target[2] + hips.z - 0.917)
-    pivot = bpy.data.objects.new("turntable", None)
-    bpy.context.scene.collection.objects.link(pivot)
-    pivot.location = (target[0], target[1], 0)
-    t0 = (0, 0, target[2])
-    stuff = [bl.light("key", (1.2, -3.0, 2.6), 900, 2.0, (1.0, 0.93, 0.85), t0),
-             bl.light("fill", (-2.5, -2.0, 1.2), 220, 3.0, (0.8, 0.88, 1.0), t0),
-             bl.light("rim", (0.5, 3.0, 2.4), 600, 2.0, (1, 1, 1), t0),
-             bl.camera_ortho((0, -6.0, target[2]), t0, scale, res)]
-    for o in stuff:
-        o.parent = pivot
-    tiles = []
-    for i, yaw in enumerate(views):
-        pivot.rotation_euler = (0, 0, math.radians(-yaw))
-        tmp = path + ".%d.png" % i
-        bl.render(tmp)
-        img = bpy.data.images.load(tmp)
-        px = np.array(img.pixels[:], dtype=np.float32).reshape(img.size[1], img.size[0], 4)
-        tiles.append(px)
-        bpy.data.images.remove(img)
-        os.remove(tmp)
-    sheet = np.concatenate(tiles, axis=1)
-    out = bpy.data.images.new("sheet", sheet.shape[1], sheet.shape[0], alpha=False)
-    out.pixels = sheet.ravel()
-    out.filepath_raw = path
-    out.file_format = "PNG"
-    out.save()
+    bl.turnaround(path, views, target, scale, res, bl.studio((2.6, 1.2, 2.4), (900, 220, 600)), 40)
 
 
 def export(arm, body, path, extra=()):
@@ -850,19 +795,11 @@ def export(arm, body, path, extra=()):
         if hasattr(st, "action_slot") and act.slots:
             st.action_slot = act.slots[0]
         tr.mute = False
-    bpy.ops.object.select_all(action="DESELECT")
-    arm.select_set(True)
-    for ob in (body, *extra):
-        ob.select_set(True)
-    bpy.context.view_layer.objects.active = arm
-    bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_animations=True,
-                              export_animation_mode="NLA_TRACKS", export_force_sampling=True, export_frame_step=1,
-                              export_skins=True, export_def_bones=False, export_normals=True, export_tangents=False,
-                              export_texcoords=True, export_vertex_color="ACTIVE", export_all_vertex_colors=True,
-                              export_active_vertex_color_when_no_material=True, export_yup=True, export_apply=False,
-                              export_materials="EXPORT", export_optimize_animation_size=False,
-                              export_anim_slide_to_zero=True, export_reset_pose_bones=True)
-    print("EXPORTED", path, "%.1f MB" % (os.path.getsize(path) / 1e6))
+    bl.export_glb(path, (arm, body, *extra), active=arm, export_animations=True, export_animation_mode="NLA_TRACKS",
+                  export_force_sampling=True, export_frame_step=1, export_skins=True, export_def_bones=False,
+                  export_tangents=False, export_vertex_color="ACTIVE", export_all_vertex_colors=True,
+                  export_active_vertex_color_when_no_material=True, export_optimize_animation_size=False,
+                  export_anim_slide_to_zero=True, export_reset_pose_bones=True)
 
 
 def main():
@@ -884,7 +821,7 @@ def main():
         set_pose(arm, opt("--pose"))
     if opt("--preview"):
         views = [float(a) for a in opt("--views", "0,-40,-90,180").split(",")]
-        preview(arm, body, opt("--preview"), views, opt("--zoom", "full"))
+        preview(arm, opt("--preview"), views, opt("--zoom", "full"))
     if opt("--out"):
         caster = shadow.shadow_mesh(body, 3000)
         print("SHADOW MESH tris=%d" % len(caster.data.polygons))

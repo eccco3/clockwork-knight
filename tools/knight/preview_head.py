@@ -3,7 +3,8 @@ Turnaround of the face sculpt: front, three-quarter, profile."""
 import bpy, sys, os, time, math
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from knight import sdf as S, mesher, head, bl
+from sculpt import sdf as S, mesher, bl
+from knight import head
 from mathutils import Vector
 
 args = sys.argv[sys.argv.index("--") + 1:]

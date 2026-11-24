@@ -8,8 +8,8 @@ figure's left, +y out of the face, +z up, metres. `field` is the sculpt,
 Proportions are life-size (eye line at z = 0, chin at z = -0.110).
 """
 import numpy as np
-from . import sdf as S
-from .sdf import V
+from sculpt import sdf as S
+from sculpt.sdf import V
 
 EYE = V(0.0315, 0.0550, 0.0000)   # eyeball centre (mirrored)
 EYE_R = 0.0150                    # eyeball radius

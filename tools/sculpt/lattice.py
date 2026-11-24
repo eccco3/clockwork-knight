@@ -1,12 +1,12 @@
 """All-quad meshing of branching sculpts.
 
-knight.mesher wraps one cube lattice onto a sculpt. Here several boxes share one integer lattice
+mesher wraps one cube lattice onto a sculpt. Here several boxes share one integer lattice
 (a polycube: a trunk with limbs extruded from its faces), each box is laid along its limb as a thin
 tube, and the skin of the whole is shrunk onto the zero level set and relaxed. Edge loops ring every
 limb, and the only extraordinary vertices are the box corners.
 """
 import numpy as np
-from knight import sdf as S
+from . import sdf as S
 
 
 class Box:
