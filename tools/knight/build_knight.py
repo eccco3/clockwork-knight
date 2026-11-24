@@ -9,7 +9,7 @@ A view is a yaw, or yaw/pitch to look from above; --zoom <bone> centres on that 
 Rest pose is a T-pose in Blender space: +X is the figure's left, -Y is forward, +Z up.
 Every piece is rigid on one bone; the gaps at the joints are deliberate.
 """
-import bpy, sys, os, time
+import bpy, sys, os, time, zlib
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -35,7 +35,6 @@ GRIP = V(-0.722, 0.060, 1.404)                 # sword grip centre in the rest p
 BLADE_DIR = V(0.0, -1.0, 0.0)
 
 PIECES = []
-rng = np.random.default_rng(7)
 
 
 def add(name, bone, mat, verts, faces, normals=None, colors=None, hard=True, grain=None, mirror=False,
@@ -249,12 +248,26 @@ def rivets(name, bone, frame, z, r, count, size=0.0028, mirror=True, phase=0.0):
         add("%s_%d" % (name, k), bone, "brass", rf.w(v), f, mirror=mirror)
 
 
+def guard(name, bone, frame, R, thick, theta_max, nu, nv, rim, radii=(1.0, 1.0, 1.0)):
+    """Domed plate of dark wood about the frame's z, edged in brass. Returns its outer and inner grids."""
+    o, i = gen.cap(R, thick, theta_max, nu, nv, radii)
+    v, f = gen.patch(o, i)
+    add(name, bone, "wood_dark", frame.w(v), f, grain=frame, mirror=True)
+    edge = o[:, 0, :] * 0.5 + i[:, 0, :] * 0.5
+    v, f = gen.tube(frame.w(edge[:-1]), rim, 8, closed=True)
+    add(name + "_rim", bone, "brass", v, f, mirror=True)
+
+
+SHOULDER_BALL = 0.045
+
+
 def arms(J, T):
     sh, el, wr = J["upperarm_l"], J["lowerarm_l"], J["hand_l"]
     ua = Frame(sh, el - sh, UP)            # local x up, y forward (elbow flexion side), z down the arm
     L = np.linalg.norm(el - sh)
-    prof = gen.arc(0.006, 0.041, 180, 58, 9) + list(gen.turned(
-        [(0.034, 0.0318), (0.046, 0.0338), (0.085, 0.0372), (0.125, 0.0362), (0.165, 0.0334), (L - 0.022, 0.0312),
+    # a ball about the joint, turning in the socket, on a neck that swells into the sleeve
+    prof = gen.arc(0.0, SHOULDER_BALL, 180, 40, 15) + list(gen.turned(
+        [(0.039, 0.0272), (0.047, 0.0280), (0.058, 0.0345), (0.085, 0.0372), (0.125, 0.0362), (0.165, 0.0334), (L - 0.022, 0.0312),
          (L - 0.014, 0.0308), (L - 0.0095, 0.0285), (L - 0.0075, 0.019), (L - 0.007, 0.0)]))
     m = [(V(0, -0.006, L - 0.007), V(0, 0.766, 0.643))]
     limb("upperarm", "upperarm_l", "wood_light", ua, prof, 32, m)
@@ -284,47 +297,63 @@ def arms(J, T):
     add("cuff", "lowerarm_l", "wood_dark", fa.w(v), f, grain=fa, mirror=True)
     band("cuff_trim", "lowerarm_l", "brass", fa, Lf - 0.003, Lf + 0.0025, 0.0398, 0.0402, 0.0018)
 
+    # the socket: a cup on the collar bone that the ball turns in, cut back where the arm swings across it
+    sf = Frame(sh, -LEFT, UP)                                  # local x up, y back, z into the trunk
+    def sth(az):
+        return np.radians(44 + 11 * np.cos(az - np.radians(135)) - 12 * np.maximum(np.cos(az - np.radians(315)), 0) ** 3)
+    guard("socket", "clavicle_l", sf, SHOULDER_BALL + 0.0062, 0.005, sth, 40, 8, 0.0030)
+
     # floating guards
     pf = Frame(sh + V(0, 0, 0.002), UP, LEFT)                  # local x toward the arm, y back
     def pth(az):
         c = np.cos(az)
         return np.radians(80 - 36 * np.maximum(c, 0) ** 1.4 - 34 * np.maximum(-c, 0) ** 1.4)
-    o, i = gen.cap(0.068, 0.0065, pth, 40, 10, (1.0, 1.06, 0.94))
-    v, f = gen.patch(o, i)
-    add("pauldron", "pauldron_l", "wood_dark", pf.w(v), f, grain=pf, mirror=True)
-    rim = o[:, 0, :] * 0.5 + i[:, 0, :] * 0.5
-    v, f = gen.tube(pf.w(rim[:-1]), 0.0042, 8, closed=True)
-    add("pauldron_rim", "pauldron_l", "brass", v, f, mirror=True)
+    guard("pauldron", "pauldron_l", pf, 0.068, 0.0065, pth, 40, 10, 0.0042, (1.0, 1.06, 0.94))
     v, f = gen.gear(12, 0.0150, 0.0185, r_hole=0.0, spokes=0)
     add("pauldron_rosette", "pauldron_l", "brass", pf.w(v + V(0, 0, 0.068 * 0.94 - 0.001)), f, thickness=-0.0045, mirror=True)
     v, f = gen.dome(0.0070, 0.0050)
     add("pauldron_boss", "pauldron_l", "brass", pf.w(v + V(0, 0, 0.068 * 0.94 + 0.003)), f, mirror=True)
 
     cf = Frame(el + V(0, 0.004, 0), BACK, LEFT)
-    o, i = gen.cap(0.047, 0.005, lambda az: np.radians(60 - 6 * np.cos(2 * az)), 32, 8)
-    v, f = gen.patch(o, i)
-    add("couter", "couter_l", "wood_dark", cf.w(v), f, grain=cf, mirror=True)
-    rim = o[:, 0, :] * 0.5 + i[:, 0, :] * 0.5
-    v, f = gen.tube(cf.w(rim[:-1]), 0.0033, 8, closed=True)
-    add("couter_rim", "couter_l", "brass", v, f, mirror=True)
+    guard("couter", "couter_l", cf, 0.047, 0.005, lambda az: np.radians(60 - 6 * np.cos(2 * az)), 32, 8, 0.0033)
     v, f = gen.dome(0.0085, 0.0055)
     add("couter_boss", "couter_l", "brass", cf.w(v + V(0, 0, 0.0465)), f, mirror=True)
 
 
 def hands(J, T):
     hf = Frame(J["hand_l"], T["hand_l"] - J["hand_l"], UP)       # x up (back of hand), y forward (thumb side), z to fingers
+    radii = {"index": (0.0090, 0.0082, 0.0074), "middle": (0.0093, 0.0085, 0.0076), "ring": (0.0088, 0.0080, 0.0072),
+             "pinky": (0.0078, 0.0070, 0.0064), "thumb": (0.0106, 0.0096, 0.0086)}
+    root = {fn: hf.l(J[fn + "_01_l"]) for fn in radii}           # each finger's first joint, in the hand's frame
+    carpal = {"index": V(-0.001, 0.016, 0.032), "middle": V(0.001, 0.005, 0.032), "ring": V(0.0, -0.007, 0.032),
+              "pinky": V(-0.002, -0.019, 0.030)}                 # where each metacarpal leaves the wrist
 
     def palm(p):
         l = hf.l(p)
-        d = S.box(l, V(-0.002, -0.005, 0.066), V(0.0125, 0.0405, 0.046), 0.011)
-        d = S.smin(d, S.ellipsoid(l, V(-0.010, 0.026, 0.045), V(0.012, 0.016, 0.026)), 0.012)
-        d = S.smin(d, S.ellipsoid(l, V(0, 0, 0.022), V(0.0145, 0.025, 0.016)), 0.012)
+        d = S.ellipsoid(l, V(0, 0, 0.020), V(0.0150, 0.0255, 0.0190))
+        for fn, base in carpal.items():                          # metacarpals fanning to the knuckles
+            d = S.smin(d, S.cone(l, base, root[fn] - V(0, 0, 0.004), 0.0115, radii[fn][0] + 0.0010), 0.012)
+        for a, b in zip(list(carpal)[:-1], list(carpal)[1:]):    # the flesh between them, ending in the webs
+            d = S.smin(d, S.cone(l, 0.5 * (carpal[a] + carpal[b]), 0.5 * (root[a] + root[b]) - V(0, 0, 0.008), 0.0095, 0.0080), 0.008)
+        pads = S.tube(l, [root[fn] + V(-0.0085, 0, -0.023) for fn in carpal], 0.0066)
+        pads = S.smin(pads, S.ellipsoid(l, V(-0.0105, 0.020, 0.050), V(0.0110, 0.0150, 0.0270)), 0.010)    # thenar
+        pads = S.smin(pads, S.ellipsoid(l, V(-0.0095, -0.028, 0.056), V(0.0085, 0.0125, 0.0340)), 0.010)   # hypothenar
+        d = S.smin(d, pads, 0.009)
+        d = S.smin(d, S.cone(l, V(-0.004, 0.010, 0.024), root["thumb"], 0.0140, radii["thumb"][0] + 0.0020), 0.010)   # thumb's seat
+        for fn in carpal:                                        # a knuckle ball each finger turns on
+            d = S.smin(d, S.sphere(l, root[fn], radii[fn][0] + 0.0012), 0.006)
         return d
 
-    v, f, n = mesher.wrap(palm, hf.w((0, -0.004, 0.040)), hf.w((0, -0.004, 0.092)), (0.062, 0.050, 0.022), (20, 16, 8), relax=8)
+    # meshed in a space where the hand is as deep as it is wide, so the lattice spreads evenly over back and palm,
+    # and drawn together round the knuckles
+    deep = V(2.5, 1, 1)
+    flat = lambda p: hf.l(p) / deep
+    near = lambda p: np.min([S.length(flat(p) - root[fn]) for fn in carpal], axis=0)
+    v, f, _ = mesher.wrap(lambda p: palm(hf.w(flat(p))), hf.w((0, -0.004, 0.022)), hf.w((0, -0.004, 0.098)),
+                          (0.068, 0.056, 0.065), (48, 36, 14), relax=30, density=lambda p: 1 + 5 * np.exp(-(near(p) / 0.018) ** 2))
+    v = hf.w(flat(v))
+    n = S.gradient(palm, v, 0.0015)                              # shaded as broadly as it is meshed
     add("palm", "hand_l", "wood_light", v, f, normals=n, hard=False, grain=hf, mirror=True)
-    radii = {"index": (0.0090, 0.0082, 0.0074), "middle": (0.0093, 0.0085, 0.0076), "ring": (0.0088, 0.0080, 0.0072),
-             "pinky": (0.0078, 0.0070, 0.0064), "thumb": (0.0106, 0.0096, 0.0086)}
     g = 0.0016
     for fn, rs in radii.items():
         for k in range(3):
@@ -391,12 +420,8 @@ def legs(J, T):
     rivets("greave_rivet", "calf_l", cf, 0.064, 0.0565, 8)
 
     kf = Frame(kn + V(0, 0.006, 0), FWD, LEFT)
-    o, i = gen.cap(0.064, 0.006, lambda az: np.radians(62 + 6 * np.cos(2 * az)), 36, 9, (1.0, 1.08, 1.0))
-    v, f = gen.patch(o, i)
-    add("poleyn", "poleyn_l", "wood_dark", kf.w(v), f, grain=kf, mirror=True)
-    rim = o[:, 0, :] * 0.5 + i[:, 0, :] * 0.5
-    v, f = gen.tube(kf.w(rim[:-1]), 0.0040, 8, closed=True)
-    add("poleyn_rim", "poleyn_l", "brass", v, f, mirror=True)
+    guard("poleyn", "poleyn_l", kf, 0.064, 0.006, lambda az: np.radians(62 + 6 * np.cos(2 * az)), 36, 9, 0.0040,
+          (1.0, 1.08, 1.0))
     v, f = gen.gear(10, 0.0125, 0.0158)
     add("poleyn_rosette", "poleyn_l", "brass", kf.w(v + V(0, 0, 0.0635)), f, thickness=-0.004, mirror=True)
     v, f = gen.dome(0.0060, 0.0045)
@@ -718,6 +743,7 @@ def realize(arm, only=None):
             me.vertices.foreach_get("co", co)
             co = co.reshape(-1, 3)
             g = pc["grain"].l(co * V(side, 1, 1))
+            rng = np.random.default_rng(zlib.crc32(name.encode()))      # each piece's own grain, whatever else is built
             if pc["mat"] != "eye":
                 ang = rng.uniform(0, 2 * np.pi)
                 off = V(np.cos(ang), np.sin(ang), 0) * rng.uniform(0.05, 0.16) + V(0, 0, rng.uniform(-2, 2))
