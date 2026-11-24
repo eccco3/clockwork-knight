@@ -40,20 +40,6 @@ Make a second kind of grinner that moves on all fours, much faster than the walk
 ### Status
 
 Not started. Comes after the walking grinner's attack animations.
-## Grinner: invisible near a detail boundary
-
-### Task description
-
-A grinner that first appears with the camera inside a detail level's 0.5 m margin in `tools/grinner/import_grinner.gd` may draw no level at all: recording the pounce, it was missing at 5.6 and 6.4 m and drew at 5.3 m. Confirm the cause in Godot's visibility-range hysteresis, then fix it so exactly one level always shows, without popping when the camera hovers at a boundary. Check the knight's and Rosalyn's detail levels for the same fault. Deliver a test in `dev/` that spawns grinners across each band.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started.
-
 ## Dev: record clips to MP4
 
 ### Task description

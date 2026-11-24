@@ -98,4 +98,5 @@ func spread(path: String) -> void:
 	for mesh: MeshInstance3D in stand(path).find_children("*_lod?", "MeshInstance3D", true, false):
 		mesh.visibility_range_begin = 0.0
 		mesh.visibility_range_end = 0.0
+		mesh.visibility_parent = NodePath()
 		mesh.position.x = 1.1 * String(mesh.name).right(1).to_int()
