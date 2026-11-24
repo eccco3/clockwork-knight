@@ -29,6 +29,63 @@ The knight's shadows cost about 0.8 ms of GPU time, but not because of her trian
 
 Not started. Scripted play: 6.8 ms with three shadowed chandeliers, 6.3 ms with only the middle one, 6.6 ms with dual paraboloids, 6.0 ms with none.
 
+## Tech debt: input, layers and app keys
+
+### Task description
+
+`Player.setup_input()` builds the input map in code, so the editor shows none and `dev/drive.gd` must call it first. Define it in `project.godot`, and delete CLAUDE.md's Controls list, which repeats it and already misses K for the roll. Name the physics and render layers there too: replace the bare 1s and 2s in four scripts, and the knight's borrowed `Hall.CHARACTER_LAYER`, with shared constants the grinner's hit layers can join. Move Esc, F11 and cursor capture out of `player.gd` into one place with the H hint. Delete the unused `scenes/player.tscn`. Check play and scripted runs behave as before.
+
+### Open questions
+
+- Should the outdoors scene show the controls hint too?
+
+### Status
+
+Not started. Do it before the grinner's combat adds hit layers. It changes a line or two in files the other tech-debt items edit, so run it first or alone.
+
+## Tech debt: one dev harness
+
+### Task description
+
+`dev/drive.gd` and `dev/shot.gd` both parse arguments, load a scene, apply `lamps=baked`, place a camera and save PNGs. Share that code, keeping their command lines in CLAUDE.md working. Delete `scripts/hall_perf.gd`, a probe among the runtime scripts; drive's `perf`, `set`, `env`, `vp` and `rs` events do its job. Fold `dev/grinner_stage` into `dev/stage`, which sets up the same sky and sun. Update drive's header, which omits `track`, `fps`, `hide`, `call`, `lookh` and `fov`. Prove nothing changed: the same commands give matching shots and perf output before and after.
+
+### Open questions
+
+- `dev/inspect_knight.gd` and `tools/knight/inspect_glb.py` both list a model's meshes, bones and clips, and nothing uses them. Keep one, or neither?
+- Delete `screenshots/`: seven unreferenced images, 14 MB, taken before the bake and the waxed wood?
+
+### Status
+
+Not started. Do it before the crowd performance test adds a `dev/` scene.
+
+## Tech debt: hall builders
+
+### Task description
+
+`scripts/hall_build.gd` is an offline builder among the runtime scripts, and does two jobs: about 200 lines write materials, the rest assembles the scene. Split them, and keep them with the hall's import hook and `tools/hall_check.gd` outside `scripts/`, as the grinner's import script is. Let layout marks say which lights reach or shadow characters, instead of matching the names "Chandelier" and "Sconce". Drop the fallback that lets `build_hall.py` build a bare hall when `hall_props` fails to import. Share the two `hall_cloth` shaders, identical but for two lines, through an include. Prove the rebuilt `hall.glb`, `hall.tscn` and materials match the old ones.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Do it before the workshop extends these builders; it cannot run beside other hall or baking work. The `ns_` comments in `hall_import.gd` and `hall_props.py` are stale: four lights cast shadows, not five, and the live chandeliers draw only characters into shadow maps.
+
+## Tech debt: the knight's materials and script
+
+### Task description
+
+`scripts/knight.gd` builds the knight's eight materials in code, beside her clip state, gait blending and clockwork motions. Move the materials out, so that Rosalyn, also lacquered wood and brass, can reuse the looks with her own colours. The face paint's placement is copied by hand from `build_knight.py` and `head.py` into `knight.gd`; let the build write it once. `knight_wood` and `knight_surface` repeat the same noise and vertex code; share it through a shader include. `tick()` and `_locomotion()` work out the same gait weights twice. Prove nothing changed with matching screenshots in the hall and outdoors, close up and full length.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Do it before Rosalyn's sculpt, so her build starts from shared materials. It edits `build_knight.py`, so not beside the shared sculpt toolkit.
+
 ## Enemy: refine the sculpt
 
 ### Task description
@@ -114,7 +171,7 @@ Move the parts of `tools/knight/` that any character uses into a new `tools/scul
 
 ### Status
 
-Not started. Wait for the grinner sculpt to merge; Rosalyn's sculpt should build on this.
+Not started. The grinner sculpt has merged; Rosalyn's sculpt should build on this. It edits `tools/grinner/`, so not beside the grinner's refinement or rig.
 
 ## Rosalyn: sculpt the model
 
