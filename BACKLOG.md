@@ -51,7 +51,8 @@ Not started. Do it before the grinner's combat adds hit layers. It changes a lin
 
 ### Open questions
 
-- `dev/inspect_knight.gd` and `tools/knight/inspect_glb.py` both list a model's meshes, bones and clips, and nothing uses them. Keep one, or neither?
+- What separates `dev/` from `tools/`, and should they merge? Both hold scripts that are not the game: `dev/` the harnesses and stages, `tools/` the builders, but also probes and checks such as `tools/hall_check.gd`.
+- Which tools should go, and which merge? For example, `dev/inspect_knight.gd` and `tools/knight/inspect_glb.py` both list a model's meshes, bones and clips, and nothing uses either.
 - Delete `screenshots/`: seven unreferenced images, 14 MB, taken before the bake and the waxed wood?
 
 ### Status
