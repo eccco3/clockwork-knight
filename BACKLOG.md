@@ -61,8 +61,7 @@ Rig Rosalyn: shoulders and upper body for gesturing, fingers, and her head and n
 
 ### Open questions
 
-- Does the skirt need cloth simulation, or are bones enough while she stands?
-- Do her eyes blink and move?
+None. Bones are enough for the skirt while she stands. Her eyes blink and move.
 
 ### Status
 
@@ -76,8 +75,7 @@ Rosalyn is voiced. Animate her speaking her lines without moving her mouth, whic
 
 ### Open questions
 
-- Does she turn her head to follow the knight?
-- Are her words shown as text?
+None. She turns her head to follow the knight, within a limited range blended into her other head motion. She is voiced, and her words are also shown as subtitles.
 
 ### Status
 
@@ -91,7 +89,7 @@ Try two ways for Rosalyn's wooden mouth to move with her speech, where no wood v
 
 ### Open questions
 
-- How many shapes, and are they swapped meshes or pieces on pivots?
+None. Try both: four or five shapes as swapped meshes, and the same shapes as pieces on pivots.
 
 ### Status
 
@@ -105,8 +103,7 @@ Stand Rosalyn in the hall and have her speak as the knight comes near. Check tha
 
 ### Open questions
 
-- Where does she stand?
-- Does she speak all the time, or only when the knight is close?
+None. She stands by one of the windows closer to the first one, between that window and the fire. She speaks only when the knight is close, and idles otherwise.
 
 ### Status
 
