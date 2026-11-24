@@ -114,14 +114,14 @@ func _build_light() -> void:
 
 	# fog hides the sun: it lights and shades from high up, and its highlight is the sky's glow around
 	# it, because a light's own specular stays a pinpoint glint on lacquer however large the light.
-	# No SSAO: it cost 2 ms here for little visible change in this soft light.
+	# No SSAO: it cost 2 ms here for little visible change in this soft light. A 10-degree sun's softer shadows cost 0.3 ms.
 	var sun := DirectionalLight3D.new()
 	sun.name = "Daylight"
 	sun.rotation_degrees = Vector3(-64, -35, 0)
 	sun.light_color = DAYLIGHT
 	sun.light_energy = 0.35
 	sun.light_specular = 0.0
-	sun.light_angular_distance = 10.0
+	sun.light_angular_distance = 7.0
 	sun.light_volumetric_fog_energy = 0.0
 	sun.shadow_enabled = true
 	sun.shadow_opacity = 0.8
