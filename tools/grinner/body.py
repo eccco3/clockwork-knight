@@ -18,12 +18,13 @@ UP, DOWN, FWD, BACK, LEFT = V(0, 0, 1), V(0, 0, -1), V(0, -1, 0), V(0, 1, 0), V(
 
 HIP = V(0.068, 0.020, 0.600)
 KNEE = V(0.084, 0.185, 0.332)                  # behind the hip: the leg folds the wrong way
-ANKLE = V(0.088, 0.030, 0.062)
+ANKLE = V(0.088, 0.055, 0.062)
 TOE_OUT = np.radians(11.0)
-SHOULDER = V(0.128, -0.040, 0.975)
-ELBOW = V(0.277, -0.070, 0.719)
-WRIST = V(0.395, -0.153, 0.461)                # the fingertips hang below the knee
-NECK_A, NECK_B, NECK_R = V(0, -0.050, 0.975), V(0, -0.084, 1.082), 0.038
+SHOULDER = V(0.128, 0.002, 0.978)
+ELBOW = V(0.277, -0.028, 0.722)
+WRIST = V(0.395, -0.111, 0.464)                # the fingertips hang below the knee
+NECK_A, NECK_B, NECK_R = V(0, -0.008, 0.979), V(0, -0.016, 1.091), 0.038
+HEAD = NECK_B + V(0, -0.024, 0.048)            # the origin of the head's frame
 THIGH = S.normalize(KNEE - HIP)
 SHIN = S.normalize(ANKLE - KNEE)
 FORE = S.normalize(WRIST - ELBOW)
@@ -315,20 +316,16 @@ def leg_seam(a, b, n=1):
 
 def torso_body(p):
     q = S.mirror_x(p)
-    d = S.smin(S.ellipsoid(p, V(0, -0.030, 0.885), V(0.106, 0.078, 0.118)),
-               S.ellipsoid(p, V(0, -0.008, 0.745), V(0.088, 0.066, 0.100)), 0.05)
+    d = S.smin(S.ellipsoid(p, V(0, -0.004, 0.887), V(0.106, 0.078, 0.118)),
+               S.ellipsoid(p, V(0, 0.003, 0.745), V(0.088, 0.066, 0.100)), 0.05)
     d = S.smin(d, S.ellipsoid(q, SHOULDER + V(-0.012, 0.002, -0.004), V(0.040, 0.040, 0.042)), 0.035)
-    d = S.smin(d, S.cone(q, V(0.025, -0.052, 1.010), SHOULDER + V(-0.012, 0, 0.014), 0.030, 0.026), 0.030)
-    d = S.smin(d, S.ellipsoid(p, V(0, -0.046, 0.972), V(0.088, 0.060, 0.046)), 0.030)       # collarbones round the neck
-    return S.smin(d, S.ellipsoid(p, V(0, 0.022, 0.930), V(0.085, 0.050, 0.075)), 0.040)     # a rounded, hunched back
-
-
-def spine_y(z):
-    return -0.132 * (z - 0.66)
+    d = S.smin(d, S.cone(q, V(0.025, -0.006, 1.014), SHOULDER + V(-0.012, 0, 0.014), 0.030, 0.026), 0.030)
+    d = S.smin(d, S.ellipsoid(p, V(0, -0.005, 0.975), V(0.088, 0.060, 0.046)), 0.030)       # collarbones round the neck
+    return S.smin(d, S.ellipsoid(p, V(0, 0.050, 0.925), V(0.085, 0.050, 0.075)), 0.040)     # a rounded back
 
 
 NECK_DIR = S.normalize(NECK_B - NECK_A)
-COLLAR = V(0, -0.0690, 1.036)
+COLLAR = lerp(NECK_A, NECK_B, 0.57)
 BUTTON_Z = 0.728 + 0.060 * np.arange(5)
 _buttons = None
 
@@ -339,7 +336,7 @@ def _shirt_cloth(p, fine=True):
     q = S.mirror_x(p)
     z = p[:, 2]
     wob = noise3(p * 16.0)
-    th = np.arctan2(p[:, 0], p[:, 1] - spine_y(z))
+    th = np.arctan2(p[:, 0], p[:, 1])
     body = torso_body(p) - 0.007 - 0.009 * bump(z, 0.742, 0.035) - 0.004 * (fbm(p * V(11.0, 11.0, 5.0)) - 0.5)
     if fine:
         body = body - 0.0030 * smoothstep(0.88, 0.76, z) * np.sin(17.0 * th + 6.0 * wob)       # gathers above the waistband
@@ -361,7 +358,7 @@ def _shirt_cloth(p, fine=True):
 def _button_points():
     global _buttons
     if _buttons is None:
-        lo, hi = np.full(5, -0.30), np.full(5, spine_y(BUTTON_Z))
+        lo, hi = np.full(5, -0.30), np.zeros(5)
         for _ in range(40):
             mid = 0.5 * (lo + hi)
             inside = _shirt_cloth(np.stack([np.zeros(5), mid, BUTTON_Z], axis=1))[0] < 0
@@ -379,7 +376,7 @@ def shirt_parts(p):
     q = S.mirror_x(p)
     z = p[:, 2]
     cloth, hs = _shirt_cloth(p)
-    front = p[:, 1] < spine_y(z)
+    front = p[:, 1] < 0
     placket = np.where(front, np.abs(p[:, 0]) - 0.0115, 1.0)
     d = np.minimum(cloth, S.smax(cloth - 0.0011, placket, 0.0006))
     collar = S.torus(p, COLLAR, NECK_DIR, NECK_R + 0.0075, 0.0058)
@@ -457,7 +454,7 @@ SHIRT_I, SHIRT_J, SHIRT_K, SLEEVE, SLEEVE_N, SLEEVE_J = 8, 6, 34, 7, 24, -4
 def shirt_boxes(n=1):
     """A torso with a sleeve from each flank. Lattice: i to the figure's left, j backward, k up."""
     trunk = Box(np.array((-SHIRT_I, -SHIRT_J, 0)) * n, np.array((SHIRT_I, SHIRT_J, SHIRT_K)) * n, 2,
-                [V(0, 0.002, 0.660), V(0, -0.010, 0.750), V(0, -0.028, 0.880), V(0, -0.042, 0.990)],
+                [V(0, 0.002, 0.660), V(0, 0.002, 0.750), V(0, 0.001, 0.882), V(0, 0.002, 0.993)],
                 [0.080, 0.086, 0.094, 0.082], [0.062, 0.066, 0.066, 0.046], LEFT, BACK, cap=(0.0, 0.5))
     boxes = [trunk]
     arm_path = [SHOULDER + V(-0.03, 0, 0), ELBOW, CUFF + FORE * 0.004]
