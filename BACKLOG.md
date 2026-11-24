@@ -108,11 +108,11 @@ Rig the grinner with clean deformation at the reversed knees and hips, the long 
 
 ### Open questions
 
-- Are original hand-keyed clips acceptable, or should a downloaded motion library be adapted?
+- None. The dev chose original hand-keyed clips over an adapted motion library.
 
 ### Status
 
-Not started.
+Not started. Starts once the refined sculpt is merged.
 
 ## Enemy: attack animations
 
