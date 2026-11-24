@@ -14,20 +14,6 @@ After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% wit
 
 Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 °C; 50% gave 43 W and 70 °C.
 
-## Tech debt: hall builders
-
-### Task description
-
-`scripts/hall_build.gd` is an offline builder among the runtime scripts, and does two jobs: about 200 lines write materials, the rest assembles the scene. Split them, and move them and the import hook out of `scripts/`, and `tools/hall_check.gd` to `dev/`. Let layout marks say which lights reach or shadow characters, instead of matching the names "Chandelier" and "Sconce". Drop the fallback that lets `build_hall.py` build a bare hall when `hall_props` fails to import. Share the two `hall_cloth` shaders, identical but for two lines, through an include. Prove the rebuilt `hall.glb`, `hall.tscn` and materials match the old ones.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. Do it before the workshop extends these builders; it cannot run beside other hall or baking work. The `ns_` comments in `hall_import.gd` and `hall_props.py` are stale: four lights cast shadows, not five, and the live chandeliers draw only characters into shadow maps.
-
 ## Enemy: attack animations
 
 ### Task description
