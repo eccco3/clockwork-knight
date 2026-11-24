@@ -279,34 +279,6 @@ Model unfinished automata at different stages, from bare mechanism to painted fi
 
 Not started. Needs the clocks, benches and tools.
 
-## Hall: dimmer fire highlight on the floor
-
-### Task description
-
-The fire's highlight on the floor in front of the hearth is too bright. Tone it down, keeping the hearth's warmth in the room. The agent chooses how. Deliver before and after screenshots from a few positions.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. Low priority. It shares the fire's lights with the fire-shadow item, so run them together or one after the other. The fire is the hall's only live light; its key light is built in `scripts/hall_build.gd` and flickers through `scripts/hall_fire_light.gd`.
-
-## Hall: steadier fire shadows
-
-### Task description
-
-The fire casts a pronounced shadow that looks twitchy. Soften its shadows or calm how much they dance, or both; the agent chooses how. Deliver short before and after captures, or contact sheets, of a shadow over a few seconds.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. Low priority. Shares the fire's lights with the floor highlight item.
-
 ## Hall: doorframe shimmer
 
 ### Task description
