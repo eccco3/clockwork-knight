@@ -53,7 +53,7 @@ def _add(out, more):
 STRIDE, GALLOP = 2.4, 14                        # metres and frames in one cycle
 HIND, FORE = 0.30, 0.28                         # the share of the cycle each foot, and each hand, is down
 LANDS = dict(foot_l=0.00, foot_r=0.07, hand_l=0.43, hand_r=0.53)
-FOOT_REACH, HAND_REACH = -0.34, -0.29           # where they land, from where they stand at rest: ahead is negative
+FOOT_REACH, HAND_REACH = -0.375, -0.29          # where they land, from where they stand at rest: ahead is negative
 SWUNG = Curve((0.0, 0.0), (0.30, 0.22), (0.62, 0.72), (0.88, 1.05), (1.0, 1.0), loop=False)
 THROWN = Curve((0.0, 0.0), (0.25, 0.14), (0.60, 0.70), (0.86, 1.06), (1.0, 1.0), loop=False)
 PAD = dict(pitch=Curve((0.00, 38.0), (0.10, 26.0), (HIND - 0.07, 48.0), (HIND, 84.0), (0.42, 100.0), (0.62, 70.0), (0.85, 30.0)),
@@ -64,7 +64,7 @@ PAD = dict(pitch=Curve((0.00, 38.0), (0.10, 26.0), (HIND - 0.07, 48.0), (HIND, 8
 PAW = dict(pitch=Curve((0.00, -4.0), (0.06, 2.0), (0.16, 8.0), (FORE - 0.04, 44.0), (FORE, 62.0), (0.36, 78.0), (0.47, 100.0),
                        (0.60, 95.0), (0.80, 45.0), (0.93, -14.0)),
            lift=Curve((0.00, 0.0), (FORE, 0.0), (0.34, 0.10), (0.43, 0.18), (0.62, 0.23), (0.85, 0.12), (0.96, 0.03)),
-           hooked=Curve((0.00, 0.10), (FORE, 0.20), (0.45, 1.0), (0.75, 0.6), (0.93, 0.0)),
+           hooked=Curve((0.00, 0.10), (FORE, 0.15), (0.37, 0.15), (0.52, 1.0), (0.75, 0.6), (0.93, 0.0)),
            splayed=Curve((0.00, 1.0), (FORE, 0.5), (0.50, 0.0), (0.80, 0.4), (0.93, 1.1)),
            elbow_out=Curve((0.00, 0.0), (FORE, -6.0), (0.55, 16.0)),
            shoulder_up=Curve((0.00, 12.0), (FORE, -8.0), (0.60, -2.0), (0.90, 14.0)),
@@ -132,7 +132,7 @@ DRUM = Curve((0.00, 0.0), (0.05, 1.0), (0.10, 0.15), (0.14, 0.0), (0.99, 0.0))
 
 def _resting(phase, raised=0.0):
     """A hand at rest drums its claws on the ground now and then; `raised` lifts it to hang from the wrist."""
-    out = _hand(PALM + 38.0 * raised, 0.07 * raised, 0.1 + 0.5 * raised, 0.6 * (1.0 - raised), hand_y=-0.03 * raised,
+    out = _hand(PALM + 38.0 * raised, 0.11 * raised, 0.1 + 0.5 * raised, 0.6 * (1.0 - raised), hand_y=-0.03 * raised,
                 shoulder_up=5.0 * raised)
     for k, name in enumerate(FINGERS):
         out["curl_" + name] += 30.0 * DRUM(phase - 0.025 * k) * (1.0 - raised) + 26.0 * raised * DRUM(4.0 * phase - 0.07 * k)
@@ -179,8 +179,9 @@ SPRUNG = dict(lift=held((0.38, 0.0), (0.44, 0.16), (0.50, 0.30), (0.64, 0.38), (
 CAST = dict(lift=held((HANDS_OFF, 0.0), (0.40, 0.34), (0.54, 0.52), (0.66, 0.34), (HANDS_ON, 0.0), (0.82, 0.0), (0.90, 0.09),
                       (0.98, 0.0)),
             pitch=held((0.10, 10.0), (0.26, 26.0), (HANDS_OFF, 60.0), (0.40, 70.0), (0.54, 20.0), (0.66, -24.0), (HANDS_ON, -8.0),
-                       (0.77, 10.0), (0.82, 52.0), (0.90, 70.0), (0.98, 0.0)),
-            hooked=held((0.26, 0.2), (0.40, 0.7), (0.54, 0.0), (0.66, 0.3), (HANDS_ON, 0.9), (0.84, 0.8), (0.98, 0.0)),
+                       (0.77, 10.0), (0.82, 30.0), (0.90, 40.0), (0.98, 0.0)),
+            hooked=held((0.26, 0.2), (0.34, 0.2), (0.44, 0.7), (0.54, 0.0), (0.66, 0.3), (HANDS_ON, 0.9), (0.80, 0.5), (0.86, 0.2),
+                        (0.98, 0.0)),
             splayed=held((0.30, 0.0), (0.42, 0.2), (0.54, 1.4), (0.68, 1.2), (HANDS_ON, 0.6), (0.98, 0.0)),
             hand_x=held((HANDS_OFF, 0.0), (0.54, 0.08), (HANDS_ON, 0.05), (0.98, 0.0)),
             elbow_out=held((0.10, 10.0), (0.28, 16.0), (0.50, -10.0), (HANDS_ON, 0.0), (0.84, 24.0), (1.10, 0.0)),
@@ -338,7 +339,7 @@ SPLAYED = dict(hand_x=held((0.66, 0.0), (0.86, 0.08), (1.00, 0.17), (1.16, 0.19)
                hand_yaw=held((0.66, 0.0), (1.00, 30.0), (1.76, 34.0), (2.10, 12.0)),
                lift=held((0.06, 0.0), (0.16, 0.30), (0.68, 0.34), (0.86, 0.0)),
                pitch=held((0.86, 0.0), (1.00, 0.0), (1.76, 0.0), (2.10, 10.0)),
-               hooked=held((0.10, 0.0), (0.30, 0.9), (0.66, 0.2), (0.90, 0.0), (1.30, 0.1), (1.76, 0.2), (2.10, 1.2)),
+               hooked=held((0.10, 0.0), (0.30, 0.9), (0.66, 0.2), (0.90, 0.0), (1.30, 0.1), (1.76, 0.2), (2.10, 0.85)),
                splayed=held((0.10, 0.6), (0.66, 0.9), (0.96, 0.5), (1.76, 0.2), (2.10, -0.4)),
                elbow_out=held((0.80, 0.0), (1.00, 44.0), (1.76, 50.0), (2.10, 36.0)))
 DRAGGED = dict(foot_y=held((0.88, 0.0), (1.00, 0.10), (1.14, 0.13), (1.50, 0.13), (1.58, 0.02), (1.70, 0.18), (1.82, 0.11), (1.94, 0.18)),

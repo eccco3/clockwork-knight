@@ -42,7 +42,7 @@ FAN = dict(pinky=-1.0, ring=-0.4, middle=0.1, index=0.8)          # how far each
 CURL = (0.9, 1.0, 0.7)                                           # each knuckle's share of a finger's curl
 _thumb = HF.dir(S.normalize(body.THUMB["chain"][1] - body.THUMB["chain"][0]))
 THUMB_HINGE = np.cross(_thumb, -BACK_OF_HAND - ACROSS_PALM)       # closes the thumb across the palm
-GIVES, SOFT = np.radians(np.arange(0.0, 101.0)), 0.012            # how far the ground can open a digit at its knuckle
+GIVES, SOFT = np.radians(np.arange(0.0, 126.0)), 0.012            # how far the ground can open a digit at its knuckle
 PALM = SHOULDER * V(1, 1, 0)
 LAID_FLAT = np.stack([Z, -X, -Y], axis=1) @ HF.R.T                # the rest hand to palm down, fingers forward, thumb inward
 WRIST_UP, PADS = V(0, 0, 0.016), V(0, -0.088, 0)                  # from the heel of a flat hand: its wrist, its finger pads
