@@ -5,7 +5,8 @@
           [--only a,b] [--gaps upperarm,rerebrace/chest,pauldron]
 
 A view is a yaw, or yaw/pitch to look from above; --zoom <bone> centres on that bone, --scale metres wide.
---gaps prints the least air between the pieces before the slash and those after it, over every frame of every clip.
+--gaps prints the least air between the pieces before the slash and those after it, over every frame of every clip,
+or in the --pose alone.
 
 Rest pose is a T-pose in Blender space: +X is the figure's left, -Y is forward, +Z up.
 Every piece is rigid on one bone; the gaps at the joints are deliberate.
@@ -32,7 +33,7 @@ CLIPS = ["Idle_Loop", "Walk_Loop", "Jog_Fwd_Loop", "Sprint_Loop", "Jump_Start", 
 
 UP, FWD, LEFT, BACK, DOWN = V(0, 0, 1), V(0, -1, 0), V(1, 0, 0), V(0, 1, 0), V(0, 0, -1)
 H0 = V(0, -0.020, 1.655)                       # head frame origin (between the eyes, skull centre)
-GRIP = V(-0.722, 0.060, 1.404)                 # sword grip centre in the rest pose (right hand)
+GRIP = V(-0.740, 0.062, 1.4155)                # sword grip centre in the rest pose (right hand): the hollow of her fist
 BLADE_DIR = V(0.0, -1.0, 0.0)
 
 PIECES = []
@@ -65,9 +66,33 @@ def load_rig():
     arm.name = "KnightRig"
     arm.data.name = "KnightRig"
     arm.animation_data_clear()
+    slim_hands(arm)
     J = {b.name: np.array(b.head_local) for b in arm.data.bones}
     T = {b.name: np.array(b.tail_local) for b in arm.data.bones}
     return arm, J, T
+
+
+KNUCKLES_IN, FINGERS_LONGER = 0.88, 1.06       # her knuckle line and her fingers, as fractions of the mannequin's
+
+
+def slim_hands(arm):
+    """Gives the mannequin's hands a woman's proportions: the knuckles drawn in toward the middle one, and the
+    four fingers longer. No bone turns, so the clips curl them as before."""
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.mode_set(mode="EDIT")
+    eb = arm.data.edit_bones
+    for s in "lr":
+        middle = eb["middle_01_" + s].head.copy()
+        for fn in ("index", "middle", "ring", "pinky"):
+            chain = [eb["%s_0%d_%s" % (fn, k, s)] for k in (1, 2, 3)]
+            heads = [b.head.copy() for b in chain]
+            tip = chain[-1].tail.copy()
+            at = middle + (heads[0] - middle) * KNUCKLES_IN
+            for b, here, there in zip(chain, heads, heads[1:] + [tip]):
+                b.head = at
+                at = at + (there - here) * FINGERS_LONGER
+                b.tail = at
+    bpy.ops.object.mode_set(mode="OBJECT")
 
 
 def add_bones(arm, J, T):
@@ -311,7 +336,7 @@ def arms(J, T):
     fa = Frame(el, wr - el, UP)
     Lf = np.linalg.norm(wr - el)
     prof = gen.turned([(0.0070, 0.0), (0.0075, 0.019), (0.0095, 0.0275), (0.014, 0.0305), (0.030, 0.0338), (0.070, 0.0358),
-                   (0.120, 0.0328), (0.180, 0.0278), (0.235, 0.0246), (Lf - 0.016, 0.0240), (Lf - 0.010, 0.0225),
+                   (0.120, 0.0328), (0.180, 0.0274), (0.235, 0.0228), (Lf - 0.016, 0.0212), (Lf - 0.010, 0.0200),
                    (Lf - 0.0085, 0.015), (Lf - 0.008, 0.0)])
     m = [(V(0, -0.006, 0.0070), V(0, 0.766, -0.643))]
     limb("forearm", "lowerarm_l", "wood_light", fa, prof, 32, m)
@@ -323,11 +348,11 @@ def arms(J, T):
     band("vambrace_trim_a", "lowerarm_l", "brass", fa, [(0.034, 0.0410), (0.041, 0.0410)], 0.0016)
     band("vambrace_trim_b", "lowerarm_l", "brass", fa, [(0.188, 0.0312), (0.195, 0.0306)], 0.0016)
     rivets("vambrace_rivet", "lowerarm_l", fa, 0.058, 0.0425, 8)
-    sec = [(0.212, 0.022), (0.212, 0.0290), (0.216, 0.0305), (Lf - 0.004, 0.0400), (Lf, 0.0410), (Lf + 0.002, 0.0400),
-           (Lf + 0.002, 0.0370), (0.220, 0.022)]
+    sec = [(0.212, 0.020), (0.212, 0.0272), (0.216, 0.0287), (Lf - 0.004, 0.0360), (Lf, 0.0370), (Lf + 0.002, 0.0360),
+           (Lf + 0.002, 0.0330), (0.220, 0.020)]
     v, f = gen.lathe_ring(sec, 32)
     add("cuff", "lowerarm_l", "wood_dark", fa.w(v), f, grain=fa, mirror=True)
-    band("cuff_trim", "lowerarm_l", "brass", fa, [(Lf - 0.003, 0.0398), (Lf + 0.0025, 0.0402)], 0.0018)
+    band("cuff_trim", "lowerarm_l", "brass", fa, [(Lf - 0.003, 0.0358), (Lf + 0.0025, 0.0362)], 0.0018)
 
     # floating guards
     pf = Frame(sh + V(0, 0, 0.002), UP, LEFT)                  # local x toward the arm, y back
@@ -348,26 +373,26 @@ def arms(J, T):
 
 def hands(J, T):
     hf = Frame(J["hand_l"], T["hand_l"] - J["hand_l"], UP)       # x up (back of hand), y forward (thumb side), z to fingers
-    radii = {"index": (0.0090, 0.0082, 0.0074), "middle": (0.0093, 0.0085, 0.0076), "ring": (0.0088, 0.0080, 0.0072),
-             "pinky": (0.0078, 0.0070, 0.0064), "thumb": (0.0106, 0.0096, 0.0086)}
+    radii = {"index": (0.0080, 0.0071, 0.0062), "middle": (0.0083, 0.0073, 0.0064), "ring": (0.0078, 0.0069, 0.0060),
+             "pinky": (0.0068, 0.0060, 0.0053), "thumb": (0.0090, 0.0080, 0.0070)}
     root = {fn: hf.l(J[fn + "_01_l"]) for fn in radii}           # each finger's first joint, in the hand's frame
-    carpal = {"index": V(-0.001, 0.016, 0.032), "middle": V(0.001, 0.005, 0.032), "ring": V(0.0, -0.007, 0.032),
-              "pinky": V(-0.002, -0.019, 0.030)}                 # where each metacarpal leaves the wrist
+    carpal = {"index": V(-0.001, 0.013, 0.032), "middle": V(0.001, 0.004, 0.032), "ring": V(0.0, -0.006, 0.032),
+              "pinky": V(-0.002, -0.016, 0.030)}                 # where each metacarpal leaves the wrist
 
     def palm(p):
         l = hf.l(p)
-        d = S.ellipsoid(l, V(0, 0, 0.020), V(0.0150, 0.0255, 0.0190))
+        d = S.ellipsoid(l, V(0, 0, 0.020), V(0.0135, 0.0210, 0.0190))
         for fn, base in carpal.items():                          # metacarpals fanning to the knuckles
-            d = S.smin(d, S.cone(l, base, root[fn] - V(0, 0, 0.004), 0.0115, radii[fn][0] + 0.0010), 0.012)
+            d = S.smin(d, S.cone(l, base, root[fn] - V(0, 0, 0.004), 0.0098, radii[fn][0] + 0.0006), 0.012)
         for a, b in zip(list(carpal)[:-1], list(carpal)[1:]):    # the flesh between them, ending in the webs
-            d = S.smin(d, S.cone(l, 0.5 * (carpal[a] + carpal[b]), 0.5 * (root[a] + root[b]) - V(0, 0, 0.008), 0.0095, 0.0080), 0.008)
-        pads = S.tube(l, [root[fn] + V(-0.0085, 0, -0.023) for fn in carpal], 0.0066)
-        pads = S.smin(pads, S.ellipsoid(l, V(-0.0105, 0.020, 0.050), V(0.0110, 0.0150, 0.0270)), 0.010)    # thenar
-        pads = S.smin(pads, S.ellipsoid(l, V(-0.0095, -0.028, 0.056), V(0.0085, 0.0125, 0.0340)), 0.010)   # hypothenar
-        d = S.smin(d, pads, 0.009)
-        d = S.smin(d, S.cone(l, V(-0.004, 0.010, 0.024), root["thumb"], 0.0140, radii["thumb"][0] + 0.0020), 0.010)   # thumb's seat
+            d = S.smin(d, S.cone(l, 0.5 * (carpal[a] + carpal[b]), 0.5 * (root[a] + root[b]) - V(0, 0, 0.008), 0.0082, 0.0068), 0.008)
+        pads = S.tube(l, [root[fn] + V(-0.0070, 0, -0.022) for fn in carpal], 0.0052)
+        pads = S.smin(pads, S.ellipsoid(l, V(-0.0090, 0.017, 0.050), V(0.0090, 0.0130, 0.0260)), 0.012)    # thenar
+        pads = S.smin(pads, S.ellipsoid(l, V(-0.0080, -0.021, 0.056), V(0.0070, 0.0100, 0.0320)), 0.012)   # hypothenar
+        d = S.smin(d, pads, 0.012)
+        d = S.smin(d, S.cone(l, V(-0.004, 0.009, 0.024), root["thumb"], 0.0122, radii["thumb"][0] + 0.0014), 0.010)   # thumb's seat
         for fn in carpal:                                        # a knuckle ball each finger turns on
-            d = S.smin(d, S.sphere(l, root[fn], radii[fn][0] + 0.0012), 0.006)
+            d = S.smin(d, S.sphere(l, root[fn], radii[fn][0] + 0.0004), 0.005)
         return d
 
     # meshed in a space where the hand is as deep as it is wide, so the lattice spreads evenly over back and palm,
@@ -376,7 +401,7 @@ def hands(J, T):
     flat = lambda p: hf.l(p) / deep
     near = lambda p: np.min([S.length(flat(p) - root[fn]) for fn in carpal], axis=0)
     v, f, _ = mesher.wrap(lambda p: palm(hf.w(flat(p))), hf.w((0, -0.004, 0.022)), hf.w((0, -0.004, 0.098)),
-                          (0.068, 0.056, 0.065), (48, 36, 14), relax=30, density=lambda p: 1 + 5 * np.exp(-(near(p) / 0.018) ** 2))
+                          (0.068, 0.056, 0.065), (40, 30, 14), relax=30, density=lambda p: 1 + 5 * np.exp(-(near(p) / 0.018) ** 2))
     v = hf.w(flat(v))
     n = S.gradient(palm, v, 0.0015)                              # shaded as broadly as it is meshed
     add("palm", "hand_l", "wood_light", v, f, normals=n, hard=False, grain=hf, mirror=True)
@@ -387,7 +412,7 @@ def hands(J, T):
             a, t = J[b], T[b]
             Lb = np.linalg.norm(t - a)
             fr = Frame(a, t - a, UP)
-            r1 = rs[k] * (0.90 if k < 2 else 0.78)
+            r1 = rs[k] * (0.90 if k < 2 else 0.70)
             v, f = gen.capsule(Lb - 2 * g, rs[k], r1, 12, 3, 0.55 if k < 2 else 0.9)
             add(b[:-2], b, "wood_light", fr.w(v * V(0.9, 1.0, 1.0) + V(0, 0, g)), f, grain=fr, mirror=True)
 
@@ -696,11 +721,11 @@ def sword():
         add("guard_finial_%d" % sx, "weapon_r", "brass", ff.w(v), f)
     v, f = gen.lathe(gen.turned([(0.040, 0.0), (0.041, 0.0125), (0.046, 0.0150), (0.054, 0.0150), (0.060, 0.0120), (0.061, 0.0)], 2), 16, sy=0.72)
     add("guard_block", "weapon_r", "brass", sf.w(v), f)
-    v, f = gen.lathe(gen.turned([(-0.052, 0.0), (-0.051, 0.0110), (-0.040, 0.0118), (-0.010, 0.0132), (0.020, 0.0128),
-                             (0.040, 0.0116), (0.042, 0.0)], 3), 20, sy=0.82)
+    v, f = gen.lathe(gen.turned([(-0.052, 0.0), (-0.051, 0.0085), (-0.040, 0.0091), (-0.010, 0.0102), (0.020, 0.0098),
+                             (0.040, 0.0090), (0.042, 0.0)], 3), 20, sy=0.82)
     add("grip", "weapon_r", "leather", sf.w(v), f, grain=sf)
     for z in (-0.046, -0.016, 0.014, 0.038):
-        v, f = gen.lathe_ring([(z - 0.0012, 0.0105), (z - 0.0012, 0.0136), (z, 0.0142), (z + 0.0012, 0.0136), (z + 0.0012, 0.0105)], 20, sy=0.82)
+        v, f = gen.lathe_ring([(z - 0.0012, 0.0078), (z - 0.0012, 0.0103), (z, 0.0108), (z + 0.0012, 0.0103), (z + 0.0012, 0.0078)], 20, sy=0.82)
         add("grip_wire_%d" % int(z * 1000), "weapon_r", "brass", sf.w(v), f)
     pfm = Frame(sf.w((0, 0, -0.070)), sf.dir((0, 1, 0)), sf.dir((1, 0, 0)))
     v, f = gen.gear(12, 0.0185, 0.0228)
@@ -810,6 +835,12 @@ def every_frame(arm):
         pb.matrix_basis.identity()
 
 
+def held(arm, pose):
+    """Poses the rig in the one `pose`, a clip and frame as "Action:frame", yielding its name."""
+    set_pose(arm, *pose.split(":"))
+    yield pose
+
+
 ZOOMS = {"full": ((0, 0, 0.93), 2.02, (520, 1000)), "upper": ((0, 0, 1.36), 1.05, (640, 640)),
          "head": ((0, -0.03, 1.66), 0.34, (600, 600))}
 
@@ -866,7 +897,7 @@ def main():
     objs = realize(only)
     if opt("--gaps"):
         movers, others = (side.split(",") for side in opt("--gaps").split("/"))
-        gaps.report(arm, objs, movers, others, every_frame(arm))
+        gaps.report(arm, objs, movers, others, held(arm, opt("--pose")) if opt("--pose") else every_frame(arm))
     body = bind(arm, objs)
     print("BUILT pieces=%d verts=%d polys=%d  t=%.1fs" % (len(PIECES), len(body.data.vertices), len(body.data.polygons), time.time() - t0))
     if opt("--pose"):

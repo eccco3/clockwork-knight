@@ -298,11 +298,11 @@ Cover the knight's seat a little more, standing and in every clip, rolls above a
 ### Status
 
 Not started. Shares the knight's builder with her shoulder and hand items.
-## Knight: shoulder and chest clearance
+## Knight: shoulder, chest and wrist clearance
 
 ### Task description
 
-In the sword clips her upper arm sinks up to 30 mm into her chest and passes through the pauldron, and her right arm reaches her face in `Sword_Regular_B:6`. Lift or reshape the pauldron, and fix the collar bone's travel or the chest's pocket, so the arm clears both. Measure with the builder's `--gaps` before and after, over all 21 clips, and deliver close-ups of the worst poses.
+In the sword clips her upper arm sinks up to 30 mm into her chest and passes through the pauldron, and her right arm reaches her face in `Sword_Regular_B:6`. Lift or reshape the pauldron, and fix the collar bone's travel or the chest's pocket, so the arm clears both. Also, when her wrist bends (Roll, Sword_Heavy_Combo), her palm passes up to 15 mm through the forearm's cuff. Measure with the builder's `--gaps` before and after, over all 21 clips, and deliver close-ups of the worst poses.
 
 ### Open questions
 
@@ -312,19 +312,6 @@ In the sword clips her upper arm sinks up to 30 mm into her chest and passes thr
 
 Not started. Shares the knight's builder with her hand and seat items.
 
-## Knight: a more feminine hand
-
-### Task description
-
-Make the knight's hands a little more feminine in 	ools/knight/build_knight.py: a narrower palm and wrist, slimmer and slightly longer fingers that taper toward the tips, smaller knuckles and softer padding, keeping her wooden jointed construction and her grip on the sword. Check the grip, fist and open hand in her clips, and deliver clay and painted close-ups before and after.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. Shares the builder with the natural shoulder, so one runs after the other.
 ## Minion: sculpt the model
 
 ### Task description
