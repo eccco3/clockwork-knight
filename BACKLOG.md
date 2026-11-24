@@ -14,21 +14,6 @@ After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% wit
 
 Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 °C; 50% gave 43 W and 70 °C.
 
-## Fewer chandelier shadows
-
-### Task description
-
-The knight's shadows cost about 0.8 ms of GPU time, but not because of her triangles: the 4,700-triangle `KnightShadow` saved nothing measurable over the full mesh. The cost is per shadowed light. Keep the knight's shadow only from the chandelier nearest her, handing it over between chandeliers without a visible pop, and try dual-paraboloid omni shadows. Measure scripted play before and after.
-
-### Open questions
-
-- Should distant chandeliers stop casting her shadow altogether?
-- Is a dual-paraboloid shadow's softer, slightly warped shape acceptable?
-
-### Status
-
-Not started. Scripted play: 6.8 ms with three shadowed chandeliers, 6.3 ms with only the middle one, 6.6 ms with dual paraboloids, 6.0 ms with none.
-
 ## Tech debt: input, layers and app keys
 
 ### Task description
