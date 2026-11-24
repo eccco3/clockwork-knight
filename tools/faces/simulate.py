@@ -3,10 +3,11 @@ the Bradley-Terry model with it, and now and then presses a key at random. Print
 direction comes to the hidden one (the cosine, which is also the correlation of their scores over random
 faces), the loop's own estimate of that, and the consistency on re-shown pairs.
 
-  python -I simulate.py [--raters 8] [--answers 200] [--strength 2.0] [--lapse 0.05] [--random]
+  python -I simulate.py [--sex women|men] [--raters 8] [--answers 200] [--strength 2.0] [--lapse 0.05] [--random]
 
---random picks pairs at random instead, for comparison. Two kinds of rater: one whose direction is drawn
-from the loop's prior, and one that cares more for the small components than the prior expects.
+Each sex's pool is tested in turn, or --sex alone. --random picks pairs at random instead, for comparison.
+Two kinds of rater: one whose direction is drawn from the loop's prior, and one that cares more for the
+small components than the prior expects.
 """
 import argparse, os, sys, tempfile
 import numpy as np
@@ -14,6 +15,7 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from faces import taste
 from faces.model import Model, SPREAD
+from faces.sexes import SEXES, Sex
 
 MODEL = os.path.join(taste.HERE, "model.npz")
 CHECKS = (25, 50, 100, 150, 200, 300)
@@ -49,8 +51,25 @@ def run(model, faces, rater, count, rng, random_pairs):
         return rows
 
 
+def test(model, sex, a):
+    faces = taste.pool(Sex(model, sex))
+    for name, variance in (("prior", model.share), ("flatter", np.sqrt(model.share))):
+        rows = []
+        for seed in range(a.raters):
+            rng = np.random.default_rng(1000 + seed)
+            rows.append(run(model, faces, Rater(variance, a.strength, a.lapse, rng), a.answers, rng, a.random))
+        rows = np.array(rows, float)
+        print("%s, rater %s, %s pairs, strength %.1f, lapse %.2f, %d raters" % (
+            sex, name, "random" if a.random else "chosen", a.strength, a.lapse, a.raters))
+        print("  answers  cosine (min)    settled  repeats agreed")
+        for k in range(rows.shape[1]):
+            n, cos, settled, agreed, again = rows[:, k].T
+            print("  %7d  %.3f (%.3f)  %.3f    %d of %d" % (n[0], cos.mean(), cos.min(), settled.mean(), agreed.sum(), again.sum()))
+
+
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--sex", choices=SEXES)
     ap.add_argument("--raters", type=int, default=8)
     ap.add_argument("--answers", type=int, default=200)
     ap.add_argument("--strength", type=float, default=2.0)
@@ -58,20 +77,8 @@ def main():
     ap.add_argument("--random", action="store_true")
     a = ap.parse_args()
     model = Model.load(MODEL)
-    faces = taste.pool(model)
-    kinds = (("prior", model.share), ("flatter", np.sqrt(model.share)))
-    for name, variance in kinds:
-        rows = []
-        for seed in range(a.raters):
-            rng = np.random.default_rng(1000 + seed)
-            rows.append(run(model, faces, Rater(variance, a.strength, a.lapse, rng), a.answers, rng, a.random))
-        rows = np.array(rows, float)
-        print("rater %s, %s pairs, strength %.1f, lapse %.2f, %d raters" % (
-            name, "random" if a.random else "chosen", a.strength, a.lapse, a.raters))
-        print("  answers  cosine (min)    settled  repeats agreed")
-        for k in range(rows.shape[1]):
-            n, cos, settled, agreed, again = rows[:, k].T
-            print("  %7d  %.3f (%.3f)  %.3f    %d of %d" % (n[0], cos.mean(), cos.min(), settled.mean(), agreed.sum(), again.sum()))
+    for sex in [a.sex] if a.sex else SEXES:
+        test(model, sex, a)
 
 
 main()

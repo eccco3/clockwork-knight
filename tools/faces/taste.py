@@ -8,14 +8,15 @@ approximation at its mode. Each next pair is the one, among random pairs of the 
 is expected to tell the most about w (BALD); about REPEAT of them instead re-show an earlier pair, sides
 swapped, to measure his consistency.
 
-The answers live in ANSWERS, one JSON line each, written the moment he gives them.
+Women's and men's faces are rated apart, each sex with its own pool of faces and answers file, which
+holds one JSON line per answer, written the moment he gives it.
 """
 import json, math, os, time
 import numpy as np
 
+from .sexes import SEXES
+
 HERE = os.path.dirname(os.path.abspath(__file__))
-ANSWERS = os.path.join(HERE, "taste.jsonl")
-POOL = os.path.join(HERE, "pool")              # build_faces.py --pool renders the faces shown here
 POOL_SEED, POOL_SIZE = 7, 240
 PRIOR_LOGIT = 2.0
 REPEAT = 0.05
@@ -26,19 +27,29 @@ BALD_C = np.sqrt(np.pi * np.log(2) / 2)
 ERF = np.vectorize(math.erf, otypes=[float])
 
 
-def pool(model, seed=POOL_SEED, size=POOL_SIZE):
-    """Coefficients of the faces the dev is shown."""
-    rng = np.random.default_rng(seed)
-    return np.stack([model.sample(rng) for _ in range(size)])
+def answers(name):
+    """The answers file of the sex of that name ("women" or "men")."""
+    return os.path.join(HERE, "taste_%s.jsonl" % name)
 
 
-def load_pool(folder=POOL):
+def pool_folder(name):
+    """Where build_faces.py --pool renders the faces of the sex of that name the dev is shown."""
+    return os.path.join(HERE, "pool", name)
+
+
+def pool(sex, size=POOL_SIZE):
+    """Coefficients of the faces of a sex (sexes.Sex) the dev is shown."""
+    rng = np.random.default_rng((POOL_SEED, list(SEXES).index(sex.name)))
+    return np.stack([sex.sample(rng) for _ in range(size)])
+
+
+def load_pool(folder):
     """The rendered pool's faces and the prior on w for them."""
     with np.load(os.path.join(folder, "pool.npz")) as f:
         return f["faces"], prior(f["share"], float(f["spread"]))
 
 
-def picture(i, folder=POOL):
+def picture(i, folder):
     return os.path.join(folder, "%03d.png" % i)
 
 
@@ -88,11 +99,11 @@ def cosine(a, b):
     return float(a @ b / max(np.linalg.norm(a) * np.linalg.norm(b), 1e-300))
 
 
-def best(posterior, model, rng, count, draws=4000):
-    """The `count` faces, of `draws` random ones, furthest along the learnt direction, best first: faces the
-    model could draw, with their other features left to chance. Returns their coefficients and the logits of
-    his preferring each to the mean face."""
-    faces = np.stack([model.sample(rng) for _ in range(draws)])
+def best(posterior, sex, rng, count, draws=4000):
+    """The `count` faces, of `draws` random ones of the sex, furthest along the learnt direction, best first:
+    faces the pool could hold, with their other features left to chance. Returns their coefficients and the
+    logits of his preferring each to the mean face."""
+    faces = np.stack([sex.sample(rng) for _ in range(draws)])
     score = faces @ posterior.mean
     keep = np.argsort(-score)[:count]
     return faces[keep], score[keep]
@@ -103,7 +114,7 @@ class Answers:
     of the winning face "won" and the losing one "lost", "repeat_of" the line it re-asks or null, "seconds"
     he took and "at", the time."""
 
-    def __init__(self, path=ANSWERS):
+    def __init__(self, path):
         self.path = path
         self.lines = []
         if os.path.exists(path):

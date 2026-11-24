@@ -383,19 +383,6 @@ Faint streaks of white light sprinkle across the air gaps between the knight's j
 
 Not started.
 
-## Faces: separate ratings for men and women
-
-### Task description
-
-Split the face-rating tool into two: one rates women's faces and one men's, each with its own pool, answers file and learned direction, and its own launcher entry. The face kit has no sex labels, so find a direction in the shape coefficients that separates female from male faces. Use known differences such as brow ridge, jaw and nose size, and confirm it with grids of each end. If that is unclear, add a short labelling pass for the dev. Each pool samples clearly on its side, with the same spread as now.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. No ratings exist yet.
 ## Faces: crisper features and use in a figure
 
 ### Task description
@@ -422,4 +409,4 @@ Add a `dev/` tool that shows the dev two faces from the morphable model side by 
 
 ### Status
 
-The tool is built and its faces rendered: the dev runs `res://dev/taste.tscn` in Godot to rate, commits `tools/faces/taste.jsonl`, then `build_faces.py -- --best` makes the final faces.
+Built, with women and men rated apart: the dev rates from the playtest launcher's two face rating tools, then `build_faces.py -- --sex women --best` (or men) makes the final faces.
