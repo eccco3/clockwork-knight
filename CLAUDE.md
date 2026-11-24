@@ -31,6 +31,7 @@ Everything the project needs is in this folder. `toolchain/` is third-party and 
 - `project.godot` holds the input map and names the layers; `scripts/layers.gd` gives code the same names.
 - The `App` autoload, `scripts/app.gd`, holds the keys Esc, F11 and H, cursor capture and the controls hint; `HINT_SCENES` lists the scenes that show it.
 - `scenes/outdoors.tscn` builds the grinner's foggy ground on load; drive and shot take `scene=res://scenes/outdoors.tscn`.
+- `dev/` runs the game to test it; `tools/`, hidden from Godot, builds and fetches assets.
 - `scripts/` holds the player controller, animator and camera rig; `shaders/` the wood, metal and eye shaders.
 - The hall's lamps are baked. `scripts/hall.gd` replaces them at runtime with lights that reach only the Characters layer and with cancelling pairs that leave character shadows on the baked floor. Only the fire lights the hall live.
 - `addons/lightmap_bake` presses the editor's bake button, the only way Godot bakes lightmaps.
