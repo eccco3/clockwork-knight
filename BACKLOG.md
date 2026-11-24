@@ -72,7 +72,7 @@ Not started. For comparison, one knight costs the GPU about 0.25 ms at mid dista
 
 ### Task description
 
-Rig Rosalyn: shoulders and upper body for gesturing, fingers, and a face that can speak, with jaw and lips. Skin the dress so the smocked bodice and skirt deform cleanly. Pose her standing with her hands clasped in front of her, and animate a quiet idle on that pose: breathing and small weight shifts. Deliver turnarounds and a contact sheet of the idle.
+Rig Rosalyn: shoulders and upper body for gesturing, fingers, and her head and neck. Her wooden face does not deform. Skin the dress so the smocked bodice and skirt deform cleanly. Pose her standing with her hands clasped in front of her, and animate a quiet idle on that pose: breathing and small weight shifts. Deliver turnarounds and a contact sheet of the idle.
 
 ### Open questions
 
@@ -87,7 +87,7 @@ Not started.
 
 ### Task description
 
-Animate Rosalyn speaking: her mouth moves, and she gestures lightly by moving her upper body and shoulders, and with her hands too, though they mostly stay clasped. Make several looping speech clips that blend with the idle and with each other without repeating visibly, played through Godot's AnimationTree. Deliver contact sheets and a close-up capture of her face while speaking.
+Animate Rosalyn speaking without moving her mouth, which is wood: she speaks through head tilts, her eyes and brows, and gestures lightly by moving her upper body and shoulders, and with her hands too, though they mostly stay clasped. Make several looping speech clips that blend with the idle and with each other without repeating visibly, played through Godot's AnimationTree. Deliver contact sheets and a close-up capture of her face while speaking.
 
 ### Open questions
 
@@ -98,6 +98,21 @@ Animate Rosalyn speaking: her mouth moves, and she gestures lightly by moving he
 ### Status
 
 Not started.
+
+## Rosalyn: mouth shapes
+
+### Task description
+
+Give Rosalyn's wooden mouth stop-motion style replacement shapes. Carve a small set of rigid lacquered lip pieces, one per mouth shape (closed, open, wide, rounded, teeth-together and so on), and swap or pivot them in time with her speech. No wood bends. Time the shapes from her lines, and judge it on close-up captures beside the still-mouthed speech. If it looks strange, it is dropped, and she keeps speaking with a still mouth.
+
+### Open questions
+
+- How many shapes, and are they swapped meshes or pieces on pivots?
+- What times them: recorded speech, or her text?
+
+### Status
+
+Not started. Comes after speech and gestures.
 
 ## Rosalyn: place her and test two entities
 
