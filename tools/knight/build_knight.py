@@ -300,7 +300,7 @@ def arms(J, T):
     # the socket: a cup on the collar bone that the ball turns in, cut back where the arm swings across it
     sf = Frame(sh, -LEFT, UP)                                  # local x up, y back, z into the trunk
     def sth(az):
-        return np.radians(44 + 11 * np.cos(az - np.radians(135)) - 12 * np.maximum(np.cos(az - np.radians(315)), 0) ** 3)
+        return np.radians(44 + 11 * np.cos(az - np.radians(135)) - 20 * np.maximum(np.cos(az - np.radians(315)), 0) ** 3)
     guard("socket", "clavicle_l", sf, SHOULDER_BALL + 0.0062, 0.005, sth, 40, 8, 0.0030)
 
     # floating guards
