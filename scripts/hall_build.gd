@@ -540,23 +540,24 @@ func _build_fire(p: Vector3) -> void:
 	sparks.draw_pass_1 = sq
 	sparks.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_add(sparks, fire, "Sparks")
-	# lights: a shadowed key that flickers, and a broad soft fill that carries the warmth
+	# lights: a shadowed key that swells slowly across the room, and a quick flicker inside the hearth.
+	# A point overstates how a broad flame mirrors in the polished floor, hence the key's low specular.
 	var key := _omni("FireKey", Vector3(0, 0.85, 0.95), Color(1.0, 0.55, 0.22), 5.5, 17.0, true, fire, Light3D.BAKE_DYNAMIC)
+	key.light_specular = 0.15
 	key.shadow_bias = 0.05
 	key.shadow_normal_bias = 1.5
-	key.shadow_blur = 1.3
+	key.shadow_blur = 3.0
 	key.light_volumetric_fog_energy = 0.03
 	key.set_script(load("res://scripts/hall_fire_light.gd"))
 	key.set("base_energy", 5.5)
-	key.set("flicker", 0.22)
-	key.set("wander", 0.05)
+	key.set("flicker", 0.16)
+	key.set("speed", 4.0)
 	var fill := _omni("FireFill", Vector3(0, 0.45, 0.0), Color(1.0, 0.45, 0.16), 0.5, 2.2, false, fire, Light3D.BAKE_DYNAMIC)
 	fill.light_specular = 0.0
 	fill.light_volumetric_fog_energy = 0.0
 	fill.set_script(load("res://scripts/hall_fire_light.gd"))
 	fill.set("base_energy", 0.5)
 	fill.set("flicker", 0.15)
-	fill.set("wander", 0.0)
 	fill.set("speed", 6.0)
 
 
