@@ -284,6 +284,19 @@ Remove the dark socket cup and its brass rim from her shoulders in 	ools/knight/
 ### Status
 
 Not started.
+## Knight: a more feminine hand
+
+### Task description
+
+Make the knight's hands a little more feminine in 	ools/knight/build_knight.py: a narrower palm and wrist, slimmer and slightly longer fingers that taper toward the tips, smaller knuckles and softer padding, keeping her wooden jointed construction and her grip on the sword. Check the grip, fist and open hand in her clips, and deliver clay and painted close-ups before and after.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Shares the builder with the natural shoulder, so one runs after the other.
 ## Knight: roll starts less like a dive
 
 ### Task description
