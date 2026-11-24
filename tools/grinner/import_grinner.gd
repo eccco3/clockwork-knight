@@ -26,7 +26,7 @@ func _post_import(scene: Node) -> Object:
 		player.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
 		var node := AnimationNodeAnimation.new()
 		node.animation = clip
-		gait.add_blend_point(node, GAIT[clip])
+		gait.add_blend_point(node, GAIT[clip], -1, clip)
 	var tree := AnimationTree.new()
 	tree.name = "AnimationTree"
 	tree.tree_root = gait
