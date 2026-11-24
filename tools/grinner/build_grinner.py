@@ -2,10 +2,11 @@
 GLB with detail levels and clips.
 
   blender --background --python build_grinner.py -- [--out grinner.glb] [--shots dir] [--size 2048]
-          [--clay a.png] [--pose crouch] [--only a,b] [--sub 2] [--wire] [--views 0,-40,-90,180]
+          [--clay a.png] [--pose crouch] [--clip Pounce] [--only a,b] [--sub 2] [--wire] [--views 0,-40,-90,180]
           [--zoom full|head|face|hand|legs]
 
---clay alone renders the bare game mesh, for judging forms quickly; --pose puts it in one of clips.POSES first.
+--clay alone renders the bare game mesh, for judging forms quickly; --pose puts it in one of clips.POSES first,
+and --clip makes the picture a contact sheet of one of clips.CLIPS.
 --out and --shots run the whole build. Rest pose in Blender space: +X is the figure's left, -Y is forward, +Z up.
 """
 import sys, os, time, tempfile
@@ -71,10 +72,16 @@ ZOOMS = {"full": ((0, 0.02, 0.63), 1.36, (640, 900)), "upper": ((0, 0.0, 1.00), 
          "head": ((0, -0.03, 1.135), 0.34, (720, 720)), "face": ((0, -0.03, 1.11), 0.17, (720, 720)),
          "hand": ((0.42, -0.15, 0.36), 0.26, (720, 720)), "legs": ((0, 0.06, 0.30), 0.70, (720, 720)),
          "foot": ((0.09, -0.005, 0.06), 0.30, (720, 720)), "pose": ((0, 0, 0.66), 1.70, (800, 800)),
-         "arms": ((0, -0.05, 0.95), 1.30, (800, 800)), "walk": ((0, 0, 0.62), 1.34, (480, 600))}
+         "arms": ((0, -0.05, 0.95), 1.30, (800, 800)), "walk": ((0, 0, 0.62), 1.34, (480, 600)),
+         "leap": ((0, -0.15, 0.86), 2.05, (640, 640)), "strike": ((0, -0.10, 0.66), 1.90, (600, 520)),
+         "fall": ((0, 0.65, 0.66), 2.60, (720, 480))}
 POSED = {"crouch": ("pose", "legs"), "stride": ("pose", "legs"), "kick": ("pose", "legs"), "reach": ("pose", "arms"),
          "claw": ("hand",), "splay": ("hand",)}
-SHEETS = {"Waddle": (12, (-90, -25)), "Idle": (12, (-25,))}        # steps round the loop, and the views of each
+SHEETS = {"Waddle": (12, (-90, -25), "walk"), "Idle": (12, (-25,), "walk"),       # steps through the clip, the views
+          "Pounce": (16, (-90, -25), "leap"), "Swipe": (12, (-25, -90), "strike"),  # of each, and the zoom
+          "Flinch": (8, (-25, -90), "strike"), "Death": (16, (-90, -25), "fall")}
+ACROSS = 8
+GROUND, GROUND_HIT = (0.20, 0.20, 0.21, 1.0), (0.60, 0.08, 0.06, 1.0)
 
 
 def turnaround(path, views, zoom, samples=48, at=(0.0, 0.0)):
@@ -83,24 +90,42 @@ def turnaround(path, views, zoom, samples=48, at=(0.0, 0.0)):
     bl.turnaround(path, views, (x + at[0], y + at[1], z), scale, res, lights, samples)
 
 
-def contact_sheet(path, skeleton, action, steps, views):
-    """A clip at even steps round its loop, left to right, with a row per view. The camera keeps pace with the root."""
+def contact_sheet(path, skeleton, action):
+    """A clip at even steps from its start, left to right in rows of ACROSS, view after view. The camera keeps
+    pace with the root, and the ground reddens while a hit window is open."""
+    steps, views, zoom = SHEETS[action.name]
     ground = bl.to_object("ground", [(x, y, z) for z in (-0.02, 0) for x, y in ((-4, -4), (4, -4), (4, 4), (-4, 4))],
                           [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)])
-    ground.data.materials.append(bl.clay("ground", base=(0.20, 0.20, 0.21), rough=0.9, vertex_color=False))
+    ground.data.materials.append(bl.clay("ground", base=GROUND[:3], rough=0.9, vertex_color=False))
+    colour = ground.data.materials[0].node_tree.nodes["Principled BSDF"].inputs["Base Color"]
     pose.use(skeleton, action)
-    width, strips = ZOOMS["walk"][2][0], []
+    end = action.frame_range[1]
+    width, strips = ZOOMS[zoom][2][0], []
     for k in range(steps):
-        bpy.context.scene.frame_set(round(k * action.frame_range[1] / steps))
+        frame = round(k * end / (steps if action.name in clips.LOOPS else steps - 1))
+        bpy.context.scene.frame_set(frame)
+        colour.default_value = GROUND_HIT if clips.phase(action.name, frame / clips.FPS) == "hit" else GROUND
         root = skeleton.pose.bones["root"].head
-        turnaround(path + ".step.png", views, "walk", 32, (root.x, root.y))
+        ground.location = (root.x, root.y, 0.0)
+        turnaround(path + ".step.png", views, zoom, 32, (root.x, root.y))
         strips.append(bl.read_image(path + ".step.png"))
     os.remove(path + ".step.png")
-    rows = [np.concatenate([s[:, v * width:(v + 1) * width] for s in strips], axis=1) for v in range(len(views))]
+    blank = np.tile(strips[0][:1, :1], (strips[0].shape[0], width, 1))
+    rows = [np.concatenate([s[:, v * width:(v + 1) * width] for s in strips[k:k + ACROSS]] + [blank] * (k + ACROSS - steps),
+                           axis=1) for v in range(len(views)) for k in range(0, steps, ACROSS)]
     bpy.data.images.remove(bl.save_image(path, np.concatenate(rows[::-1], axis=0)))
     bpy.data.objects.remove(ground, do_unlink=True)
     pose.use(skeleton, None)
     print("SHEET", path)
+
+def export(path, skeleton, meshes, actions):
+    """Write the GLB. The clips' marks ride on the skeleton as the custom property `marks`, which import_grinner.gd
+    turns into markers on Godot's animations."""
+    skeleton["marks"] = clips.MARKS
+    pose.shelve(skeleton, actions)
+    bl.export_glb(path, [skeleton] + meshes, active=skeleton, export_animations=True, export_extras=True,
+                  export_animation_mode="NLA_TRACKS", export_force_sampling=True, export_optimize_animation_size=False,
+                  export_reset_pose_bones=True, export_skins=True, export_tangents=True)
 
 
 def main():
@@ -118,10 +143,14 @@ def main():
     if not (opt("--out") or opt("--shots")):
         if opt("--clay"):
             build.clay_objects(pieces, "--wire" in argv, black=("eye",))
-            if opt("--pose"):
+            if opt("--pose") or opt("--clip"):
                 skeleton = rig.armature("grinner")
                 for ob in [ob for ob in bpy.context.scene.objects if ob.type == "MESH"]:
                     rig.bind(ob, skeleton)
+            if opt("--clip"):
+                contact_sheet(opt("--clay"), skeleton, pose.record(skeleton, opt("--clip"), *clips.CLIPS[opt("--clip")]))
+                return
+            if opt("--pose"):
                 pose.strike(skeleton, clips.POSES[opt("--pose")])
             turnaround(opt("--clay"), views, opt("--zoom", "pose" if opt("--pose") else "full"), 40)
         return
@@ -169,16 +198,14 @@ def main():
                 turnaround(os.path.join(shots, "pose_stride_%s.png" % ob.name[-4:]), [-40, 140], "pose")
             pose.strike(skeleton, {})
             build.show(levels, levels[0], painted)
-            for name, (steps, angles) in SHEETS.items():
-                contact_sheet(os.path.join(shots, "sheet_%s.png" % name.lower()), skeleton, actions[name], steps, angles)
+            for name in SHEETS:
+                contact_sheet(os.path.join(shots, "sheet_%s.png" % name.lower()), skeleton, actions[name])
     if opt("--out"):
         for ob in levels:
             ob.hide_render = False
-        pose.shelve(skeleton, actions.values())
-        bl.export_glb(opt("--out"), [skeleton] + levels, active=skeleton, export_animations=True,
-                      export_animation_mode="NLA_TRACKS", export_force_sampling=True, export_optimize_animation_size=False,
-                      export_reset_pose_bones=True, export_skins=True, export_tangents=True)
+        export(opt("--out"), skeleton, levels, actions.values())
     print("DONE t=%.1fs" % (time.time() - t0))
 
 
-main()
+if __name__ == "__main__":
+    main()

@@ -27,20 +27,6 @@ Make the grinner's rump a little flatter, in the sculpt and the shorts over it, 
 ### Status
 
 Not started.
-## Enemy: attack animations
-
-### Task description
-
-Animate two attacks with root motion: a pounce that leaps about 4 m at the knight after a 0.6 s wind-up and rakes with one claw, and a twin-claw swipe made in place after a 0.4 s wind-up. Each has a readable wind-up, a hit window marked in the clip, and a recovery. Add a flinch and a death, and blend all of them with the waddle and idle in the AnimationTree. Deliver contact sheets of each.
-
-### Open questions
-
-- None. A hit during a wind-up interrupts it; once the leap or swipe starts, it commits.
-
-### Status
-
-Ready to resume: the upright posture and straighter knees are merged. Branch `worktree-agent-ab16faaf0a806d2b0` holds a first pass to resume from: four clips in `tools/grinner/moves.py`, a state-machine AnimationTree, hit-window markers, `Grinner` methods and `dev/grinner_check.gd`. Its body values and `keys.BEARING` need re-keying to the new stance.
-
 ## Grinner: a variant on all fours
 
 ### Task description

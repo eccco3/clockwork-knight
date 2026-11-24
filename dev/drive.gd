@@ -19,7 +19,9 @@ extends Harness
 ##   track:<frames>                  prints the knight's body, ankles, balls and pelvis each frame
 ##   fps                             prints frames per second and process time
 ##   perf:start, perf:stop           frame times; run with --disable-vsync --max-fps 0
-##   hide:<node name>, call:<method on the scene root>
+##   hide:<node name>
+##   call:<method>[:<argument>]      on the scene root, as dev/shot.tscn's call=
+##   tell:<node>:<method>            on a node named as cam: names them, e.g. tell:Grinner:pounce
 ##   set:<node path or name pattern>:<property>:<value>, env:<property>:<value>,
 ##   vp:<property>:<value>, rs:<RenderingServer method>:<args...>   what-if switches
 ##   quit                            writes the contact sheet and quits
@@ -204,7 +206,11 @@ func _physics_process(dt: float) -> void:
 				else:
 					print("hide: no node ", ev[1])
 			"call":
-				scene.call(ev[1])
+				scene.callv(ev[1], [":".join(ev.slice(2))] if ev.size() > 2 else [])
+			"tell":
+				var n := _subject(ev[1])
+				if n:
+					n.call(ev[2])
 			"set":
 				var found := [scene.get_node(ev[1])] if ev[1].contains("/") else scene.find_children(ev[1], "", true, false)
 				if found.is_empty():
