@@ -53,7 +53,8 @@ Animate two attacks with root motion: a pounce that leaps about 4 m at the knigh
 
 ### Status
 
-Not started.
+Paused for the upright posture. Branch `worktree-agent-ab16faaf0a806d2b0` holds a first pass to resume from: four clips in `tools/grinner/moves.py`, a state-machine AnimationTree, hit-window markers, `Grinner` methods and `dev/grinner_check.gd`. Its body values and `keys.BEARING` need re-keying to the new stance.
+
 ## Enemy: behaviour and combat
 
 ### Task description
