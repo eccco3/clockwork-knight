@@ -1,7 +1,7 @@
 """Builds the grinner: sculpts every piece, bakes its textures from the sculpt, exports GLB with detail levels.
 
   blender --background --python build_grinner.py -- [--out grinner.glb] [--shots dir] [--size 2048]
-          [--clay a.png] [--only a,b] [--sub 2] [--wire] [--views 0,-40,-90,180] [--zoom full|upper|head|face|ear|hand|legs|foot]
+          [--clay a.png] [--only a,b] [--sub 2] [--wire] [--views 0,-40,-90,180] [--zoom full|head|face|hand|legs]
 
 --clay alone renders the bare game mesh, for judging forms quickly. --out and --shots run the whole build.
 Rest pose in Blender space: +X is the figure's left, -Y is forward, +Z up. Unrigged.
@@ -11,10 +11,9 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
-from sculpt import mesher, bl, bake, build, pieces as P
+from sculpt import bl, bake, build, pieces as P
 from sculpt.bl import argv, opt
 from sculpt.pieces import under, either, on_left
-from sculpt.sdf import V
 from grinner import body, head
 
 LODS = (40000, 20000, 10000, 5000)              # triangle ceilings, full detail first
@@ -47,7 +46,7 @@ SPECS = {
                    paint=body.shorts_paint, seam=body.shorts_seam, mirror=False, grain=0.28, pitch=0.0024,
                    grain_tint=0.12, boost=0.9, hidden=either(under(on_left(body.leg), 0.002), under(body.shirt, 0.003))),
     "head": dict(SKIN, mesh=wrap_head, field=in_head(head.field), detail=in_head(head.detail), paint=in_head(head.paint),
-                 seam=head.seam, mirror=False, hidden=under(body.shirt, 0.003), boost=1.45, favour=in_head(head.face)),
+                 seam=head.seam, mirror=False, hidden=under(body.shirt, 0.003), boost=1.55, favour=in_head(head.face)),
 }
 
 
@@ -67,8 +66,8 @@ def small_parts():
 
 ZOOMS = {"full": ((0, 0.02, 0.63), 1.36, (640, 900)), "upper": ((0, -0.05, 1.00), 0.72, (720, 720)),
          "head": ((0, -0.10, 1.125), 0.34, (720, 720)), "face": ((0, -0.10, 1.10), 0.17, (720, 720)),
-         "ear": ((0.073, -0.091, 1.122), 0.085, (720, 720)), "hand": ((0.42, -0.19, 0.36), 0.26, (720, 720)),
-         "legs": ((0, 0.06, 0.30), 0.70, (720, 720)), "foot": ((0.09, -0.03, 0.06), 0.30, (720, 720))}
+         "hand": ((0.42, -0.19, 0.36), 0.26, (720, 720)), "legs": ((0, 0.06, 0.30), 0.70, (720, 720)),
+         "foot": ((0.09, -0.03, 0.06), 0.30, (720, 720))}
 
 
 def turnaround(path, views, zoom, samples=48):
