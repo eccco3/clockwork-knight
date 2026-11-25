@@ -10,7 +10,8 @@ given (see sexes.py), each alone under the same camera and lamps, turned --view 
 share of the people's standard deviation the faces are drawn at. --labels renders the label set the dev
 labels the sexes on, --pool the pools taste.py shows him, of --sex or both, each face from the front and
 turned, keeping those already rendered, and their refinement rounds. --refine renders the next refinement
-round of --sex (taste.refine) from his answers so far; the rating tool shows it in place of the pool.
+round of --sex (taste.refine) from his answers, or from --answers, or finishes the one begun; the rating
+tool runs it in the background, and once it is rendered shows it in place of the pool or the round before.
 --best renders the 25 faces of --sex furthest along the taste learnt from his answers, or from --answers,
 as a grid, best first, and writes their numbers beside it: a.json.
 
@@ -196,7 +197,8 @@ def grid(model, sex, path, seed, spread, view, light):
 
 def render_set(model, name, faces, share, spread, light, set_name):
     """Renders a set of faces for the dev to judge (files.py), each from every view and symmetric, keeping
-    those already rendered; other faces, or another look, replace the set. `share` and `spread` are what
+    those already rendered, so a render cut short carries on where it stopped; each picture and the set's
+    index appear whole or not at all. Other faces, or another look, replace the set. `share` and `spread` are what
     the prior on his taste in them needs (taste.prior). Returns whether the faces changed."""
     folder = files.folder(name)
     index = os.path.join(folder, "pool.npz")
@@ -209,54 +211,66 @@ def render_set(model, name, faces, share, spread, light, set_name):
     if looks:
         for old in os.listdir(folder):
             os.remove(os.path.join(folder, old))
-        np.savez(index, faces=faces, share=share, spread=spread, look=LOOK, set=set_name)
+        with open(index + ".part", "wb") as f:
+            np.savez(f, faces=faces, share=share, spread=spread, look=LOOK, set=set_name)
+        os.replace(index + ".part", index)
     t0 = time.time()
     for i, c in enumerate(faces):
         path = files.picture(i, folder)
         if not os.path.exists(path):
             views = [portrait(model, c, path + ".tile.png", view, light, style(name)) for view in VIEWS]
-            bpy.data.images.remove(bl.save_image(path, np.concatenate(views, axis=1)))
+            bpy.data.images.remove(bl.save_image(path + ".part.png", np.concatenate(views, axis=1)))
+            os.replace(path + ".part.png", path)
             print("%s %d/%d  t=%.0fs" % (name.upper(), i + 1, len(faces), time.time() - t0), flush=True)
     return changed
 
 
 def pool(model, name, light):
-    """Renders taste.py's pool of faces of the sex, and its latest refinement round in the same look; a
-    round drawn when the pool held other faces goes with them."""
+    """Renders taste.py's pool of faces of the sex, and its latest refinement round in the same look; the
+    rounds drawn when the pool held other faces go with them."""
     refined = taste.refine_folder(name)
     if render_set(model, name, taste.pool(Sex(model, name)), taste.shares(model), taste.spread(model), light, taste.POOL):
-        shutil.rmtree(refined, ignore_errors=True)
+        for old in (refined, taste.next_folder(name)):
+            shutil.rmtree(old, ignore_errors=True)
     elif files.exists(refined):
         faces, share, spread, set_name = files.rendered(refined)
         render_set(model, os.path.basename(refined), faces, share, spread, light, set_name)
 
 
-def refine(model, sex, seed, light):
-    """Renders the sex's next refinement round from his answers so far, in place of the last."""
-    answers = taste.Answers(taste.answers(sex.name))
-    if not answers.lines:
-        sys.exit("No answers on the %s yet: rate the pool first." % sex.name)
-    where = taste.refine_folder(sex.name)
-    last = files.rendered(where)[3] if files.exists(where) else "refine 0"
-    n = max(int(last.split()[1]), answers.rounds()) + 1
-    share, spread = taste.shares(model), taste.spread(model)
-    faces = taste.refine(answers.posterior(taste.prior(share, spread)), sex, np.random.default_rng((seed, n)))
-    print("REFINE %s round %d from %d answers" % (sex.name, n, len(answers)))
-    render_set(model, os.path.basename(where), faces, share, spread, light, "refine %d" % n)
+def refine(model, sex, answers, seed, light):
+    """Renders the sex's next refinement round from his answers so far beside the latest, or finishes the
+    one drawn there before; the rating tool puts it in place of the latest (taste.advance)."""
+    where = taste.next_folder(sex.name)
+    if files.exists(where):
+        faces, share, spread, set_name = files.rendered(where)
+        print("REFINE %s %s resumed" % (sex.name, set_name))
+    else:
+        answers = taste.Answers(answers)
+        if not answers.lines:
+            sys.exit("No answers on the %s yet: rate the pool first." % sex.name)
+        latest = taste.refine_folder(sex.name)
+        last = files.rendered(latest)[3] if files.exists(latest) else "refine 0"
+        n = max(int(last.split()[1]), answers.rounds()) + 1
+        share, spread, set_name = taste.shares(model), taste.spread(model), "refine %d" % n
+        faces = taste.refine(answers.posterior(taste.prior(share, spread)), sex, np.random.default_rng((seed, n)))
+        print("REFINE %s %s from %d answers" % (sex.name, set_name, len(answers)))
+    render_set(model, os.path.basename(where), faces, share, spread, light, set_name)
 
 
 def best(model, sex, path, answers, seed, view, light):
+    """The best faces as a grid at `path`, and then their numbers beside it, with the count of answers
+    they were learnt from: a render cut short leaves the numbers of the faces before."""
     answers, rng = taste.Answers(answers), np.random.default_rng(seed)
     posterior = answers.posterior(taste.prior(taste.shares(model), taste.spread(model)))
     faces, score = taste.best(posterior, sex, rng, SIDE * SIDE)
     lopsided = uneven(model, rng, len(faces))
+    sheet(model, faces, lopsided, path, view, light, style(sex.name))
     numbers = os.path.splitext(path)[0] + ".json"
     with open(numbers, "w", encoding="utf-8", newline="\n") as f:
         json.dump(dict(answers=len(answers), faces=[
             dict(logit=round(float(s), 3), coefficients=np.round(c, 5).tolist(), lopsided=np.round(u, 5).tolist())
             for c, s, u in zip(faces, score, lopsided)]), f, indent=1)
     print("BEST %s from %d answers" % (numbers, len(answers)))
-    sheet(model, faces, lopsided, path, view, light, style(sex.name))
 
 
 def main():
@@ -275,10 +289,11 @@ def main():
     if "--pool" in argv:
         for name in [sex.name] if sex else SEXES:
             pool(model, name, light)
+    answers = opt("--answers", taste.answers(sex.name)) if sex else None
     if "--refine" in argv:
-        refine(model, sex, int(opt("--seed", "1")), light)
+        refine(model, sex, answers, int(opt("--seed", "1")), light)
     if opt("--best"):
-        best(model, sex, opt("--best"), opt("--answers", taste.answers(sex.name)), int(opt("--seed", "1")), view, light)
+        best(model, sex, opt("--best"), answers, int(opt("--seed", "1")), view, light)
 
 
 main()
