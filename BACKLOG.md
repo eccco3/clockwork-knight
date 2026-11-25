@@ -277,6 +277,20 @@ In the sword clips her upper arm sinks up to 30 mm into her chest and passes thr
 
 In progress on branch `worktree-agent-add37c3e80de4452a` (unmerged WIP): pauldrons keyed clear of the arm (`follow.py`) and the chest pocketed from the shoulders' sweep (`sweep.py`), never yet built. Left: before/after `--gaps` numbers; choose between the swept pocket and limiting the collar bone's travel (it turns 29 degrees in the Sword_Regular clips, pulling the shoulder about 9.5 cm out of its socket); end the cuff about 22 mm short of the wrist joint; check the other seats, and after shots.
 
+## Minion: exposed clockwork variations
+
+### Task description
+
+Give the minion more exposed clockwork machinery: gears, escapements, springs, ratchets and linkages showing through cut-outs, open joints or missing panels. Build many variations across distinct flavours (for example an open chest, a skeletal frame, brass-heavy, a tidy dress uniform with only glimpses, or a battered field repair). Prefer a procedural generator in `tools/minion/` with seeds and flavour settings, so the dev can pick favourite variants or adopt the algorithm. Keep the triangle budgets, detail levels and shadow stand-in. Deliver a numbered contact sheet of every variant beside the current minion.
+
+### Open questions
+
+- None; the dev picks after seeing the sheet.
+
+### Status
+
+Not started.
+
 ## Minion: rig and animation
 
 ### Task description
@@ -289,7 +303,7 @@ Rig the minion simply, with few bones, and hand-key an idle, a march, a spear th
 
 ### Status
 
-Not started. The sculpt is built by `tools/minion/build_minion.py`.
+Not started. Better after the dev picks from the clockwork variations, which may add moving parts to key.
 
 ## Battles: intelligent multi-unit fights
 
