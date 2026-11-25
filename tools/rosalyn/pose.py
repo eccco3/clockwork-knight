@@ -68,11 +68,12 @@ def _leg(c, hips, pelvis):
     return {"thigh_l": thigh, "shin_l": shin, "foot_l": foot}, short
 
 
-def _arm(c, hips, pelvis, chest, sternum):
+def _arm(c, hips, pelvis, chest, breast):
     clavicle = chest @ turn(Y, -c("shoulder_up")) @ turn(Z, -c("shoulder_fwd"))
     hand = hips @ turn(X, -c("hand_pitch")) @ turn(Y, c("hand_roll")) @ turn(Z, -c("hand_yaw"))
     wrist = pelvis + hips @ (WRIST + V(c("hand_x"), c("hand_y"), c("hand_z")) - PELVIS)
-    upper, fore, short = _bent(sternum + clavicle @ (SHOULDER - STERNUM), wrist, ELBOW - SHOULDER, WRIST - ELBOW, ELBOW_HINGE,
+    shoulder = breast + chest @ (STERNUM - CHEST) + clavicle @ (SHOULDER - STERNUM)
+    upper, fore, short = _bent(shoulder, wrist, ELBOW - SHOULDER, WRIST - ELBOW, ELBOW_HINGE,
                                chest @ _aside(ELBOW, SHOULDER, WRIST), c("elbow"))
     out = {"clavicle_l": clavicle, "upperarm_l": upper, "forearm_l": fore, "hand_l": hand,
            "wrist_l": fore @ turn(FORE, twist(fore.T @ hand, FORE))}
@@ -80,7 +81,8 @@ def _arm(c, hips, pelvis, chest, sternum):
         at = hand @ turn(BACK_OF_HAND, fan * c("spread"))
         for k, share in enumerate(CURL, 1):
             at = out["%s_%d_l" % (name, k)] = at @ turn(ACROSS_PALM, -share * c("curl_" + name))
-    out["thumb_1_l"] = hand @ turn(rig.FINGERWARD, -c("thumb_lift")) @ turn(BACK_OF_HAND, c("thumb_in"))         @ turn(THUMB_HINGE, 0.3 * c("thumb_curl"))
+    out["thumb_1_l"] = hand @ turn(rig.FINGERWARD, -c("thumb_lift")) @ turn(BACK_OF_HAND, c("thumb_in")) \
+        @ turn(THUMB_HINGE, 0.3 * c("thumb_curl"))
     out["thumb_2_l"] = out["thumb_1_l"] @ turn(THUMB_HINGE, 0.7 * c("thumb_curl"))
     out["thumb_3_l"] = out["thumb_2_l"] @ turn(THUMB_HINGE, c("thumb_curl"))
     return out, short
@@ -116,14 +118,14 @@ def solve(controls):
     out.update(_skirt(c, hips))
     moves = {"root": V(0, 0, 0), "hips": V(c("hips_x"), c("hips_y"), c("hips_z"))}
     pelvis = PELVIS + moves["hips"]
-    sternum = pelvis + hips @ (WAIST - PELVIS) + spine @ (CHEST - WAIST) + chest @ (STERNUM - CHEST)
+    breast = pelvis + hips @ (WAIST - PELVIS) + spine @ (CHEST - WAIST)
     strain = 0.0
     for side, m in (("_l", SAME), ("_r", FLIP)):
         def sided(name):
             return c(name + side)
         mirrored = lambda r: m @ r @ m
         leg, far = _leg(sided, mirrored(hips), pelvis * np.diag(m))
-        arm, short = _arm(sided, mirrored(hips), pelvis * np.diag(m), mirrored(chest), sternum * np.diag(m))
+        arm, short = _arm(sided, mirrored(hips), pelvis * np.diag(m), mirrored(chest), breast * np.diag(m))
         strain = max(strain, far, short)
         lid = mirrored(head_) @ turn(rig.LID_HINGE, head.LID_SHUT * c("blink"))
         out.update({name[:-2] + side: mirrored(r) for name, r in dict(arm, **leg, lid_l=lid).items()})

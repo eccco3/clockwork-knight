@@ -112,8 +112,8 @@ def _digits(l):
 def _arm(q):
     sleeve = near(q, [SHOULDER, ELBOW, WRIST, KNUCKLES, HF.w(V(0, 0, 0.20))], [0.080, 0.055, 0.045, 0.080, 0.090], 0.012)
     flesh = np.minimum(body.upper_arm(q), body.arm(q))
-    sleeve = sleeve * np.clip((body.trunk(q) - flesh) / 0.030 + 0.5, 0.0, 1.0)                 # the bodice keeps to the ribs
-    upper = sleeve * beyond(q, SHOULDER, UPPER, 0.015, 0.045)
+    sleeve = sleeve * smoothstep(-0.030, 0.030, body.trunk(q) - flesh)                        # the bodice keeps to the ribs
+    upper = sleeve * beyond(q, SHOULDER, UPPER, 0.020, 0.070)
     girdle = np.maximum(smoothstep(0.110, 0.045, S.length(q - SHOULDER)), upper)
     fore = upper * beyond(q, ELBOW, UPPER + FORE, 0.030, 0.030)
     down, _ = along(q, ELBOW, WRIST)
