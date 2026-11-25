@@ -3,7 +3,7 @@ extends Node3D
 ## Open rolling ground in heavy daytime fog, where the grinners live: scanned earth with mossy
 ## patches, sparse grass that thins out with distance, and the flat white daylight the hall's
 ## windows show. Everything is built on load. The knight spawns in the middle and invisible
-## walls keep her where there is ground to see.
+## walls keep her where there is ground to see. Once her grinners are all dead, it starts over.
 
 const HALF := 160.0
 const CHUNK := 32
@@ -24,6 +24,7 @@ const TEX := "res://assets/textures/%s/%s.jpg"
 
 ## The grinners waiting for her: [position, facing].
 const GRINNERS := [[Vector3(4, 0, 11), PI + 0.4], [Vector3(-0.5, 0, 8), 0.0], [Vector3(-5, 0, 12), PI - 0.9]]
+const CLEARED := 3.0  ## seconds from the last grinner's death to starting over
 
 ## Whether it places its own grinners; dev/crowd.gd places a crowd instead.
 @export var grinners := true
@@ -33,6 +34,7 @@ var _swell := FastNoiseLite.new()
 var _moss: PackedByteArray
 var _moss_tex: ImageTexture
 var _noise_tex: ImageTexture
+var _standing := 0  ## of the grinners it placed
 
 
 func _ready() -> void:
@@ -62,7 +64,20 @@ func _place_grinners() -> void:
 		var g := Grinner.new()
 		g.position = spec[0] + Vector3.UP * height(spec[0].x, spec[0].z)
 		g.rotation.y = spec[1]
+		g.health.died.connect(_on_grinner_died.unbind(1))
+		_standing += 1
 		add_child(g)
+
+
+func _on_grinner_died() -> void:
+	_standing -= 1
+	if _standing == 0:
+		var wait := Timer.new()
+		wait.wait_time = CLEARED
+		wait.one_shot = true
+		wait.autostart = true
+		wait.timeout.connect(App.restart)
+		add_child(wait)
 
 
 func height(x: float, z: float) -> float:

@@ -1,13 +1,14 @@
 """Rosalyn's skeleton and skin.
 
-Eighty bones stand on the sculpt's landmarks: a root, five up the middle, an eye and its sleeping lid on
-each side, an arm of nine with fifteen in the hand, a leg of three, and sixteen in the skirt, which hangs in
-eight columns of two. The upper arm and the forearm are each LENGTHS bones end to end, which share out the
-limb's twist: the shoulder keeps its roundness, and the hand turns over without wringing the arm.
+Eighty-two bones stand on the sculpt's landmarks: a root, five up the middle, an eye, its sleeping lid and a
+brow on each side, an arm of nine with fifteen in the hand, a leg of three, and sixteen in the skirt, which
+hangs in eight columns of two. The upper arm and the forearm are each LENGTHS bones end to end, which share
+out the limb's twist: the shoulder keeps its roundness, and the hand turns over without wringing the arm.
 
 Whatever is carved or cast in one piece rides one bone: her head from the choker up, her hair, eyes, lids and
-brass. The rest is skinned by a field over the rest pose: `weights` gives any point its bones, so every mesh
-binds by where its points lie, at each detail.
+brass. A brow carries no mesh: the game paints the brow where its bone has moved it over the wood. The rest
+is skinned by a field over the rest pose: `weights` gives any point its bones, so every mesh binds by where
+its points lie, at each detail.
 """
 import numpy as np
 from sculpt import sdf as S, rig as R
@@ -33,6 +34,7 @@ HEEL, BALL = body.from_foot([(0, -0.045, 0.012), (0, 0.095, 0.012)])
 DIGITS = dict(body.FINGERS, thumb=body.THUMB)
 EYE = Frame(body.HEAD.w(head.EYE * R.MIRROR), FWD * np.cos(head.EYE_TURN) + LEFT * np.sin(head.EYE_TURN), LEFT)
 LID_HINGE = body.HEAD.dir(head.LID_HINGE * R.MIRROR)          # the left lid shuts by turning head.LID_SHUT about this
+BROW = body.HEAD.w(head.BROW_AT * R.MIRROR)
 
 HIPLINE, FLOUNCE = 0.930, 0.615               # heights at which the skirt's columns begin, and their lower halves
 SKIRT = dict(front=0.0, fore=45.0, side=90.0, aft=135.0, back=180.0)        # columns, in degrees round from the front
@@ -74,6 +76,7 @@ BONES = list(R.both_sides([
     ("hips", "root", PELVIS, WAIST), ("spine", "hips", WAIST, CHEST), ("chest", "spine", CHEST, NECK_A),
     ("neck", "chest", NECK_A, CHOKER), ("head", "neck", CHOKER, CROWN),
     ("eye_l", "head", EYE.o, EYE.w(V(0, 0, 0.030))), ("lid_l", "head", EYE.o, EYE.o + LID_HINGE * 0.030),
+    ("brow_l", "head", BROW, BROW + FWD * 0.020),
     ("clavicle_l", "chest", STERNUM, SHOULDER), ("deltoid_l", "clavicle_l", SHOULDER, SHOULDER + CAP * 0.05),
     *_twisting("upperarm", "clavicle_l", SHOULDER, ELBOW),
     *_twisting("forearm", lengths("upperarm")[-1], ELBOW, WRIST), ("hand_l", lengths("forearm")[-1], WRIST, KNUCKLES),

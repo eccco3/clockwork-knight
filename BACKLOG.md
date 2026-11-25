@@ -14,20 +14,6 @@ After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% wit
 
 Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 Ãƒâ€šÃ‚Â°C; 50% gave 43 W and 70 Ãƒâ€šÃ‚Â°C.
 
-## Rosalyn: speech and gestures
-
-### Task description
-
-Rosalyn is voiced. Animate her speaking her lines without moving her mouth, which is wood: she speaks through head tilts, her eyes and brows, and gestures lightly by moving her upper body and shoulders, and with her hands too, though they mostly stay clasped. Make several looping speech clips that blend with the idle and with each other without repeating visibly, played through Godot's AnimationTree. Deliver contact sheets and a close-up capture of her face while speaking.
-
-### Open questions
-
-None. She turns her head to follow the knight, within a limited range blended into her other head motion. She is voiced, and her words are also shown as subtitles.
-
-### Status
-
-Not started. Her rig (80 bones), idle and blink are built. Left over from it: a fully overhead raise bulks the sleeve, a pale streak down the skirt's side in Godot, a dark tick at each outer lid corner, and a crease along the palm's edge.
-
 ## Rosalyn: a moving mouth
 
 ### Task description
@@ -40,7 +26,7 @@ None. Try both: four or five shapes as swapped meshes, and the same shapes as pi
 
 ### Status
 
-Not started. Comes after speech and gestures.
+Not started. Speech is built: four 12 s clips (Tell, Ask, Muse, Insist) crossed by her AnimationTree, `Rosalyn.say()` with subtitles, brows as decals on brow bones and `scripts/gaze.gd` turning her head to the knight; `dev/talk.tscn` tries it. No voice files yet, so a real voice stream is untested.
 
 ## Rosalyn: place her and test two entities
 
@@ -54,7 +40,7 @@ None. She stands by one of the windows closer to the first one, between that win
 
 ### Status
 
-Not started.
+Not started. Her scene needs a `Subtitles` node (`scripts/subtitles.gd`) for her lines to show.
 
 ## Plan the balance model with the dev
 
@@ -274,3 +260,31 @@ When the knight's health runs out, break her apart: armour plates, limbs and clo
 ### Status
 
 Low priority. Not started. Builds on the collapse and restart from "Enemy: behaviour and combat".
+
+## Rosalyn: blemishes left from her rig
+
+### Task description
+
+Fix what her speech work found but left. A pale streak runs down the skirt's side in Godot: its lighting and normal buffers show wrong normals along the panels' side seam, likely the baked normal map's tangent frame against the exported tangents in `tools/sculpt/bake.py`. Pale jagged slivers show along the lower lids near both corners in close-ups. The palm's edge creases, probably because the arm's lattice is half the palm's thickness (`body.arm_boxes`); recheck the clasp after. A fully overhead raise bulks the sleeve (`rig.py` weights).
+
+### Open questions
+
+- The dark tick at each outer lid corner is the lash paint running into the corner's crack, which the sleeping lid's raised ends carry. Taper the lash band before the crack, or give the lids unpainted wood?
+
+### Status
+
+Not started. Evidence in the speech branch's `dev/shots/speech/diag_*` and `dbg_*`.
+
+## Grinners: flinch when hit
+
+### Task description
+
+Grinners now flinch only when a blow lands during an attack's wind-up, and otherwise just jolt. Turn that around: any blow makes a grinner flinch, cutting into what it was doing, except while it is mid-pounce (in the air) or toward the end of its claw swipe, when it shrugs the blow off with only the jolt. Mark those windows in the clips like the hit windows, in `tools/grinner/moves.py` and `scripts/grinner.gd`. Record clips of each case.
+
+### Open questions
+
+- Does the scuttler's bite follow the same rule as the swipe?
+
+### Status
+
+Not started.

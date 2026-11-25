@@ -1,8 +1,9 @@
 """Her head: a soft oval face with almond eyes, a short nose and a faint smile, on a slender neck.
 
 Head frame as the knight's: origin between the eyes at the centre of the skull, +y out of the face, +z up,
-metres; the sculpt is symmetric in x. `field` is the carving, `paint` its lacquer (lips, brows, lashes,
-blush) as a tint over the wood, and `wrap` meshes it with edge loops round the eyes and along the lips.
+metres; the sculpt is symmetric in x. `field` is the carving, `paint` its lacquer (lips, lashes, blush) as a
+tint over the wood, and `wrap` meshes it with edge loops round the eyes and along the lips. The brows are
+painted apart, by `brow`, for the game to lay over the wood where her brows have moved to.
 The lips part on a slot that runs back to a pocket, so a jaw can open them. Each eye has a sleeping lid: a
 shell hidden under the brow that turns down over the eyeball, so she blinks without her wood bending.
 """
@@ -246,6 +247,10 @@ BLUSH = V(1.0, 0.74, 0.70)
 BROW_PTS = np.array([(0.0140, 0.0222), (0.0210, 0.0254), (0.0290, 0.0278), (0.0370, 0.0288), (0.0445, 0.0272),
                      (0.0515, 0.0230)])
 BROW_W = np.array([0.0018, 0.0021, 0.0020, 0.0016, 0.0011, 0.0004])
+BROW_INK = 0.85                                # the brows' lacquer at its thickest
+BROW_AT = V(0.0320, 0.0640, 0.0255)            # the middle of each brow (mirrored), about which it tilts
+BROW_BOX = V(0.048, 0.050, 0.020)              # what its painting covers: across, deep (as seen from the front) and high
+BROW_TEXELS = 10000                            # per metre
 
 
 def _brow(x, z):
@@ -264,20 +269,22 @@ def _brow(x, z):
     return np.clip(-best / 0.0009, 0, 1) * hairs * (0.70 + 0.30 * np.clip(along / 1.2, 0, 1))
 
 
+def _front(p):
+    return np.clip((p[:, 1] - 0.020) / 0.020, 0, 1)
+
+
 def paint(p):
     """Lacquer tint multiplied over the wood at points on or near the surface. RGB in 0..1."""
     P = _parts(p)
     q = S.mirror_x(p)
     col = np.ones((len(p), 3))
-    front = np.clip((p[:, 1] - 0.020) / 0.020, 0, 1)
-    col = mix(col, BLUSH, 0.50 * bump(q[:, 0], 0.040, 0.017) * bump(q[:, 2], -0.028, 0.015) * front)
+    col = mix(col, BLUSH, 0.50 * bump(q[:, 0], 0.040, 0.017) * bump(q[:, 2], -0.028, 0.015) * _front(p))
     lips = np.minimum(P["upper_lip"], P["lower_lip"])
     m = smoothstep(0.0012, 0.0001, lips)
     deep = np.exp(-np.maximum(P["mouth_g"], 0) / 0.0011) * 0.9 + 0.25 * np.clip((q[:, 0] - 0.012) / 0.012, 0, 1)
     col = mix(col, LIP * (1 - deep[:, None]) + LIP_DEEP * deep[:, None], m * 0.88)
     col = mix(col, MOUTH, smoothstep(0.00015, -0.00005, P["mouth_g"]))
     col = mix(col, V(0.50, 0.33, 0.26), np.clip(1.0 - (P["nostril"] + 0.0006) / 0.0014, 0, 1) * 0.8)
-    col = mix(col, BROW, _brow(q[:, 0], q[:, 2]) * 0.85 * front)
     g = P["lid_g"]
     s = P["lid_s"]
     upper_side = P["lid_ph"] > 0.5 * (P["lid_up"] + P["lid_lo"])
@@ -287,6 +294,23 @@ def paint(p):
     lw = np.where(upper_side, 0.0011 + 0.0015 * np.clip((s + 0.3) / 1.3, 0, 1), 0.0006)
     lash = np.clip(1.0 - (g - 0.0002) / lw, 0, 1) * on_lid
     return mix(col, LASH, lash * np.where(upper_side, 1.0, 0.40 * np.clip((s + 0.2) / 0.8, 0, 1)))
+
+
+def at_rest(p):
+    """`paint` with the brows where they rest: how previews show her face."""
+    q = S.mirror_x(p)
+    return mix(paint(p), BROW, _brow(q[:, 0], q[:, 2]) * BROW_INK * _front(p))
+
+
+def brow():
+    """One brow (mirrored) as seen from the front, over BROW_BOX about BROW_AT: (H, W, 4) colour and opacity,
+    row 0 at the top and column 0 nearest the nose."""
+    width, height = (int(round(BROW_BOX[k] * BROW_TEXELS)) for k in (0, 2))
+    x = BROW_AT[0] + ((np.arange(width) + 0.5) / width - 0.5) * BROW_BOX[0]
+    z = BROW_AT[2] - ((np.arange(height) + 0.5) / height - 0.5) * BROW_BOX[2]
+    X, Z = np.meshgrid(x, z)
+    ink = _brow(X.ravel(), Z.ravel()).reshape(height, width, 1) * BROW_INK
+    return np.concatenate([np.broadcast_to(BROW, (height, width, 3)), ink], axis=2)
 
 
 # ---------------------------------------------------------------- eyeballs
