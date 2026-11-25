@@ -151,6 +151,20 @@ Plan the game's opening scene with the dev in the main chat; this is not a subag
 
 Not started. Needs the dev; the workshop items build the room.
 
+## Workshop: shorten it and the apartment
+
+### Task description
+
+The workshop blockout feels too large. Shorten the workshop by a quarter, three bays (from 72 m to 54 m), and the apartment by a third, one bay (from 18 m to 12 m), through the constants in `tools/workshop_shell.py`, keeping its width, height and the doors from the hall where they are. Rebuild the hall, rebake its lightmap, and deliver the overhead plan and the views down the workshop's length again.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. It rebakes the hall, so nothing else may bake at the same time.
+
 ## Workshop: windows and surfaces
 
 ### Task description
@@ -262,6 +276,20 @@ Build a small clockwork soldier as `assets/models/minion.glb` from a new `tools/
 ### Status
 
 In progress on branch `worktree-agent-a97a4c5fc7017908a` (unmerged WIP): a wooden soldier with a crimson cuirass and short spear, 11,472 / 5,910 / 2,954 triangles and a 799-triangle shadow stand-in, passing `dev/detail_check.gd`. Left: fresh Godot turnarounds and line-up, a `build_models.ps1` step, CLAUDE.md notes, the spear blade's crease and the armholes' jagged edge.
+
+## Minion: cover his legs
+
+### Task description
+
+The minion's lower half reads wrong for a soldier: a short skirt with bare thighs, knee-high boots and stockings. Give him a soldier's legs instead: breeches or trousers to the boot tops, a tunic or tassets reaching mid-thigh under the cuirass, and plain calf or ankle boots, in the same lacquered wooden toy style. Keep his height, triangle budgets and detail levels, and deliver turnarounds and the line-up beside the knight again.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Needs the minion's sculpt merged (branch `worktree-agent-a97a4c5fc7017908a`); it may be done as part of finishing that item.
 
 ## Minion: rig and animation
 
