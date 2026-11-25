@@ -47,7 +47,7 @@ function Invoke-Hidden([string]$exe, [string[]]$arguments, [scriptblock]$onLine 
   }
   $process.WaitForExit()
   if ($process.ExitCode -ne 0) {
-    $tail = @($lines) + ($errors.Result -split '\r?\n') | Where-Object { $_ } | Select-Object -Last 12
+    $tail = @($lines) + ($errors.Result -split '\r?\n') | ForEach-Object { $_ -replace '\x1b\[[0-9;]*m' } | Where-Object { $_ } | Select-Object -Last 12
     throw "$(Split-Path -Leaf $exe) exited with code $($process.ExitCode):`r`n$($tail -join "`r`n")"
   }
 }
