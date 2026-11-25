@@ -1,0 +1,27 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/hall_surface_worn.gdshader" id="1_tvaxp"]
+[ext_resource type="Texture2D" path="res://assets/textures/rough_concrete/albedo.jpg" id="2_wr0t1"]
+[ext_resource type="Texture2D" path="res://materials/hall_noise_soft.tres" id="3_yva5k"]
+[ext_resource type="Texture2D" path="res://assets/textures/rough_concrete/normal.jpg" id="4_p4g34"]
+[ext_resource type="Texture2D" path="res://assets/textures/rough_concrete/arm.jpg" id="5_p3n60"]
+[ext_resource type="Texture2D" path="res://assets/textures/hall_gen/workshop_wear.png" id="6_433kn"]
+
+[resource]
+resource_name = "hall_stone_worn"
+render_priority = 0
+shader = ExtResource("1_tvaxp")
+shader_parameter/albedo_tex = ExtResource("2_wr0t1")
+shader_parameter/normal_tex = ExtResource("4_p4g34")
+shader_parameter/orm_tex = ExtResource("5_p3n60")
+shader_parameter/macro_tex = ExtResource("3_yva5k")
+shader_parameter/tint = Vector3(0.9, 0.83, 0.74)
+shader_parameter/normal_strength = 1.4
+shader_parameter/macro_strength = 0.3
+shader_parameter/macro_scale = 0.45
+shader_parameter/roughness_scale = 1.0
+shader_parameter/grime_height = 0.0
+shader_parameter/grime_strength = 0.0
+shader_parameter/saturation = null
+shader_parameter/wear_tex = ExtResource("6_433kn")
+shader_parameter/wear_rect = Vector4(7.1, -12, 54, 24)

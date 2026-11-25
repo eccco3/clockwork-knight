@@ -112,6 +112,7 @@ class Builder:
         self.stack = [Matrix.Identity(4)]
         self.rng = random.Random(seed)
         self.group = 'shell'
+        self.variant_name = None
         self.colliders = []
         self.marks = {}
         self.tris = 0
@@ -138,7 +139,43 @@ class Builder:
         finally:
             self.group = old
 
+    def ns(self):
+        """The current group's fine dressing, which casts no shadows (see builders/hall_import.gd)."""
+        return self.grp(self.group if self.group.startswith('ns_') else 'ns_' + self.group)
+
+    @contextmanager
+    def variant(self, name):
+        """Materials that have a `<material>_<name>` variant use it inside the block."""
+        old = self.variant_name
+        self.variant_name = name
+        try:
+            yield
+        finally:
+            self.variant_name = old
+
+    def yaw(self):
+        """World heading of local +Z: the angle about +Y that turns +Z onto it."""
+        z = self.M.to_3x3() @ Vector((0, 0, 1))
+        return round(math.atan2(z.x, z.z), 5)
+
+    def world_box(self, p0, p1):
+        """World corner (least x, y, z) and size of the box between local corners p0 and p1, in a
+        frame turned by quarter turns."""
+        a, c = self.M @ Vector(p0), self.M @ Vector(p1)
+        return [round(min(a[i], c[i]), 4) for i in range(3)], [round(abs(c[i] - a[i]), 4) for i in range(3)]
+
     # ---- randomness ------------------------------------------------------
+    @contextmanager
+    def seeded(self, key):
+        """A random stream of the block's own, so what it draws never shifts the variation of
+        anything built after it."""
+        old = self.rng
+        self.rng = random.Random(repr(key))
+        try:
+            yield
+        finally:
+            self.rng = old
+
     def r(self, a=0.0, b=1.0):
         return self.rng.uniform(a, b)
 
@@ -151,6 +188,8 @@ class Builder:
     def _g(self, mat):
         if mat not in MATS:
             raise KeyError("unknown material " + mat)
+        if self.variant_name and mat + '_' + self.variant_name in MATS:
+            mat += '_' + self.variant_name
         key = (self.group, mat)
         g = self.geo.get(key)
         if g is None:

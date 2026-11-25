@@ -45,53 +45,57 @@ def S_at(x):
     return APEX - math.tan(PITCH) * abs(x)
 
 
+def boards(b, x0, x1, z0, z1):
+    """Floorboards over x0..x1 and z0..z1, running along z with staggered joints, on a dark bed that
+    shows through the gaps."""
+    x = x0
+    while x < x1:
+        w = b.r(0.21, 0.33)
+        z = z0 - b.r(0, 3.5)
+        while z < z1:
+            ln = b.r(2.8, 5.4)
+            a, c = max(z, z0), min(z + ln, z1)
+            if c - a > 0.05:
+                b.box((w - 0.004, 0.03, c - a - 0.004), 'wood_floor', pos=(x + w / 2, -0.015 + b.r(-0.001, 0.001), (a + c) / 2),
+                      bevel=0.0035, grain=2, tint=b.vary((1, 1, 1), 0.16, 0.035))
+            z += ln
+        x += w
+    b.box((x1 - x0 + 0.9, 0.06, z1 - z0 + 0.9), 'mortar', pos=((x0 + x1) / 2, -0.055, (z0 + z1) / 2), bevel=0, tint=(0.12, 0.1, 0.08))
+
+
 def floor(b):
     with b.grp('ns_floor'):
-        x = -HW - 0.25
-        while x < HW + 0.25:
-            w = b.r(0.21, 0.33)
-            z = -HL - 0.25 - b.r(0, 3.5)
-            while z < HL + 0.25:
-                ln = b.r(2.8, 5.4)
-                z0 = max(z, -HL - 0.25); z1 = min(z + ln, HL + 0.25)
-                if z1 - z0 > 0.05:
-                    b.box((w - 0.004, 0.03, z1 - z0 - 0.004), 'wood_floor',
-                          pos=(x + w / 2, -0.015 + b.r(-0.001, 0.001), (z0 + z1) / 2),
-                          bevel=0.0035, grain=2, tint=b.vary((1, 1, 1), 0.16, 0.035))
-                z += ln
-            x += w
-        b.box((2 * HW + 1.4, 0.06, 2 * HL + 1.4), 'mortar', pos=(0, -0.055, 0), bevel=0, tint=(0.12, 0.1, 0.08))
+        boards(b, -HW - 0.25, HW + 0.25, -HL - 0.25, HL + 0.25)
     # floor + outer skin colliders
     b.col((2 * HW + 3, 1.0, 2 * HL + 3), pos=(0, -0.5, 0))
 
 
-def plaster_wall(b, half, openings, corner_ext, top=EH):
-    """Plaster boxes for one wall in wall-local space. openings: (u, width, y0, y1)."""
-    cur = -half - corner_ext
+def plaster_wall(b, a, c, openings, top=EH):
+    """Plaster boxes for one wall in wall-local space, from u = a to c. openings: (u, width, y0, y1)."""
+    cur = a
     zc = -WT / 2
     for (u, w, y0, y1) in sorted(openings):
-        a, c = u - w / 2, u + w / 2
-        b.box((a - cur, top, WT), 'plaster', pos=((a + cur) / 2, top / 2, zc), bevel=0, uv='world')
+        l, r = u - w / 2, u + w / 2
+        b.box((l - cur, top, WT), 'plaster', pos=((l + cur) / 2, top / 2, zc), bevel=0, uv='world')
         if y0 > 0.01:
             b.box((w, y0, WT), 'plaster', pos=(u, y0 / 2, zc), bevel=0, uv='world')
         b.box((w, top - y1, WT), 'plaster', pos=(u, (top + y1) / 2, zc), bevel=0, uv='world')
-        cur = c
-    end = half + corner_ext
-    b.box((end - cur, top, WT), 'plaster', pos=((end + cur) / 2, top / 2, zc), bevel=0, uv='world')
+        cur = r
+    b.box((c - cur, top, WT), 'plaster', pos=((c + cur) / 2, top / 2, zc), bevel=0, uv='world')
 
 
-def wall_col(b, half, doors=(), inside=False, top=EH + 5.5):
-    """Colliders for one wall in wall-local space, rising past the roof to keep cameras in.
-    doors: (u, width, height) left open. An outside wall's are thicker than the wall; an inside
-    wall's fit it on both faces."""
+def wall_col(b, a, c, doors=(), inside=False, top=EH + 5.5):
+    """Colliders for one wall in wall-local space from u = a to c, rising past the roof to keep
+    cameras in. doors: (u, width, height) left open. An outside wall's are thicker than the wall; an
+    inside wall's fit it on both faces."""
     d, zc = (WT + 0.06, -WT / 2) if inside else (WT + 0.4, -WT / 2 - 0.2 + 0.03)
-    cur = -half
+    cur = a
     for (u, w, h) in sorted(doors):
-        a = u - w / 2
-        b.col((a - cur, top, d), pos=((a + cur) / 2, top / 2, zc))
+        l = u - w / 2
+        b.col((l - cur, top, d), pos=((l + cur) / 2, top / 2, zc))
         b.col((w, top - h, d), pos=(u, (top + h) / 2, zc))
         cur = u + w / 2
-    b.col((half - cur, top, d), pos=((half + cur) / 2, top / 2, zc))
+    b.col((c - cur, top, d), pos=((c + cur) / 2, top / 2, zc))
 
 
 def door_opening(w, h):
@@ -114,9 +118,49 @@ def plank_leaf(b, w, h, planks=5):
         b.box((pw - 0.004, h, LEAF_T), 'wood_panel', pos=(0.003 + (k + 0.5) * pw, h / 2, 0), bevel=0.008, grain=1, tint=b.vary((0.95, 0.9, 0.86), 0.1))
 
 
-def doorway(b, w, h, leaves, swing=0.0):
-    """Plain doorway through a wall. Local z = 0 is the wall face its leaves hang on, with the
-    wall behind it: timber frame, sill, and one or two plank leaves swung `swing` radians open."""
+def _ledge_heights(h):
+    return 0.14 * h, 0.5 * h, 0.84 * h
+
+
+def leaf_iron(b, w, h, planks=5, face=1):
+    """Ironwork on side `face` of a plank_leaf: strap hinges from the hinge edge, nail heads on the
+    planks and a ring handle by the free edge."""
+    with b.ns():
+        for y in _ledge_heights(h):
+            # strap hinge: tapered plate with a finial
+            x1 = w - 0.2
+            pts = [(0.02, y - 0.045), (x1, y - 0.02), (x1 + 0.07, y), (x1, y + 0.02), (0.02, y + 0.045)]
+            b.prism(pts, 0.012, 'iron', bevel=0.003, M=T(0, 0, face * 0.036))
+            for k in range(5):
+                b.ball(0.012, 'iron', 6, 4, M=T(0.02 + (x1 - 0.02) * (k + 0.5) / 5, y, face * 0.044), sy=0.6)
+        for y in (0.32 * h, 0.68 * h):
+            for k in range(planks):
+                b.ball(0.014, 'iron', 6, 4, M=T(0.003 + (k + 0.5) * (w - 0.006) / planks, y, face * 0.033), sy=0.6)
+        # ring handle + plate
+        x = w - 0.14
+        pl = [(-0.055, -0.12), (0, -0.17), (0.055, -0.12), (0.055, 0.12), (0, 0.17), (-0.055, 0.12)]
+        b.prism(pl, 0.01, 'iron', bevel=0.003, M=T(x, 1.12, face * 0.035))
+        b.ball(0.022, 'iron', 8, 5, M=T(x, 1.17, face * 0.045), sy=0.7)
+        ring = [(x + 0.075 * math.cos(TAU * k / 16), 1.095 + 0.075 * math.sin(TAU * k / 16), face * 0.06) for k in range(16)]
+        b.sweep(ring, circ_prof(0.0095, 6), 'iron', closed=True, up=(0, 0, 1))
+
+
+def ledges(b, w, h, face=1):
+    """Ledges across side `face` of a plank_leaf, braced from the hinge side up to the free edge."""
+    z = face * (LEAF_T / 2 + 0.0125)
+    ys = _ledge_heights(h)
+    with b.ns():
+        for y in ys:
+            b.box((w - 0.08, 0.15, 0.025), 'wood_panel', pos=(w / 2, y, z), bevel=0.006, grain=0, tint=b.vary((0.95, 0.9, 0.86), 0.1))
+        for y0, y1 in zip(ys, ys[1:]):
+            b.beam((0.12, y0 + 0.07, z), (w - 0.12, y1 - 0.07, z), 0.11, 0.022, 'wood_panel', up=(0, 0, 1), bevel=0.005,
+                   tint=b.vary((0.95, 0.9, 0.86), 0.1))
+
+
+def doorway(b, w, h, leaves, swing=0.0, face=1):
+    """Doorway through a wall. Local z = 0 is the wall face its leaves hang on, with the wall behind
+    it: timber frame, sill, and one or two ledged plank leaves swung `swing` radians open, their
+    ironwork on side `face` (+1: the side they hang on)."""
     depth = WT + 2 * FRAME_PROUD
     door_frame(b, w, h, depth, -WT / 2)
     b.box((w, 0.03, depth), 'wood_oak', pos=(0, -0.009, -WT / 2), bevel=0.005, grain=0)
@@ -124,10 +168,76 @@ def doorway(b, w, h, leaves, swing=0.0):
     for sx in (1, -1)[:leaves]:
         with b.at(T(sx * w / 2, 0, FRAME_PROUD + LEAF_T / 2) @ RY(sx * swing) @ SC(-sx, 1, 1)):
             plank_leaf(b, lw, h)
+            with b.seeded((w, h, sx)):
+                ledges(b, lw, h, -face)
+                leaf_iron(b, lw, h, face=face)
             b.col((lw, h, LEAF_T), pos=(lw / 2, h / 2, 0))
 
 
-def _runs(a, c, gaps):
+def arch_head(b, w, h, depth, z):
+    """Spandrels turning the head of a w x h opening (wall-local) into a four-centred arch."""
+    ys = h - 0.42
+    for sx in (-1, 1):
+        pts = [(sx * w / 2, h), (sx * w / 2, ys)]
+        n = 10
+        for k in range(1, n + 1):
+            t = k / n
+            x = w / 2 * (1 - t)
+            y = ys + 0.40 * (1 - (1 - t) ** 2.6) ** (1 / 2.0)
+            pts.append((sx * x, min(y, h - 0.02)))
+        pts.append((0, h))
+        b.prism(pts, depth, 'wood_beam', bevel=0.012, tint=b.vary(BEAM, 0.05), M=T(0, 0, z), grain=0)
+
+
+def rosette(b, k, x, y, z):
+    pet = []
+    for i in range(16):
+        rr = 0.085 if i % 2 == 0 else 0.05
+        pet.append((x + rr * math.cos(TAU * i / 16), y + rr * math.sin(TAU * i / 16)))
+    b.prism(pet, 0.03, 'wood_beam', bevel=0.01, tint=b.vary(BEAM, 0.05), M=T(0, 0, z + 0.005))
+    b.ball(0.028, 'wood_beam', 8, 5, tint=b.vary(BEAM, 0.05), M=T(x, y, z + 0.018), sy=0.6)
+
+
+def gear(b, k, x, y, z):
+    """Gear wheels, large and small by turns, meshing along a row 0.125 apart."""
+    r, teeth = (0.075, 12) if k % 2 == 0 else (0.05, 8)
+    a = TAU / teeth
+    turn = 0.0 if k % 2 == 0 else a / 2
+    pts = []
+    for i in range(teeth):
+        for da, rr in ((-0.3, r - 0.009), (-0.14, r + 0.009), (0.14, r + 0.009), (0.3, r - 0.009)):
+            pts.append((x + rr * math.cos(turn + (i + da) * a), y + rr * math.sin(turn + (i + da) * a)))
+    b.prism(pts, 0.026, 'wood_beam', bevel=0, tint=b.vary(BEAM, 0.05), M=T(0, 0, z + 0.008))
+    b.cyl(r * 0.4, 0.018, 'wood_beam', 8, tint=b.vary(BEAM, 0.05), M=T(x, y, z + 0.012) @ RX(PI / 2), bevel=0)
+
+
+ROSETTES = (rosette, 0.33)
+GEARS = (gear, 0.125)
+
+
+def carved_lintel(b, w, h, z, carving):
+    """Label on the lintel over a w x h door (wall-local, facing +z from the lintel's face at z): two
+    mouldings framing a row of carvings, (draw(b, k, x, y, z), spacing)."""
+    draw, pitch = carving
+    with b.ns():
+        for y in (h + 0.27, h + 0.03):
+            b.box((w + 0.3, 0.035, 0.03), 'wood_beam', pos=(0, y, z), bevel=0.012, grain=0, tint=b.vary(BEAM, 0.05))
+        n = int(w / 2 / pitch)
+        for k in range(-n, n + 1):
+            draw(b, k, k * pitch, h + 0.15, z)
+
+
+def door_head(b, w, h, carving, faces=(1, -1), arch=False):
+    """A doorway's carved head (wall-local as doorway): a carved label on its lintel on each of
+    `faces` (+1: the side its leaves hang on) and, with `arch`, a four-centred arch through the wall."""
+    if arch:
+        arch_head(b, w, h, WT + 2 * FRAME_PROUD - 0.04, -WT / 2)
+    for f in faces:
+        with b.at(T(0, 0, -WT / 2) @ RY(0 if f > 0 else PI) @ T(0, 0, WT / 2)):
+            carved_lintel(b, w, h, FRAME_PROUD + 0.01, carving)
+
+
+def runs(a, c, gaps):
     """The stretches of a..c left between gaps [(centre, width)]."""
     out = []
     for (u, w) in sorted(gaps):
@@ -136,12 +246,12 @@ def _runs(a, c, gaps):
     return out + [(a, c)]
 
 
-def _wainscot(b, a, c):
+def wainscot(b, a, c):
     """Frame-and-panel wainscot between wall-local u = a..c, sitting on the stone plinth."""
     ln = c - a
     if ln < 0.2:
         return
-    with b.grp('ns_walls'):
+    with b.ns():
         _wainscot_body(b, a, c)
 
 
@@ -172,8 +282,9 @@ def _wainscot_body(b, a, c):
     b.box((ln, 0.03, 0.06), 'wood_panel', pos=(mid, WAINS - 0.012, 0.045), bevel=0.01, grain=0, tint=(0.8, 0.78, 0.76))
 
 
-def _plinth(b, a, c):
-    with b.grp('ns_walls'):
+def plinth(b, a, c):
+    """Stone plinth under the wainscot, between wall-local u = a..c."""
+    with b.ns():
         _plinth_body(b, a, c)
 
 
@@ -189,8 +300,9 @@ def _plinth_body(b, a, c):
     b.box((c - a, PLINTH - 0.03, 0.1), 'mortar', pos=((a + c) / 2, (PLINTH - 0.03) / 2, 0.02), bevel=0)
 
 
-def _window(b, name, u):
-    """Mullioned oak window in a 1.7 x 2.6 opening; glass is created Godot-side from the mark."""
+def window(b, u):
+    """Mullioned oak window in a 1.7 x 2.6 opening at wall-local u; glass is created Godot-side from
+    the mark."""
     w, y0, y1 = WWID, WSILL, WHEAD
     zf = -0.40          # frame plane
     fd = 0.11           # frame depth
@@ -224,7 +336,7 @@ def _window(b, name, u):
             pts += [(xb, ys), (xb, yt)]
             b.prism(pts, 0.05, 'wood_beam', bevel=0.006, tint=tb(), M=T(0, 0, zf), grain=0)
         # glass (one pane spanning the frame; lead pattern is in the shader)
-        b.mark('glass', (0, (y0 + y1) / 2 + 0.03, zf - 0.01), size=[w - 0.1, y1 - y0 - 0.1], wall=name)
+        b.mark('glass', (0, (y0 + y1) / 2 + 0.03, zf - 0.01), size=[w - 0.1, y1 - y0 - 0.1], yaw=b.yaw())
         # reveal lining boards (oak) on the jambs give a crisp inner edge
         for sx in (-1, 1):
             b.box((0.03, y1 - y0 - 0.06, 0.34), 'wood_oak', pos=(sx * (w / 2 - 0.015), (y0 + y1) / 2 + 0.03, -0.17), bevel=0.006, grain=1,
@@ -232,34 +344,28 @@ def _window(b, name, u):
         b.box((w, 0.03, 0.34), 'wood_oak', pos=(0, y1 - 0.015, -0.17), bevel=0.006, grain=0, tint=b.vary((0.9, 0.88, 0.85), 0.06))
 
 
-def _frame_side(b, name):
-    """Timber frame on a long wall (wall-local)."""
-    wins = WIN_Z[name]
-    doors = SIDE_DOORS[name]
-    sgn = 1 if name == 'R' else -1
-    posts = [sgn * z for z in TRUSS_Z]
-    tb = lambda a=0.09: b.vary(BEAM, a)
+def frame_side(b, a, c, posts, wins=(), doors=()):
+    """Timber frame on a wall from wall-local u = a to c: principal posts at `posts`, wall plate and
+    head rail, studs beside the windows `wins` and over the doors `doors` (u), and studs and a middle
+    rail across the bays without either."""
+    tb = lambda v=0.09: b.vary(BEAM, v)
     # principal posts
     for u in posts:
         b.box((0.30, EH - PLINTH, 0.34), 'wood_beam', pos=(u, (EH + PLINTH) / 2, 0.24 - 0.17), bevel=0.018, grain=1, tint=tb())
         b.box((0.42, PLINTH + 0.02, 0.36), 'stone', pos=(u, (PLINTH + 0.02) / 2, 0.14), bevel=0.02, tint=b.vary((0.9, 0.88, 0.86), 0.1))
         b.col((0.34, EH, 0.3), pos=(u, EH / 2, 0.13))
     # wall plate and head rail
-    b.box((2 * HL, 0.25, 0.3), 'wood_beam', pos=(0, EH - 0.125, 0.0), bevel=0.015, grain=0, tint=tb(0.04))
-    b.box((2 * HL, 0.16, 0.2), 'wood_beam', pos=(0, WHEAD + 0.08, -0.03), bevel=0.012, grain=0, tint=tb(0.04))
-    # studs: window jambs, and intermediate studs
-    ps = sorted(posts)
-    edges = [-HL] + ps + [HL]
-    for i in range(len(edges) - 1):
-        a, c = edges[i], edges[i + 1]
-        mid = (a + c) / 2
+    b.box((c - a, 0.25, 0.3), 'wood_beam', pos=((a + c) / 2, EH - 0.125, 0.0), bevel=0.015, grain=0, tint=tb(0.04))
+    b.box((c - a, 0.16, 0.2), 'wood_beam', pos=((a + c) / 2, WHEAD + 0.08, -0.03), bevel=0.012, grain=0, tint=tb(0.04))
+    edges = [a] + sorted(posts) + [c]
+    for a, c in zip(edges, edges[1:]):
         win = [u for u in wins if a < u < c]
         if win or any(a < u < c for u in doors):
             for u in win:
                 for sx in (-1, 1):
                     b.box((0.15, WHEAD - WAINS, 0.16), 'wood_beam', pos=(u + sx * (WWID / 2 + 0.075), (WHEAD + WAINS) / 2, -0.02), bevel=0.012, grain=1, tint=tb())
             # short studs above the head rail
-            n = 5
+            n = max(1, round((c - a - 0.3) / 0.8))
             for k in range(n):
                 uu = a + 0.15 + (c - a - 0.3) * (k + 0.5) / n
                 b.box((0.11, EH - 0.25 - WHEAD - 0.16, 0.14), 'wood_beam', pos=(uu, (EH - 0.25 + WHEAD + 0.16) / 2, -0.025), bevel=0.01, grain=1, tint=tb())
@@ -270,7 +376,20 @@ def _frame_side(b, name):
                 uu = a + 0.15 + span * k / n
                 b.box((0.13, EH - 0.25 - WAINS, 0.15), 'wood_beam', pos=(uu, (EH - 0.25 + WAINS) / 2, -0.025), bevel=0.01, grain=1, tint=tb())
             if span > 1.0:
-                b.box((span, 0.14, 0.17), 'wood_beam', pos=(mid, 2.62, -0.02), bevel=0.012, grain=0, tint=tb(0.04))
+                b.box((span, 0.14, 0.17), 'wood_beam', pos=((a + c) / 2, 2.62, -0.02), bevel=0.012, grain=0, tint=tb(0.04))
+
+
+def dress(b, a, c, posts, wins=(), doors=()):
+    """Plinth, wainscot, timber frame and windows along a wall from wall-local u = a to c, with
+    principal posts at `posts`, windows at `wins` and doors [(u, opening width)] left open."""
+    for a1, c1 in runs(a, c, doors):
+        plinth(b, a1, c1)
+        wainscot(b, a1, c1)
+        # wainscot/plinth thickness
+        b.col((c1 - a1, WAINS + 0.05, 0.1), pos=((a1 + c1) / 2, (WAINS + 0.05) / 2, 0.05))
+    frame_side(b, a, c, posts, wins, [u for u, _ in doors])
+    for u in wins:
+        window(b, u)
 
 
 def side_walls(b):
@@ -279,19 +398,14 @@ def side_walls(b):
             wins = WIN_Z[name]
             doors = SIDE_DOORS[name]
             ow, oh = door_opening(WS_DOOR_W, WS_DOOR_H)
-            plaster_wall(b, HL, [(u, WWID, WSILL, WHEAD) for u in wins] + [(u, ow, 0, oh) for u in doors], WT)
-            for a, c in _runs(-HL, HL, [(u, ow) for u in doors]):
-                _plinth(b, a, c)
-                _wainscot(b, a, c)
-                # wainscot/plinth thickness
-                b.col((c - a, WAINS + 0.05, 0.1), pos=((a + c) / 2, (WAINS + 0.05) / 2, 0.05))
-            _frame_side(b, name)
-            for u in wins:
-                _window(b, name, u)
+            plaster_wall(b, -HL - WT, HL + WT, [(u, WWID, WSILL, WHEAD) for u in wins] + [(u, ow, 0, oh) for u in doors])
+            dress(b, -HL, HL, [(1 if name == 'R' else -1) * z for z in TRUSS_Z], wins, [(u, ow) for u in doors])
             for u in doors:
                 with b.at(T(u, 0, -WT) @ RY(PI)):
-                    doorway(b, WS_DOOR_W, WS_DOOR_H, 2, WS_DOOR_SWING)
-            wall_col(b, HL + WT, [(u, WS_DOOR_W, WS_DOOR_H) for u in doors], inside=(name == SHARED))
+                    doorway(b, WS_DOOR_W, WS_DOOR_H, 2, WS_DOOR_SWING, face=-1)
+                    with b.seeded('workshop doors'):
+                        door_head(b, WS_DOOR_W, WS_DOOR_H, GEARS, arch=True)
+            wall_col(b, -HL - WT, HL + WT, [(u, WS_DOOR_W, WS_DOOR_H) for u in doors], inside=(name == SHARED))
             # beam filling between the rafter feet (closes the eaves)
             b.box((2 * HL + 2 * WT, EAVE_FILL, WT - 0.03), 'plaster', pos=(0, EH + EAVE_FILL / 2 - 0.01, -WT / 2 - 0.015), bevel=0, uv='world')
 
@@ -304,34 +418,36 @@ def _gable(b, mat='plaster'):
     b.prism(poly, WT, mat, bevel=0, M=T(0, 0, -WT / 2), uv='world')
 
 
-def _gable_frame(b, skip=None):
-    """Raking beams + studs on the inside of a gable. skip: (u0, u1) range to leave clear."""
+def gable_frame(b, half, pitch, skip=None):
+    """Raking beams + studs on the inside of a gable (wall-local) `half` wide either side of its
+    middle, under a roof rising at `pitch` to APEX. skip: (u0, u1) range to leave clear."""
     tb = lambda a=0.09: b.vary(BEAM, a)
+    under = lambda x: APEX - math.tan(pitch) * abs(x)
     # tie-level beam
     if skip is None:
-        b.box((2 * HW, 0.3, 0.26), 'wood_beam', pos=(0, EH + 0.15, 0.03), bevel=0.016, grain=0, tint=tb(0.04))
+        b.box((2 * half, 0.3, 0.26), 'wood_beam', pos=(0, EH + 0.15, 0.03), bevel=0.016, grain=0, tint=tb(0.04))
     else:
         for sx in (-1, 1):
-            ln = HW - skip[1]
+            ln = half - skip[1]
             b.box((ln, 0.3, 0.26), 'wood_beam', pos=(sx * (skip[1] + ln / 2), EH + 0.15, 0.03), bevel=0.016, grain=0, tint=tb(0.04))
     # raking beams under the roof boarding
     for sx in (-1, 1):
-        x1 = sx * (HW - 0.05); x0 = sx * ((skip[1] + 0.05) if skip else 0.12)
+        x1 = sx * (half - 0.05); x0 = sx * ((skip[1] + 0.05) if skip else 0.12)
         off = 0.42
-        b.beam((x0, S_at(x0) - off, 0.02), (x1, S_at(x1) - off, 0.02), 0.24, 0.26, 'wood_beam', up=(0, 1, 0), bevel=0.016, tint=tb(0.05))
-    # studs
-    n = 9
+        b.beam((x0, under(x0) - off, 0.02), (x1, under(x1) - off, 0.02), 0.24, 0.26, 'wood_beam', up=(0, 1, 0), bevel=0.016, tint=tb(0.05))
+    # studs, about 0.65 m apart
+    n = round(half * 9 / HW)
     for k in range(-n, n + 1):
-        u = k * (HW - 0.2) / (n + 0.6)
+        u = k * (half - 0.2) / (n + 0.6)
         if skip and skip[0] - 0.1 < u < skip[1] + 0.1:
             continue
-        ytop = S_at(u) - 0.52
+        ytop = under(u) - 0.52
         if ytop - (EH + 0.3) < 0.25:
             continue
         b.box((0.13 if k else 0.22, ytop - (EH + 0.3) + 0.1, 0.15), 'wood_beam', pos=(u, (ytop + EH + 0.3) / 2, -0.02), bevel=0.01, grain=1, tint=tb())
     # collar-level rail
     yc = 6.9
-    xr = (APEX - 0.6 - yc) / math.tan(PITCH)
+    xr = (APEX - 0.6 - yc) / math.tan(pitch)
     if skip is None:
         b.box((2 * xr, 0.16, 0.17), 'wood_beam', pos=(0, yc, -0.015), bevel=0.012, grain=0, tint=tb(0.05))
     else:
@@ -351,14 +467,14 @@ def door_wall(b):
     with b.grp('walls'), b.at(WALLS['D']):
         tb = lambda a=0.09: b.vary(BEAM, a)
         ow, oh = door_opening(DOOR_W, DOOR_H)
-        plaster_wall(b, HW, [(0, ow, 0, oh)], 0)
+        plaster_wall(b, -HW, HW, [(0, ow, 0, oh)])
         _gable(b)
-        _gable_frame(b)
+        gable_frame(b, HW, PITCH)
         _corner_posts(b)
         for sx in (-1, 1):
             a = ow / 2
-            _plinth(b, min(sx * a, sx * HW), max(sx * a, sx * HW))
-            _wainscot(b, min(sx * a, sx * (HW - 0.27)), max(sx * a, sx * (HW - 0.27)))
+            plinth(b, min(sx * a, sx * HW), max(sx * a, sx * HW))
+            wainscot(b, min(sx * a, sx * (HW - 0.27)), max(sx * a, sx * (HW - 0.27)))
             # studs
             for k in range(1, 5):
                 u = sx * (a + (HW - a) * k / 5)
@@ -366,62 +482,21 @@ def door_wall(b):
             ln = HW - a
             b.box((ln, 0.14, 0.17), 'wood_beam', pos=(sx * (a + ln / 2), 3.0, -0.02), bevel=0.012, grain=0, tint=tb(0.04))
         door_frame(b, DOOR_W, DOOR_H, 0.5, -0.12)
-        # carved lintel: chamfered label with a row of rosettes
-        b.box((DOOR_W + 0.3, 0.035, 0.03), 'wood_beam', pos=(0, DOOR_H + 0.27, 0.14), bevel=0.012, grain=0, tint=tb(0.05))
-        b.box((DOOR_W + 0.3, 0.035, 0.03), 'wood_beam', pos=(0, DOOR_H + 0.03, 0.14), bevel=0.012, grain=0, tint=tb(0.05))
-        for k in range(-3, 4):
-            x = k * 0.33
-            pet = []
-            for i in range(16):
-                rr = 0.085 if i % 2 == 0 else 0.05
-                pet.append((x + rr * math.cos(TAU * i / 16), DOOR_H + 0.15 + rr * math.sin(TAU * i / 16)))
-            b.prism(pet, 0.03, 'wood_beam', bevel=0.01, tint=tb(0.05), M=T(0, 0, 0.145))
-            b.ball(0.028, 'wood_beam', 8, 5, tint=tb(0.05), M=T(x, DOOR_H + 0.15, 0.158), sy=0.6)
+        carved_lintel(b, DOOR_W, DOOR_H, 0.14, ROSETTES)
         # studs above lintel
         for k in range(-2, 3):
             b.box((0.13, EH - oh, 0.15), 'wood_beam', pos=(k * 0.5, (EH + oh) / 2, -0.025), bevel=0.01, grain=1, tint=tb())
-        # arched head spandrels (four-centred arch)
-        ys = DOOR_H - 0.42
+        arch_head(b, DOOR_W, DOOR_H, 0.14, -0.16)
+        # door leaves: planks and ironwork
         for sx in (-1, 1):
-            pts = [(sx * DOOR_W / 2, DOOR_H), (sx * DOOR_W / 2, ys)]
-            n = 10
-            for k in range(1, n + 1):
-                t = k / n
-                x = DOOR_W / 2 * (1 - t)
-                y = ys + 0.40 * (1 - (1 - t) ** 2.6) ** (1 / 2.0)
-                pts.append((sx * x, min(y, DOOR_H - 0.02)))
-            pts.append((0, DOOR_H))
-            b.prism(pts, 0.14, 'wood_beam', bevel=0.012, tint=tb(0.05), M=T(0, 0, -0.16), grain=0)
-        # door leaves: planks, ledges, iron straps
-        zd = -0.30
-        for sx in (-1, 1):
-            lw = DOOR_W / 2 - 0.006
-            npl = 5
-            with b.at(T(sx * DOOR_W / 2, 0, zd) @ SC(-sx, 1, 1)):
-                plank_leaf(b, DOOR_W / 2, DOOR_H, npl)
-            for y in (0.35, 1.25, 2.1):
-                # strap hinge: tapered plate with a finial
-                x0 = sx * (DOOR_W / 2 - 0.02); x1 = sx * 0.2
-                pts = [(x0, y - 0.045), (x1, y - 0.02), (x1 - sx * 0.07, y), (x1, y + 0.02), (x0, y + 0.045)]
-                b.prism(pts, 0.012, 'iron', bevel=0.003, M=T(0, 0, zd + 0.036))
-                for k in range(5):
-                    xs = x0 + (x1 - x0) * (k + 0.5) / 5
-                    b.ball(0.012, 'iron', 6, 4, M=T(xs, y, zd + 0.044), sy=0.6)
-            # studs rows
-            for y in (0.8, 1.7):
-                for k in range(npl):
-                    b.ball(0.014, 'iron', 6, 4, M=T(sx * (0.003 + (k + 0.5) * lw / npl), y, zd + 0.033), sy=0.6)
-            # ring handle + plate
-            pl = [(-0.055, -0.12), (0, -0.17), (0.055, -0.12), (0.055, 0.12), (0, 0.17), (-0.055, 0.12)]
-            b.prism(pl, 0.01, 'iron', bevel=0.003, M=T(sx * 0.14, 1.12, zd + 0.035))
-            b.ball(0.022, 'iron', 8, 5, M=T(sx * 0.14, 1.17, zd + 0.045), sy=0.7)
-            ring = [(sx * 0.14 + 0.075 * math.cos(TAU * k / 16), 1.095 + 0.075 * math.sin(TAU * k / 16), zd + 0.06) for k in range(16)]
-            b.sweep(ring, circ_prof(0.0095, 6), 'iron', closed=True, up=(0, 0, 1))
+            with b.at(T(sx * DOOR_W / 2, 0, -0.30) @ SC(-sx, 1, 1)):
+                plank_leaf(b, DOOR_W / 2, DOOR_H)
+                leaf_iron(b, DOOR_W / 2, DOOR_H)
         # threshold stone
         b.box((DOOR_W + 0.5, 0.05, 0.6), 'stone', pos=(0, 0.012, -0.05), bevel=0.02, tint=(0.85, 0.83, 0.8))
         # blocking behind the door (keeps the dusk out)
         b.box((ow + 0.4, oh + 0.2, 0.2), 'mortar', pos=(0, (oh + 0.2) / 2, -0.5), bevel=0, tint=(0.1, 0.09, 0.08))
-        wall_col(b, HW)
+        wall_col(b, -HW, HW)
         for sx in (-1, 1):
             b.col((HW - DOOR_W / 2, WAINS + 0.05, 0.1), pos=(sx * (DOOR_W / 2 + (HW - DOOR_W / 2) / 2), (WAINS + 0.05) / 2, 0.05))
         b.col((DOOR_W + 0.6, DOOR_H + 0.4, 0.3), pos=(0, DOOR_H / 2, -0.13))
@@ -431,20 +506,20 @@ def door_wall(b):
 def fire_wall(b):
     with b.grp('walls'), b.at(WALLS['F']):
         tb = lambda a=0.09: b.vary(BEAM, a)
-        plaster_wall(b, HW, [], 0)
+        plaster_wall(b, -HW, HW, [])
         _gable(b)
-        _gable_frame(b, skip=(-FIRE_W2 / 2 - 0.15, FIRE_W2 / 2 + 0.15))
+        gable_frame(b, HW, PITCH, skip=(-FIRE_W2 / 2 - 0.15, FIRE_W2 / 2 + 0.15))
         _corner_posts(b)
         for sx in (-1, 1):
             a = FIRE_W / 2
-            _plinth(b, min(sx * a, sx * HW), max(sx * a, sx * HW))
-            _wainscot(b, min(sx * a, sx * (HW - 0.27)), max(sx * a, sx * (HW - 0.27)))
+            plinth(b, min(sx * a, sx * HW), max(sx * a, sx * HW))
+            wainscot(b, min(sx * a, sx * (HW - 0.27)), max(sx * a, sx * (HW - 0.27)))
             for k in range(1, 5):
                 u = sx * (a + (HW - a) * k / 5)
                 b.box((0.13, EH - WAINS, 0.15), 'wood_beam', pos=(u, (EH + WAINS) / 2, -0.025), bevel=0.01, grain=1, tint=tb())
             ln = HW - a
             b.box((ln, 0.14, 0.17), 'wood_beam', pos=(sx * (a + ln / 2), 3.0, -0.02), bevel=0.012, grain=0, tint=tb(0.04))
-        wall_col(b, HW)
+        wall_col(b, -HW, HW)
 
 
 def roof(b):
@@ -502,9 +577,18 @@ def roof(b):
                 b.col((sl, ROOF_T, zlen), pos=(sl / 2, sx * ROOF_T / 2, 0))
 
 
+def probe(b, x0, x1, z0, z1, capture=(0.0, 0.0)):
+    """Marks the room over local x0..x1, z0..z1 for a box-projected reflection probe, captured at eye
+    height `capture` (local x, z) from its middle."""
+    _, size = b.world_box((x0 - 0.2, -0.2, z0 - 0.2), (x1 + 0.2, 6.2, z1 + 0.2))
+    off = b.M.to_3x3() @ Vector((capture[0], -1.2, capture[1]))
+    b.mark('probe', ((x0 + x1) / 2, 3.0, (z0 + z1) / 2), size=size, offset=[round(v, 4) for v in off])
+
+
 def build_shell(b):
     floor(b)
     side_walls(b)
     door_wall(b)
     fire_wall(b)
     roof(b)
+    probe(b, -HW, HW, -HL, HL, (0.0, 2.0))
