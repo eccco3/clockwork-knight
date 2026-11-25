@@ -69,7 +69,7 @@ class Labeller:
 
 def run(model, faces, rater, count, rng, random_pairs):
     with tempfile.TemporaryDirectory() as folder:
-        session = taste.Session(faces, taste.prior(model.share, SPREAD), taste.Answers(os.path.join(folder, "a.jsonl")), rng)
+        session = taste.Session(faces, taste.prior(model.share, taste.spread(len(model.share))), taste.Answers(os.path.join(folder, "a.jsonl")), rng)
         rows = []
         for n in range(1, count + 1):
             left, right, _ = session.next()

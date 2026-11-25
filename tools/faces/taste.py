@@ -10,11 +10,16 @@ to measure his consistency.
 
 Women's and men's faces are rated apart, each sex with its own pool of faces and answers file. The pools
 are drawn from the labels (sexes.py); answers given on an earlier pool are discarded with it.
+
+Pool pairs are mostly ordinary faces against ordinary ones, which teach what he dislikes more than what
+makes a face he likes better still. So once he has rated the pool, refinement rounds (refine) replace it
+with REFINE_SIZE faces each likely to be among his favourites, differing where his taste is still unclear.
+Every round's answers join the same file, each line naming its set, and all of them teach w.
 """
 import os, time
 import numpy as np
 
-from .files import HERE, Log, folder, rendered
+from .files import HERE, Log, exists, folder, rendered
 from .logistic import Posterior, shape_prior
 from .sexes import SEXES
 
@@ -30,6 +35,7 @@ CLEAR = 20
 REPEAT = 0.05
 FIRST_REPEAT = 10                              # no pair is re-shown before this many answers
 CANDIDATES = 4000
+REFINE_SIZE, REFINE_DRAWS = 60, 500
 
 
 def answers(name):
@@ -58,10 +64,28 @@ def pool(sex, size=POOL_SIZE):
     return np.stack([draw(sex, rng) for _ in range(size)])
 
 
-def load_pool(name):
-    """The rendered pool's faces of the sex of that name and the prior on w for them."""
-    faces, share, spread = rendered(folder(name))
-    return faces, prior(share, spread)
+def refine_folder(name):
+    """Where the latest refinement round of the sex of that name is rendered."""
+    return folder(name + "_refine")
+
+
+def current(name):
+    """The set of faces of the sex of that name he rates now, the latest refinement round's or else the
+    pool's: its folder, its faces' coefficients, the prior on w and the set's name."""
+    where = refine_folder(name) if exists(refine_folder(name)) else folder(name)
+    faces, share, _, set_name = rendered(where)
+    return where, faces, prior(share, spread(len(share))), set_name
+
+
+def refine(posterior, sex, rng, size=REFINE_SIZE, draws=REFINE_DRAWS):
+    """A refinement round's faces (Thompson sampling): for each, a taste drawn from the posterior and the
+    best of `draws` faces of the sex under it. They are faces he likely likes, and differ most where the
+    posterior is least sure of his taste, so his answers on them teach what makes the best faces best."""
+    faces = []
+    for w in rng.multivariate_normal(posterior.mean, posterior.cov, size):
+        drawn = np.stack([draw(sex, rng) for _ in range(draws)])
+        faces.append(drawn[np.argmax(drawn @ w)])
+    return np.stack(faces)
 
 
 def prior(share, spread):
@@ -80,9 +104,9 @@ def best(posterior, sex, rng, count, draws=4000):
 
 
 class Answers(Log):
-    """The answers file: each line is one answer, {"left", "right", "winner"} pool indices, the coefficients
-    of the winning face "won" and the losing one "lost", "repeat_of" the line it re-asks or null, "seconds"
-    he took and "at", the time."""
+    """The answers file: each line is one answer, "set" the set of faces shown (files.rendered; "pool" if
+    missing), {"left", "right", "winner"} indices in it, the coefficients of the winning face "won" and the
+    losing one "lost", "repeat_of" the line it re-asks or null, "seconds" he took and "at", the time."""
 
     def consistency(self):
         """How many re-shown pairs he answered as he did the first time, and how many were re-shown."""
@@ -95,26 +119,32 @@ class Answers(Log):
 
 
 class Session:
-    """A sitting: shows pairs from the pool's faces (coefficients (P, K)) and records the answers."""
+    """A sitting: shows pairs from a set of faces (coefficients (P, K)), named `set_name`, and records the
+    answers. It learns from every answer in the file, but asks and re-shows pairs of this set only."""
 
-    def __init__(self, faces, prior_var, answers, rng):
-        self.faces, self.prior_var, self.answers, self.rng = faces, prior_var, answers, rng
+    def __init__(self, faces, prior_var, answers, rng, set_name="pool"):
+        self.faces, self.prior_var, self.answers, self.rng, self.set = faces, prior_var, answers, rng, set_name
         self.posterior = answers.posterior(prior_var)
         self.pair = None
 
+    def mine(self, line):
+        """Whether an answer was given on this set."""
+        return line.get("set", "pool") == self.set
+
     def repeatable(self):
-        """Earlier first-time answers on this pool's faces that have not been re-shown."""
+        """Earlier first-time answers on this set's faces that have not been re-shown."""
         again = {line["repeat_of"] for line in self.answers.lines}
         return [k for k, line in enumerate(self.answers.lines)
-                if line["repeat_of"] is None and k not in again and line["left"] < len(self.faces)
-                and line["right"] < len(self.faces)
+                if self.mine(line) and line["repeat_of"] is None and k not in again
+                and line["left"] < len(self.faces) and line["right"] < len(self.faces)
                 and np.allclose(self.faces[line["winner"]], line["won"], atol=1e-3)]
 
     def candidates(self):
         """Random pairs not asked yet, during the first CLEAR answers of faces not shown yet."""
         i, j = self.rng.integers(0, len(self.faces), (2, CANDIDATES))
-        asked = {frozenset((line["left"], line["right"])) for line in self.answers.lines}
-        shown = {line[side] for line in self.answers.lines for side in ("left", "right")}
+        lines = [line for line in self.answers.lines if self.mine(line)]
+        asked = {frozenset((line["left"], line["right"])) for line in lines}
+        shown = {line[side] for line in lines for side in ("left", "right")}
         clear = len(self.answers) < CLEAR
         fresh = np.array([a != b and frozenset((a, b)) not in asked and not (clear and (a in shown or b in shown))
                           for a, b in zip(i, j)])
@@ -141,13 +171,15 @@ class Session:
         """Records that he picked the "left" or "right" face of the pair shown."""
         left, right, repeat_of = self.pair
         winner, loser = (left, right) if pick == "left" else (right, left)
-        self.answers.add(dict(left=left, right=right, winner=winner, repeat_of=repeat_of,
+        self.answers.add(dict(set=self.set, left=left, right=right, winner=winner, repeat_of=repeat_of,
                               won=np.round(self.faces[winner], 5).tolist(), lost=np.round(self.faces[loser], 5).tolist(),
                               seconds=round(seconds, 2), at=time.strftime("%Y-%m-%dT%H:%M:%S")))
         self.posterior = self.answers.posterior(self.prior_var)
 
     def undo(self):
-        """Takes back the last answer and shows its pair again."""
+        """Takes back the last answer, if given on this set, and shows its pair again."""
+        if not (self.answers.lines and self.mine(self.answers.lines[-1])):
+            return self.pair
         line = self.answers.undo()
         if line:
             self.posterior = self.answers.posterior(self.prior_var)
@@ -156,5 +188,5 @@ class Session:
 
     def status(self):
         agreed, again = self.answers.consistency()
-        return dict(answers=len(self.answers), agreed=agreed, repeats=again,
+        return dict(set=self.set, answers=len(self.answers), agreed=agreed, repeats=again,
                     settled=round(self.posterior.settled(self.rng), 3))

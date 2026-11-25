@@ -1,6 +1,7 @@
 extends FaceTool
 ## Teaches the face tools the dev's taste in the faces of one sex: shows two from that sex's pool in
-## tools/faces/pool side by side and asks which he prefers; tools/faces/rate.py chooses the pairs.
+## tools/faces/pool, or its latest refinement round, side by side and asks which he prefers;
+## tools/faces/rate.py chooses the pairs.
 ##
 ##   godot --path . res://dev/taste_women.tscn      or taste_men.tscn
 ##
@@ -44,5 +45,5 @@ func _unhandled_input(e: InputEvent) -> void:
 func show(shown: Dictionary) -> void:
 	for i in 2:
 		shows(_faces[i], shown[["left", "right"][i]])
-	status.text = "%s:  %d answers      direction settled %d%%      re-shown pairs answered alike: %d of %d" % [
-		sex.capitalize(), shown["answers"], roundi(100.0 * shown["settled"]), shown["agreed"], shown["repeats"]]
+	status.text = "%s, %s:  %d answers      direction settled %d%%      re-shown pairs answered alike: %d of %d" % [
+		sex.capitalize(), shown["set"], shown["answers"], roundi(100.0 * shown["settled"]), shown["agreed"], shown["repeats"]]

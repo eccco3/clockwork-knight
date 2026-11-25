@@ -1,14 +1,15 @@
 """Builds the face model, tools/faces/model.npz, and shows faces drawn from it.
 
   blender --background --python build_faces.py -- [--fit] [--detail 1.0] [--sex women|men] [--grid a.png]
-          [--seed 1] [--spread 0.65] [--view 0] [--light 1.0] [--labels] [--pool] [--best a.png] [--answers a.jsonl]
+          [--seed 1] [--spread 0.65] [--view 0] [--light 1.0] [--labels] [--pool] [--refine] [--best a.png] [--answers a.jsonl]
 
 --fit learns the model from the heads tools/fetch_assets.ps1 downloads, as does a missing model; --detail
 scales its lattice, as it does a figure's. --grid renders 25 random faces, of --sex if given (see
 sexes.py), each alone under the same camera and lamps, turned --view degrees. --spread is the share of
 the people's standard deviation the faces are drawn at. --labels renders the label set the dev labels the
 sexes on, --pool the pools taste.py shows him, of --sex or both, each face from the front and turned,
-keeping those already rendered. --best renders the 25 faces of --sex furthest along the taste learnt
+keeping those already rendered. --refine renders the next refinement round of --sex (taste.refine) from
+his answers so far; the rating tool shows it in place of the pool. --best renders the 25 faces of --sex furthest along the taste learnt
 from his answers to them, or to --answers, as a grid, best first, and writes their coefficients beside
 it: a.json.
 
@@ -16,7 +17,7 @@ Every face is painted the same, with skin, lips, eyes, hair and brows, so that o
 label set wears short hair, so that no face reads as a sex for its hair; the women's pool wears its hair
 pulled back into a bun, which is the same on every woman, so the taste learnt from it is still the face's.
 """
-import bpy, json, sys, os, time
+import bpy, json, sys, os, shutil, time
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -143,8 +144,8 @@ def portrait(model, coefficients, path, view, light, style="crop"):
 
 
 def style(name):
-    """The hair a set of faces wears: the women's pool a bun, every other set short hair."""
-    return "bun" if name == "women" else "crop"
+    """The hair a set of faces wears: the women's pool and refinement rounds a bun, every other set short hair."""
+    return "bun" if name.startswith("women") else "crop"
 
 
 def sheet(model, faces, path, view, light, hair="crop"):
@@ -162,7 +163,7 @@ def grid(model, sex, path, seed, spread, view, light):
     sheet(model, [draw(rng, spread) for _ in range(SIDE * SIDE)], path, view, light, style(sex.name if sex else ""))
 
 
-def render_set(model, name, faces, spread, light):
+def render_set(model, name, faces, spread, light, set_name="pool"):
     """Renders a set of faces for the dev to judge (files.py), each from every view, keeping those already
     rendered; other faces, or another look, replace the set. Returns whether they did."""
     folder = files.folder(name)
@@ -175,7 +176,7 @@ def render_set(model, name, faces, spread, light):
     if replaced:
         for old in os.listdir(folder):
             os.remove(os.path.join(folder, old))
-        np.savez(index, faces=faces, share=model.share, spread=spread, look=LOOK)
+        np.savez(index, faces=faces, share=model.share, spread=spread, look=LOOK, set=set_name)
     t0 = time.time()
     for i, c in enumerate(faces):
         path = files.picture(i, folder)
@@ -187,11 +188,27 @@ def render_set(model, name, faces, spread, light):
 
 
 def pool(model, name, light):
-    """Renders taste.py's pool of faces of the sex; answers given on an earlier pool go with it."""
+    """Renders taste.py's pool of faces of the sex; answers and refinement rounds of an earlier pool go with it."""
     answers = taste.answers(name)
-    if render_set(model, name, taste.pool(Sex(model, name)), taste.spread(len(model.share)), light) and os.path.exists(answers):
-        os.remove(answers)
-        print("DISCARDED", answers, "given on the earlier pool")
+    if render_set(model, name, taste.pool(Sex(model, name)), taste.spread(len(model.share)), light):
+        if os.path.exists(answers):
+            os.remove(answers)
+            print("DISCARDED", answers, "given on the earlier pool")
+        shutil.rmtree(taste.refine_folder(name), ignore_errors=True)
+
+
+def refine(model, sex, seed, light):
+    """Renders the sex's next refinement round from his answers so far, in place of the last."""
+    answers = taste.Answers(taste.answers(sex.name))
+    if not answers.lines:
+        sys.exit("No answers on the %s yet: rate the pool first." % sex.name)
+    where = taste.refine_folder(sex.name)
+    last = files.rendered(where)[3] if files.exists(where) else "refine 0"
+    n = int(last.split()[1]) + 1
+    posterior = answers.posterior(taste.prior(model.share, taste.spread(len(model.share))))
+    faces = taste.refine(posterior, sex, np.random.default_rng((seed, n)))
+    print("REFINE %s round %d from %d answers" % (sex.name, n, len(answers)))
+    render_set(model, os.path.basename(where), faces, taste.spread(len(model.share)), light, "refine %d" % n)
 
 
 def best(model, sex, path, answers, seed, view, light):
@@ -210,8 +227,8 @@ def main():
     model = learn(float(opt("--detail", "1.0"))) if "--fit" in argv or not os.path.exists(MODEL) else Model.load(MODEL)
     sex = Sex(model, opt("--sex")) if opt("--sex") else None
     light, view = float(opt("--light", "1.0")), float(opt("--view", "0"))
-    if opt("--best") and not sex:
-        sys.exit("--best needs --sex women or men")
+    if (opt("--best") or "--refine" in argv) and not sex:
+        sys.exit("--best and --refine need --sex women or men")
     if opt("--grid"):
         grid(model, sex, opt("--grid"), int(opt("--seed", "1")), float(opt("--spread", str(SPREAD))), view, light)
     if "--labels" in argv:
@@ -219,6 +236,8 @@ def main():
     if "--pool" in argv:
         for name in [sex.name] if sex else SEXES:
             pool(model, name, light)
+    if "--refine" in argv:
+        refine(model, sex, int(opt("--seed", "1")), light)
     if opt("--best"):
         best(model, sex, opt("--best"), opt("--answers", taste.answers(sex.name)), int(opt("--seed", "1")), view, light)
 

@@ -16,10 +16,15 @@ def picture(i, folder):
 
 
 def rendered(folder):
-    """The rendered set's coefficients (F, K), the model's share of the variance per component, and the
-    spread the faces were drawn at, one number or one per component."""
+    """The rendered set's coefficients (F, K), the model's share of the variance per component, the spread
+    the faces were drawn at, one number or one per component, and the set's name in the answers: "pool",
+    or "refine n" for the nth refinement round (taste.refine)."""
     with np.load(os.path.join(folder, "pool.npz")) as f:
-        return f["faces"], f["share"], f["spread"]
+        return f["faces"], f["share"], f["spread"], str(f["set"]) if "set" in f.files else "pool"
+
+
+def exists(folder):
+    return os.path.exists(os.path.join(folder, "pool.npz"))
 
 
 class Log:
