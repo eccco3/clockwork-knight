@@ -219,20 +219,6 @@ The grinners and the knight now fight outdoors (`scripts/grinner.gd`, `player.gd
 
 Not started. Needs the dev's playtest.
 
-## Faces: crisper features and use in a figure
-
-### Task description
-
-The morphable model in `tools/faces/` has ragged ears, slightly jagged nostril edges and outer eye corners, a soft lip groove with no edge loop, and dark smudges under the flat neck cut. Add a lip rail like Rosalyn's, handle the ears' undercuts, and speed up `scan.Solid.field`. Then wire a sampled face into a figure build, with its field for baking and hidden tests and a neck join, and add the model to `build_models.ps1`. Keep each coefficient's meaning, so the dev's ratings stay valid. Deliver the grid again and a figure wearing a sampled face.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started.
-
 ## Faces: learn the dev's taste
 
 ### Task description
@@ -288,3 +274,17 @@ Grinners now flinch only when a blow lands during an attack's wind-up, and other
 ### Status
 
 Not started.
+
+## Sculpt: lid snaps and bake bleed
+
+### Task description
+
+Two faults in the shared `tools/sculpt/` modules, found on the faces' bust (`tools/faces/build_bust.py`). White specks run along the lids in extreme close-ups: a few vertices of the lids' two edge loops land on the wrong side in the mesher's inner snap. Dark streaks show along the bust's UV seams at the throat and crown from about 1 m in Godot: lower mip levels reach past the bake's 12 texels of bleed (`bake.dilate`). Fix both for every figure that uses them, and check the knight, grinner and Rosalyn for changes.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. The bust also has about 27 folded quads at the eye corners, no detail levels or shadow stand-in, and always the short crop.

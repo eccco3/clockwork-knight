@@ -6,12 +6,17 @@ shape changes of its base head, one feature each. Its head is laid onto the mode
 onto it, then bent onto its surface, coarse to fine. Each vertex of the model then takes a smooth average of
 the movements of the bent head's vertices near it that landed on the mean and face its way, so a target
 becomes a direction the model's faces can move in, without tearing where the two heads' details differ.
+
+Where the head lies is kept in laid.json: it was laid onto the first lattice's mean, and every lattice since
+binds to the same laying, so that each feature keeps its meaning and the dev's answers stay valid. Without
+the file the head is laid again, onto this lattice's mean.
 """
-import os
+import json, os
 import numpy as np
 from .model import MIRROR, mirrored, normals, twins
 
 FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "downloads", "makehuman")
+LAID = os.path.join(os.path.dirname(os.path.abspath(__file__)), "laid.json")
 BODY = 13380                                   # the base mesh's skin; helper geometry follows
 DECIMETRE = 0.1
 EYE_Y = 0.0515                                 # the model's eyeball centres stand this far before its origin
@@ -118,49 +123,70 @@ def _smooth(field, weight, edges, rounds):
     return f / np.maximum(w, 1e-9)[:, None]
 
 
+def lay(raw, quads, eye, mean):
+    """MakeHuman's base vertices raw, wound into quads, laid onto the model's mean head: the scale and the turn
+    taking its movements into the model's frame, the vertices that landed on the mean (LANDED), where they
+    lie, which way they face and how far each reaches (REACH)."""
+    p = _frame(raw - eye)
+    p[:, 1] += EYE_Y
+    surface = mean[_on_face(mean)]
+    head = np.where(p[:, 2] > FACE["bottom"] - 0.03)[0]
+    mine = _on_face(p[head])
+
+    s, R, few = 1.0, np.eye(3), surface[::4]
+    for _ in range(30):                                 # scaled and turned onto the mean, matched both ways
+        q = p[head][mine]
+        a = np.concatenate([q, q[_nearest(few, q)]])
+        b = np.concatenate([few[_nearest(q, few)], few])
+        s1, R1, t1 = _similarity(np.concatenate([a, a * MIRROR]), np.concatenate([b, b * MIRROR]))
+        p = s1 * p @ R1.T + t1
+        s, R = s * s1, R1 @ R
+
+    edges = np.unique(np.sort(np.concatenate([quads[:, [k, (k + 1) % 4]] for k in range(4)]), 1), axis=0)
+    index = np.full(BODY, -1)
+    index[head] = np.arange(len(head))
+    edges = index[edges]
+    edges = edges[(edges >= 0).all(1)].T
+    x = p[head]
+    for rounds in (64, 32, 16, 8, 4, 2, 1):             # then bent onto it, coarse to fine
+        for _ in range(4):
+            gap = surface[_nearest(x, surface)] - x
+            weight = (mine & (np.linalg.norm(gap, axis=1) < 0.012)).astype(float)
+            x = x + _smooth(gap, weight, edges, rounds)
+    p[head] = x
+    gap = np.linalg.norm(surface[_nearest(x[mine], surface)] - x[mine], axis=1)
+    landed = head[mine][gap < LANDED]
+    sides = np.concatenate([quads[:, [k, (k + 1) % 4]] for k in range(4)])
+    length = np.linalg.norm(p[sides[:, 0]] - p[sides[:, 1]], axis=1)
+    reach = REACH * np.bincount(sides[:, 0], length, BODY) / np.maximum(np.bincount(sides[:, 0], minlength=BODY), 1)
+    return s, R, landed, p[landed], normals(p, quads)[landed], reach[landed]
+
+
+def keep(scale, turn, landed, at, facing, reach):
+    """Writes laid.json: the scale and the turn, and a landed vertex to a row: its index, where it lies, which
+    way it faces and its reach."""
+    rows = ",\n".join("  [%d, %s]" % (i, ", ".join("%.7g" % x for x in np.concatenate([a, f, [r]])))
+                      for i, a, f, r in zip(landed, at, facing, reach))
+    with open(LAID, "w", encoding="utf-8", newline="\n") as f:
+        f.write('{"scale": %r,\n"turn": %s,\n"landed": [\n%s]}\n'
+                % (float(scale), json.dumps(np.asarray(turn).tolist()), rows))
+
+
 class Fit:
-    """MakeHuman's head laid onto the model's mean: its base vertices where they landed (BODY, 3), the
-    scale and turn taking its movements into the model's frame, how far its face landed from the mean's
-    (gap), and each model vertex's place on it: a triangle of base vertices and weights, if one is near."""
+    """MakeHuman's head as laid.json lays it on the model's mean (lay): the scale and turn taking its movements
+    into the model's frame, the base vertices that landed on the mean, where they lie, which way they face and
+    how far each reaches; and each model vertex's place among them."""
 
     def __init__(self, model):
         raw, quads, eye = _read()
         self.twin = twins(raw)
-        p = _frame(raw - eye)
-        p[:, 1] += EYE_Y
-        mean = model.mean
-        surface = mean[_on_face(mean)]
-        head = np.where(p[:, 2] > FACE["bottom"] - 0.03)[0]
-        mine = _on_face(p[head])
-
-        s, R, few = 1.0, np.eye(3), surface[::4]
-        for _ in range(30):                             # scaled and turned onto the mean, matched both ways
-            q = p[head][mine]
-            a = np.concatenate([q, q[_nearest(few, q)]])
-            b = np.concatenate([few[_nearest(q, few)], few])
-            s1, R1, t1 = _similarity(np.concatenate([a, a * MIRROR]), np.concatenate([b, b * MIRROR]))
-            p = s1 * p @ R1.T + t1
-            s, R = s * s1, R1 @ R
-        self.scale, self.turn = s, R
-
-        edges = np.unique(np.sort(np.concatenate([quads[:, [k, (k + 1) % 4]] for k in range(4)]), 1), axis=0)
-        index = np.full(BODY, -1)
-        index[head] = np.arange(len(head))
-        edges = index[edges]
-        edges = edges[(edges >= 0).all(1)].T
-        x = p[head]
-        for rounds in (64, 32, 16, 8, 4, 2, 1):         # then bent onto it, coarse to fine
-            for _ in range(4):
-                gap = surface[_nearest(x, surface)] - x
-                weight = (mine & (np.linalg.norm(gap, axis=1) < 0.012)).astype(float)
-                x = x + _smooth(gap, weight, edges, rounds)
-        p[head] = x
-        self.verts = p
-        self.gap = np.linalg.norm(surface[_nearest(x[mine], surface)] - x[mine], axis=1)
-
-        self.quads = quads
-        self.landed = np.zeros(BODY, bool)
-        self.landed[head[mine]] = self.gap < LANDED
+        if not os.path.exists(LAID):
+            keep(*lay(raw, quads, eye, model.mean))
+        with open(LAID, encoding="utf-8") as f:
+            laid = json.load(f)
+        rows = np.array(laid["landed"])
+        self.scale, self.turn = laid["scale"], np.array(laid["turn"])
+        self.landed, self.at, self.facing, self.reach = rows[:, 0].astype(int), rows[:, 1:4], rows[:, 4:7], rows[:, 7]
         self.bind(model)
 
     def carry(self, movement):
@@ -171,11 +197,7 @@ class Fit:
     def bind(self, model):
         """For each model vertex, the MakeHuman vertices and the weights it averages their movements with."""
         mean, normal = model.mean, normals(model.mean, model.quads)
-        source = np.where(self.landed)[0]
-        x, n = self.verts[source], normals(self.verts, self.quads)[source]
-        edges = np.concatenate([self.quads[:, [k, (k + 1) % 4]] for k in range(4)])
-        length = np.linalg.norm(self.verts[edges[:, 0]] - self.verts[edges[:, 1]], axis=1)
-        reach = REACH * (np.bincount(edges[:, 0], length, BODY) / np.maximum(np.bincount(edges[:, 0], minlength=BODY), 1))[source]
+        x, n, reach = self.at, self.facing, self.reach
         neighbours = np.zeros((len(mean), NEIGHBOURS), int)
         weights = np.zeros((len(mean), NEIGHBOURS))
         for k in range(0, len(mean), 1024):
@@ -184,7 +206,7 @@ class Fit:
             few = np.argpartition(d, NEIGHBOURS, axis=1)[:, :NEIGHBOURS]
             w = np.exp(-np.take_along_axis(d, few, 1) / (2 * reach[few] ** 2))
             w *= np.clip(((n[few] * normal[k:k + 1024, None]).sum(-1) - FACING) / (1 - FACING), 0, 1)
-            neighbours[k:k + 1024] = source[few]
+            neighbours[k:k + 1024] = self.landed[few]
             weights[k:k + 1024] = w / (w.sum(1, keepdims=True) + np.exp(-FADE ** 2 / 2))
         self.neighbours, self.weights = neighbours, weights
 

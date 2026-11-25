@@ -1,9 +1,10 @@
 """Pieces: the parts a textured figure is sculpted in, each a dict.
 
 A sculpted piece's spec gives mat, mirror, boost, hidden (points -> bool, culled from the game mesh), field,
-detail and paint for the bake, seam for the unwrap, and how to mesh it: boxes (a polycube for lattice.fit,
-with an optional pin) or mesh (sub -> verts, quads, normals, lattice points). `sculpt` adds name, v, q, n,
-lat and sub. A small part made by formula carries v, q, n, chart, size and paint instead.
+detail and paint for the bake (and normals, if its detail is a mesh), seam for the unwrap, and how to mesh it:
+boxes (a polycube for lattice.fit, with an optional pin) or mesh (sub -> verts, quads, normals, lattice
+points). `sculpt` adds name, v, q, n, lat and sub. A small part made by formula carries v, q, n, chart, size
+and paint instead.
 """
 import time
 import numpy as np

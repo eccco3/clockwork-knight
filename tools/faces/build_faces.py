@@ -4,9 +4,9 @@
           [--hair straight] [--seed 1] [--spread 0.65] [--view 0] [--light 1.0] [--labels] [--pool] [--again]
           [--refine] [--best a.png] [--answers a.jsonl]
 
---fit learns the model from the heads tools/fetch_assets.ps1 downloads, as does a missing model (eight
+--fit learns the model from the heads tools/fetch_assets.ps1 downloads, as does a missing model (two
 minutes); --detail scales its lattice, as it does a figure's. A model whose features are not the shapes
-makehuman.py names now is given those first (three minutes). --grid renders 25 random faces, of --sex if
+makehuman.py names now is given those first (twenty seconds). --grid renders 25 random faces, of --sex if
 given (see sexes.py), each alone under the same camera and lamps, turned --view degrees, in the hair of
 HAIRS --hair names, or else the one the sex's sets wear. --spread is the share of the people's standard
 deviation the faces are drawn at. --labels renders the label set the dev labels the sexes on, --pool the
@@ -55,9 +55,9 @@ LOOK = 5                                        # the renders' look: a set rende
 SKIN, HAIR = (0.60, 0.40, 0.30), (0.045, 0.032, 0.025)
 LIPS, CHEEKS = (0.52, 0.24, 0.21), (0.66, 0.36, 0.29)
 WHITE, IRIS, PUPIL = (0.80, 0.77, 0.72), (0.16, 0.10, 0.05), (0.01, 0.01, 0.01)
-# The eyeball's visible surface: a sphere about this centre (on +x), and the angles off straight ahead
-# (degrees) the iris and pupil reach.
-EYE, EYE_R, IRIS_ANGLE, PUPIL_ANGLE = (0.032, 0.0565, 0.0005), 0.0123, 31.0, 11.0
+# The eyes look straight ahead from this centre (on +x); the iris and the pupil reach these angles off
+# straight ahead (degrees).
+EYE, IRIS_ANGLE, PUPIL_ANGLE = (0.032, 0.0565, 0.0005), 31.0, 11.0
 # The lips: the line they meet on is this high on the midline; they reach out to the corners at x and up
 # and down from the line by these heights in the middle, rounding off to the corners.
 MOUTH_Z, MOUTH_X, UPPER, LOWER = -0.0695, 0.026, 0.013, 0.0135
@@ -99,14 +99,12 @@ def learn(detail):
 
 
 def featured(model):
-    """The model with MakeHuman's shapes for its features, and with its asymmetries if it was fitted before
-    it kept them: saved."""
+    """The model with MakeHuman's shapes for its features: saved."""
     t0 = time.time()
-    asymmetries = model.asymmetries if len(model.asymmetries) else fit.asymmetries(ict.Heads(), model.mean)
-    model = Model(model.mean, model.components, model.share, model.quads, model.lat, asymmetries,
-                  *makehuman.shapes(makehuman.Fit(model)))
+    model = Model(model.mean, model.components, model.share, model.quads, model.lat, model.asymmetries,
+                  *makehuman.shapes(makehuman.Fit(model)), fitted=model.fitted, eyes=model.eyes)
     model.save(MODEL)
-    print("FEATURED features=%d asymmetries=%d  t=%.1fs" % (len(model.names), len(asymmetries), time.time() - t0))
+    print("FEATURED features=%d  t=%.1fs" % (len(model.names), time.time() - t0))
     return model
 
 
@@ -195,11 +193,11 @@ def groom(mean, brow, hair="crop"):
     return stand + BROW_RISE * brow, np.maximum(cover, brow)
 
 
-def paint(mean):
-    """The colour every face carries at each vertex of the lattice, before hair: skin, flushed cheeks, lips
-    and eyes; and how much of each vertex is eye, from 0 to 1."""
-    x, y, z = np.abs(mean[:, 0]), mean[:, 1], mean[:, 2]
-    colour = np.tile(np.array(SKIN), (len(mean), 1))
+def paint(at, eyes):
+    """The colour every face carries at places on the mean head, the lattice's vertices or a figure's texels,
+    before hair: skin, flushed cheeks, lips and, where `eyes` says they are, eyes."""
+    x, y, z = np.abs(at[:, 0]), at[:, 1], at[:, 2]
+    colour = np.tile(np.array(SKIN), (len(at), 1))
     flush = 0.5 * ramp(1.0 - np.linalg.norm(np.stack([x, y, z], 1) - CHEEK, axis=1) / CHEEK_R)
     colour += flush[:, None] * (np.array(CHEEKS) - SKIN)
     across = np.sqrt(np.clip(1.0 - (x / MOUTH_X) ** 2, 0.0, 1.0))
@@ -207,12 +205,10 @@ def paint(mean):
     lip = ramp((1.0 - np.abs(z - MOUTH_Z) / np.maximum(height, 1e-6)) * 4.0) * (y > 0.06) * (x < MOUTH_X)
     colour += lip[:, None] * (np.array(LIPS) - colour)
     out = np.stack([x, y, z], 1) - EYE
-    reach = np.linalg.norm(out, axis=1)
-    eye = (reach < EYE_R) * (out[:, 1] > 0)
-    angle = np.degrees(np.arccos(np.clip(out[:, 1] / np.maximum(reach, 1e-9), -1.0, 1.0)))
+    angle = np.degrees(np.arccos(np.clip(out[:, 1] / np.maximum(np.linalg.norm(out, axis=1), 1e-9), -1.0, 1.0)))
     ball = np.where(angle < PUPIL_ANGLE, 0, np.where(angle < IRIS_ANGLE, 1, 2))
-    colour[eye] = np.array((PUPIL, IRIS, WHITE))[ball[eye]]
-    return colour, eye.astype(np.float64)
+    colour[eyes] = np.array((PUPIL, IRIS, WHITE))[ball[eyes]]
+    return colour
 
 
 def reach(v, top):
@@ -276,14 +272,14 @@ def portrait(model, face, path, view, light, style="crop", lopsided=()):
     its coefficients and then its brow numbers; `lopsided` weighs the model's asymmetries."""
     bl.reset_scene()
     stand, hair = groom(model.mean, face[len(model.directions):], style)
-    skin, eye = paint(model.mean)
+    skin = paint(model.mean, model.eyes)
     v, quads, n, _ = model.mesh(face, lopsided)
     v = level(v + n * stand[:, None])
     colour = skin + hair[:, None] * (np.array(HAIR) - skin)
     face = bl.to_object("face", STAND.w(v), quads, STAND.dir(normals(v, quads)), colour)
     for name, rough in (("skin", 0.5), ("hair", 0.85), ("eye", 0.15)):
         face.data.materials.append(bl.clay(name, base=(1.0, 1.0, 1.0), rough=rough))
-    index = np.where(eye[quads].mean(1) > 0.5, 2, (hair[quads].mean(1) > 0.5).astype(np.int32))
+    index = np.where(model.eyes[quads].mean(1) > 0.5, 2, (hair[quads].mean(1) > 0.5).astype(np.int32))
     face.data.polygons.foreach_set("material_index", index.astype(np.int32))
     HAIRS[style].dress(v)
     bl.turnaround(path, [view], TARGET, SCALE, TILE, bl.studio(LAMPS[0], [e * light for e in LAMPS[1]]))
@@ -326,11 +322,16 @@ def uneven(model, rng, count):
     return rng.normal(0.0, LOPSIDED, (count, len(model.asymmetries)))
 
 
-def grid(model, sex, path, seed, spread, view, light, hair):
+def drawn(model, sex, seed, spread=SPREAD):
+    """The faces the grid draws with this seed, of the sex if given, and how lopsided each is."""
     rng = np.random.default_rng(seed)
     draw = sex.sample if sex else model.sample
     faces = [draw(rng, spread) for _ in range(SIDE * SIDE)]
-    sheet(model, faces, uneven(model, rng, len(faces)), path, view, light, hair)
+    return faces, uneven(model, rng, len(faces))
+
+
+def grid(model, sex, path, seed, spread, view, light, hair):
+    sheet(model, *drawn(model, sex, seed, spread), path, view, light, hair)
 
 
 def worn(folder):
@@ -459,11 +460,19 @@ def again(model, name, view, light):
             note(path, dict(kept, look=LOOK, hair=style(name)))
 
 
-def main():
-    fitted = "--fit" in argv or not os.path.exists(MODEL)
-    model = learn(float(opt("--detail", "1.0"))) if fitted else Model.load(MODEL)
-    if fitted or model.names != list(makehuman.SHAPES):
+def current(again=False, detail=1.0):
+    """The face model, fitted again (at that detail) if asked or if fit.py fits another way now, and given
+    features if makehuman.py names other shapes now."""
+    model = Model.load(MODEL) if os.path.exists(MODEL) and not again else None
+    if model is None or model.fitted != fit.VERSION:
+        model = learn(detail)
+    if model.names != list(makehuman.SHAPES):
         model = featured(model)
+    return model
+
+
+def main():
+    model = current("--fit" in argv, float(opt("--detail", "1.0")))
     sex = Sex(model, opt("--sex")) if opt("--sex") else None
     light, view = float(opt("--light", "1.0")), float(opt("--view", "0"))
     if (opt("--best") or "--refine" in argv) and not sex:
@@ -488,4 +497,5 @@ def main():
         best(model, sex, opt("--best"), answers, int(opt("--seed", "1")), view, light)
 
 
-main()
+if __name__ == "__main__":
+    main()
