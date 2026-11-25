@@ -203,11 +203,11 @@ The dev decided the white streaks between the knight's joints were a bad idea. R
 
 Not started.
 
-## Knight: shoulder, chest and wrist clearance
+## Knight: shoulder sockets and the overhead pauldron
 
 ### Task description
 
-In the sword clips her upper arm sinks up to 30 mm into her chest and passes through the pauldron, and her right arm reaches her face in `Sword_Regular_B:6`. Lift or reshape the pauldron, and fix the collar bone's travel or the chest's pocket, so the arm clears both. Also, when her wrist bends (Roll, Sword_Heavy_Combo), her palm passes up to 15 mm through the forearm's cuff. Measure with the builder's `--gaps` before and after, over all 21 clips, and deliver close-ups of the worst poses.
+Her shoulders now stay out of her chest (`tools/knight/collar.py`, `follow.py`), but the thrusts (Sword_Regular_B, Regular_Combo, Dash) carry the right shoulder up to 9 cm forward, leaving its socket empty behind the ball, and the ball presses up to 8 mm into the socket's front rim in Heavy_Combo and Regular_A. Give the socket a cup carried by the collar bone, or open the chest toward the front. With the arm overhead (Heavy_Combo:32–34, 49–53) the right pauldron still sinks 13 mm into the chest. The death collapse leaves her pauldrons held.
 
 ### Open questions
 
@@ -215,7 +215,7 @@ In the sword clips her upper arm sinks up to 30 mm into her chest and passes thr
 
 ### Status
 
-In progress on branch `worktree-agent-add37c3e80de4452a` (unmerged WIP): pauldrons keyed clear of the arm (`follow.py`) and the chest pocketed from the shoulders' sweep (`sweep.py`), never yet built. Left: before/after `--gaps` numbers; choose between the swept pocket and limiting the collar bone's travel (it turns 29 degrees in the Sword_Regular clips, pulling the shoulder about 9.5 cm out of its socket); end the cuff about 22 mm short of the wrist joint; check the other seats, and after shots.
+Not started. Worst poses: `--gaps` in `build_knight.py`.
 
 ## Minion: rig and animation
 

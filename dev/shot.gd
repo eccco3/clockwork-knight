@@ -7,6 +7,7 @@ extends Harness
 ##
 ## Several views in one run: views="x,y,z>x,y,z;x,y,z>x,y,z" writes out_0.png, out_1.png ...
 ## Omit pos/views to use whatever camera the scene itself makes current.
+## bone=<name> measures pos, look and views from where that bone of the scene's skeleton is.
 ## call=method[:arg] invokes a method on the scene root after loading (for posing things).
 ## lamps=baked drops the hall's live character lights.
 ## Replace godot with python -I dev/quiet.py to run on a hidden desktop.
@@ -37,11 +38,20 @@ func _run(views: Array) -> void:
 		await _settle(frames)
 		save(await grab(), out)
 	else:
+		var origin := await _origin()
 		for i in views.size():
-			_cam.look_at_from_position(views[i][0], views[i][1])
+			_cam.look_at_from_position(origin + views[i][0], origin + views[i][1])
 			await _settle(frames if i == 0 else maxi(frames / 2, 30))
 			save(await grab(), out if views.size() == 1 else out.replace(".png", "_%d.png" % i))
 	get_tree().quit()
+
+func _origin() -> Vector3:
+	if not args.has("bone"):
+		return Vector3.ZERO
+	await _settle(2)
+	var skel: Skeleton3D = scene.find_children("*", "Skeleton3D", true, false)[0]
+	return skel.global_transform * skel.get_bone_global_pose(skel.find_bone(args["bone"])).origin
+
 
 func _settle(n: int) -> void:
 	for i in n:

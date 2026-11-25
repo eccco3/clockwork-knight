@@ -168,7 +168,8 @@ func _setup_extras() -> void:
 		if n.ends_with("_r") and (n.begins_with("index") or n.begins_with("middle") or n.begins_with("ring")
 				or n.begins_with("pinky") or n.begins_with("thumb")):
 			_grip[b] = _carry[b]
-	for pair in [["clavicle_r", 0.5], ["upperarm_r", 1.0], ["lowerarm_r", 1.0], ["hand_r", 1.0]]:
+	for pair in [["clavicle_r", 0.5], ["upperarm_r", 1.0], ["pauldron_lift_r", 1.0], ["pauldron_r", 1.0], ["lowerarm_r", 1.0],
+			["couter_r", 1.0], ["hand_r", 1.0]]:
 		var b := skel.find_bone(pair[0])
 		if b >= 0:
 			_carry_mask[b] = pair[1]
