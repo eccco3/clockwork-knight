@@ -5,19 +5,23 @@ from . import bl, uv, bake, pieces as P
 
 
 def clay_objects(pieces, wire=False, black=()):
-    """The bare pieces in grey clay; those named in `black` gloss black, and `wire` draws every edge."""
+    """The bare pieces in grey clay; those named in `black` gloss black, and `wire` draws every edge. Returns
+    the clay objects, in the order of the pieces' sides."""
     grey = bl.clay("clay", base=(0.62, 0.60, 0.58), rough=0.55, vertex_color=False)
     dark = bl.clay("clay_eye", base=(0.01, 0.01, 0.01), rough=0.05, vertex_color=False)
     line = bl.clay("wire", base=(0.02, 0.02, 0.02), rough=0.8, vertex_color=False)
+    made = []
     for pc in pieces:
         for v, faces, n in P.sides(pc):
             ob = bl.to_object(pc["name"], v, faces, n)
             ob.data.materials.append(dark if pc["name"] in black else grey)
+            made.append(ob)
             if wire:
                 w = bl.to_object(pc["name"] + "_wire", v, faces)
                 w.data.materials.append(line)
                 mod = w.modifiers.new("wire", "WIREFRAME")
                 mod.thickness, mod.use_even_offset = 0.0005, False
+    return made
 
 
 def material(name, albedo, normal, orm, clay=False):
@@ -116,8 +120,10 @@ def assemble(name, pieces, order, mats):
     return ob
 
 
-def reduce(base, name, ceiling):
-    """A copy of the full mesh collapsed to at most `ceiling` triangles, shaded with the full mesh's normals."""
+def reduce(base, name, ceiling, creased=False):
+    """A copy of the full mesh collapsed to at most `ceiling` triangles. It is shaded with the normals of the
+    nearest face of the full mesh, which suits one smooth skin. A `creased` mesh, of hard-edged pieces that pass
+    through one another, would find another piece's face nearest: it is shaded smooth between the creases it keeps."""
     ob = base.copy()
     ob.data = base.data.copy()
     ob.name = ob.data.name = name
@@ -128,6 +134,9 @@ def reduce(base, name, ceiling):
     dec = ob.modifiers.new("collapse", "DECIMATE")
     dec.ratio = 0.985 * ceiling / len(base.data.polygons)
     bpy.ops.object.modifier_apply(modifier=dec.name)
+    if creased:
+        bpy.ops.mesh.customdata_custom_splitnormals_clear()
+        return ob
     nrm = ob.modifiers.new("normals", "DATA_TRANSFER")
     nrm.object = base
     nrm.use_loop_data = True

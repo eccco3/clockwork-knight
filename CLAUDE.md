@@ -20,13 +20,13 @@ A roguelite: the workshop and hall are the safe hub; enemies appear only outdoor
 - Materials, then scene: `godot --headless --path . --script res://builders/hall_materials.gd`, then `hall_scene.gd`.
 - Knight: `blender --background --python tools/knight/build_knight.py -- --out assets/models/knight.glb` (80 s), then `godot --path . --headless --import`. `--seat culet|armour` replaces her tabard.
 - Grinner: `blender --background --python tools/grinner/build_grinner.py -- --out assets/models/grinner.glb` (seven minutes), then import; `--kind scuttler` for `scuttler.glb`. `--shots dir` adds turnarounds; `--clay a.png` alone previews the bare mesh.
-- Rosalyn: likewise (`rosalyn`, seven minutes); `--detail 0.7` halves her triangles; `scripts/rosalyn.gd`, her model's root, dresses her.
+- Rosalyn and minion: likewise (seven minutes; ten seconds), dressed by their models' roots `scripts/rosalyn.gd` and `minion.gd`; `--detail 0.7` halves Rosalyn's triangles.
 - Never combine `--only` with `--out`: it overwrites the full model.
 - Run: `godot --path .`. Playtest picker to pin: `tools\playtest\install.ps1` in the main checkout; `playtest.ps1 -DryRun` tests it.
-- Scripted play and screenshots: `dev/drive.tscn` with `--fixed-fps 60`; `dev/shot.tscn` photographs a scene. Both list arguments in their headers; `lamps=baked` drops live character lights.
+- Scripted play: `dev/drive.tscn` with `--fixed-fps 60`; `dev/shot.tscn` photographs a scene. Their headers list arguments.
 - Never open Godot windows on the dev's screen for tests or bakes, unless he is playtesting: replace `godot` with `toolchain\blender\4.5\python\bin\python.exe -I dev\quiet.py`; `--timing` first for GPU timing waits until nothing else runs.
 - Clips: `tools\clip.py out.mp4 <drive arguments>` (that Python) records `dev/drive.tscn` hidden.
-- Capped at 60 fps. Frame times: `dev/drive.tscn` events `perf:start` and `perf:stop`, run with `--disable-vsync --max-fps 0`.
+- Capped at 60 fps. Frame times: `dev/drive.tscn` perf events; crowds: `dev/crowd.tscn`.
 
 ## Where things are
 
@@ -35,20 +35,21 @@ A roguelite: the workshop and hall are the safe hub; enemies appear only outdoor
 - The `App` autoload, `scripts/app.gd`, holds the keys Esc, F11 and H, cursor capture and the controls hint for playable scenes.
 - `scenes/outdoors.tscn` builds the grinner's foggy ground on load.
 - `dev/` tests the game; `builders/` builds in Godot; `tools/`, hidden from Godot, builds and fetches assets.
-- `scripts/` holds the player controller, animator and camera rig; `looks.gd` makes each figure's wood, metal and eye materials.
+- `scripts/` holds the player controller, animator and camera rig; `looks.gd` makes each figure's wood, metal and eye materials; fighters carry `Health`, `Hurtbox`, `Strike`.
 - Lamps are baked. `scripts/hall.gd` turns those marked `lights_characters` into lights for the Characters layer only, and `shadows_characters` into cancelling pairs leaving character shadows on the baked floor. Only the fire is live.
 - `addons/lightmap_bake` presses the editor's bake button.
 - `tools/sculpt/` is the characters' shared toolkit.
 - `tools/knight/` builds the knight, `assets/textures/knight/face_paint.png` and its placement `face_paint.json`; `tools/build_hall.py` and `builders/hall_*.gd` build the hall; `tools/workshop_shell.py`'s constants size the workshop beyond its east doors.
-- Only `KnightShadow`, a 4,700-triangle copy from `tools/knight/shadow.py`, casts the knight's shadows.
-- `tools/faces/`: ICT-FaceKit model, sex labels (`dev/labels.tscn`), taste per sex (`dev/taste_*.tscn`, then `--refine`); see `sexes.py`.
-- `tools/grinner/` builds the grinner and four-legged scuttler, rigged and hand-keyed; `import_grinner.gd` adds detail distances and AnimationTree; `scripts/grinner.gd` moves both. Shot on `dev/stage.tscn`: `call=stand:res://assets/models/grinner.glb`, `stand:res://dev/waddler.tscn` waddling, `dev/scuttler.tscn` running, `spread:` detail levels, `pose:Roll@0.47` poses the knight.
+- Only stand-ins such as `KnightShadow` (`tools/knight/shadow.py`) cast figures' shadows.
+- `tools/faces/`: ICT-FaceKit model, MakeHuman features, sex labels (`dev/labels.tscn`), taste (`dev/taste_*.tscn` renders rounds); see `taste.py`.
+- `tools/grinner/` builds the grinner and four-legged scuttler, rigged and hand-keyed; `import_grinner.gd` adds its AnimationTree; `scripts/grinner.gd` moves both. `dev/stage.tscn` stands models (see its header), and `dev/waddler.tscn` or `scuttler.tscn` moving.
+- `tools/minion/` builds the unrigged minion; `tools/sculpt/levels.gd` chains detail levels, proven by `dev/detail_check.gd -- <model>`.
 
 ## Repository
 
 - `tools/check_docs.sh` enforces the four documentation rules in `DEV.md`; `tools/hooks/pre-commit` runs it. After cloning: `git config core.hooksPath tools/hooks`.
 - First-party means everything git tracks except `tools/downloads/`.
-- Git ignores `toolchain/`, `.godot/`, `dev/shots/`, fetched files (`tools/fetch_assets.ps1`) and built models and lightmap (`tools/build_models.ps1`).
+- Git ignores `toolchain/`, `.godot/`, `dev/shots/` and what `tools/fetch_assets.ps1` and `build_models.ps1` restore.
 - Commit with Windows git, not WSL.
 
 ## Downloads

@@ -14,52 +14,6 @@ After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% wit
 
 Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 Ãƒâ€šÃ‚Â°C; 50% gave 43 W and 70 Ãƒâ€šÃ‚Â°C.
 
-## Enemy: behaviour and combat
-
-### Task description
-
-Extend `scripts/grinner.gd`, which now only plays the idle and waddle: it waddles straight at the knight, pounces from mid range and swipes up close, with cooldowns. Add the least combat both sides need: health, sword hits that land on grinners, claw hits on the knight, and reactions. A grinner dies to three hits, and flinches only when hit during a wind-up. When the knight's health runs out she collapses, the screen fades and the scene restarts. Replace the stand-in pacing grinners in `scripts/outdoors.gd` with three real ones and record a scripted fight.
-
-### Open questions
-
-None. The dev's combat direction, for this and the battle items:
-
-- Kills are quick, soulslike; each grinner hits a bit softer than a soulslike enemy, and the danger comes from being surrounded.
-- Stamina limits how many she can take on at once.
-- No attack tokens: grinners do not take turns to attack.
-- Clear wind-ups only on the more powerful enemy attacks.
-- She starts closer to one among equals (low stamina, damage about a minion's) and becomes a hero through her upgrades.
-
-### Status
-
-Not started. Enemies only appear outside; see the crowd item.
-## Enemy: crowd performance test
-
-### Task description
-
-Add a `dev/` scene that spawns a chosen number of grinners around the knight outdoors, and run it with the scripted-play harness at 1, 6, 12, 24 and 40. Record frame time, GPU time, CPU time spent on scripts and animation, triangles and draw calls. Find where 60 fps breaks and where GPU time crosses 6.5 ms. Then cut the largest costs, for example shadows and update rate for distant grinners, and report before and after.
-
-### Open questions
-
-- None. Up to 12 grinners on screen; later, up to 40 allies and enemies in all.
-
-### Status
-
-Not started. For comparison, one knight costs the GPU about 0.25 ms at mid distance.
-## Rosalyn: rig and standing pose
-
-### Task description
-
-Rig Rosalyn: shoulders and upper body for gesturing, fingers, and her head and neck. Her wooden face does not deform. Skin the dress so the smocked bodice and skirt deform cleanly. Pose her standing with her hands clasped in front of her, and animate a quiet idle on that pose: breathing and small weight shifts. Deliver turnarounds and a contact sheet of the idle.
-
-### Open questions
-
-None. Bones are enough for the skirt while she stands. Her eyes blink and move.
-
-### Status
-
-In progress on branch `worktree-agent-a67a951fb109a0580` (unmerged WIP): 72 bones, an Idle (breathing only) and a Blink, clay-checked at half detail; shared rig, key and turn helpers in `tools/sculpt/`. Left: render the last sleeve-blend change; boxy shoulders and the raised arm's collapse; clasped fingers, the stray thumb and shards by the right wrist; gaps at the shut lids' corners; weight shifts and eyes in the idle; everything in Godot.
-
 ## Rosalyn: speech and gestures
 
 ### Task description
@@ -72,7 +26,7 @@ None. She turns her head to follow the knight, within a limited range blended in
 
 ### Status
 
-Not started.
+Not started. Her rig (80 bones), idle and blink are built. Left over from it: a fully overhead raise bulks the sleeve, a pale streak down the skirt's side in Godot, a dark tick at each outer lid corner, and a crease along the palm's edge.
 
 ## Rosalyn: a moving mouth
 
@@ -151,20 +105,6 @@ Plan the game's opening scene with the dev in the main chat; this is not a subag
 
 Not started. Needs the dev; the workshop items build the room.
 
-## Workshop: shorten it and the apartment
-
-### Task description
-
-The workshop blockout feels too large. Shorten the workshop by a quarter, three bays (from 72 m to 54 m), and the apartment by a third, one bay (from 18 m to 12 m), through the constants in `tools/workshop_shell.py`, keeping its width, height and the doors from the hall where they are. Rebuild the hall, rebake its lightmap, and deliver the overhead plan and the views down the workshop's length again.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. It rebakes the hall, so nothing else may bake at the same time.
-
 ## Workshop: windows and surfaces
 
 ### Task description
@@ -177,7 +117,7 @@ None. Windows along both of the workshop's long walls, every few metres; none on
 
 ### Status
 
-Not started. Needs the workshop's walls.
+Not started. The walls are built: 54 m workshop, 12 m apartment.
 
 ## Workshop: lamps and bake
 
@@ -205,7 +145,7 @@ None. Dense around the edges and the benches, with one or two clear aisles about
 
 ### Status
 
-Not started. Needs the workshop's walls.
+Not started. The walls are built: 54 m workshop, 12 m apartment.
 
 ## Workshop: clocks
 
@@ -277,34 +217,6 @@ In the sword clips her upper arm sinks up to 30 mm into her chest and passes thr
 
 In progress on branch `worktree-agent-add37c3e80de4452a` (unmerged WIP): pauldrons keyed clear of the arm (`follow.py`) and the chest pocketed from the shoulders' sweep (`sweep.py`), never yet built. Left: before/after `--gaps` numbers; choose between the swept pocket and limiting the collar bone's travel (it turns 29 degrees in the Sword_Regular clips, pulling the shoulder about 9.5 cm out of its socket); end the cuff about 22 mm short of the wrist joint; check the other seats, and after shots.
 
-## Minion: sculpt the model
-
-### Task description
-
-Build a small clockwork soldier as `assets/models/minion.glb` from a new `tools/minion/` builder on the shared sculpt toolkit: an adult man two-thirds the knight's height, a regular, reasonably strong-looking soldier (not stocky), carrying a short spear. He is the knight's ally; the grinners are the enemy's minions. He needs far less human likeness than the knight or Rosalyn; a simple, readable, mechanical design is right, since many share the field. Give him detail levels and a cheap shadow stand-in from the start. Deliver clay and painted turnarounds beside the knight's.
-
-### Open questions
-
-- None. About 12,000 triangles at full detail.
-
-### Status
-
-In progress on branch `worktree-agent-a97a4c5fc7017908a` (unmerged WIP): a wooden soldier with a crimson cuirass and short spear, 11,472 / 5,910 / 2,954 triangles and a 799-triangle shadow stand-in, passing `dev/detail_check.gd`. Left: fresh Godot turnarounds and line-up, a `build_models.ps1` step, CLAUDE.md notes, the spear blade's crease and the armholes' jagged edge.
-
-## Minion: cover his legs
-
-### Task description
-
-The minion's lower half reads wrong for a soldier: a short skirt with bare thighs, knee-high boots and stockings. Give him a soldier's legs instead: breeches or trousers to the boot tops, a tunic or tassets reaching mid-thigh under the cuirass, and plain calf or ankle boots, in the same lacquered wooden toy style. Keep his height, triangle budgets and detail levels, and deliver turnarounds and the line-up beside the knight again.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. Needs the minion's sculpt merged (branch `worktree-agent-a97a4c5fc7017908a`); it may be done as part of finishing that item.
-
 ## Minion: rig and animation
 
 ### Task description
@@ -317,7 +229,7 @@ Rig the minion simply, with few bones, and hand-key an idle, a march, a spear th
 
 ### Status
 
-Not started. Needs the minion's sculpt.
+Not started. Better after the dev picks a clockwork variant (or a flavour) from the contact sheet, `build_minion.py -- --sheet`: 36 designs in six flavours, built with `--works flavour:seed` and adopted in `build_models.ps1`. Their wheels may be worth keying.
 
 ## Battles: intelligent multi-unit fights
 
@@ -332,7 +244,22 @@ Make fights between groups outdoors, in the shape of a MOBA lane: waves of minio
 
 ### Status
 
-Not started. Needs the minion's animation and the grinner's behaviour and combat.
+Not started. Needs the minion's animation. Grinners fight the knight (fighters carry `Health`, `Hurtbox`, `Strike`), but stand still while their attacks recharge, and their cost at 40 units is unmeasured.
+
+## Combat: tuning from the dev's playtest
+
+### Task description
+
+The grinners and the knight now fight outdoors (`scripts/grinner.gd`, `player.gd`; numbers in the report of commit "Enemy: grinners fight"). Playtest with the dev and tune: the waddle's 0.29 m/s barely closes on her, the swipe has no clear wind-up, ichor and sparks are specks from the game camera, unaimed attacks follow her facing, and corpses stay. Re-key the waddle or add a run in `tools/grinner` if needed.
+
+### Open questions
+
+- Should grinners run at her, or stay slow and dangerous only in numbers?
+- Do corpses fade, sink or stay?
+
+### Status
+
+Not started. Needs the dev's playtest.
 
 ## Faces: crisper features and use in a figure
 
@@ -360,4 +287,18 @@ Add a `dev/` tool that shows the dev two faces from the morphable model side by 
 
 ### Status
 
-Waits for the dev's labels from the launcher's "Face labels" tool; then `build_faces.py -- --pool` rebuilds the pools. Built, with women and men rated apart: the dev rates from the playtest launcher's two face rating tools, then `build_faces.py -- --sex women --best` (or men) makes the final faces.
+Built, women and men rated apart: a face is 62 scan components, 22 MakeHuman features and 6 brow numbers, with slight random asymmetry on final faces only. The dev rates in the launcher's two rating tools (his 91 women's answers still count); every 40 answers they render the next refinement round in the background and switch to it, and B shows the best faces.
+
+## Knight: shattering on death
+
+### Task description
+
+When the knight's health runs out, break her apart: armour plates, limbs and clockwork pieces come loose and scatter with simple physics, then settle on the ground before the screen fades. Split her along her existing parts where possible, add a few gears and springs flung from inside, and keep it cheap. Record clips from two angles.
+
+### Open questions
+
+- Does she shatter in place of the collapse, or after kneeling?
+
+### Status
+
+Low priority. Not started. Builds on the collapse and restart from "Enemy: behaviour and combat".

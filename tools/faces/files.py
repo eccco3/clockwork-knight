@@ -16,15 +16,28 @@ def picture(i, folder):
 
 
 def rendered(folder):
-    """The rendered set's coefficients (F, K), the model's share of the variance per component, the spread
-    the faces were drawn at, one number or one per component, and the set's name in the answers: "pool",
-    or "refine n" for the nth refinement round (taste.refine)."""
+    """The rendered set's faces (F, their numbers), the share of his taste each number is expected to hold
+    and the spread the faces were drawn at, one number or one per number of a face (taste.prior), and the
+    set's name in the answers: a pool's, or "refine n" for the nth refinement round (taste.refine)."""
     with np.load(os.path.join(folder, "pool.npz")) as f:
         return f["faces"], f["share"], f["spread"], str(f["set"]) if "set" in f.files else "pool"
 
 
 def exists(folder):
     return os.path.exists(os.path.join(folder, "pool.npz"))
+
+
+def progress(folder):
+    """How many of the set's faces have their picture, of how many: (0, 0) before its faces are drawn."""
+    if not exists(folder):
+        return 0, 0
+    size = len(rendered(folder)[0])
+    return sum(os.path.exists(picture(i, folder)) for i in range(size)), size
+
+
+def complete(folder):
+    done, size = progress(folder)
+    return 0 < size == done
 
 
 class Log:

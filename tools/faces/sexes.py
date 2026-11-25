@@ -14,7 +14,7 @@ sex's side and moved MARGIN further out, so that they vary as much as before in 
 
   python -I sexes.py      what the labels teach: the direction, its middle, and where the pools lie on it
 
-Once he has labelled, one command rebuilds both pools from the labels (taste.py; about 50 minutes):
+Once he has labelled, one command rebuilds both pools from the labels (taste.py; about two hours):
 
   toolchain\\blender\\blender.exe --background --python tools/faces/build_faces.py -- --pool
 """
@@ -117,4 +117,4 @@ if __name__ == "__main__":
     from faces import taste
     model = Model.load(os.path.join(HERE, "model.npz"))
     labels = Labels(sys.argv[1] if len(sys.argv) > 1 else LABELS)
-    report(model, labels, {name: taste.pool(Sex(model, name, labels.path)) for name in SEXES})
+    report(model, labels, {name: taste.pool(Sex(model, name, labels.path))[:, :len(model.share)] for name in SEXES})

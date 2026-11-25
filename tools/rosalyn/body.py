@@ -64,12 +64,14 @@ def trunk(p):
 
 
 def _girdle(p):
-    """Trunk, sloping shoulders, the roots of the arms and the neck."""
+    """Trunk, sloping shoulders, the roots of the arms and the neck. Each shoulder is a cap over the joint, and
+    the arm's root bulges below it, so the outline rounds over the deltoid instead of turning a corner."""
     q = S.mirror_x(p)
     d = trunk(p)
-    d = S.smin(d, S.cone(q, V(0.032, 0.022, 1.476), SHOULDER + V(-0.016, 0.0, 0.020), 0.026, 0.028), 0.045)
-    d = S.smin(d, S.sphere(q, SHOULDER + V(-0.002, 0, 0), 0.0405), 0.028)
-    d = S.smin(d, upper_arm(q), 0.020)
+    d = S.smin(d, S.cone(q, V(0.032, 0.022, 1.476), SHOULDER + V(-0.024, 0.0, 0.004), 0.026, 0.022), 0.045)
+    d = S.smin(d, S.sphere(q, SHOULDER + V(0.004, 0.0, -0.010), 0.036), 0.032)
+    d = S.smin(d, S.tube(q, [SHOULDER + UPPER * 0.030, lerp(SHOULDER, ELBOW, 0.40), lerp(SHOULDER, ELBOW, 0.80), ELBOW],
+                         [0.0390, 0.0365, 0.0318, 0.0290]), 0.024)
     return S.smin(d, neck(p), 0.030)
 
 
@@ -136,16 +138,16 @@ def _digit(base, spread, lengths, curls, radii):
 
 
 def _joints(pts, r, root=None):
-    """A digit's flesh through its four joint points, and the line its lattice follows, which leaves the
-    palm at `root` (by default just behind the first joint)."""
+    """A digit's four joint points, its flesh through them, and the line its lattice follows, which leaves
+    the palm at `root` (by default just behind the first joint)."""
     mcp, pip, dip, tip = pts
     flesh = ([mcp, lerp(mcp, pip, 0.5), pip, lerp(pip, dip, 0.5), dip, lerp(dip, tip, 0.6), tip],
              [r[0], 0.46 * (r[0] + r[1]), 1.04 * r[1], 0.46 * (r[1] + r[2]), 1.03 * r[2], 0.98 * r[3], 0.80 * r[3]])
     end = tip + S.normalize(tip - dip) * 0.5 * r[3]
     if root is None:
-        return dict(flesh=flesh, spine=[mcp - S.normalize(pip - mcp) * 0.008, pip, dip, end],
+        return dict(joints=pts, flesh=flesh, spine=[mcp - S.normalize(pip - mcp) * 0.008, pip, dip, end],
                     spine_r=[0.7 * r[0], 0.7 * r[1], 0.7 * r[2], 0.5 * r[3]])
-    return dict(flesh=flesh, spine=[root, pip, dip, end], spine_r=[0.7 * r[1], 0.7 * r[1], 0.7 * r[2], 0.5 * r[3]])
+    return dict(joints=pts, flesh=flesh, spine=[root, pip, dip, end], spine_r=[0.7 * r[1], 0.7 * r[1], 0.7 * r[2], 0.5 * r[3]])
 
 
 FINGERS = {
@@ -166,7 +168,7 @@ def arm(p):
     fore = S.tube(p, [ELBOW, lerp(ELBOW, WRIST, 0.24), lerp(ELBOW, WRIST, 0.64), WRIST], [0.0285, 0.0300, 0.0238, 0.0180])
     d = S.smin(d, fore, 0.014)
     d = S.smin(d, S.ellipsoid(l, V(0, 0, 0.002), V(0.0135, 0.0220, 0.026)), 0.012)
-    d = S.smin(d, S.sphere(l, V(0.0085, -0.0185, -0.004), 0.0072), 0.006)          # head of the ulna
+    d = S.smin(d, S.sphere(l, V(0.0072, -0.0178, -0.004), 0.0062), 0.008)          # head of the ulna
     palm = S.smin(S.ellipsoid(l, V(0, 0, 0.032), V(0.0122, 0.0285, 0.034)),
                   S.box(l, V(-0.001, 0.0005, 0.068), V(0.0092, 0.0330, 0.027), 0.0090), 0.018)
     palm = S.smin(palm, S.ellipsoid(l, V(-0.0085, 0.0235, 0.036), V(0.0105, 0.0150, 0.030)), 0.012)

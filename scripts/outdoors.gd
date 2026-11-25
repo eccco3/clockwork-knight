@@ -22,14 +22,12 @@ const MUD := "brown_mud_02"
 const MOSS := "forrest_ground_01"
 const TEX := "res://assets/textures/%s/%s.jpg"
 
-## Stand-in grinners until they have behaviour: [position, facing, paces]. Pacers waddle for
-## PACE_WALK seconds, then stop and turn round.
-const GRINNERS := [[Vector3(4, 0, 11), PI + 0.4, true], [Vector3(-0.5, 0, 8), 0.0, false], [Vector3(-5, 0, 12), PI - 0.9, true]]
-const PACE_WALK := 7.0
-const PACE_TURN := 3.0
+## The grinners waiting for her: [position, facing].
+const GRINNERS := [[Vector3(4, 0, 11), PI + 0.4], [Vector3(-0.5, 0, 8), 0.0], [Vector3(-5, 0, 12), PI - 0.9]]
 
-var _pacers: Array[Grinner] = []
-var _t := 0.0
+## Whether it places its own grinners; dev/crowd.gd places a crowd instead.
+@export var grinners := true
+
 var _relief := FastNoiseLite.new()
 var _swell := FastNoiseLite.new()
 var _moss: PackedByteArray
@@ -51,22 +49,12 @@ func _ready() -> void:
 	_build_ground()
 	_build_grass()
 	_build_walls()
-	_place_grinners()
+	if grinners:
+		_place_grinners()
 	var p := Player.new()
 	p.name = "Player"
 	p.position = Vector3(0, height(0, 0) + 0.02, 0)
 	add_child(p)
-
-
-func _process(dt: float) -> void:
-	_t += dt
-	for k in _pacers.size():
-		var g := _pacers[k]
-		var walking := fmod(_t + k * 4.0, PACE_WALK + PACE_TURN) < PACE_WALK
-		g.gait = move_toward(g.gait, 1.0 if walking else 0.0, dt * 4.0)
-		if not walking:
-			g.rotation.y += PI / PACE_TURN * dt
-		g.position.y = height(g.position.x, g.position.z)
 
 
 func _place_grinners() -> void:
@@ -75,8 +63,6 @@ func _place_grinners() -> void:
 		g.position = spec[0] + Vector3.UP * height(spec[0].x, spec[0].z)
 		g.rotation.y = spec[1]
 		add_child(g)
-		if spec[2]:
-			_pacers.append(g)
 
 
 func height(x: float, z: float) -> float:
