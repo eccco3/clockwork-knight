@@ -15,9 +15,9 @@ A roguelite: the workshop and hall are the safe hub; enemies appear only outdoor
 
 ## Build and run
 
-- All models, the Godot import and the hall's lightmap: `tools\build_models.ps1`. Needed after cloning.
-- Lightmap alone: `godot --editor --path . res://scenes/hall.tscn -- bake-lightmaps` takes six minutes; `draft` previews in one. Rebake after changing the hall.
-- Hall materials, then scene: `godot --headless --path . --script res://builders/hall_materials.gd`, then `hall_scene.gd`.
+- All models, the Godot import and the lightmap: `tools\build_models.ps1`. Needed after cloning.
+- Lightmap alone: `godot --editor --path . res://scenes/hall.tscn -- bake-lightmaps` takes fourteen minutes; `draft` two. Rebake after rebuilding.
+- Materials, then scene: `godot --headless --path . --script res://builders/hall_materials.gd`, then `hall_scene.gd`.
 - Knight: `blender --background --python tools/knight/build_knight.py -- --out assets/models/knight.glb` (80 s), then `godot --path . --headless --import`. `--seat armour|tabard` tries another seat (`hang.py`).
 - Grinner: `blender --background --python tools/grinner/build_grinner.py -- --out assets/models/grinner.glb` (seven minutes), then import. `--shots dir` adds turnarounds; `--clay a.png` alone previews the bare mesh.
 - Rosalyn: likewise (`rosalyn`, seven minutes); `--detail 0.7` halves her triangles; `scripts/rosalyn.gd`, her model's root, dresses her.
@@ -36,10 +36,10 @@ A roguelite: the workshop and hall are the safe hub; enemies appear only outdoor
 - `scenes/outdoors.tscn` builds the grinner's foggy ground on load.
 - `dev/` tests the game; `builders/` builds in Godot; `tools/`, hidden from Godot, builds and fetches assets.
 - `scripts/` holds the player controller, animator and camera rig; `looks.gd` makes each figure's wood, metal and eye materials.
-- The hall's lamps are baked. `scripts/hall.gd` turns lamps marked `lights_characters` into lights for the Characters layer only, and `shadows_characters` into cancelling pairs leaving character shadows on the baked floor. Only the fire lights the hall live.
+- Lamps are baked. `scripts/hall.gd` turns those marked `lights_characters` into lights for the Characters layer only, and `shadows_characters` into cancelling pairs leaving character shadows on the baked floor. Only the fire is live.
 - `addons/lightmap_bake` presses the editor's bake button.
 - `tools/sculpt/` is the characters' shared toolkit.
-- `tools/knight/` builds the knight, `assets/textures/knight/face_paint.png` and its placement `face_paint.json`; `tools/build_hall.py` and `builders/hall_*.gd` build the hall.
+- `tools/knight/` builds the knight, `assets/textures/knight/face_paint.png` and its placement `face_paint.json`; `tools/build_hall.py` and `builders/hall_*.gd` build the hall; `tools/workshop_shell.py`'s constants size the workshop beyond its east doors.
 - Only `KnightShadow`, a 4,700-triangle copy from `tools/knight/shadow.py`, casts the knight's shadows.
 - `tools/faces/`: ICT-FaceKit face model, sex labels (`dev/labels.tscn`), taste per sex (`dev/taste_*.tscn`); see `sexes.py`.
 - `tools/grinner/` builds the first enemy, its rig and hand-keyed clips; `import_grinner.gd` sets its detail distances and adds the AnimationTree. `scripts/grinner.gd` walks it. Shot shows it on `dev/stage.tscn`: `call=stand:res://assets/models/grinner.glb`, `stand:res://dev/waddler.tscn` waddling, `spread:` detail levels, `pose:Roll@0.47` poses the knight.
