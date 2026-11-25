@@ -32,20 +32,8 @@ None. The dev's combat direction, for this and the battle items:
 
 ### Status
 
-Not started. Enemies only appear outside; see the crowd item.
-## Enemy: crowd performance test
+Not started. Enemies only appear outside. The crowd test found 40 units well within 60 fps; `Cadence` slows distant grinners' animation.
 
-### Task description
-
-Add a `dev/` scene that spawns a chosen number of grinners around the knight outdoors, and run it with the scripted-play harness at 1, 6, 12, 24 and 40. Record frame time, GPU time, CPU time spent on scripts and animation, triangles and draw calls. Find where 60 fps breaks and where GPU time crosses 6.5 ms. Then cut the largest costs, for example shadows and update rate for distant grinners, and report before and after.
-
-### Open questions
-
-- None. Up to 12 grinners on screen; later, up to 40 allies and enemies in all.
-
-### Status
-
-Not started. For comparison, one knight costs the GPU about 0.25 ms at mid distance.
 ## Rosalyn: rig and standing pose
 
 ### Task description

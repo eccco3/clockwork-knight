@@ -255,15 +255,41 @@ class Tracker extends Node:
 		print(out)
 
 
+## Averages per frame: wall time, GPU and render-thread CPU time, the scene tree's process time (scripts,
+## animation and skeletons, from the process_frame signal until drawing starts) and physics time (from the frame's
+## first physics step until processing starts), and draw calls and primitives of the view and of the shadow maps.
 class Perf extends Node:
+	const PASSES := [RenderingServer.VIEWPORT_RENDER_INFO_TYPE_VISIBLE, RenderingServer.VIEWPORT_RENDER_INFO_TYPE_SHADOW]
 	var frames := PackedFloat32Array()
 	var gpu := 0.0
 	var cpu := 0.0
+	var process := 0.0
+	var physics := 0.0
+	var draws := [0.0, 0.0]
+	var primitives := [0.0, 0.0]
 	var _last := 0
+	var _physics_from := 0
+	var _process_from := 0
 
 	func _ready() -> void:
 		RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 		_last = Time.get_ticks_usec()
+		get_tree().physics_frame.connect(func() -> void:
+			if _physics_from == 0:
+				_physics_from = Time.get_ticks_usec())
+		get_tree().process_frame.connect(func() -> void:
+			_process_from = Time.get_ticks_usec()
+			if _physics_from > 0:
+				physics += (_process_from - _physics_from) / 1000.0
+				_physics_from = 0)
+		RenderingServer.frame_pre_draw.connect(_drawing)
+
+	func _exit_tree() -> void:
+		RenderingServer.frame_pre_draw.disconnect(_drawing)
+
+	func _drawing() -> void:
+		if _process_from > 0:
+			process += (Time.get_ticks_usec() - _process_from) / 1000.0
 
 	func _process(_dt: float) -> void:
 		var now := Time.get_ticks_usec()
@@ -272,6 +298,9 @@ class Perf extends Node:
 		var vp := get_viewport().get_viewport_rid()
 		gpu += RenderingServer.viewport_get_measured_render_time_gpu(vp)
 		cpu += RenderingServer.viewport_get_measured_render_time_cpu(vp) + RenderingServer.get_frame_setup_time_cpu()
+		for i in PASSES.size():
+			draws[i] += RenderingServer.viewport_get_render_info(vp, PASSES[i], RenderingServer.VIEWPORT_RENDER_INFO_DRAW_CALLS_IN_FRAME)
+			primitives[i] += RenderingServer.viewport_get_render_info(vp, PASSES[i], RenderingServer.VIEWPORT_RENDER_INFO_PRIMITIVES_IN_FRAME)
 
 	func report() -> void:
 		var n := frames.size()
@@ -280,9 +309,11 @@ class Perf extends Node:
 		var total := 0.0
 		for f in frames:
 			total += f
-		print("perf: %d frames at %s  avg %.2f ms (%.0f fps)  p1 %.2f  p99 %.2f  worst %.2f  gpu %.2f  cpu-render %.2f" % [
+		print("perf: %d frames at %s  avg %.2f ms (%.0f fps)  p1 %.2f  p99 %.2f  worst %.2f  gpu %.2f  cpu-render %.2f  process %.2f  physics %.2f" % [
 			n, get_viewport().size, total / n, 1000.0 * n / total, sorted[int(n * 0.01)], sorted[int(n * 0.99)], sorted[n - 1],
-			gpu / n, cpu / n])
+			gpu / n, cpu / n, process / n, physics / n])
+		print("perf: view %.0f draws %.0fk primitives  shadows %.0f draws %.0fk primitives" % [
+			draws[0] / n, primitives[0] / n / 1000.0, draws[1] / n, primitives[1] / n / 1000.0])
 		print("perf: draw calls %d  primitives %d  vram %.0f MB  texture %.0f MB  buffer %.0f MB" % [
 			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 			Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME),

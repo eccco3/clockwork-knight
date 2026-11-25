@@ -1,8 +1,8 @@
 @tool
 extends EditorScenePostImport
 ## Import script of every kind of grinner's model. Shows exactly one detail level at a time, chosen by distance
-## from the camera, and adds an AnimationTree: a state machine whose state Gait blends the kind's looping clips,
-## its idle into its walk or run, along `parameters/Gait/blend_position` (0 to 1) and whose other states are its
+## from the camera, leaves the casting of its shadow to a copy of the coarsest level, and adds an AnimationTree:
+## a state machine whose state Gait blends the kind's looping clips, its idle into its walk or run, along `parameters/Gait/blend_position` (0 to 1) and whose other states are its
 ## moves, each played once. `parameters/playback` travels to a move; the attacks and the flinch come back to
 ## Gait when they end, a flinch cuts into an attack, and Death cuts into anything and stays. All travel is root
 ## motion: whoever owns the grinner moves it by the tree's `get_root_motion_position()`.
@@ -22,7 +22,7 @@ const FADE_OUT := 0.25
 const CUT := 0.08
 
 func _post_import(scene: Node) -> Object:
-	Levels.chain(scene, "*_lod?", BEGIN, MARGIN)
+	Levels.shadow_from_coarsest(Levels.chain(scene, "*_lod?", BEGIN, MARGIN))
 
 	var player: AnimationPlayer = scene.find_child("AnimationPlayer")
 	var extras: Dictionary = scene.find_children("*").filter(func(n: Node) -> bool: return n.has_meta("extras"))[0].get_meta("extras")
