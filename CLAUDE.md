@@ -18,7 +18,7 @@ A roguelite: the workshop and hall are the safe hub; enemies appear only outdoor
 - All models, the Godot import and the lightmap: `tools\build_models.ps1`. Needed after cloning.
 - Lightmap alone: `godot --editor --path . res://scenes/hall.tscn -- bake-lightmaps` takes fourteen minutes; `draft` two. Rebake after rebuilding.
 - Materials, then scene: `godot --headless --path . --script res://builders/hall_materials.gd`, then `hall_scene.gd`.
-- Knight: `blender --background --python tools/knight/build_knight.py -- --out assets/models/knight.glb` (80 s), then `godot --path . --headless --import`. `--seat armour|tabard` tries another seat (`hang.py`).
+- Knight: `blender --background --python tools/knight/build_knight.py -- --out assets/models/knight.glb` (80 s), then `godot --path . --headless --import`. `--seat culet|armour` replaces her tabard.
 - Grinner: `blender --background --python tools/grinner/build_grinner.py -- --out assets/models/grinner.glb` (seven minutes), then import; `--kind scuttler` for `scuttler.glb`. `--shots dir` adds turnarounds; `--clay a.png` alone previews the bare mesh.
 - Rosalyn: likewise (`rosalyn`, seven minutes); `--detail 0.7` halves her triangles; `scripts/rosalyn.gd`, her model's root, dresses her.
 - Never combine `--only` with `--out`: it overwrites the full model.
