@@ -131,10 +131,11 @@ def render(path):
     bpy.ops.render.render(write_still=True)
 
 
-def save_image(path, px, colour=True):
-    """Write (H, W, 3 or 4) floats, bottom row first, as a PNG. Returns the image, named after the file."""
+def save_image(path, px, colour=True, alpha=False):
+    """Write (H, W, 3 or 4) floats, bottom row first, as a PNG, with the fourth as its alpha if `alpha`. Returns
+    the image, named after the file."""
     path = os.path.abspath(path)
-    img = bpy.data.images.new(os.path.splitext(os.path.basename(path))[0], px.shape[1], px.shape[0], alpha=False)
+    img = bpy.data.images.new(os.path.splitext(os.path.basename(path))[0], px.shape[1], px.shape[0], alpha=alpha)
     rgba = np.ones(px.shape[:2] + (4,), dtype=np.float32)
     rgba[..., :px.shape[2]] = px
     img.pixels.foreach_set(rgba.ravel())

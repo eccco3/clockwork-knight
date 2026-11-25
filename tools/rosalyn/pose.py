@@ -9,6 +9,7 @@ from rest, in the figure's axes (+X her left, -Y forward, +Z up).
   spine_, chest_, neck_, head_    the same three turns, each on top of the bone below
   head_level                      0..1: how far the head ignores the body's lean
   eye_yaw, eye_up, blink          both eyes turned to her left and upward; 0..1: the lids shut
+  brow_up, brow_tilt              the brow slid up her face; turned about its middle to lift its inner end
   foot_x/y/z, foot_yaw/pitch/roll the sole under the ankle; pitch lifts the heel off the ball (or, negative,
                                   the toes off the heel), yaw turns the toes out
   knee                            the knee swung outward round the hip-to-ankle line
@@ -37,7 +38,7 @@ ACROSS_PALM, BACK_OF_HAND = HF.dir(V(0, 1, 0)), HF.dir(V(1, 0, 0))
 FAN = dict(pinky=-1.0, ring=-0.4, middle=0.1, index=0.8)          # how far each finger spreads
 CURL = (0.9, 1.0, 0.7)                                           # each knuckle's share of a finger's curl
 THUMB_HINGE = np.cross(HF.dir(S.normalize(body.THUMB["joints"][2] - body.THUMB["joints"][1])), -BACK_OF_HAND - ACROSS_PALM)
-MOVED = ("root", "hips")
+MOVED = ("root", "hips", "brow_l", "brow_r")
 COLUMNS = {name: (S.normalize((head_ - PELVIS) * V(1, 1, 0)), parent != "hips")
            for name, parent, head_, tail in rig.BONES if name.startswith("skirt")}     # each one's way out, and if it is a lower half
 
@@ -143,7 +144,9 @@ def solve(controls):
         arm, short = _arm(sided, mirrored(hips), pelvis * np.diag(m), mirrored(chest), breast * np.diag(m))
         strain = max(strain, far, short)
         lid = mirrored(head_) @ turn(rig.LID_HINGE, head.LID_SHUT * c("blink"))
-        out.update({name[:-2] + side: mirrored(r) for name, r in dict(arm, **leg, lid_l=lid).items()})
+        brow = mirrored(head_) @ turn(Y, sided("brow_tilt"))
+        out.update({name[:-2] + side: mirrored(r) for name, r in dict(arm, **leg, lid_l=lid, brow_l=brow).items()})
+        moves["brow" + side] = head_ @ V(0, 0, sided("brow_up"))
     return out, moves, strain
 
 

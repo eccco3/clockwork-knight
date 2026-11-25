@@ -7,12 +7,13 @@ exports GLB with her clips.
 
 --clay alone renders the bare game mesh, for judging forms quickly; --pose puts it in one of clips.POSES first,
 and --clip in the pose one of clips.CLIPS has at the phase --at. --out and --shots run the whole build; --shots
-renders her turnarounds, clay and painted, her test poses and the idle's contact sheets.
+renders her turnarounds, clay and painted, her test poses and each loop's contact sheets, with her brows at rest.
 --detail scales every lattice, and with it the triangle count: 1.0 comes to about 225,000 of her 300,000, 0.7 to half that.
 Rest pose in Blender space: +X is her left, -Y is forward, +Z up.
 
 Her wood, brass and eyes carry the game's solid grain space instead of textures, and the game dresses them
-by material name (scripts/looks.gd). The paint on her face is written beside this build's other textures.
+by material name (scripts/looks.gd). The paint on her face, and her brow apart from it, are written to
+assets/textures/rosalyn.
 """
 import bpy, sys, os, time, tempfile
 import numpy as np
@@ -31,6 +32,7 @@ BUDGET = 300000                                 # triangles she may have; --deta
 CLAY_LIGHT = 0.15                               # pale clay wants the lamps this much dimmer than her wood
 ROOT = os.path.dirname(os.path.dirname(HERE))
 FACE_PAINT = os.path.join(ROOT, "assets", "textures", NAME, "face_paint.png")
+BROW_PAINT = os.path.join(ROOT, "assets", "textures", NAME, "brow.png")
 HEAD = body.HEAD
 UPRIGHT = Frame(V(0, 0, 0), body.UP, body.LEFT)
 FACE_GRAIN = V(0.09, 0.05, 0.60)                # the head frame's origin in the face's grain space
@@ -57,7 +59,7 @@ def on_head(wrap):
 
 
 FACE, HAIR = in_head(head.field), in_head(hair.field)
-FACE_WOOD = dict(mat="wood_face", grain=Frame(HEAD.o, body.UP, body.LEFT), grain_offset=FACE_GRAIN, tint=in_head(head.paint))
+FACE_WOOD = dict(mat="wood_face", grain=Frame(HEAD.o, body.UP, body.LEFT), grain_offset=FACE_GRAIN, tint=in_head(head.at_rest))
 SPECS = {                                       # a piece with a `bone` rides it whole; the rest are skinned by rig.weights
     "head": dict(FACE_WOOD, mesh=on_head(head.wrap), field=FACE, mirror=False, bone="head",
                  hidden=either(under(body.chest, 0.0015), under(HAIR, 0.0012))),
@@ -134,7 +136,7 @@ ZOOMS = {"full": ((0, 0, 0.93), 2.02, (520, 1000)), "upper": ((0, 0, 1.36), 1.05
 POSED = {"stand": ("full", "upper", "clasp"), "asleep": ("face",), "glance": ("head",), "bow": ("full",), "sway": ("full",),
          "open": ("open",), "raise": ("open",)}  # the poses --shots shows, and the zooms of each
 CLASP_VIEWS = [0, -50, 50, (0, 55)]             # her hands from before her, from either side and from above
-SHEETS = {"full": [0, -90], "face": [0]}        # the idle's contact sheets: her weight from before her and the side, her eyes
+SHEETS = {"full": [0, -90], "face": [0]}        # each loop's contact sheets: her weight from before her and the side, her eyes
 STEPS, ACROSS = 16, 8                           # frames on each, evenly from the clip's start, and to a row
 
 
@@ -169,10 +171,24 @@ def asked():
 
 
 def export(path, skeleton, meshes, actions):
+    """Write the GLB. Which clips are her speech rides on the skeleton as the custom property `speech`, which
+    import_rosalyn.gd reads."""
     R.shelve(skeleton, actions)
+    skeleton["speech"] = list(clips.SPEECH)
     bl.export_glb(path, [skeleton] + meshes, active=skeleton, export_animations=True, export_animation_mode="NLA_TRACKS",
                   export_force_sampling=True, export_optimize_animation_size=False, export_reset_pose_bones=True,
-                  export_skins=True, export_tangents=True, export_vertex_color="NONE")
+                  export_skins=True, export_tangents=True, export_vertex_color="NONE", export_extras=True)
+
+
+def brows(path):
+    """Paint her brow for the game to lay over her face wherever the brow's bone has carried it, and write beside
+    it the size it covers: across, deep and high, in metres."""
+    import json
+    bl.save_image(path, head.brow()[::-1], alpha=True)
+    with open(os.path.splitext(path)[0] + ".json", "w", newline="\n") as f:
+        json.dump(dict(size=[float(x) for x in head.BROW_BOX]), f)
+        f.write("\n")
+    print("PAINT", path)
 
 
 def main():
@@ -238,11 +254,14 @@ def main():
                 turnaround(os.path.join(opt("--shots"), "pose_%s_%s.png" % (name, zoom)),
                            CLASP_VIEWS if zoom == "clasp" else views, zoom)
         pose.strike(skeleton, {})
-        for zoom in () if opt("--zoom") else SHEETS:
-            contact_sheet(os.path.join(opt("--shots"), "sheet_idle_%s.png" % zoom), skeleton, actions["Idle"], zoom)
+        for name in () if opt("--zoom") else ("Idle", *clips.SPEECH):
+            for zoom in SHEETS:
+                contact_sheet(os.path.join(opt("--shots"), "sheet_%s_%s.png" % (name.lower(), zoom)), skeleton,
+                              actions[name], zoom)
     if opt("--out"):
         export(opt("--out"), skeleton, figure, actions.values())
         build.face_paint(FACE_PAINT, head, FACE_GRAIN)
+        brows(BROW_PAINT)
     print("DONE t=%.1fs" % (time.time() - t0))
 
 

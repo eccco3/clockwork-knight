@@ -23,6 +23,7 @@ def encode(avi: str, mp4: str) -> None:
     scene.render.resolution_percentage = 100
     scene.render.fps, scene.render.fps_base = round(strip.fps), 1.0
     scene.frame_start, scene.frame_end = 1, strip.frame_final_duration
+    scene.view_settings.view_transform = 'Standard'  # Godot's colours as they are: the factory AgX greys them
     scene.render.image_settings.file_format = 'FFMPEG'
     ffmpeg = scene.render.ffmpeg
     ffmpeg.format, ffmpeg.codec = 'MPEG4', 'H264'

@@ -20,7 +20,7 @@ A roguelite: the workshop and hall are the safe hub; enemies appear only outdoor
 - Materials, then scene: `godot --headless --path . --script res://builders/hall_materials.gd`, then `hall_scene.gd`.
 - Knight: `blender --background --python tools/knight/build_knight.py -- --out assets/models/knight.glb` (80 s), then `godot --path . --headless --import`. `--seat culet|armour` replaces her tabard.
 - Grinner: `blender --background --python tools/grinner/build_grinner.py -- --out assets/models/grinner.glb` (seven minutes), then import; `--kind scuttler` for `scuttler.glb`. `--shots dir` adds turnarounds; `--clay a.png` alone previews the bare mesh.
-- Rosalyn and minion: likewise (seven minutes; ten seconds), dressed by their models' roots `scripts/rosalyn.gd` and `minion.gd`; `--detail 0.7` halves Rosalyn's triangles.
+- Rosalyn and minion: likewise (seven minutes; ten seconds), dressed by their models' roots `scripts/rosalyn.gd` (subtitled `say()`) and `minion.gd`; `--detail 0.7` halves Rosalyn's triangles.
 - Never combine `--only` with `--out`: it overwrites the full model.
 - Run: `godot --path .`. Playtest picker to pin: `tools\playtest\install.ps1` in the main checkout; `playtest.ps1 -DryRun` tests it.
 - Scripted play: `dev/drive.tscn` with `--fixed-fps 60`; `dev/shot.tscn` photographs a scene. Their headers list arguments.
@@ -47,7 +47,7 @@ A roguelite: the workshop and hall are the safe hub; enemies appear only outdoor
 
 ## Repository
 
-- `tools/check_docs.sh` enforces the four documentation rules in `DEV.md`; `tools/hooks/pre-commit` runs it. After cloning: `git config core.hooksPath tools/hooks`.
+- `tools/check_docs.sh` enforces `DEV.md`'s four documentation rules; `tools/hooks/pre-commit` runs it. After cloning: `git config core.hooksPath tools/hooks`.
 - First-party means everything git tracks except `tools/downloads/`.
 - Git ignores `toolchain/`, `.godot/`, `dev/shots/` and what `tools/fetch_assets.ps1` and `build_models.ps1` restore.
 - Commit with Windows git, not WSL.
