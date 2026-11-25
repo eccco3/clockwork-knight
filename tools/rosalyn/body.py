@@ -136,16 +136,16 @@ def _digit(base, spread, lengths, curls, radii):
 
 
 def _joints(pts, r, root=None):
-    """A digit's flesh through its four joint points, and the line its lattice follows, which leaves the
-    palm at `root` (by default just behind the first joint)."""
+    """A digit's four joint points, its flesh through them, and the line its lattice follows, which leaves
+    the palm at `root` (by default just behind the first joint)."""
     mcp, pip, dip, tip = pts
     flesh = ([mcp, lerp(mcp, pip, 0.5), pip, lerp(pip, dip, 0.5), dip, lerp(dip, tip, 0.6), tip],
              [r[0], 0.46 * (r[0] + r[1]), 1.04 * r[1], 0.46 * (r[1] + r[2]), 1.03 * r[2], 0.98 * r[3], 0.80 * r[3]])
     end = tip + S.normalize(tip - dip) * 0.5 * r[3]
     if root is None:
-        return dict(flesh=flesh, spine=[mcp - S.normalize(pip - mcp) * 0.008, pip, dip, end],
+        return dict(joints=pts, flesh=flesh, spine=[mcp - S.normalize(pip - mcp) * 0.008, pip, dip, end],
                     spine_r=[0.7 * r[0], 0.7 * r[1], 0.7 * r[2], 0.5 * r[3]])
-    return dict(flesh=flesh, spine=[root, pip, dip, end], spine_r=[0.7 * r[1], 0.7 * r[1], 0.7 * r[2], 0.5 * r[3]])
+    return dict(joints=pts, flesh=flesh, spine=[root, pip, dip, end], spine_r=[0.7 * r[1], 0.7 * r[1], 0.7 * r[2], 0.5 * r[3]])
 
 
 FINGERS = {

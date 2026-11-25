@@ -1,11 +1,14 @@
-"""Builds Rosalyn: sculpts every piece, bakes her dress and hair from the sculpt, exports GLB.
+"""Builds Rosalyn: sculpts every piece, bakes her dress and hair from the sculpt, rigs and animates her, and
+exports GLB with her clips.
 
   blender --background --python build_rosalyn.py -- [--out rosalyn.glb] [--shots dir] [--detail 1.0] [--size 2048]
-          [--clay a.png] [--only a,b] [--wire] [--views 0,-40,-90,180] [--zoom full,upper,head,face,hand,feet] [--light 1.0]
+          [--clay a.png] [--pose stand] [--clip Idle --at 0.25] [--only a,b] [--wire] [--views 0,-40,-90,180]
+          [--zoom full,upper,head,face,hand,clasp,feet] [--light 1.0]
 
---clay alone renders the bare game mesh, for judging forms quickly. --out and --shots run the whole build.
+--clay alone renders the bare game mesh, for judging forms quickly; --pose puts it in one of clips.POSES first,
+and --clip in the pose one of clips.CLIPS has at the phase --at. --out and --shots run the whole build.
 --detail scales every lattice, and with it the triangle count: 1.0 comes to about 225,000 of her 300,000, 0.7 to half that.
-Rest pose in Blender space: +X is her left, -Y is forward, +Z up. Unrigged.
+Rest pose in Blender space: +X is her left, -Y is forward, +Z up.
 
 Her wood, brass and eyes carry the game's solid grain space instead of textures, and the game dresses them
 by material name (scripts/looks.gd). The paint on her face is written beside this build's other textures.
@@ -15,12 +18,12 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
-from sculpt import bl, bake, build, pieces as P
+from sculpt import bl, bake, build, pieces as P, rig as R
 from sculpt.bl import argv, opt
 from sculpt.pieces import under, either, on_left
 from sculpt.sdf import V
 from sculpt.gen import Frame
-from rosalyn import body, head, hair, dress, trim
+from rosalyn import body, head, hair, dress, trim, rig, pose, clips
 
 NAME = "rosalyn"                                # her working name: every file and object this build makes is called after it
 BUDGET = 300000                                 # triangles she may have; --detail 1.0 uses three quarters of them
@@ -53,11 +56,12 @@ def on_head(wrap):
 
 
 FACE, HAIR = in_head(head.field), in_head(hair.field)
-SPECS = {
-    "head": dict(mat="wood_face", mesh=on_head(head.wrap), field=FACE, mirror=False, grain=Frame(HEAD.o, body.UP, body.LEFT),
-                 grain_offset=FACE_GRAIN, tint=in_head(head.paint), hidden=either(under(body.chest, 0.0015), under(HAIR, 0.0012))),
+FACE_WOOD = dict(mat="wood_face", grain=Frame(HEAD.o, body.UP, body.LEFT), grain_offset=FACE_GRAIN, tint=in_head(head.paint))
+SPECS = {                                       # a piece with a `bone` rides it whole; the rest are skinned by rig.weights
+    "head": dict(FACE_WOOD, mesh=on_head(head.wrap), field=FACE, mirror=False, bone="head",
+                 hidden=either(under(body.chest, 0.0015), under(HAIR, 0.0012))),
     "hair": dict(mat="hair", mesh=on_head(hair.wrap), field=HAIR, detail=in_head(hair.detail), paint=in_head(hair.paint),
-                 seam=hair.seam, mirror=False, boost=1.0, hidden=under(FACE, 0.0012)),
+                 seam=hair.seam, mirror=False, boost=1.0, hidden=under(FACE, 0.0012), bone="head"),
     "chest": dict(mat="wood", boxes=body.chest_boxes, field=body.chest, mirror=False, grain=UPRIGHT,
                   hidden=either(under(FACE, 0.0015), under(on_left(body.arm), 0.0015), under(dress.cloth, 0.003))),
     "arm": dict(mat="wood", boxes=body.arm_boxes, field=body.arm, mirror=True, hidden=under(dress.cloth, 0.003),
@@ -73,16 +77,30 @@ SPECS = {
 
 
 def small_parts():
-    """Eyes and brass: made by formula, each in the frame its grain runs in."""
-    eye = Frame(HEAD.w(head.EYE * V(-1, 1, 1)), body.FWD * np.cos(head.EYE_TURN) + body.LEFT * np.sin(head.EYE_TURN), body.LEFT)
+    """Eyes, their sleeping lids and brass: made by formula, each in the frame its grain runs in."""
     v, faces, n, tint = head.eyeball()
-    return [dict(name="eye", mat="eye", v=eye.w(v), q=faces, n=eye.dir(n), tint=lambda p: tint, mirror=True, grain=eye,
-                 grain_offset=0.0)] + trim.parts()
+    eye = dict(name="eye", mat="eye", v=rig.EYE.w(v), q=faces, n=rig.EYE.dir(n), tint=lambda p: tint, mirror=True,
+               grain=rig.EYE, grain_offset=0.0, bone="eye")
+    v, faces, n = head.lid()
+    v, n = HEAD.w((v + head.EYE) * P.MIRROR), HEAD.dir(n * P.MIRROR)
+    lid = dict(FACE_WOOD, name="lid", v=v, q=P.outward(v, faces, n), n=n, mirror=True, bone="lid")
+    return [eye, lid] + trim.parts()
+
+
+def sides(pieces):
+    """Each piece once for each side it has, with whether that is the right."""
+    return [(pc, right) for pc in pieces for right in ((False, True) if pc["mirror"] else (False,))]
+
+
+def ridden(pieces, mat):
+    """The one bone that a baked material's pieces ride, or None if they are skinned by where they stand."""
+    (bone,) = {pc.get("bone") for pc in pieces if pc["mat"] == mat}
+    return bone
 
 
 def carve(pieces, seed=11):
-    """The pieces the game dresses, and their mirror images, as one object in grain space. Each is cut from
-    its own block: its grain is set off by `grain_offset`, or at random."""
+    """The pieces the game dresses, and their mirror images, as one skinned object in grain space. Each is cut
+    from its own block: its grain is set off by `grain_offset`, or at random."""
     rng = np.random.default_rng(seed)
     objs = []
     for pc in pieces:
@@ -97,6 +115,7 @@ def carve(pieces, seed=11):
             offset = V(np.cos(turn), np.sin(turn), 0) * rng.uniform(0.05, 0.16) + V(0, 0, rng.uniform(-2, 2))
             g = pc["grain"].l(co.reshape(-1, 3) * (P.MIRROR if side else 1.0))
             bl.grain_layers(me, g + pc.get("grain_offset", offset), rng.uniform(0, 1))
+            rig.weigh(ob, pc.get("bone"), bool(side))
             objs.append(ob)
     ob = bl.join(objs, NAME.capitalize())
     cut = ob.modifiers.new("ngons", "TRIANGULATE")              # the exporter's tangents need triangles and quads
@@ -108,8 +127,12 @@ def carve(pieces, seed=11):
 ZOOMS = {"full": ((0, 0, 0.93), 2.02, (520, 1000)), "upper": ((0, 0, 1.36), 1.05, (640, 640)), "neck": ((0, -0.03, 1.44), 0.50, (720, 720)),
          "head": ((0, -0.03, 1.635), 0.34, (600, 600)), "face": ((0, -0.03, 1.605), 0.19, (720, 720)),
          "hand": ((0.36, -0.06, 0.86), 0.30, (720, 720)), "feet": ((0, 0, 0.17), 0.60, (720, 720)),
+         "clasp": ((0, -0.14, 0.97), 0.36, (720, 720)), "open": ((0, -0.05, 1.25), 1.20, (640, 640)),
          "wrist": ((0.35, -0.05, 0.91), 0.12, (720, 720)),
          "eye": ((0.028, -0.08, 1.630), 0.055, (720, 720)), "mouth": ((0, -0.10, 1.570), 0.075, (720, 720))}
+POSED = {"stand": ("full", "upper", "clasp"), "asleep": ("face",), "glance": ("head",), "bow": ("full",), "sway": ("full",),
+         "open": ("open",)}                     # the poses --shots shows, and the zooms of each
+CLASP_VIEWS = [0, -50, 50, (0, 55)]             # her hands from before her, from either side and from above
 
 
 def turnaround(path, views, zoom, light=1.0, samples=40):
@@ -117,6 +140,20 @@ def turnaround(path, views, zoom, light=1.0, samples=40):
     target, scale, res = ZOOMS[zoom]
     dim = light * float(opt("--light", "1.0"))
     bl.turnaround(path, views, target, scale, res, bl.studio((2.6, 1.2, 2.4), (900 * dim, 220 * dim, 600 * dim)), samples)
+
+
+def asked():
+    """The controls that --pose, or --clip and --at, ask for."""
+    if opt("--clip"):
+        return clips.CLIPS[opt("--clip")][0](float(opt("--at", "0")))
+    return clips.POSES[opt("--pose")]
+
+
+def export(path, skeleton, meshes, actions):
+    R.shelve(skeleton, actions)
+    bl.export_glb(path, [skeleton] + meshes, active=skeleton, export_animations=True, export_animation_mode="NLA_TRACKS",
+                  export_force_sampling=True, export_optimize_animation_size=False, export_reset_pose_bones=True,
+                  export_skins=True, export_tangents=True, export_vertex_color="NONE")
 
 
 def main():
@@ -134,9 +171,16 @@ def main():
     print("SCULPTED tris=%d of %d  t=%.1fs" % (count, int(BUDGET * detail * detail), time.time() - t0))
     if not (opt("--out") or opt("--shots")):
         if opt("--clay"):
-            build.clay_objects(pieces, "--wire" in argv, black=("eye",))
+            clay = build.clay_objects(pieces, "--wire" in argv, black=("eye",))
+            if opt("--pose") or opt("--clip"):
+                skeleton = rig.armature("rig")
+                for ob, (pc, right) in zip(clay, sides(pieces)):
+                    rig.weigh(ob, pc.get("bone"), right)
+                    R.attach(ob, skeleton)
+                pose.strike(skeleton, asked())
             for zoom in zooms:
-                turnaround(opt("--clay").replace(".png", "_%s.png" % zoom), views, zoom, CLAY_LIGHT)
+                turnaround(opt("--clay").replace(".png", "_%s.png" % zoom), CLASP_VIEWS if zoom == "clasp" else views, zoom,
+                           CLAY_LIGHT)
         return
     assert count <= BUDGET * max(detail, 1.0) ** 2, "over the triangle budget"
 
@@ -146,9 +190,15 @@ def main():
     figure = [carve([pc for pc in pieces if pc["mat"] in CARVED])]
     for mat, look in zip(baked, painted):
         figure.append(build.assemble(NAME.capitalize() + mat.capitalize(), pieces, [mat], [look]))
+        rig.weigh(figure[-1], ridden(pieces, mat))
+    skeleton = rig.armature("rig")
     for ob in figure:
+        R.attach(ob, skeleton)
         print("MESH %s: %d triangles, materials %s" % (ob.name, sum(len(f.vertices) - 2 for f in ob.data.polygons),
                                                        ", ".join(m.name for m in ob.data.materials)))
+    actions = [pose.record(skeleton, name, clip, frames) for name, (clip, frames) in clips.CLIPS.items()]
+    R.use(skeleton, None)
+    pose.strike(skeleton, {})
     if opt("--shots"):
         grey = bl.clay("clay", base=(0.62, 0.60, 0.58), rough=0.55, vertex_color=False)
         dark = bl.clay("clay_eye", base=(0.01, 0.01, 0.01), rough=0.05, vertex_color=False)
@@ -163,11 +213,17 @@ def main():
                     for k, m in enumerate(slots):
                         ob.data.materials[k] = m
                 turnaround(os.path.join(opt("--shots"), "%s_%s.png" % (kind, zoom)), angles, zoom, light)
+        for name in () if opt("--zoom") else POSED:
+            pose.strike(skeleton, clips.POSES[name])
+            for zoom in POSED[name]:
+                turnaround(os.path.join(opt("--shots"), "pose_%s_%s.png" % (name, zoom)),
+                           CLASP_VIEWS if zoom == "clasp" else views, zoom)
+        pose.strike(skeleton, {})
     if opt("--out"):
-        bl.export_glb(opt("--out"), figure, export_animations=False, export_skins=False, export_tangents=True,
-                      export_vertex_color="NONE")
+        export(opt("--out"), skeleton, figure, actions)
         build.face_paint(FACE_PAINT, head, FACE_GRAIN)
     print("DONE t=%.1fs" % (time.time() - t0))
 
 
-main()
+if __name__ == "__main__":
+    main()
