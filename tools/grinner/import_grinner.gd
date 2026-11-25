@@ -1,20 +1,19 @@
 @tool
 extends EditorScenePostImport
-## Import script of grinner.glb. Shows exactly one detail level at a time, chosen by distance from the camera, and
-## adds an AnimationTree: a state machine whose state Gait blends Idle into Waddle along
-## `parameters/Gait/blend_position` (0 to 1) and whose other states are the moves, each played once.
-## `parameters/playback` travels to a move; the attacks and the flinch come back to Gait when they end, a flinch
-## cuts into an attack, and Death cuts into anything and stays. All travel is root motion: whoever owns the
-## grinner moves it by the tree's `get_root_motion_position()`.
+## Import script of every kind of grinner's model. Shows exactly one detail level at a time, chosen by distance
+## from the camera, and adds an AnimationTree: a state machine whose state Gait blends the kind's looping clips,
+## its idle into its walk or run, along `parameters/Gait/blend_position` (0 to 1) and whose other states are its
+## moves, each played once. `parameters/playback` travels to a move; the attacks and the flinch come back to
+## Gait when they end, a flinch cuts into an attack, and Death cuts into anything and stays. All travel is root
+## motion: whoever owns the grinner moves it by the tree's `get_root_motion_position()`.
 ##
-## The build's marks become markers on the animations, named after the phase that begins there: `leap`, `hit`
-## and `recover` on Pounce, `hit` and `recover` on Swipe. An attack is winding up until its first marker, and
-## its hit window is open from `hit` to `recover`.
+## The build says which clips are which in the skeleton's extras: `gait` places each looping clip along the
+## blend, and `marks` gives each move the seconds its phases begin, which become markers on the animations,
+## named after the phase: `hit` and `recover` on every attack, and `leap` before them on a pounce. An attack is
+## winding up until its first marker, and its hit window is open from `hit` to `recover`.
 
 const BEGIN: Array[float] = [0.0, 6.0, 12.0, 22.0]
 const MARGIN := 0.5
-const GAIT := {"Idle": 0.0, "Waddle": 1.0}
-const RETURNING: Array[String] = ["Pounce", "Swipe", "Flinch"]
 const INTERRUPTION := "Flinch"
 const END := "Death"
 const FADE_IN := 0.1
@@ -25,23 +24,24 @@ func _post_import(scene: Node) -> Object:
 	_chain_levels(scene)
 
 	var player: AnimationPlayer = scene.find_child("AnimationPlayer")
-	var marks: Dictionary = scene.find_children("*").filter(func(n: Node) -> bool: return n.has_meta("extras"))[0].get_meta("extras")["marks"]
+	var extras: Dictionary = scene.find_children("*").filter(func(n: Node) -> bool: return n.has_meta("extras"))[0].get_meta("extras")
+	var marks: Dictionary = extras["marks"]
 	for clip: String in marks:
 		for phase: String in marks[clip]:
 			player.get_animation(clip).add_marker(phase, marks[clip][phase])
 
 	var gait := AnimationNodeBlendSpace1D.new()
 	gait.min_space = 0.0
-	for clip: String in GAIT:
+	for clip: String in extras["gait"]:
 		player.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
-		gait.add_blend_point(_clip(clip), GAIT[clip], -1, clip)
+		gait.add_blend_point(_clip(clip), extras["gait"][clip], -1, clip)
 	var machine := AnimationNodeStateMachine.new()
 	machine.add_node("Gait", gait)
 	machine.add_transition("Start", "Gait", _transition(0.0, AnimationNodeStateMachineTransition.ADVANCE_MODE_AUTO))
-	for move: String in RETURNING + [END]:
+	for move: String in marks:
 		machine.add_node(move, _clip(move))
 		machine.add_transition("Gait", move, _transition(FADE_IN))
-	for move in RETURNING:
+	for move: String in marks.keys().filter(func(m: String) -> bool: return m != END):
 		var back := _transition(FADE_OUT, AnimationNodeStateMachineTransition.ADVANCE_MODE_AUTO)
 		back.switch_mode = AnimationNodeStateMachineTransition.SWITCH_MODE_AT_END
 		machine.add_transition(move, "Gait", back)
@@ -66,7 +66,7 @@ func _post_import(scene: Node) -> Object:
 func _chain_levels(scene: Node) -> void:
 	var levels: Array[MeshInstance3D] = []
 	levels.resize(BEGIN.size())
-	for mesh: MeshInstance3D in scene.find_children("grinner_lod*", "MeshInstance3D"):
+	for mesh: MeshInstance3D in scene.find_children("*_lod?", "MeshInstance3D"):
 		levels[String(mesh.name).right(1).to_int()] = mesh
 	for level in levels.size():
 		var mesh := levels[level]
