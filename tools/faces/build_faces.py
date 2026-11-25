@@ -3,19 +3,22 @@
   blender --background --python build_faces.py -- [--fit] [--detail 1.0] [--sex women|men] [--grid a.png]
           [--seed 1] [--spread 0.65] [--view 0] [--light 1.0] [--labels] [--pool] [--refine] [--best a.png] [--answers a.jsonl]
 
---fit learns the model from the heads tools/fetch_assets.ps1 downloads, as does a missing model; --detail
-scales its lattice, as it does a figure's. --grid renders 25 random faces, of --sex if given (see
-sexes.py), each alone under the same camera and lamps, turned --view degrees. --spread is the share of
-the people's standard deviation the faces are drawn at. --labels renders the label set the dev labels the
-sexes on, --pool the pools taste.py shows him, of --sex or both, each face from the front and turned,
-keeping those already rendered, and their refinement rounds. --refine renders the next refinement round of --sex (taste.refine) from
-his answers so far; the rating tool shows it in place of the pool. --best renders the 25 faces of --sex furthest along the taste learnt
-from his answers to them, or to --answers, as a grid, best first, and writes their coefficients beside
-it: a.json.
+--fit learns the model from the heads tools/fetch_assets.ps1 downloads, as does a missing model (eight
+minutes); --detail scales its lattice, as it does a figure's. A model whose features are not the shapes
+makehuman.py names now is given those first (three minutes). --grid renders 25 random faces, of --sex if
+given (see sexes.py), each alone under the same camera and lamps, turned --view degrees. --spread is the
+share of the people's standard deviation the faces are drawn at. --labels renders the label set the dev
+labels the sexes on, --pool the pools taste.py shows him, of --sex or both, each face from the front and
+turned, keeping those already rendered, and their refinement rounds. --refine renders the next refinement
+round of --sex (taste.refine) from his answers so far; the rating tool shows it in place of the pool.
+--best renders the 25 faces of --sex furthest along the taste learnt from his answers, or from --answers,
+as a grid, best first, and writes their numbers beside it: a.json.
 
-Every face is painted the same, with skin, lips, eyes, hair and brows, so that only its shape differs. The
-label set wears short hair, so that no face reads as a sex for its hair; the women's pool wears its hair
-pulled back into a bun, which is the same on every woman, so the taste learnt from it is still the face's.
+Every face is painted the same, with skin, lips, eyes and hair, so that only its shape and its brows
+differ. The label set wears short hair, so that no face reads as a sex for its hair; the women's pool wears
+its hair pulled back into a bun, which is the same on every woman, so the taste learnt from it is still
+the face's. The faces he judges are symmetric, so that his answers measure his taste and not chance; the
+grid's and the best faces are each slightly lopsided, as people are, by weights a.json keeps.
 """
 import bpy, json, sys, os, shutil, time
 import numpy as np
@@ -25,21 +28,21 @@ sys.path.insert(0, os.path.dirname(HERE))
 from sculpt import bl
 from sculpt.bl import argv, opt
 from sculpt.gen import Frame
-from faces import ict, fit, taste, files
+from faces import brows, files, fit, ict, makehuman, taste
 from faces.model import Model, SPREAD, normals
 from faces.sexes import SEXES, LABEL_SPREAD, Sex, label_set
 
 MODEL = os.path.join(HERE, "model.npz")
 SIDE = 5                                        # the grid shows SIDE * SIDE faces
 STAND = Frame((0, 0, 1.63), (0, 0, 1), (-1, 0, 0))            # a head on a standing figure, facing the camera
-TARGET, SCALE, TILE = (0, 0, 1.61), 0.30, (360, 400)
+TARGET, SCALE, TILE = (0, 0, 1.61), 0.30, (540, 600)
 LAMPS = ((2.6, 1.2, 2.4), (135.0, 33.0, 90.0))                # the figures' preview lamps, dimmed for pale clay
 VIEWS = (0.0, 35.0)                             # a rendered set shows each face from these
 # The model's heads sit chin up: the ear canal lies about this far (degrees) below the line through the eye
 # socket's floor that a level head keeps horizontal, which shows the front camera up the nostrils. Every
 # face is tipped forward by it.
 PITCH = 9.0
-LOOK = 4                                        # the renders' look: a set rendered in another is rendered again
+LOOK = 5                                        # the renders' look: a set rendered in another is rendered again
 SKIN, HAIR = (0.60, 0.40, 0.30), (0.045, 0.032, 0.025)
 LIPS, CHEEKS = (0.52, 0.24, 0.21), (0.66, 0.36, 0.29)
 WHITE, IRIS, PUPIL = (0.80, 0.77, 0.72), (0.16, 0.10, 0.05), (0.01, 0.01, 0.01)
@@ -58,17 +61,29 @@ HAIRLINE = ((0, 0.071), (30, 0.066), (50, 0.058), (65, 0.045), (74, 0.028), (80,
             (92, 0.003), (115, 0.003), (128, -0.010), (145, -0.040), (165, -0.065), (180, -0.070))
 EARS = (0.080, 0.006, -0.075)                  # no hair further out than x, below z and in front of y
 CROP = (0.003, 0.008, 0.010)                   # hair thickness low on the head and at the crown, rising from this z
-BROW = ((0.013, 0.021, 0.0045), (0.038, 0.027, 0.0038), (0.058, 0.022, 0.0014))   # (x, z, half height) along a brow
-BROW_RISE, BROW_DENSITY = 0.0006, 0.9
+BROW_RISE = 0.0006                              # the brows (brows.py) stand this far off the skin
+# A face that is generated, not judged, is this many times as lopsided as the scanned heads.
+LOPSIDED = 1.0
 
 
 def learn(detail):
     t0 = time.time()
     model = fit.fit(ict.Heads(), detail)
-    model.save(MODEL)
     print("FITTED verts=%d quads=%d components=%d  t=%.1fs" % (len(model.mean), len(model.quads), len(model.components),
                                                               time.time() - t0))
     print("VARIANCE", " ".join("%.1f" % (100 * s) for s in model.share[:12]), "... percent")
+    return model
+
+
+def featured(model):
+    """The model with MakeHuman's shapes for its features, and with its asymmetries if it was fitted before
+    it kept them: saved."""
+    t0 = time.time()
+    asymmetries = model.asymmetries if len(model.asymmetries) else fit.asymmetries(ict.Heads(), model.mean)
+    model = Model(model.mean, model.components, model.share, model.quads, model.lat, asymmetries,
+                  *makehuman.shapes(makehuman.Fit(model)))
+    model.save(MODEL)
+    print("FEATURED features=%d asymmetries=%d  t=%.1fs" % (len(model.names), len(asymmetries), time.time() - t0))
     return model
 
 
@@ -77,9 +92,10 @@ def ramp(x):
     return x * x * (3.0 - 2.0 * x)
 
 
-def groom(mean):
-    """The hair and brows, the same on every face as each vertex of the model's lattice carries them: how far
-    the hair stands off the skin (metres), and how much of the vertex is hair or brow, from 0 to 1."""
+def groom(mean, brow):
+    """The hair, the same on every face, and the brows its brow numbers shape, as each vertex of the model's
+    lattice carries them: how far the hair stands off the skin (metres), and how much of the vertex is hair
+    or brow, from 0 to 1."""
     x, y, z = np.abs(mean[:, 0]), mean[:, 1] - AXIS_Y, mean[:, 2]
     angle = np.degrees(np.arctan2(x, y))
     above = z - np.interp(angle, *zip(*HAIRLINE))
@@ -87,10 +103,7 @@ def groom(mean):
     hair = ramp(above / 0.003 + 0.5) * (1.0 - bare)
     thick = CROP[0] + (CROP[1] - CROP[0]) * ramp((z - CROP[2]) / 0.08)
     stand = thick * ramp(above / 0.020) * (1.0 - bare)
-    xs, zs, halves = zip(*BROW)
-    middle, half = np.polyval(np.polyfit(xs, zs, 2), x), np.interp(x, xs, halves)
-    brow = ramp((1.0 - np.abs(z - middle) / half) * 2.0) * ramp((x - xs[0]) / 0.003) * ramp((xs[-1] - x) / 0.003)
-    brow *= BROW_DENSITY * (mean[:, 1] > 0.03) * (x >= xs[0]) * (x <= xs[-1])
+    brow = brows.brow(x, z, brow) * (mean[:, 1] > 0.03)
     return stand + BROW_RISE * brow, np.maximum(hair, brow)
 
 
@@ -133,12 +146,13 @@ def level(v):
     return np.stack([v[:, 0], y * np.cos(a) + z * np.sin(a), z * np.cos(a) - y * np.sin(a)], 1)
 
 
-def portrait(model, coefficients, path, view, light, style="crop"):
-    """One face alone in the scene, level, painted, with hair and brows: style "crop" short, "bun" pulled back."""
+def portrait(model, face, path, view, light, style="crop", lopsided=()):
+    """One face alone in the scene, level, painted, with hair and brows: style "crop" short, "bun" pulled
+    back. `face` is its coefficients and then its brow numbers; `lopsided` weighs the model's asymmetries."""
     bl.reset_scene()
-    stand, hair = groom(model.mean)
+    stand, hair = groom(model.mean, face[len(model.directions):])
     skin, eye = paint(model.mean)
-    v, quads, n, _ = model.mesh(coefficients)
+    v, quads, n, _ = model.mesh(face, lopsided)
     v = level(v + n * stand[:, None])
     colour = skin + hair[:, None] * (np.array(HAIR) - skin)
     face = bl.to_object("face", STAND.w(v), quads, STAND.dir(normals(v, quads)), colour)
@@ -159,25 +173,31 @@ def style(name):
     return "bun" if name.startswith("women") else "crop"
 
 
-def sheet(model, faces, path, view, light, hair="crop"):
-    """The faces, SIDE to a row, first at the top left."""
+def sheet(model, faces, lopsided, path, view, light, hair="crop"):
+    """The faces, each as lopsided as its row of `lopsided` says, SIDE to a row, first at the top left."""
     path = os.path.abspath(path)
-    tiles = [portrait(model, c, path + ".tile.png", view, light, hair) for c in faces]
+    tiles = [portrait(model, c, path + ".tile.png", view, light, hair, uneven) for c, uneven in zip(faces, lopsided)]
     rows = [np.concatenate(tiles[k:k + SIDE], axis=1) for k in range(0, len(tiles), SIDE)]
     bl.save_image(path, np.concatenate(rows[::-1], axis=0))
     print("GRID", path)
 
 
+def uneven(model, rng, count):
+    """How lopsided each of `count` generated faces is: its weights on the model's asymmetries."""
+    return rng.normal(0.0, LOPSIDED, (count, len(model.asymmetries)))
+
+
 def grid(model, sex, path, seed, spread, view, light):
     rng = np.random.default_rng(seed)
     draw = sex.sample if sex else model.sample
-    sheet(model, [draw(rng, spread) for _ in range(SIDE * SIDE)], path, view, light, style(sex.name if sex else ""))
+    faces = [draw(rng, spread) for _ in range(SIDE * SIDE)]
+    sheet(model, faces, uneven(model, rng, len(faces)), path, view, light, style(sex.name if sex else ""))
 
 
-def render_set(model, name, faces, spread, light, set_name="pool"):
-    """Renders a set of faces for the dev to judge (files.py), each from every view, keeping those already
-    rendered; other faces, or another look, replace the set. Returns whether the faces changed: answers
-    given on the set hold for it in another look."""
+def render_set(model, name, faces, share, spread, light, set_name):
+    """Renders a set of faces for the dev to judge (files.py), each from every view and symmetric, keeping
+    those already rendered; other faces, or another look, replace the set. `share` and `spread` are what
+    the prior on his taste in them needs (taste.prior). Returns whether the faces changed."""
     folder = files.folder(name)
     index = os.path.join(folder, "pool.npz")
     os.makedirs(folder, exist_ok=True)
@@ -189,7 +209,7 @@ def render_set(model, name, faces, spread, light, set_name="pool"):
     if looks:
         for old in os.listdir(folder):
             os.remove(os.path.join(folder, old))
-        np.savez(index, faces=faces, share=model.share, spread=spread, look=LOOK, set=set_name)
+        np.savez(index, faces=faces, share=share, spread=spread, look=LOOK, set=set_name)
     t0 = time.time()
     for i, c in enumerate(faces):
         path = files.picture(i, folder)
@@ -201,17 +221,14 @@ def render_set(model, name, faces, spread, light, set_name="pool"):
 
 
 def pool(model, name, light):
-    """Renders taste.py's pool of faces of the sex, and its latest refinement round in the same look;
-    answers and refinement rounds of an earlier pool go with it."""
-    answers, refined = taste.answers(name), taste.refine_folder(name)
-    if render_set(model, name, taste.pool(Sex(model, name)), taste.spread(len(model.share)), light):
-        if os.path.exists(answers):
-            os.remove(answers)
-            print("DISCARDED", answers, "given on the earlier pool")
+    """Renders taste.py's pool of faces of the sex, and its latest refinement round in the same look; a
+    round drawn when the pool held other faces goes with them."""
+    refined = taste.refine_folder(name)
+    if render_set(model, name, taste.pool(Sex(model, name)), taste.shares(model), taste.spread(model), light, taste.POOL):
         shutil.rmtree(refined, ignore_errors=True)
     elif files.exists(refined):
-        faces, _, spread, set_name = files.rendered(refined)
-        render_set(model, os.path.basename(refined), faces, spread, light, set_name)
+        faces, share, spread, set_name = files.rendered(refined)
+        render_set(model, os.path.basename(refined), faces, share, spread, light, set_name)
 
 
 def refine(model, sex, seed, light):
@@ -221,27 +238,32 @@ def refine(model, sex, seed, light):
         sys.exit("No answers on the %s yet: rate the pool first." % sex.name)
     where = taste.refine_folder(sex.name)
     last = files.rendered(where)[3] if files.exists(where) else "refine 0"
-    n = int(last.split()[1]) + 1
-    posterior = answers.posterior(taste.prior(model.share, taste.spread(len(model.share))))
-    faces = taste.refine(posterior, sex, np.random.default_rng((seed, n)))
+    n = max(int(last.split()[1]), answers.rounds()) + 1
+    share, spread = taste.shares(model), taste.spread(model)
+    faces = taste.refine(answers.posterior(taste.prior(share, spread)), sex, np.random.default_rng((seed, n)))
     print("REFINE %s round %d from %d answers" % (sex.name, n, len(answers)))
-    render_set(model, os.path.basename(where), faces, taste.spread(len(model.share)), light, "refine %d" % n)
+    render_set(model, os.path.basename(where), faces, share, spread, light, "refine %d" % n)
 
 
 def best(model, sex, path, answers, seed, view, light):
-    answers = taste.Answers(answers)
-    posterior = answers.posterior(taste.prior(model.share, taste.spread(len(model.share))))
-    faces, score = taste.best(posterior, sex, np.random.default_rng(seed), SIDE * SIDE)
-    coefficients = os.path.splitext(path)[0] + ".json"
-    with open(coefficients, "w", encoding="utf-8", newline="\n") as f:
-        json.dump(dict(answers=len(answers), faces=[dict(logit=round(float(s), 3), coefficients=np.round(c, 5).tolist())
-                                                    for c, s in zip(faces, score)]), f, indent=1)
-    print("BEST %s from %d answers" % (coefficients, len(answers)))
-    sheet(model, faces, path, view, light, style(sex.name))
+    answers, rng = taste.Answers(answers), np.random.default_rng(seed)
+    posterior = answers.posterior(taste.prior(taste.shares(model), taste.spread(model)))
+    faces, score = taste.best(posterior, sex, rng, SIDE * SIDE)
+    lopsided = uneven(model, rng, len(faces))
+    numbers = os.path.splitext(path)[0] + ".json"
+    with open(numbers, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(dict(answers=len(answers), faces=[
+            dict(logit=round(float(s), 3), coefficients=np.round(c, 5).tolist(), lopsided=np.round(u, 5).tolist())
+            for c, s, u in zip(faces, score, lopsided)]), f, indent=1)
+    print("BEST %s from %d answers" % (numbers, len(answers)))
+    sheet(model, faces, lopsided, path, view, light, style(sex.name))
 
 
 def main():
-    model = learn(float(opt("--detail", "1.0"))) if "--fit" in argv or not os.path.exists(MODEL) else Model.load(MODEL)
+    fitted = "--fit" in argv or not os.path.exists(MODEL)
+    model = learn(float(opt("--detail", "1.0"))) if fitted else Model.load(MODEL)
+    if fitted or model.names != list(makehuman.SHAPES):
+        model = featured(model)
     sex = Sex(model, opt("--sex")) if opt("--sex") else None
     light, view = float(opt("--light", "1.0")), float(opt("--view", "0"))
     if (opt("--best") or "--refine" in argv) and not sex:
@@ -249,7 +271,7 @@ def main():
     if opt("--grid"):
         grid(model, sex, opt("--grid"), int(opt("--seed", "1")), float(opt("--spread", str(SPREAD))), view, light)
     if "--labels" in argv:
-        render_set(model, "labels", label_set(model), LABEL_SPREAD, light)
+        render_set(model, "labels", label_set(model), model.share, LABEL_SPREAD, light, "labels")
     if "--pool" in argv:
         for name in [sex.name] if sex else SEXES:
             pool(model, name, light)

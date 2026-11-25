@@ -1,14 +1,20 @@
 """Tests the face tools' learning with simulated raters, who answer by hidden directions of their own.
 
-  python -I simulate.py [--sex women|men] [--raters 8] [--answers 200] [--strength 2.0] [--lapse 0.05] [--random]
+  python -I simulate.py [--sex women|men] [--raters 8] [--answers 300] [--strength 2.0] [--lapse 0.05]
+                        [--first 40] [--round 40] [--random] [--his]
   python -I simulate.py --labels [--raters 8] [--slope 4.0] [--lapse 0.05] [--truth d.npy]
 
 Taste (taste.py): each rater has a hidden preference direction, answers by the Bradley-Terry model with
-it, and now and then presses a key at random. Prints how close the learnt direction comes to the hidden
-one (the cosine, which is also the correlation of their scores over random faces), the loop's own
-estimate of that, and the consistency on re-shown pairs. Each sex's pool, drawn from labels a simulated
-labeller gives, is tested in turn, or --sex alone; --random picks pairs at random instead, for comparison. Two kinds of rater: one whose direction is
+it, and now and then presses a key at random. He rates the pool for --first answers and then refinement
+rounds of --round answers each, as the dev is meant to; --first at least --answers keeps him on the pool,
+and --random picks pairs at random instead, for comparison. Prints, as the answers come in, how close the
+learnt direction comes to the hidden one (the cosine), how good the faces it would generate are (of 4000
+faces the 25 it likes best, by the rater's own taste, as a share of the 25 he likes best), the loop's own
+estimate of the cosine, and the consistency on re-shown pairs. Each sex's pool, drawn from labels a
+simulated labeller gives, is tested in turn, or --sex alone, on two kinds of rater: one whose direction is
 drawn from the loop's prior, and one that cares more for the small components than the prior expects.
+--strength is how far two pool faces' logits differ. --his tests the women instead as the dev rates them:
+with his labels, raters drawn from what his answers so far say of his taste, who have given those answers.
 
 Labels (sexes.py): each labeller has a hidden female-male direction, `--truth` or drawn as the raters'
 are, and a middle; along it his logit grows by --slope per standard deviation, and he calls faces within
@@ -23,11 +29,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from faces import taste
 from faces.files import HERE
 from faces.logistic import cosine, sigmoid
-from faces.model import Model, SPREAD
+from faces.model import Model
 from faces.sexes import SEXES, LABEL_COUNT, Direction, Labels, Sex, label_set
 
 MODEL = os.path.join(HERE, "model.npz")
-CHECKS = (25, 50, 100, 150, 200, 300)
+CHECK = 25                                     # answers between the lines printed
+JUDGED, KEPT = 4000, 25
 LABEL_CHECKS = (25, 50, 75, 100, LABEL_COUNT)
 BAND, UNCLEAR = 1.0, 0.04
 
@@ -37,9 +44,22 @@ def hidden(variance, rng):
     return w / np.linalg.norm(w)
 
 
+class Memory(taste.Answers):
+    """A simulated rater's answers, which no file keeps, after those he starts with."""
+
+    def __init__(self, lines=()):
+        self.lines = list(lines)
+
+    def add(self, line):
+        self.lines.append(line)
+
+
 class Rater:
-    def __init__(self, variance, strength, lapse, rng):
-        self.w = hidden(variance, rng) * strength / np.sqrt(2 * SPREAD ** 2)
+    """Answers by the hidden taste w, scaled so that the logits of two faces drawn at `spread` differ by
+    about `strength`."""
+
+    def __init__(self, w, spread, strength, lapse, rng):
+        self.w = w * strength / np.sqrt(2 * ((w * spread) ** 2).sum())
         self.lapse, self.rng = lapse, rng
 
     def pick(self, left, right):
@@ -53,7 +73,7 @@ class Labeller:
         self.unit, self.middle, self.slope, self.lapse, self.rng = unit, middle, slope, lapse, rng
 
     def logit(self, faces):
-        return self.slope * (faces @ self.unit - self.middle)
+        return self.slope * (faces[..., :len(self.unit)] @ self.unit - self.middle)
 
     def label(self, face):
         r = self.rng.random()
@@ -67,38 +87,71 @@ class Labeller:
         return "woman" if r < woman else "man" if r > 1.0 - man else "androgynous"
 
 
-def run(model, faces, rater, count, rng, random_pairs):
-    with tempfile.TemporaryDirectory() as folder:
-        session = taste.Session(faces, taste.prior(model.share, taste.spread(len(model.share))), taste.Answers(os.path.join(folder, "a.jsonl")), rng)
-        rows = []
-        for n in range(1, count + 1):
-            left, right, _ = session.next()
-            if random_pairs and session.pair[2] is None:
-                left, right = rng.choice(len(faces), 2, replace=False)
-                session.pair = (int(left), int(right), None)
-            session.answer(rater.pick(faces[left], faces[right]), 1.0)
-            if n in CHECKS:
-                status = session.status()
-                rows.append((n, cosine(session.posterior.mean, rater.w), status["settled"],
-                             status["agreed"], status["repeats"]))
-        assert len(taste.Answers(session.answers.path)) == count, "an answer was not saved"
-        return rows
+def quality(learnt, w, judged):
+    """How good, by the rater's taste w, the KEPT faces the learnt taste likes best of those judged are:
+    their mean score above the average face's, as a share of that of the KEPT he likes best."""
+    true = judged @ w
+    picked = true[np.argsort(-(judged @ learnt))[:KEPT]]
+    return (picked.mean() - true.mean()) / (np.sort(true)[-KEPT:].mean() - true.mean())
 
 
-def test(model, sex, a):
-    faces = taste.pool(sex)
-    for name, variance in (("prior", model.share), ("flatter", np.sqrt(model.share))):
+def run(sex, prior, pool, judged, rater, start, a, rng):
+    answers = Memory(start)
+    session = taste.Session(pool, prior, answers, rng)
+    rows = []
+    for n in range(a.answers):
+        if n >= a.first and (n - a.first) % a.round == 0:
+            faces = taste.refine(session.posterior, sex, rng)
+            session = taste.Session(faces, prior, answers, rng, "refine %d" % ((n - a.first) // a.round + 1))
+        left, right, _ = session.next()
+        if a.random and session.pair[2] is None:
+            left, right = rng.choice(len(session.faces), 2, replace=False)
+            session.pair = (int(left), int(right), None)
+        session.answer(rater.pick(session.faces[left], session.faces[right]), 1.0)
+        if (n + 1) % CHECK == 0:
+            status = session.status()
+            rows.append((n + 1, cosine(session.posterior.mean, rater.w), quality(session.posterior.mean, rater.w, judged),
+                         status["settled"], status["agreed"], status["repeats"]))
+    return rows
+
+
+def test(model, sex, kinds, start, a):
+    """kinds: for each kind of rater, its name and what draws one's hidden taste from a generator."""
+    share, spread = taste.shares(model), taste.spread(model)
+    prior, pool = taste.prior(share, spread), taste.pool(sex)
+    rng = np.random.default_rng(1)
+    judged = np.stack([taste.draw(sex, rng) for _ in range(JUDGED)])
+    for name, draw in kinds:
         rows = []
         for seed in range(a.raters):
             rng = np.random.default_rng(1000 + seed)
-            rows.append(run(model, faces, Rater(variance, a.strength, a.lapse, rng), a.answers, rng, a.random))
+            rows.append(run(sex, prior, pool, judged, Rater(draw(rng), spread, a.strength, a.lapse, rng), start, a, rng))
         rows = np.array(rows, float)
-        print("%s, rater %s, %s pairs, strength %.1f, lapse %.2f, %d raters" % (
-            sex.name, name, "random" if a.random else "chosen", a.strength, a.lapse, a.raters))
-        print("  answers  cosine (min)    settled  repeats agreed")
+        print("%s, rater %s, %s pairs, %d answers on the pool then rounds of %d, strength %.1f, lapse %.2f, %d raters" % (
+            sex.name, name, "random" if a.random else "chosen", min(a.first, a.answers), a.round, a.strength, a.lapse, a.raters))
+        print("  answers  cosine (min)    quality  settled  repeats agreed")
         for k in range(rows.shape[1]):
-            n, cos, settled, agreed, again = rows[:, k].T
-            print("  %7d  %.3f (%.3f)  %.3f    %d of %d" % (n[0], cos.mean(), cos.min(), settled.mean(), agreed.sum(), again.sum()))
+            n, cos, good, settled, agreed, again = rows[:, k].T
+            print("  %7d  %.3f (%.3f)  %.3f    %.3f    %d of %d" % (n[0], cos.mean(), cos.min(), good.mean(), settled.mean(),
+                                                                agreed.sum(), again.sum()))
+
+
+def taste_main(model, a):
+    share = taste.shares(model)
+    if a.his:
+        answers = taste.Answers(taste.answers("women"))
+        known = answers.posterior(taste.prior(share, taste.spread(model)))
+        test(model, Sex(model, "women"), [("his", lambda rng: rng.multivariate_normal(known.mean, known.cov))], answers.lines, a)
+        return
+    kinds = [("prior", lambda rng: hidden(share, rng)), ("flatter", lambda rng: hidden(np.sqrt(share), rng))]
+    with tempfile.TemporaryDirectory() as folder:
+        rng = np.random.default_rng(0)
+        labels = Labels(os.path.join(folder, "labels.jsonl"))
+        labeller = Labeller(hidden(model.share, rng), 0.0, a.slope, a.lapse, rng)
+        for i, face in enumerate(label_set(model)):
+            labels.label(i, face, labeller.label(face), 1.0)
+        for sex in [a.sex] if a.sex else SEXES:
+            test(model, Sex(model, sex, labels.path), kinds, (), a)
 
 
 def label_test(model, labeller, folder):
@@ -114,9 +167,8 @@ def label_test(model, labeller, folder):
             rows.append((cosine(d.unit, labeller.unit), d.middle - labeller.middle))
     pools = {}
     for name, side in SEXES.items():
-        faces = taste.pool(Sex(model, name, labels.path))
-        along = faces @ labeller.unit - labeller.middle
-        pools[name] = (side * along, sigmoid(side * labeller.logit(faces)))
+        logit = labeller.logit(taste.pool(Sex(model, name, labels.path)))
+        pools[name] = (side * logit / labeller.slope, sigmoid(side * logit))
     return rows, pools
 
 
@@ -150,26 +202,19 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sex", choices=SEXES)
     ap.add_argument("--raters", type=int, default=8)
-    ap.add_argument("--answers", type=int, default=200)
+    ap.add_argument("--answers", type=int, default=300)
     ap.add_argument("--strength", type=float, default=2.0)
     ap.add_argument("--lapse", type=float, default=0.05)
+    ap.add_argument("--first", type=int, default=taste.FIRST)
+    ap.add_argument("--round", type=int, default=taste.ROUND)
     ap.add_argument("--random", action="store_true")
+    ap.add_argument("--his", action="store_true")
     ap.add_argument("--labels", action="store_true")
     ap.add_argument("--slope", type=float, default=4.0)
     ap.add_argument("--truth")
     a = ap.parse_args()
     model = Model.load(MODEL)
-    if a.labels:
-        labels_main(model, a)
-        return
-    with tempfile.TemporaryDirectory() as folder:
-        rng = np.random.default_rng(0)
-        labels = Labels(os.path.join(folder, "labels.jsonl"))
-        labeller = Labeller(hidden(model.share, rng), 0.0, a.slope, a.lapse, rng)
-        for i, face in enumerate(label_set(model)):
-            labels.label(i, face, labeller.label(face), 1.0)
-        for sex in [a.sex] if a.sex else SEXES:
-            test(model, Sex(model, sex, labels.path), a)
+    (labels_main if a.labels else taste_main)(model, a)
 
 
 main()

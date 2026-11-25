@@ -346,4 +346,4 @@ Add a `dev/` tool that shows the dev two faces from the morphable model side by 
 
 ### Status
 
-Waits for the dev's labels from the launcher's "Face labels" tool; then `build_faces.py -- --pool` rebuilds the pools. Built, with women and men rated apart: the dev rates from the playtest launcher's two face rating tools, then `build_faces.py -- --sex women --best` (or men) makes the final faces.
+Built, women and men rated apart: a face is 62 scan components, 22 MakeHuman features and 6 brow numbers, with slight random asymmetry on final faces only. The dev rates the new pools from the launcher's two rating tools (his 91 women's answers still count), `build_faces.py -- --refine --sex women` (or men) every 40 or so answers, then `--best` makes the final faces.

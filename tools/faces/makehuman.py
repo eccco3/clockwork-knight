@@ -23,6 +23,35 @@ FADE = 2.0                                     # fading out where they are fewer
 NEIGHBOURS = 48                                # from at most this many,
 FACING = 0.5                                   # facing its way to within 60 degrees
 CHUNK = 2048
+# The shapes the model's faces take: the targets each sums, as stems that end one way for more and the other
+# for less, and the share of MakeHuman's full slider that is one unit of it, about as far as people commonly
+# differ. Left out are the targets the scans' components already span (the whole nose, mouth or head moved
+# or scaled, the chin's height), those that all but repeat one kept here, and the eyes': the model's lids
+# end in edge loops on its eyeballs, which those tear before they move them far enough to see.
+SHAPES = {
+    "nose tip up": (("nose/nose-point",), "up", "down", 0.6),
+    "septum low": (("nose/nose-septumangle",), "incr", "decr", 0.6),
+    "nostrils flared": (("nose/nose-flaring",), "incr", "decr", 0.6),
+    "nostrils wide": (("nose/nose-nostrils-width",), "incr", "decr", 0.6),
+    "bridge wide": (("nose/nose-width1", "nose/nose-width2"), "incr", "decr", 0.7),
+    "nose tip wide": (("nose/nose-point-width", "nose/nose-volume"), "incr", "decr", 0.8),
+    "nose convex": (("nose/nose-curve",), "convex", "concave", 0.4),
+    "nose root full": (("nose/nose-greek",), "incr", "decr", 1.0),
+    "upper lip full": (("mouth/mouth-upperlip-volume",), "incr", "decr", 0.8),
+    "lower lip full": (("mouth/mouth-lowerlip-volume",), "incr", "decr", 0.8),
+    "upper lip tall": (("mouth/mouth-upperlip-height",), "incr", "decr", 0.6),
+    "lower lip tall": (("mouth/mouth-lowerlip-height",), "incr", "decr", 0.6),
+    "mouth wide": (("mouth/mouth-scale-horiz",), "incr", "decr", 0.4),
+    "mouth corners up": (("mouth/mouth-angles",), "up", "down", 0.4),
+    "chin wide": (("chin/chin-width",), "incr", "decr", 0.5),
+    "jaw wide": (("chin/chin-bones",), "incr", "decr", 0.5),
+    "jaw corners low": (("chin/chin-jaw-drop",), "incr", "decr", 0.8),
+    "cheekbones": (("cheek/l-cheek-bones", "cheek/r-cheek-bones"), "incr", "decr", 0.5),
+    "cheeks full": (("cheek/l-cheek-inner", "cheek/r-cheek-inner"), "incr", "decr", 0.7),
+    "brow ridge slanted up": (("eyebrows/eyebrows-angle",), "up", "down", 0.6),
+    "forehead rounded": (("forehead/forehead-nubian",), "incr", "decr", 0.55),
+    "temples full": (("forehead/forehead-temple",), "incr", "decr", 0.5),
+}
 
 
 def _read():
@@ -162,3 +191,12 @@ class Fit:
 
 def _on_face(p):
     return (p[:, 1] > FACE["front"]) & (p[:, 2] < FACE["top"]) & (p[:, 2] > FACE["bottom"])
+
+
+def shapes(fit):
+    """SHAPES as a Fit carries them onto the model: their names and each one's movement of the model's
+    vertices (F, N, 3), in metres per unit."""
+    def end(stem, way):
+        return fit.carry(target("%s-%s" % (stem, way)))
+    return list(SHAPES), np.stack([0.5 * unit * sum(end(stem, more) - end(stem, less) for stem in stems)
+                                   for stems, more, less, unit in SHAPES.values()])
