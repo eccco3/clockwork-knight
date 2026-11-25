@@ -26,5 +26,6 @@ __pycache__/
 
 # ICT-FaceKit, restored by tools/fetch_assets.ps1, and the face model and pool of faces tools/faces builds from it
 /tools/downloads/ict_facekit/
+/tools/downloads/makehuman/
 /tools/faces/model.npz
 /tools/faces/pool/
