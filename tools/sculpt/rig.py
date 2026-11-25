@@ -74,15 +74,17 @@ def beyond(p, joint, way, before, after):
     return smoothstep(-before, after, (p - joint) @ S.normalize(way))
 
 
-def near(p, pts, radii, soft):
-    """1 within the round polyline, easing to 0 over `soft` metres either side of its surface."""
-    return smoothstep(soft, -soft, S.tube(p, pts, radii))
+def twisted(hold, share, n):
+    """The holds of `n` bones that share out a limb's twist, from the limb's own `hold` and how far along it
+    each point lies, 0..1: the first carries the whole limb, and each one after it the points further along."""
+    return [hold] + [hold * np.clip(share * (n - 1) - k, 0.0, 1.0) for k in range(n - 1)]
 
 
 def chain(*holds):
     """Weights down a chain of bones from (name, hold) pairs, where a hold is the share of each point carried
-    by that bone and all below it."""
+    by that bone and all below it: no bone holds more than the one above it."""
     names, held = zip(*holds)
+    held = tuple(np.minimum.accumulate(held))
     return {name: h - below for name, h, below in zip(names, held, held[1:] + (0.0,))}
 
 

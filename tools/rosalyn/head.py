@@ -308,7 +308,10 @@ def eyeball(segs=32):
 # ---------------------------------------------------------------- sleeping lids
 
 LID_R = EYE_R + 0.0004                         # the lid's shell slides this close over the eyeball
-LID_TUCK = 0.035                               # how far (rad) it reaches behind the wooden lids all round the opening
+LID_TUCK = 0.10                                # how far (rad) it reaches behind the wooden lids all round the opening:
+                                               # further than the coarsest mesh's lids stand back from their true corners
+LID_RISE, LID_RISE_FROM = 0.0030, 0.12         # its ends stand this far off the eyeball, rising over this much of the hinge,
+                                               # to fill the opening's corners, which narrow to a crack through the wood
 
 
 def _on_eye(th, ph):
@@ -340,15 +343,20 @@ LID_SHUT = np.degrees(_LID_HIDES)              # the turn about LID_HINGE that s
 
 def lid(segs=28, rows=10):
     """One eye's sleeping lid about the eyeball's centre in the head's mirrored frame, open: the opening's own
-    shape and a tuck more, turned up under the brow. Returns verts, quads and normals."""
+    shape and a tuck more, turned up under the brow, its ends risen into the corners. Returns verts, quads
+    and normals."""
     (ua, ul), (la, ll) = _LID_EDGES
     along = np.linspace(la[0] - LID_TUCK, la[-1] + LID_TUCK, segs + 1)
     low = np.interp(along, la, ll) - LID_TUCK + _LID_HIDES
     high = np.interp(along, ua, ul) + LID_TUCK + _LID_HIDES
     t = np.linspace(0.0, 1.0, rows + 1)[:, None]
     a, turn = np.tile(along, (rows + 1, 1)), low + (high - low) * t
-    n = (a[..., None] * LID_HINGE + np.sqrt(1.0 - a[..., None] ** 2)
-         * (np.cos(turn)[..., None] * _LID_FACES + np.sin(turn)[..., None] * _LID_LIFTS)).reshape(-1, 3)
+    out = (a[..., None] * LID_HINGE + np.sqrt(1.0 - a[..., None] ** 2)
+           * (np.cos(turn)[..., None] * _LID_FACES + np.sin(turn)[..., None] * _LID_LIFTS))
+    rise = np.where(a > 0, smoothstep(la[-1] - LID_RISE_FROM, la[-1], a), smoothstep(-la[0] - LID_RISE_FROM, -la[0], -a))
+    v = out * (LID_R + LID_RISE * rise)[..., None]
+    n = S.normalize(np.cross(np.gradient(v, axis=1), np.gradient(v, axis=0)).reshape(-1, 3))
+    n = n * np.sign(np.sum(n * out.reshape(-1, 3), axis=1))[:, None]
     w = segs + 1
     quads = [(r * w + c, r * w + c + 1, (r + 1) * w + c + 1, (r + 1) * w + c) for r in range(rows) for c in range(segs)]
-    return n * LID_R, quads, n
+    return v.reshape(-1, 3), quads, n

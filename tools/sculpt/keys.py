@@ -37,6 +37,13 @@ def times(n, *keys):
     return Curve(*((t + k / n, v) for k in range(n) for t, v in keys))
 
 
+def stepped(move, *keys):
+    """A looping curve that rests on each key's value, and passes to the next in the `move` of the loop before it."""
+    keys = sorted(keys)
+    rests = [(after + (after <= t) - move, v) for (t, v), (after, _) in zip(keys, keys[1:] + keys[:1])]
+    return Curve(*keys, *rests)
+
+
 def held(*keys):
     """Keys in seconds after the start of a move played once, which it begins at rest: (0, 0) is understood."""
     return Curve((0.0, 0.0), *keys, loop=False)

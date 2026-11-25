@@ -46,6 +46,13 @@ def twist(r, axis):
     return np.degrees(np.arctan2(np.cross(side, spin @ side) @ axis, side @ spin @ side))
 
 
+def shared(first, last, axis, n):
+    """`n` rotations that share out, in like steps, the twist about `axis` by which `last` differs from `first`:
+    the first is `first`, and the last has turned as far round the axis as `last`."""
+    whole = twist(first.T @ last, axis)
+    return [first @ turn(axis, whole * k / (n - 1)) for k in range(n)]
+
+
 def hinged(along, hinge):
     """The frame of a bone that points `along` and bends about `hinge`."""
     return np.stack([hinge, np.cross(along, hinge), along], axis=1)

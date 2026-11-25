@@ -1,8 +1,9 @@
 """Rosalyn's skeleton and skin.
 
-Seventy-two bones stand on the sculpt's landmarks: a root, five up the middle, an eye and its sleeping lid on
-each side, an arm of five with fifteen in the hand, a leg of three, and sixteen in the skirt, which hangs in
-eight columns of two. `wrist` carries the forearm's twist, so the hand turns over without wringing the arm.
+Eighty bones stand on the sculpt's landmarks: a root, five up the middle, an eye and its sleeping lid on
+each side, an arm of nine with fifteen in the hand, a leg of three, and sixteen in the skirt, which hangs in
+eight columns of two. The upper arm and the forearm are each LENGTHS bones end to end, which share out the
+limb's twist: the shoulder keeps its roundness, and the hand turns over without wringing the arm.
 
 Whatever is carved or cast in one piece rides one bone: her head from the choker up, her hair, eyes, lids and
 brass. The rest is skinned by a field over the rest pose: `weights` gives any point its bones, so every mesh
@@ -13,7 +14,7 @@ from sculpt import sdf as S, rig as R
 from sculpt.sdf import V
 from sculpt.gen import Frame
 from sculpt.num import smoothstep, lerp, along
-from sculpt.rig import beyond, near, chain, twin
+from sculpt.rig import beyond, chain, twisted, twin
 from . import body, head, dress
 from .body import HIP, KNEE, ANKLE, SHOULDER, ELBOW, WRIST, NECK_A, CHOKER, NECK_DIR, HF, UP, FWD, LEFT
 
@@ -21,9 +22,11 @@ PELVIS = V(0, HIP[1], HIP[2])
 WAIST, CHEST = V(0, 0.008, 1.045), V(0, 0.006, 1.250)
 CROWN = body.HEAD.w(V(0, 0, 0.090))
 STERNUM = V(0.020, -0.030, 1.432)             # the collarbone's inner end
-UPPER, FORE = S.normalize(ELBOW - SHOULDER), S.normalize(WRIST - ELBOW)
+GIRDLE, UPPER, FORE = (S.normalize(b - a) for a, b in ((STERNUM, SHOULDER), (SHOULDER, ELBOW), (ELBOW, WRIST)))
+CAP = S.normalize(GIRDLE + UPPER)             # out over the shoulder, between the collarbone's way and the arm's
+INWARD = S.normalize(np.cross(np.cross(UPPER, -LEFT), UPPER))  # square off the upper arm, toward her ribs
 THIGH, SHIN = S.normalize(KNEE - HIP), S.normalize(ANKLE - KNEE)
-TWIST = lerp(ELBOW, WRIST, 0.5)               # where the bone that twists the forearm begins
+LENGTHS = 3                                   # bones that share the twist of the upper arm, and of the forearm
 FINGERWARD = HF.dir(V(0, 0, 1))
 KNUCKLES = HF.w(V(0, 0, 0.092))
 HEEL, BALL = body.from_foot([(0, -0.045, 0.012), (0, 0.095, 0.012)])
@@ -43,6 +46,17 @@ def _digit_bones():
             yield "%s_%d_l" % (name, k), "%s_%d_l" % (name, k - 1) if k > 1 else "hand_l", pts[k - 1], pts[k]
 
 
+def lengths(limb):
+    """The names of the bones that share out a limb's twist, from its root."""
+    return ["%s_%d_l" % (limb, k) for k in range(1, LENGTHS + 1)]
+
+
+def _twisting(limb, parent, head, tail):
+    for k, name in enumerate(lengths(limb)):
+        yield name, parent, lerp(head, tail, k / LENGTHS), lerp(head, tail, (k + 1) / LENGTHS)
+        parent = name
+
+
 def _column(name, half):
     return "skirt_%s_%d%s" % (name, half, "" if SKIRT[name] in (0.0, 180.0) else "_l")
 
@@ -60,9 +74,10 @@ BONES = list(R.both_sides([
     ("hips", "root", PELVIS, WAIST), ("spine", "hips", WAIST, CHEST), ("chest", "spine", CHEST, NECK_A),
     ("neck", "chest", NECK_A, CHOKER), ("head", "neck", CHOKER, CROWN),
     ("eye_l", "head", EYE.o, EYE.w(V(0, 0, 0.030))), ("lid_l", "head", EYE.o, EYE.o + LID_HINGE * 0.030),
-    ("clavicle_l", "chest", STERNUM, SHOULDER), ("upperarm_l", "clavicle_l", SHOULDER, ELBOW),
-    ("forearm_l", "upperarm_l", ELBOW, TWIST), ("wrist_l", "forearm_l", TWIST, WRIST),
-    ("hand_l", "wrist_l", WRIST, KNUCKLES), *_digit_bones(),
+    ("clavicle_l", "chest", STERNUM, SHOULDER), ("deltoid_l", "clavicle_l", SHOULDER, SHOULDER + CAP * 0.05),
+    *_twisting("upperarm", "clavicle_l", SHOULDER, ELBOW),
+    *_twisting("forearm", lengths("upperarm")[-1], ELBOW, WRIST), ("hand_l", lengths("forearm")[-1], WRIST, KNUCKLES),
+    *_digit_bones(),
     ("thigh_l", "hips", HIP, KNEE), ("shin_l", "thigh_l", KNEE, ANKLE), ("foot_l", "shin_l", ANKLE, BALL),
     *_skirt_bones()]))
 NAMES = [bone[0] for bone in BONES]
@@ -85,41 +100,57 @@ def weigh(ob, bone=None, right=False):
 # ---------------------------------------------------------------- the skin
 
 def _leg(q):
-    limb = np.maximum(near(q, [lerp(KNEE, HIP, 0.35), KNEE, ANKLE], [0.075, 0.070, 0.055], 0.012),
-                      near(q, [HEEL, BALL + (BALL - HEEL) * 0.5], 0.060, 0.012))
+    limb = smoothstep(0.020, 0.008, np.minimum(body.leg(q), body.shoe(q)))        # not the skirt that hangs about it
     shin = limb * beyond(q, KNEE, THIGH + SHIN, 0.030, 0.030)
     foot = shin * beyond(q, ANKLE, SHIN, 0.025, 0.020)
     return chain(("thigh_l", limb), ("shin_l", shin), ("foot_l", foot))
 
 
 def _digits(l):
-    """Each digit bone's share of a point of the hand, in the hand's frame."""
+    """Each digit bone's share of a point of the hand, in the hand's frame. A digit holds what lies within three
+    of its root's radii, and its joints ease over three quarters of their own."""
     lines = {name: np.array(g["joints"]) for name, g in DIGITS.items()}
+    thick = {name: g["flesh"][1][::2] for name, g in DIGITS.items()}
     off = {name: S.tube(l, line, 0.0) for name, line in lines.items()}
     out = {}
     for name, line in lines.items():
         rival = np.minimum.reduce([d for other, d in off.items() if other != name])
-        hold = np.clip((rival - off[name]) / 0.006 + 0.5, 0.0, 1.0) * smoothstep(0.020, 0.010, off[name]) \
-            * beyond(l, line[0], line[1] - line[0], 0.010, 0.006)
+        ease = [0.75 * r for r in thick[name]]
+        hold = np.clip((rival - off[name]) / 0.006 + 0.5, 0.0, 1.0) * smoothstep(3.0 * thick[name][0], 1.5 * thick[name][0], off[name]) \
+            * beyond(l, line[0], line[1] - line[0], 2.0 * ease[0], ease[0])
         holds = [hold]
         for j in (1, 2):
             holds.append(holds[-1] * beyond(l, line[j], S.normalize(line[j] - line[j - 1])
-                                            + S.normalize(line[j + 1] - line[j]), 0.005, 0.005))
+                                            + S.normalize(line[j + 1] - line[j]), ease[j], ease[j]))
         out.update(chain(*(("%s_%d_l" % (name, k), h) for k, h in enumerate(holds, 1))))
     return out
 
 
+def _down(q, joint, end, clear=0.12):
+    """How far a point lies down the part of a limb that twists, 0..1: its ends, `clear` of its length each, do not."""
+    return (along(q, joint, end)[0] / np.linalg.norm(end - joint) - clear) / (1.0 - 2.0 * clear)
+
+
 def _arm(q):
-    sleeve = near(q, [SHOULDER, ELBOW, WRIST, KNUCKLES, HF.w(V(0, 0, 0.20))], [0.080, 0.055, 0.045, 0.080, 0.090], 0.012)
+    """The shoulder passes from the collarbone to the deltoid over its top, and from the deltoid to the arm down
+    its side: the deltoid turns half as far as the arm, so neither blend spans the whole of the arm's swing.
+    The sleeve goes whole with the arm, out to the fold of the armpit; below the fold the deltoid carries the
+    bodice's side, less and less down the ribs, so a raised arm draws the cloth up rather than tearing it."""
+    s, r = along(q, SHOULDER, ELBOW)
     flesh = np.minimum(body.upper_arm(q), body.arm(q))
-    sleeve = sleeve * smoothstep(-0.030, 0.030, body.trunk(q) - flesh)                        # the bodice keeps to the ribs
-    upper = sleeve * beyond(q, SHOULDER, UPPER, 0.020, 0.070)
-    girdle = np.maximum(smoothstep(0.110, 0.045, S.length(q - SHOULDER)), upper)
+    by_ribs = smoothstep(0.32, 0.26, s)
+    sleeve = smoothstep(0.045, 0.030, flesh) * np.maximum(smoothstep(0.066, 0.057, r), 1.0 - by_ribs)
+    toward = ((q - SHOULDER - np.outer(s, UPPER)) @ INWARD) / np.maximum(r, 1e-9)
+    side = 0.6 * smoothstep(0.110, 0.062, r) * smoothstep(0.02, 0.07, s) * by_ribs * smoothstep(0.6, 0.9, toward)
+    out_over = (q - SHOULDER) @ CAP
+    cap = np.maximum(sleeve * smoothstep(-0.030, 0.010, out_over), side)
+    upper = sleeve * smoothstep(0.020, 0.070, out_over)
+    girdle = np.maximum(smoothstep(0.110, 0.045, S.length(q - SHOULDER)), cap)
     fore = upper * beyond(q, ELBOW, UPPER + FORE, 0.030, 0.030)
-    down, _ = along(q, ELBOW, WRIST)
-    turned = fore * smoothstep(0.25, 0.92, down / np.linalg.norm(WRIST - ELBOW))
     hand = fore * beyond(q, WRIST, FORE + FINGERWARD, 0.016, 0.016)
-    out = chain(("clavicle_l", girdle), ("upperarm_l", upper), ("forearm_l", fore), ("wrist_l", turned), ("hand_l", hand))
+    out = chain(("clavicle_l", girdle), ("deltoid_l", cap),
+                *zip(lengths("upperarm"), twisted(upper, _down(q, SHOULDER, ELBOW), LENGTHS)),
+                *zip(lengths("forearm"), twisted(fore, _down(q, ELBOW, WRIST), LENGTHS)), ("hand_l", hand))
     for name, share in _digits(HF.l(q)).items():
         out[name] = hand * share
         out["hand_l"] = out["hand_l"] - out[name]

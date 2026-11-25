@@ -25,7 +25,8 @@ from rest, in the figure's axes (+X her left, -Y forward, +Z up).
 import numpy as np
 from sculpt import sdf as S, rig as R
 from sculpt.sdf import V
-from sculpt.turns import X, Y, Z, SAME, FLIP, MIRROR, turn, lean, part, between, twist, hinged, reach
+from sculpt.num import smoothstep
+from sculpt.turns import X, Y, Z, SAME, FLIP, MIRROR, turn, lean, part, between, shared, hinged, reach
 from . import body, head, rig
 from .rig import HIP, KNEE, ANKLE, PELVIS, WAIST, CHEST, STERNUM, SHOULDER, ELBOW, WRIST, UPPER, FORE, THIGH, SHIN, HF
 
@@ -57,6 +58,11 @@ def _aside(joint, root, end):
     return joint - root - line * ((joint - root) @ line)
 
 
+ELBOW_OUT = S.normalize(_aside(ELBOW, SHOULDER, WRIST))
+ELBOW_HANGS = 1.0                              # the elbow's pull downward, beside its standing out as it does at rest
+SHOULDER_FOLLOWS = 0.25                        # the collarbone's share of the upper arm's swing, once the arm is raised
+
+
 def _leg(c, hips, pelvis):
     flat = turn(Z, c("foot_yaw"))
     foot = flat @ turn(OUTWARD, c("foot_pitch")) @ turn(TOEWARD, c("foot_roll"))
@@ -69,16 +75,25 @@ def _leg(c, hips, pelvis):
 
 
 def _arm(c, hips, pelvis, chest, breast):
-    clavicle = chest @ turn(Y, -c("shoulder_up")) @ turn(Z, -c("shoulder_fwd"))
     hand = hips @ turn(X, -c("hand_pitch")) @ turn(Y, c("hand_roll")) @ turn(Z, -c("hand_yaw"))
     wrist = pelvis + hips @ (WRIST + V(c("hand_x"), c("hand_y"), c("hand_z")) - PELVIS)
-    shoulder = breast + chest @ (STERNUM - CHEST) + clavicle @ (SHOULDER - STERNUM)
-    upper, fore, short = _bent(shoulder, wrist, ELBOW - SHOULDER, WRIST - ELBOW, ELBOW_HINGE,
-                               chest @ _aside(ELBOW, SHOULDER, WRIST), c("elbow"))
-    out = {"clavicle_l": clavicle, "upperarm_l": upper, "forearm_l": fore, "hand_l": hand,
-           "wrist_l": fore @ turn(FORE, twist(fore.T @ hand, FORE))}
+
+    def reached(clavicle):
+        shoulder = breast + chest @ (STERNUM - CHEST) + clavicle @ (SHOULDER - STERNUM)
+        return _bent(shoulder, wrist, ELBOW - SHOULDER, WRIST - ELBOW, ELBOW_HINGE, chest @ ELBOW_OUT - Z * ELBOW_HANGS,
+                     c("elbow"))
+    asked = chest @ turn(Y, -c("shoulder_up")) @ turn(Z, -c("shoulder_fwd"))
+    swing = between(asked @ UPPER, reached(asked)[0] @ UPPER)
+    rise = (swing @ asked @ UPPER - asked @ UPPER) @ chest @ Z
+    clavicle = part(swing, SHOULDER_FOLLOWS * smoothstep(0.0, 1.0, rise)) @ asked
+    upper, fore, short = reached(clavicle)
+    swing = between(clavicle @ UPPER, upper @ UPPER)
+    swung = swing @ clavicle
+    out = {"clavicle_l": clavicle, "deltoid_l": part(swing, 0.5) @ clavicle, "hand_l": hand}
+    out.update(zip(rig.lengths("upperarm"), shared(swung, upper, UPPER, rig.LENGTHS)))
+    out.update(zip(rig.lengths("forearm"), shared(fore, hand, FORE, rig.LENGTHS)))
     for name, fan in FAN.items():
-        at = hand @ turn(BACK_OF_HAND, fan * c("spread"))
+        at = hand @ turn(BACK_OF_HAND, -fan * c("spread"))
         for k, share in enumerate(CURL, 1):
             at = out["%s_%d_l" % (name, k)] = at @ turn(ACROSS_PALM, -share * c("curl_" + name))
     out["thumb_1_l"] = hand @ turn(rig.FINGERWARD, -c("thumb_lift")) @ turn(BACK_OF_HAND, c("thumb_in")) \

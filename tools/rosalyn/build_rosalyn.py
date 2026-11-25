@@ -6,7 +6,8 @@ exports GLB with her clips.
           [--zoom full,upper,head,face,hand,clasp,feet] [--light 1.0]
 
 --clay alone renders the bare game mesh, for judging forms quickly; --pose puts it in one of clips.POSES first,
-and --clip in the pose one of clips.CLIPS has at the phase --at. --out and --shots run the whole build.
+and --clip in the pose one of clips.CLIPS has at the phase --at. --out and --shots run the whole build; --shots
+renders her turnarounds, clay and painted, her test poses and the idle's contact sheets.
 --detail scales every lattice, and with it the triangle count: 1.0 comes to about 225,000 of her 300,000, 0.7 to half that.
 Rest pose in Blender space: +X is her left, -Y is forward, +Z up.
 
@@ -131,8 +132,10 @@ ZOOMS = {"full": ((0, 0, 0.93), 2.02, (520, 1000)), "upper": ((0, 0, 1.36), 1.05
          "wrist": ((0.35, -0.05, 0.91), 0.12, (720, 720)),
          "eye": ((0.028, -0.08, 1.630), 0.055, (720, 720)), "mouth": ((0, -0.10, 1.570), 0.075, (720, 720))}
 POSED = {"stand": ("full", "upper", "clasp"), "asleep": ("face",), "glance": ("head",), "bow": ("full",), "sway": ("full",),
-         "open": ("open",)}                     # the poses --shots shows, and the zooms of each
+         "open": ("open",), "raise": ("open",)}  # the poses --shots shows, and the zooms of each
 CLASP_VIEWS = [0, -50, 50, (0, 55)]             # her hands from before her, from either side and from above
+SHEETS = {"full": [0, -90], "face": [0]}        # the idle's contact sheets: her weight from before her and the side, her eyes
+STEPS, ACROSS = 16, 8                           # frames on each, evenly from the clip's start, and to a row
 
 
 def turnaround(path, views, zoom, light=1.0, samples=40):
@@ -140,6 +143,22 @@ def turnaround(path, views, zoom, light=1.0, samples=40):
     target, scale, res = ZOOMS[zoom]
     dim = light * float(opt("--light", "1.0"))
     bl.turnaround(path, views, target, scale, res, bl.studio((2.6, 1.2, 2.4), (900 * dim, 220 * dim, 600 * dim)), samples)
+
+
+def contact_sheet(path, skeleton, action, zoom):
+    """A clip at STEPS even frames from its start, left to right ACROSS to a row, view after view."""
+    R.use(skeleton, action)
+    width, strips = ZOOMS[zoom][2][0], []
+    for k in range(STEPS):
+        bpy.context.scene.frame_set(round(k * action.frame_range[1] / STEPS))
+        turnaround(path + ".step.png", SHEETS[zoom], zoom, samples=24)
+        strips.append(bl.read_image(path + ".step.png"))
+    os.remove(path + ".step.png")
+    rows = [np.concatenate([s[:, v * width:(v + 1) * width] for s in strips[k:k + ACROSS]], axis=1)
+            for v in range(len(SHEETS[zoom])) for k in range(0, STEPS, ACROSS)]
+    bpy.data.images.remove(bl.save_image(path, np.concatenate(rows[::-1], axis=0)))
+    R.use(skeleton, None)
+    print("SHEET", path)
 
 
 def asked():
@@ -196,7 +215,7 @@ def main():
         R.attach(ob, skeleton)
         print("MESH %s: %d triangles, materials %s" % (ob.name, sum(len(f.vertices) - 2 for f in ob.data.polygons),
                                                        ", ".join(m.name for m in ob.data.materials)))
-    actions = [pose.record(skeleton, name, clip, frames) for name, (clip, frames) in clips.CLIPS.items()]
+    actions = {name: pose.record(skeleton, name, clip, frames) for name, (clip, frames) in clips.CLIPS.items()}
     R.use(skeleton, None)
     pose.strike(skeleton, {})
     if opt("--shots"):
@@ -219,8 +238,10 @@ def main():
                 turnaround(os.path.join(opt("--shots"), "pose_%s_%s.png" % (name, zoom)),
                            CLASP_VIEWS if zoom == "clasp" else views, zoom)
         pose.strike(skeleton, {})
+        for zoom in () if opt("--zoom") else SHEETS:
+            contact_sheet(os.path.join(opt("--shots"), "sheet_idle_%s.png" % zoom), skeleton, actions["Idle"], zoom)
     if opt("--out"):
-        export(opt("--out"), skeleton, figure, actions)
+        export(opt("--out"), skeleton, figure, actions.values())
         build.face_paint(FACE_PAINT, head, FACE_GRAIN)
     print("DONE t=%.1fs" % (time.time() - t0))
 
