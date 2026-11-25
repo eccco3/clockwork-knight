@@ -189,20 +189,6 @@ Model unfinished automata at different stages, from bare mechanism to painted fi
 
 Not started. Needs the clocks, benches and tools.
 
-## Knight: remove the light between her joints
-
-### Task description
-
-The dev decided the white streaks between the knight's joints were a bad idea. Remove them entirely: delete `scripts/joint_light.gd`, `shaders/joint_light.gdshader` and their `.uid` files, and the line in `scripts/knight.gd`'s `_ready` that adds the light, and any mention in the docs. Check the game runs with no errors and take a close shot mid-swing showing the streaks are gone.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started.
-
 ## Knight: shoulder sockets and the overhead pauldron
 
 ### Task description
