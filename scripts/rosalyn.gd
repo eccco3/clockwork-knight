@@ -2,10 +2,17 @@ class_name Rosalyn
 extends Node3D
 ## Rosalyn, a clockwork woman of lacquered tulipwood in a smocked dress: the root of her imported
 ## model, which dresses her wood, brass and eyes in her colours. Her dress and hair carry their own
-## baked textures. She is not rigged yet, and stands as her build posed her.
+## baked textures. Her AnimationTree (built by tools/rosalyn/import_rosalyn.gd) loops her Idle, and
+## she blinks over it now and then.
 
 const FACE_PAINT := preload("res://assets/textures/rosalyn/face_paint.png")
 const FACE_PAINT_PLACEMENT := preload("res://assets/textures/rosalyn/face_paint.json")
+const BLINKS := Vector2(1.5, 6.0)  ## seconds from one blink to the next, at random between these
+const TWICE := 0.15  ## the chance that a blink comes again straight after
+const AGAIN := 0.35  ## seconds from a blink to its repeat: just longer than the Blink clip
+
+var _tree: AnimationTree
+var _next_blink := 0.0
 
 
 func _ready() -> void:
@@ -21,3 +28,12 @@ func _ready() -> void:
 	for mesh: MeshInstance3D in find_children("*", "MeshInstance3D", true, false):
 		Looks.dress(mesh, looks)
 		mesh.layers = Layers.CHARACTERS
+	_tree = $AnimationTree
+	_next_blink = randf_range(BLINKS.x, BLINKS.y)
+
+
+func _process(delta: float) -> void:
+	_next_blink -= delta
+	if _next_blink <= 0.0:
+		_tree.set("parameters/Blink/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+		_next_blink = AGAIN if randf() < TWICE else randf_range(BLINKS.x, BLINKS.y)

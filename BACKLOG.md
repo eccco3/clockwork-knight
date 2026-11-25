@@ -34,20 +34,6 @@ None. The dev's combat direction, for this and the battle items:
 
 Not started. Enemies only appear outside. The crowd test found 40 units well within 60 fps; `Cadence` slows distant grinners' animation.
 
-## Rosalyn: rig and standing pose
-
-### Task description
-
-Rig Rosalyn: shoulders and upper body for gesturing, fingers, and her head and neck. Her wooden face does not deform. Skin the dress so the smocked bodice and skirt deform cleanly. Pose her standing with her hands clasped in front of her, and animate a quiet idle on that pose: breathing and small weight shifts. Deliver turnarounds and a contact sheet of the idle.
-
-### Open questions
-
-None. Bones are enough for the skirt while she stands. Her eyes blink and move.
-
-### Status
-
-In progress on branch `worktree-agent-a67a951fb109a0580` (unmerged WIP): 72 bones, an Idle (breathing only) and a Blink, clay-checked at half detail; shared rig, key and turn helpers in `tools/sculpt/`. Left: render the last sleeve-blend change; boxy shoulders and the raised arm's collapse; clasped fingers, the stray thumb and shards by the right wrist; gaps at the shut lids' corners; weight shifts and eyes in the idle; everything in Godot.
-
 ## Rosalyn: speech and gestures
 
 ### Task description
@@ -60,7 +46,7 @@ None. She turns her head to follow the knight, within a limited range blended in
 
 ### Status
 
-Not started.
+Not started. Her rig (80 bones), idle and blink are built. Left over from it: a fully overhead raise bulks the sleeve, a pale streak down the skirt's side in Godot, a dark tick at each outer lid corner, and a crease along the palm's edge.
 
 ## Rosalyn: a moving mouth
 
