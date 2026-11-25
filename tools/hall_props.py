@@ -861,9 +861,9 @@ def build_props(b):
             bookshelf(b)
         with b.at(WALLS['R'] @ T(-8.0, 0, 0.05)):
             bookshelf(b)
-        # --- east wall: window seats, chest, weapon rack, sideboard -------------
+        # --- east wall: seats either side of the workshop doors, chest, weapon rack, sideboard
         with b.at(WALLS['R']):
-            for u in (-4.0, 0.0, 4.0):
+            for u in (-4.0, 4.0):
                 with b.at(T(u, 0, 0.055)):
                     window_seat(b)
             with b.at(T(8.0, 0, 0.06)):

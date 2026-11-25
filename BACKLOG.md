@@ -12,7 +12,7 @@ After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% wit
 
 ### Status
 
-Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 °C; 50% gave 43 W and 70 °C.
+Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 Ã‚Â°C; 50% gave 43 W and 70 Ã‚Â°C.
 
 ## Grinner: a variant on all fours
 
@@ -61,8 +61,7 @@ Rig Rosalyn: shoulders and upper body for gesturing, fingers, and her head and n
 
 ### Open questions
 
-- Does the skirt need cloth simulation, or are bones enough while she stands?
-- Do her eyes blink and move?
+None. Bones are enough for the skirt while she stands. Her eyes blink and move.
 
 ### Status
 
@@ -76,8 +75,7 @@ Rosalyn is voiced. Animate her speaking her lines without moving her mouth, whic
 
 ### Open questions
 
-- Does she turn her head to follow the knight?
-- Are her words shown as text?
+None. She turns her head to follow the knight, within a limited range blended into her other head motion. She is voiced, and her words are also shown as subtitles.
 
 ### Status
 
@@ -91,7 +89,7 @@ Try two ways for Rosalyn's wooden mouth to move with her speech, where no wood v
 
 ### Open questions
 
-- How many shapes, and are they swapped meshes or pieces on pivots?
+None. Try both: four or five shapes as swapped meshes, and the same shapes as pieces on pivots.
 
 ### Status
 
@@ -105,8 +103,7 @@ Stand Rosalyn in the hall and have her speak as the knight comes near. Check tha
 
 ### Open questions
 
-- Where does she stand?
-- Does she speak all the time, or only when the knight is close?
+None. She stands by one of the windows closer to the first one, between that window and the fire. She speaks only when the knight is close, and idles otherwise.
 
 ### Status
 
@@ -144,22 +141,6 @@ Plan the game's opening scene with the dev in the main chat; this is not a subag
 
 Not started. Needs the dev; the workshop items build the room.
 
-## Workshop: walls, door and apartment
-
-### Task description
-
-The building is a clockmaker's house and workshop. Build the workshop's structure onto the hall: its width equals the hall's length, it is three times as long as it is wide, and a door in one of the hall's long walls joins them. A studio apartment fills one back corner as a closed room whose interior is not seen yet. Floor, walls, roof, beams and collision, matching the hall's construction, built by the same tools as the hall. Lighting comes later.
-
-### Open questions
-
-- Which long wall gets the door, and where along it?
-- How tall is the workshop, and how large is the apartment's corner?
-- Does the apartment show a door into the workshop?
-
-### Status
-
-Not started. It changes the hall's walls, so it cannot run beside other hall or baking work.
-
 ## Workshop: windows and surfaces
 
 ### Task description
@@ -168,7 +149,7 @@ Give the workshop windows onto the same foggy day the hall shows, and finish its
 
 ### Open questions
 
-- How many windows, and on which walls?
+None. Windows along both of the workshop's long walls, every few metres; none on the hall side or the apartment's walls.
 
 ### Status
 
@@ -192,11 +173,11 @@ Not started. Needs the windows and surfaces; it rebakes the hall, so nothing els
 
 ### Task description
 
-Research real clockmakers' and automaton makers' workshops: benches, machines, tools, storage and how work flows between them. Write the findings into the workshop builder as a layout: where benches, machines, shelves and clutter zones go, with walkable aisles for the knight. Block it out with simple shapes and collision, and deliver overhead and eye-level screenshots.
+Research real clockmakers' and automaton makers' workshops: benches, machines, tools, storage and how work flows between them. Write the findings into the workshop builder as a layout: where benches, machines, shelves and clutter zones go, with walkable aisles for the knight. Block it out with simple shapes and collision, coarse like the walls (this is for planning, not finish), and deliver overhead and eye-level screenshots.
 
 ### Open questions
 
-- Dense clutter with narrow aisles, or open floor around the benches?
+None. Dense around the edges and the benches, with one or two clear aisles about the knight's width plus a margin.
 
 ### Status
 
@@ -210,7 +191,7 @@ Model original clocks of many kinds for the workshop: longcase, bracket and wall
 
 ### Open questions
 
-- Do clocks tick and pendulums swing, or are they still for now?
+None. Pendulums swing and a few clocks tick audibly: cheap looping animation on a handful of them.
 
 ### Status
 
@@ -262,12 +243,11 @@ Not started. Shares the knight's builder with her hand and seat items.
 
 ### Task description
 
-Build a small clockwork soldier as `assets/models/minion.glb` from a new `tools/minion/` builder on the shared sculpt toolkit: an adult man, short and stocky, carrying a short spear. He needs far less human likeness than the knight or Rosalyn; a simple, readable, mechanical design is right, since many share the field. Give him detail levels and a cheap shadow stand-in from the start. Deliver clay and painted turnarounds beside the knight's.
+Build a small clockwork soldier as `assets/models/minion.glb` from a new `tools/minion/` builder on the shared sculpt toolkit: an adult man two-thirds the knight's height, a regular, reasonably strong-looking soldier (not stocky), carrying a short spear. He is the knight's ally; the grinners are the enemy's minions. He needs far less human likeness than the knight or Rosalyn; a simple, readable, mechanical design is right, since many share the field. Give him detail levels and a cheap shadow stand-in from the start. Deliver clay and painted turnarounds beside the knight's.
 
 ### Open questions
 
-- How tall is he, and what is his triangle budget at full detail?
-- Is he an ally of the knight, an enemy, or are there both kinds?
+- None. About 12,000 triangles at full detail.
 
 ### Status
 
@@ -302,20 +282,6 @@ Make fights between groups outdoors, in the shape of a MOBA lane: waves of minio
 
 Not started. Needs the minion's animation and the grinner's behaviour and combat.
 
-## Knight: light between her joints
-
-### Task description
-
-Faint streaks of white light sprinkle across the air gaps between the knight's jointed parts. They are translucent and faint at rest, and brighter and more striking while the joint moves. They light nothing around them. Make them cheap, for example a shader on thin cards or particles driven by each joint's angular speed. Deliver captures at rest and mid-swing.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started.
-
 ## Faces: crisper features and use in a figure
 
 ### Task description
@@ -334,7 +300,7 @@ Not started.
 
 ### Task description
 
-Add a `dev/` tool that shows the dev two faces from the morphable model side by side, rendered identically, and records which he prefers in about two seconds per pair. Fit a Bradley–Terry model over the shape coefficients, picking each next pair where the model is least sure, so 100 to 200 comparisons should be enough. Re-show about 5% of pairs to measure his consistency. Then sample faces along the learned direction, keep the best, and offer them for figures such as Rosalyn and the Clockmaker.
+Add a `dev/` tool that shows the dev two faces from the morphable model side by side, rendered identically, and records which he prefers in about two seconds per pair. Fit a BradleyÃ¢â‚¬â€œTerry model over the shape coefficients, picking each next pair where the model is least sure, so 100 to 200 comparisons should be enough. Re-show about 5% of pairs to measure his consistency. Then sample faces along the learned direction, keep the best, and offer them for figures such as Rosalyn and the Clockmaker.
 
 ### Open questions
 

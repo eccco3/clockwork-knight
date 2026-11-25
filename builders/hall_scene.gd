@@ -215,7 +215,7 @@ func _scene() -> void:
 	lm.directional = true
 	lm.interior = true
 	lm.max_texture_size = 4096
-	lm.generate_probes_subdiv = LightmapGI.GENERATE_PROBES_SUBDIV_16
+	lm.generate_probes_subdiv = LightmapGI.GENERATE_PROBES_SUBDIV_32  # of the building's length: a probe every 2.7 m
 	_add(lm, null, "LightmapGI")
 
 	# --- spawn ---------------------------------------------------------------------

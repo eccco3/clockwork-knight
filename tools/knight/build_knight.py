@@ -2,14 +2,14 @@
 
   blender --background --python build_knight.py -- [--out knight.glb] [--preview a.png]
           [--pose Action:frame] [--views 0,-40,-90/30,180] [--zoom head|upper|full|<bone> [--scale 0.34]]
-          [--only a,b] [--gaps upperarm,rerebrace/chest,pauldron] [--seat culet|skirt|wrap]
+          [--only a,b] [--gaps upperarm,rerebrace/chest,pauldron] [--seat culet|skirt|wrap|armour|tabard]
 
 A view is a yaw, or yaw/pitch to look from above; --zoom <bone> centres on that bone, --scale metres wide.
 --gaps prints the least air between the pieces before the slash and those after it, over every frame of every clip,
 or in the --pose alone. --seat picks what covers her seat; SEAT holds the default.
 
 Rest pose is a T-pose in Blender space: +X is the figure's left, -Y is forward, +Z up.
-Every piece is rigid on one bone; the gaps at the joints are deliberate.
+Every piece is rigid on one bone, but for the tabard's cloth; the gaps at the joints are deliberate.
 """
 import bpy, sys, os, time, zlib
 import numpy as np
@@ -21,7 +21,7 @@ from sculpt.bl import opt
 from sculpt.sdf import V
 from sculpt.gen import Frame
 from sculpt.num import smoothstep
-from knight import gaps, head, roll, shadow
+from knight import gaps, hang, head, roll, shadow
 
 DL = os.path.join(os.path.dirname(HERE), "downloads")
 REF_RIG = os.path.join(DL, "ual2", "Universal Animation Library 2[Standard]", "Female Mannequin", "Unreal-Godot", "Mannequin_F.glb")
@@ -38,21 +38,59 @@ GRIP = V(-0.740, 0.062, 1.4155)                # sword grip centre in the rest p
 BLADE_DIR = V(0.0, -1.0, 0.0)
 
 # What covers her seat. "culet": a lame across her back. "skirt": plates hinged under her fauld, each swinging
-# with its thigh. "wrap": her tassets carried on round the back of her thighs.
+# with its thigh. "wrap": her tassets carried on round the back of her thighs. "armour": plates hinged all
+# round her fauld in her tassets' place, sprung in against her legs. "tabard": a cloth panel before and behind,
+# over the wrap's tassets. Under the last two her seat is a flat block set back between the tops of her thighs.
 SEAT = opt("--seat", "culet")
+RECESSED = SEAT in ("armour", "tabard")
 FAULD = Frame(V(0, 0.008, 0)), V(1.07, 0.70, 1)    # the axis her fauld is turned on, and how it is pressed oval
-SKIRT = {"back": (3, 36), "side": (40, 73)}        # each left plate's span round the fauld, in degrees from the middle of her back
-HUNG_Z, HUNG_R = 0.954, 0.1715                     # where the culet or the skirt hangs from under the fauld: height, and radius before pressing
+SEAT_FLOOR = 0.946                                 # where her pelvis is cut flat over the block, level with the fauld's lower edge
+HUNG_Z, HUNG_R = 0.954, 0.1715                     # where the culet or a plate hangs from under the fauld: height, and radius before pressing
+# The plates under her fauld: each one's span round it, in degrees from the middle of her back, and its drop.
+# One that spans the middle is a single plate; any other is a left plate and its mirror image.
+PLATES = {"skirt": {"back": (3, 36, 0.104), "side": (40, 73, 0.104)},
+          "armour": {"tail": (-17, 17, 0.175), "haunch": (19, 55, 0.170), "side": (57, 104, 0.160),
+                     "hip": (106, 147, 0.150), "front": (149, 179.4, 0.140)}}.get(SEAT, {})
 SKIRT_SWING = (np.radians(-30), np.radians(100))   # how far a plate swings in under her and out
+PLATE_TUCKS = {"tail": np.radians(60), "haunch": np.radians(45)}   # how far a plate turns in under her once the thighs before it are forward
+# The tabard's panels: where each hangs, in degrees round the fauld, and half its width. A panel comes out from
+# under her belt, lies on the fauld to its lower edge and hangs free to mid-thigh on two chains of bones side
+# by side, a half following each leg, hinged at PANEL_JOINTS. Behind, the chain curls in under her by PANEL_TUCKS.
+PANELS = {"front": (180, 22), "back": (0, 40)}
+PANEL_TOP, PANEL_HEM, PANEL_JOINTS = 1.020, 0.730, (0.944, 0.872, 0.800)
+PANEL_R = 0.189                                    # the free part's radius round the fauld, before pressing
+PANEL_SWING = (np.radians(-60), np.radians(110))   # how far a panel's top swings, and each joint below it bends
+PANEL_BEND = (np.radians(-75), np.radians(30))
+PANEL_TUCKS = np.radians((50, 95, 130))
+SIDES = (("l", 1), ("r", -1))
 
 PIECES = []
 
 
 def add(name, bone, mat, verts, faces, normals=None, colors=None, hard=True, grain=None, mirror=False,
-        thickness=0.0, sharp=38.0, bevel=0.0, grain_offset=None):
+        thickness=0.0, sharp=38.0, bevel=0.0, grain_offset=None, skin=None):
+    """`skin`, in place of the one bone, gives each bone's weights on the piece's vertices as they rest."""
     PIECES.append(dict(name=name, bone=bone, mat=mat, verts=np.asarray(verts, dtype=np.float64), faces=faces,
                        normals=normals, colors=colors, hard=hard, grain=grain or Frame(V(0, 0, 0)),
-                       mirror=mirror, thickness=thickness, sharp=sharp, bevel=bevel, grain_offset=grain_offset))
+                       mirror=mirror, thickness=thickness, sharp=sharp, bevel=bevel, grain_offset=grain_offset, skin=skin))
+
+
+def round_fauld(a, r=HUNG_R, z=HUNG_Z):
+    """The point `a` radians round the fauld from the middle of her back, toward her left, and the way its rim runs there."""
+    axis, oval = FAULD
+    along = V(np.cos(a), -np.sin(a), 0) * oval
+    return axis.w(V(r * np.sin(a), r * np.cos(a), z) * oval), along / np.linalg.norm(along)
+
+
+def plate_bones(name):
+    """The bones a plate of PLATES hangs on, each with its side and that side's sign: one for a plate across her middle."""
+    if PLATES[name][0] < 0:
+        return [("skirt_" + name, "lr", 1)]
+    return [("skirt_%s_%s" % (name, s), s, sx) for s, sx in SIDES]
+
+
+def panel_bone(name, joint, side):
+    return "tabard_%s_%d_%s" % (name, joint, side)
 
 
 # ============================================================== rig
@@ -120,23 +158,31 @@ def add_bones(arm, J, T):
         J[name], T[name] = np.array(head_), np.array(tail_)
         return b
 
-    for s, sx in (("l", 1), ("r", -1)):
+    def hinge(name, parent, at, along, toward=None):
+        """A bone at `at` whose x runs `along` a hung thing's top edge. Its y points down the thing, or as near
+        `toward` as a turn about x brings it, and its z out of it."""
+        to = DOWN if toward is None else toward - at
+        to = to - along * np.dot(to, along)
+        to /= np.linalg.norm(to)
+        new(name, parent, at, at + to * 0.05).align_roll(tuple(np.cross(along, to)))
+
+    for s, sx in SIDES:
         e = H0 + V(-sx * head.EYE[0], -head.EYE[1], head.EYE[2]) * V(-1, 1, 1)
         new("eye_" + s, "Head", e, e + FWD * 0.03)
         new("pauldron_" + s, "clavicle_" + s, J["upperarm_" + s], T["upperarm_" + s], like="upperarm_" + s)
         new("couter_" + s, "upperarm_" + s, J["lowerarm_" + s], T["lowerarm_" + s], like="lowerarm_" + s)
         new("poleyn_" + s, "thigh_" + s, J["calf_" + s], T["calf_" + s], like="calf_" + s)
-        if SEAT == "skirt":                     # a hinge along each plate's top edge, the bone pointing at the knee
-            axis, oval = FAULD
-            for plate_, span in SKIRT.items():
-                a = sx * np.radians(np.mean(span))
-                hinge = axis.w(V(HUNG_R * np.sin(a), HUNG_R * np.cos(a), HUNG_Z) * oval)
-                along = V(np.cos(a), -np.sin(a), 0) * oval
-                along /= np.linalg.norm(along)
-                to_knee = J["calf_" + s] - hinge
-                to_knee -= along * np.dot(to_knee, along)
-                to_knee /= np.linalg.norm(to_knee)
-                new("skirt_%s_%s" % (plate_, s), "pelvis", hinge, hinge + to_knee * 0.05).align_roll(tuple(np.cross(along, to_knee)))
+    for name, (a0, a1, _) in PLATES.items():    # the skirt's plates track the knee; the armour's are turned by `hang`
+        for bone, s, sx in plate_bones(name):
+            hinge(bone, "pelvis", *round_fauld(sx * np.radians(0.5 * (a0 + a1))), J["calf_" + s] if SEAT == "skirt" else None)
+    if SEAT == "tabard":
+        for name, (middle, _) in PANELS.items():
+            for s, sx in SIDES:
+                above = "pelvis"
+                for k, z in enumerate(PANEL_JOINTS):
+                    at, along = round_fauld(np.radians(middle), PANEL_R, z)
+                    hinge(panel_bone(name, k, s), above, at + LEFT * sx * 0.04, along)
+                    above = panel_bone(name, k, s)
     new("weapon_r", "hand_r", GRIP, GRIP + BLADE_DIR * 0.10)
     new("key", "spine_03", V(0, 0.100, 1.400), V(0, 0.140, 1.400))
     for n, c in GEARS.items():
@@ -148,7 +194,7 @@ def add_bones(arm, J, T):
             c.target, c.subtarget = arm, src + s
             c.target_space = c.owner_space = "LOCAL"
             c.influence = 0.5
-        for plate_ in SKIRT if SEAT == "skirt" else ():      # a plate turns on its hinge to follow the knee, as far as it may swing
+        for plate_ in PLATES if SEAT == "skirt" else ():     # a plate turns on its hinge to follow the knee, as far as it may swing
             pb = arm.pose.bones["skirt_%s_%s" % (plate_, s)]
             c = pb.constraints.new("LOCKED_TRACK")
             c.target, c.subtarget, c.track_axis, c.lock_axis = arm, "calf_" + s, "TRACK_Y", "LOCK_X"
@@ -217,13 +263,20 @@ def torso(J):
     def pelvis(p):
         q = S.mirror_x(p)
         d = S.ellipsoid(p, V(0, 0.008, 0.990), V(0.150, 0.100, 0.085))
-        d = S.smin(d, S.ellipsoid(p, V(0, 0.012, 0.915), V(0.070, 0.085, 0.075)), 0.04)
+        if RECESSED:
+            d = S.smax(d, S.plane(p, V(0, 0, SEAT_FLOOR), DOWN), 0.008)
+        else:
+            d = S.smin(d, S.ellipsoid(p, V(0, 0.012, 0.915), V(0.070, 0.085, 0.075)), 0.04)
         d = S.smax(d, S.plane(p, V(0, 0, 1.060), UP), 0.014)
         d = S.ssub(d, S.sphere(q, hip + V(0.004, 0, -0.006), 0.073), 0.010)
         return d
 
     v, f, n = mesher.wrap(pelvis, V(-0.012, 0.01, 1.005), V(0.012, 0.01, 1.005), (0.16, 0.11, 0.12), (40, 26, 30), relax=10)
     add("pelvis", "pelvis", "wood_dark", v, f, normals=n, hard=False)
+    if RECESSED:
+        block = seat_block(J)
+        v, f, n = mesher.wrap(block, V(0, 0.003, 0.950), V(0, 0.003, 0.915), (0.035, 0.040, 0.040), (10, 12, 14), relax=8)
+        add("seat", "pelvis", "wood_dark", v, f, normals=n, hard=False)
     # fauld: two flared lames hanging from the belt
     axis, oval = FAULD
     for k, sec in enumerate((
@@ -235,7 +288,7 @@ def torso(J):
         v, f = gen.lathe_ring([(z0 - 0.003, r0 - 0.004), (z0 - 0.003, r0 - 0.0002), (z0, r0 + 0.0014), (z0 + 0.003, r0 - 0.0002),
                                (z0 + 0.003, r0 - 0.004)], 64, sx=oval[0], sy=oval[1])
         add("fauld_bead_%d" % k, "pelvis", "brass", axis.w(v), f)
-    skirt() if SEAT == "skirt" else culet()
+    {"skirt": skirt, "armour": skirt, "tabard": tabard}.get(SEAT, culet)()
     # her trunk, turned from the pale wood of her limbs, seen only through the gaps between the lames
     for name, bone, pts, cy in (
             ("core_lower", "spine_01", [(1.040, 0.0), (1.041, 0.066), (1.100, 0.074), (1.185, 0.070), (1.198, 0.060), (1.199, 0.0)], -0.026),
@@ -275,23 +328,67 @@ def culet():
     plate("culet", "pelvis", cul(0.0), cul(-0.005), 0.0032, axis, hung=True)
 
 
+def seat_block(J):
+    """The sculpt of the flat block between the tops of her thighs, its faces set back from theirs."""
+    socket = J["thigh_l"] + V(0.004, 0, -0.006)
+    return lambda p: S.ssub(S.box(p, V(0, 0.003, 0.930), V(0.024, 0.031, 0.032), 0.004),
+                            S.sphere(S.mirror_x(p), socket, 0.073), 0.004)
+
+
 def skirt():
-    """Scalloped plates in the culet's place, from the middle of her back round to each side."""
+    """The scalloped PLATES, hung under her fauld."""
     U, Zv = np.meshgrid(np.linspace(0, 1, 15), np.linspace(0, 1, 9), indexing="ij")
     axis, oval = FAULD
-    for name, (a0, a1) in SKIRT.items():
+    for name, (a0, a1, drop) in PLATES.items():
         A = np.radians(a0 + (a1 - a0) * U)
 
         def scallop(dr):
-            z = HUNG_Z - (0.104 - 0.030 * np.abs(2 * U - 1) ** 2.6) * Zv
+            z = HUNG_Z - (drop - 0.030 * np.abs(2 * U - 1) ** 2.6) * Zv
             r = HUNG_R + dr + 0.012 * Zv + 0.003 * np.sin(np.pi * Zv)
             return np.stack([r * np.sin(A), r * np.cos(A), z], axis=-1) * oval
 
         o = scallop(0.0)
-        bone = "skirt_%s_l" % name
-        plate("skirt_" + name, bone, o, scallop(-0.005), 0.0032, axis, mirror=True, hung=True)
+        bone, paired = plate_bones(name)[0][0], len(plate_bones(name)) > 1
+        plate("skirt_" + name, bone, o, scallop(-0.005), 0.0032, axis, mirror=paired, hung=True)
         for k, (iu, iv, size) in enumerate(((3, 2, 0.0042), (11, 2, 0.0042), (7, 6, 0.0060))):
-            stud("skirt_%s_rivet_%d" % (name, k), bone, axis, o[iu, iv], o[iu, iv] / oval ** 2 * V(1, 1, 0), size, size * 0.7)
+            stud("skirt_%s_rivet_%d" % (name, k), bone, axis, o[iu, iv], o[iu, iv] / oval ** 2 * V(1, 1, 0), size, size * 0.7, paired)
+
+
+def drape(name):
+    """The weights that hang a piece of the tabard's `name` panel: on her pelvis down to the first joint, then
+    on each chain's bones in turn, easing from one to the next across a joint and from her left chain to her right."""
+    def skin(p):
+        left = smoothstep(-0.035, 0.035, p[:, 0])
+        above = [smoothstep(z - 0.012, z + 0.012, p[:, 2]) for z in PANEL_JOINTS]
+        weights = {"pelvis": above[0]}
+        for k, below in enumerate(above[1:] + [1.0]):
+            held = (1.0 - above[k]) * below
+            weights[panel_bone(name, k, "l")] = held * left
+            weights[panel_bone(name, k, "r")] = held * (1.0 - left)
+        return weights
+    return skin
+
+
+def tabard():
+    """A cloth panel before and behind, piped and studded in brass, a gear on the front for her crest."""
+    U, Zv = np.meshgrid(np.linspace(0, 1, 17), np.linspace(0, 1, 27), indexing="ij")
+    axis, oval = FAULD
+    for name, (middle, half) in PANELS.items():
+        A = np.radians(middle + half * (2 * U - 1))
+        z = PANEL_TOP + (PANEL_HEM + 0.030 * np.abs(2 * U - 1) ** 1.5 - PANEL_TOP) * Zv
+        on_fauld = np.clip((z - PANEL_JOINTS[0]) / (PANEL_TOP - PANEL_JOINTS[0]), 0, 1)
+
+        def sheet(dr):
+            r = PANEL_R + dr - 0.0205 * on_fauld
+            return np.stack([r * np.sin(A), r * np.cos(A), z], axis=-1) * oval
+
+        o = sheet(0.003)
+        plate("tabard_" + name, None, o, sheet(0.0), 0.0022, axis, hung=True, mat="cloth", skin=drape(name))
+        for iu in (2, 14):
+            stud("tabard_%s_stud_%d" % (name, iu), "pelvis", axis, o[iu, 1], o[iu, 1] / oval ** 2 * V(1, 1, 0), 0.0042, 0.0030, False)
+    face, _ = round_fauld(np.radians(PANELS["front"][0]), PANEL_R - 0.0065, 0.980)      # on the fauld, where the cloth cannot crease it
+    v, f = gen.gear(12, 0.0205, 0.0260, r_hole=0.0065, spokes=6)
+    add("tabard_crest", "pelvis", "brass", Frame(face, V(0, -0.98, 0.19), LEFT).w(v), f, thickness=0.0025)
 
 
 # ============================================================== limbs
@@ -337,18 +434,18 @@ def rivets(name, bone, frame, z, r, count, size=0.0028, mirror=True, phase=0.0):
              size * 0.6, mirror)
 
 
-def plate(name, bone, outer, inner, rim, frame, mirror=False, hung=False):
-    """Plate of dark wood between two grids in the frame, their columns running from its top edge down, edged
-    in brass: all round, or on its three free sides if it is `hung` from under another piece."""
+def plate(name, bone, outer, inner, rim, frame, mirror=False, hung=False, mat="wood_dark", skin=None):
+    """Plate of dark wood, or of `mat`, between two grids in the frame, their columns running from its top edge
+    down, edged in brass: all round, or on its three free sides if it is `hung` from under another piece."""
     v, f = gen.patch(outer, inner)
-    add(name, bone, "wood_dark", frame.w(v), f, grain=frame, mirror=mirror)
+    add(name, bone, mat, frame.w(v), f, grain=frame, mirror=mirror, skin=skin)
     mid = 0.5 * (outer + inner)
     if hung:
         loop = np.concatenate([mid[0, 1:-1], mid[:, -1], mid[-1, -2:0:-1]])
     else:
         loop = np.concatenate([mid[:-1, 0], mid[-1, :-1], mid[:0:-1, -1], mid[0, :0:-1]])
     v, f = gen.tube(frame.w(loop), rim, 8, closed=not hung)
-    add(name + "_rim", bone, "brass", v, f, mirror=mirror)
+    add(name + "_rim", bone, "brass", v, f, mirror=mirror, skin=skin)
 
 
 def guard(name, bone, frame, R, thick, theta_max, nu, nv, rim, radii=(1.0, 1.0, 1.0)):
@@ -482,26 +579,12 @@ def hands(J, T):
             add(b[:-2], b, "wood_light", fr.w(v * V(0.9, 1.0, 1.0) + V(0, 0, g)), f, grain=fr, mirror=True)
 
 
-def legs(J, T):
-    hip, kn, an = J["thigh_l"], J["calf_l"], J["foot_l"]
-    th = Frame(hip, kn - hip, LEFT)            # local x left, y forward, z down the leg
-    L = np.linalg.norm(kn - hip)
-    prof = gen.arc(0.004, 0.062, 180, 62, 10) + list(gen.turned(
-        [(0.040, 0.0600), (0.065, 0.0690), (0.105, 0.0735), (0.170, 0.0705), (0.250, 0.0625), (0.330, 0.0540),
-         (L - 0.024, 0.0500), (L - 0.014, 0.0490), (L - 0.0090, 0.0450), (L - 0.0070, 0.030), (L - 0.0065, 0.0)]))
-    limb("thigh", "thigh_l", "wood_light", th, prof, 36, [(V(0, 0.008, L - 0.0065), V(0, -0.766, 0.643))])
-    sec = [(0.085, 0.060), (0.085, 0.0775), (0.089, 0.0790), (0.170, 0.0750), (0.270, 0.0640), (0.300, 0.0605),
-           (0.303, 0.0590), (0.303, 0.050)]
-    v, f = gen.lathe_ring(sec, 36)
-    add("cuisse", "thigh_l", "wood_dark", th.w(v), f, grain=th, mirror=True)
-    band("cuisse_trim_a", "thigh_l", "brass", th, [(0.081, 0.0772), (0.089, 0.0772)], 0.0018, 36)
-    band("cuisse_trim_b", "thigh_l", "brass", th, [(0.298, 0.0598), (0.306, 0.0590)], 0.0018, 36)
-    rivets("cuisse_rivet", "thigh_l", th, 0.108, 0.0795, 8)
-
-    # tasset: from the inner front of her thigh round its outside; the wrap carries it on behind her, where it ducks
-    # under the culet's end, domes over her seat about the hip, hangs lower, and rounds off toward her other thigh
+def tasset(th):
+    """A plate on her thigh, in the thigh's frame `th`, from the inner front round its outside. The wrap and the tabard
+    carry it on behind her, where it ducks under the culet's end, domes over her seat about the hip, hangs lower, and rounds
+    off toward her other thigh."""
     span, studs = 122, [(4, 1, 0.0042, 0.0030), (12, 1, 0.0042, 0.0030), (20, 1, 0.0042, 0.0030), (12, 8, 0.0060, 0.0042)]
-    if SEAT == "wrap":
+    if SEAT in ("wrap", "tabard"):
         span, studs = 240, studs + [(30, 8, 0.0042, 0.0030), (39, 8, 0.0042, 0.0030)]
     nu, nv = 1 + round(span / 5.08), 11
     uu, vv = np.meshgrid(np.linspace(0, 1, nu), np.linspace(0, 1, nv), indexing="ij")
@@ -522,6 +605,26 @@ def legs(J, T):
     plate("tasset", "thigh_l", o, tas(0.0885), 0.0034, th, mirror=True)
     for k, (iu, iv, size, height) in enumerate(studs):
         stud("tasset_rivet_%d" % k, "thigh_l", th, o[iu, iv], o[iu, iv] * V(1, 1, 0), size, height)
+
+
+def legs(J, T):
+    hip, kn, an = J["thigh_l"], J["calf_l"], J["foot_l"]
+    th = Frame(hip, kn - hip, LEFT)            # local x left, y forward, z down the leg
+    L = np.linalg.norm(kn - hip)
+    prof = gen.arc(0.004, 0.062, 180, 62, 10) + list(gen.turned(
+        [(0.040, 0.0600), (0.065, 0.0690), (0.105, 0.0735), (0.170, 0.0705), (0.250, 0.0625), (0.330, 0.0540),
+         (L - 0.024, 0.0500), (L - 0.014, 0.0490), (L - 0.0090, 0.0450), (L - 0.0070, 0.030), (L - 0.0065, 0.0)]))
+    limb("thigh", "thigh_l", "wood_light", th, prof, 36, [(V(0, 0.008, L - 0.0065), V(0, -0.766, 0.643))])
+    sec = [(0.085, 0.060), (0.085, 0.0775), (0.089, 0.0790), (0.170, 0.0750), (0.270, 0.0640), (0.300, 0.0605),
+           (0.303, 0.0590), (0.303, 0.050)]
+    v, f = gen.lathe_ring(sec, 36)
+    add("cuisse", "thigh_l", "wood_dark", th.w(v), f, grain=th, mirror=True)
+    band("cuisse_trim_a", "thigh_l", "brass", th, [(0.081, 0.0772), (0.089, 0.0772)], 0.0018, 36)
+    band("cuisse_trim_b", "thigh_l", "brass", th, [(0.298, 0.0598), (0.306, 0.0590)], 0.0018, 36)
+    rivets("cuisse_rivet", "thigh_l", th, 0.108, 0.0795, 8)
+
+    if SEAT != "armour":                    # the armour's plates hang in the tassets' place
+        tasset(th)
 
     cf = Frame(kn, an - kn, LEFT)
     Lc = np.linalg.norm(an - kn)
@@ -812,6 +915,7 @@ MATS = {
     "brass_dark": dict(base=(0.42, 0.29, 0.13), rough=0.40, metallic=1.0),
     "steel": dict(base=(0.74, 0.76, 0.80), rough=0.22, metallic=1.0),
     "leather": dict(base=(0.16, 0.075, 0.04), rough=0.6),
+    "cloth": dict(base=(0.05, 0.16, 0.14), rough=0.85),
     "eye": dict(base=(0.9, 0.87, 0.8), rough=0.06),
 }
 
@@ -868,8 +972,10 @@ def realize(only=None):
                 off = V(np.cos(ang), np.sin(ang), 0) * rng.uniform(0.05, 0.16) + V(0, 0, rng.uniform(-2, 2))
                 g = g + (off if pc["grain_offset"] is None else pc["grain_offset"])
             bl.grain_layers(me, g, rng.uniform(0, 1))
-            vg = ob.vertex_groups.new(name=bone)
-            vg.add(list(range(len(me.vertices))), 1.0, "REPLACE")
+            for bone, weights in (pc["skin"](co) if pc["skin"] else {bone: np.ones(len(co))}).items():
+                vg = ob.vertex_groups.new(name=bone)
+                for weight in np.unique(weights[weights > 0]):
+                    vg.add(np.flatnonzero(weights == weight).tolist(), float(weight), "REPLACE")
             objs.append(ob)
     return objs
 
@@ -897,6 +1003,10 @@ def every_frame(arm):
         for frame in range(int(first), int(last) + 1):
             set_pose(arm, name, frame)
             yield "%s:%d" % (name, frame)
+    unpose(arm)
+
+
+def unpose(arm):
     arm.animation_data_clear()
     for pb in arm.pose.bones:
         pb.matrix_basis.identity()
@@ -910,6 +1020,38 @@ def held(arm, pose):
 
 ZOOMS = {"full": ((0, 0, 0.93), 2.02, (520, 1000)), "upper": ((0, 0, 1.36), 1.05, (640, 640)),
          "head": ((0, -0.03, 1.66), 0.34, (600, 600))}
+
+
+def carried(bone):
+    """The vertices at rest of every piece that `bone` carries, or carries most of the weight of."""
+    parts = []
+    for pc in PIECES:
+        if pc["skin"]:
+            parts.append(pc["verts"][pc["skin"](pc["verts"]).get(bone, np.zeros(len(pc["verts"]))) > 0.5])
+        elif pc["bone"] == bone:
+            parts.append(pc["verts"])
+        elif pc["mirror"] and bone == pc["bone"][:-2] + "_r":
+            parts.append(pc["verts"] * V(-1, 1, 1))
+    return np.concatenate(parts)
+
+
+def hung():
+    """What `hang` turns, parents first, and her legs for it to rest on: each leg bone's pieces as spheres."""
+    hinges = []
+    for name in PLATES:
+        for bone, s, _ in plate_bones(name):
+            tuck = PLATE_TUCKS.get(name, 0.0)
+            hinges.append(hang.Hinge(bone, carried(bone), (-tuck, SKIRT_SWING[1]), tuck=tuck, thighs=s))
+    for name in PANELS if SEAT == "tabard" else ():
+        for s, _ in SIDES:
+            above = None
+            for k in range(len(PANEL_JOINTS)):
+                bone = panel_bone(name, k, s)
+                above = hang.Hinge(bone, carried(bone), PANEL_BEND if above else PANEL_SWING, above,
+                                   PANEL_TUCKS[k] if name == "back" else 0.0, s)
+                hinges.append(above)
+    legs = {part + s: hang.spheres(carried(part + s)) for part in ("thigh", "poleyn", "calf", "foot") for s in ("_l", "_r")}
+    return hinges, legs
 
 
 def preview(arm, path, views, zoom):
@@ -961,6 +1103,11 @@ def main():
     head_pieces(int(opt("--res", "96")))
     clockwork()
     sword()
+    if RECESSED:
+        block = seat_block(J)
+        hang.bake(arm, {name: bpy.data.actions[name] for name in CLIPS}, *hung(), set_pose,
+                  lambda p: np.minimum(block(p), S.plane(p, V(0, 0, SEAT_FLOOR), DOWN)))
+        unpose(arm)
     objs = realize(only)
     if opt("--gaps"):
         movers, others = (side.split(",") for side in opt("--gaps").split("/"))
