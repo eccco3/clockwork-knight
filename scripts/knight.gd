@@ -114,6 +114,7 @@ func _ready() -> void:
 	for v: VisualInstance3D in find_children("*", "VisualInstance3D", true, false):
 		v.layers = Layers.CHARACTERS
 	_apply_pose(0.0)
+	skel.add_child(JointLight.new(skel, mesh, anim.bones))
 
 
 func _find(n: Node, type: String) -> Node:
