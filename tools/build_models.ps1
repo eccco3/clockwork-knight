@@ -25,7 +25,9 @@ try {
     '--', '--kind', 'scuttler', '--out', 'assets/models/scuttler.glb')
   Invoke-Step 'rosalyn' $blender @('--background', '--python-exit-code', '1', '--python', 'tools/rosalyn/build_rosalyn.py',
     '--', '--out', 'assets/models/rosalyn.glb')
-  foreach ($model in 'hall', 'knight', 'grinner', 'scuttler', 'rosalyn') {
+  Invoke-Step 'minion' $blender @('--background', '--python-exit-code', '1', '--python', 'tools/minion/build_minion.py',
+    '--', '--out', 'assets/models/minion.glb')
+  foreach ($model in 'hall', 'knight', 'grinner', 'scuttler', 'rosalyn', 'minion') {
     if (-not (Test-Path "assets\models\$model.glb")) { throw "$model.glb was not written" }
   }
   Invoke-Step 'import' $godot @('--path', '.', '--headless', '--import')

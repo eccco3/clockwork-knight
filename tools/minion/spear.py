@@ -8,6 +8,10 @@ from .body import part
 
 LENGTH = 1.215
 SHAFT = 0.0095
+# The leaf's outline, rounded through enough rings that its flats run smooth from socket to point. Its section is a
+# flat diamond, whose faces meet across the midrib at 23 degrees: `sharp` creases there and at the edges only.
+BLADE = [(1.045, 0.0), (1.046, 0.0070), (1.056, 0.0118), (1.066, 0.0150), (1.078, 0.0174), (1.090, 0.0185), (1.103, 0.0183),
+         (1.118, 0.0170), (1.135, 0.0148), (1.152, 0.0122), (1.168, 0.0094), (1.183, 0.0064), (1.198, 0.0034), (LENGTH, 0.0)]
 
 
 def parts():
@@ -18,6 +22,5 @@ def parts():
         part("spear_shaft", "wood", gen.lathe([(0.030, 0.0), (0.030, SHAFT), (1.020, SHAFT * 0.92), (1.020, 0.0)], 8), axis),
         part("spear_socket", "brass", gen.lathe([(1.000, 0.0), (1.000, 0.0118), (1.006, 0.0130), (1.012, 0.0118), (1.050, 0.0085),
                                                  (1.056, 0.0)], 8), axis),
-        part("spear_blade", "steel", gen.lathe([(1.045, 0.0), (1.046, 0.0070), (1.066, 0.0150), (1.095, 0.0185), (1.135, 0.0150),
-                                                (1.180, 0.0080), (LENGTH, 0.0)], 4, sy=0.2), axis, sharp=25.0),
+        part("spear_blade", "steel", gen.lathe(BLADE, 4, sy=0.2), axis, sharp=15.0),
     ]

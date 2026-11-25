@@ -29,6 +29,7 @@ PREVIEWS = {                                    # how Blender shows what the gam
     "wood": dict(base=(0.66, 0.47, 0.27), rough=0.40),
     "wood_dark": dict(base=(0.030, 0.024, 0.020), rough=0.22),
     "lacquer": dict(base=(0.42, 0.050, 0.040), rough=0.20),
+    "navy": dict(base=(0.030, 0.040, 0.105), rough=0.22),
     "brass": dict(base=(0.86, 0.62, 0.26), rough=0.28, metallic=1.0),
     "steel": dict(base=(0.74, 0.76, 0.80), rough=0.22, metallic=1.0),
     "leather": dict(base=(0.16, 0.075, 0.04), rough=0.60),

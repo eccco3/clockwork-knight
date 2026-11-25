@@ -1,4 +1,4 @@
-﻿extends SceneTree
+extends SceneTree
 ## Dev check (not used at runtime), needs a renderer:  godot --path . --script res://dev/detail_check.gd [-- <model>]
 ## Proves a figure's model, the grinner's unless another is named, draws exactly one detail level wherever the
 ## camera is. Each figure gets a world of its own with the camera already in place before its first frame, in the

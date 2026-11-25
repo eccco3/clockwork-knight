@@ -5,10 +5,10 @@ carved wood with brass works, and an ally cut from her timber reads as hers at a
 pale skin and rags. Turned limbs and rigid plates are the cheapest forms the toolkit makes, and many of him share
 the field. And every piece is rigid on one segment, so a few bones will move him without skinning.
 
-His design is a toy soldier's: limbs turned from pale wood on ball joints with brass axle caps, tall black
-lacquered boots, a black kettle helmet rimmed in brass, and a cuirass, shoulder caps and skirt lacquered in the
-crimson of the hall's banner, whose gold cog he wears on his breast. His face is a carved block with bead eyes
-and a moustache; his proportions, not his likeness, make him a grown man.
+His design is a toy soldier's: arms turned from pale wood on ball joints with brass axle caps, navy trousers
+into black calf boots, a black kettle helmet rimmed in brass, and a cuirass, shoulder caps, skirt and tassets
+lacquered in the crimson of the hall's banner, whose gold cog he wears on his breast. His face is a carved block with
+bead eyes and a moustache; his proportions, not his likeness, make him a grown man.
 
 World frame as the knight's: +X his left, -Y forward, +Z up, metres, feet on z = 0. He stands to attention with
 the spear grounded in his right fist. Each piece's name starts with the segment that carries it: chest, hips,
@@ -28,6 +28,7 @@ HEIGHT = KNIGHT_HEIGHT * 2 / 3                 # to the crown of his helmet
 
 HIP, KNEE, ANKLE = V(0.060, 0.004, 0.612), V(0.062, -0.006, 0.332), V(0.064, 0.008, 0.052)
 SHOULDER = V(0.135, 0.004, 0.945)
+ARMHOLE = SHOULDER + V(0.006, 0, 0)            # the centre of the hollow his cuirass is cut with, for the arm to turn in
 SKULL = V(0, -0.006, 1.100)
 TRUNK = Frame(V(0, 0.004, 0), UP, LEFT), 0.76  # the axis his hips are turned on, and how they are pressed oval
 CORE = 0.050                                   # the radius his hips are bored out to, out of sight
@@ -41,6 +42,8 @@ CARRY = {1: (V(0.10, 0.03, -1), V(0.05, -0.20, -1), V(0.05, -0.20, -1)),
          -1: (V(-0.12, 0.16, -1), V(-0.04, -1, -0.50), V(-0.05, -1, 0))}
 HOLLOW = V(-0.003, 0, 0.036)                   # the hollow of a fist in the hand's frame
 CAP = 0.058, 1.06, 0.92                        # a shoulder cap: its radius, and how it is pressed wide and low
+# How far a tasset wraps his thigh from its outside round the front, and where it hangs: from under his skirt to mid-thigh.
+TASSET = np.radians((-30, 150)), (0.030, 0.150)
 
 
 def arm_frames(sx):
@@ -107,12 +110,18 @@ def cuirass(p):
     d = S.smin(d, S.ellipsoid(p, V(0, 0.040, 0.900), V(0.098, 0.046, 0.085)), 0.040)             # shoulder blades
     d = S.smax(d, S.plane(p, V(0, 0, 0.706), DOWN), 0.008)
     d = S.smax(d, S.plane(p, V(0, 0, 0.998), UP), 0.010)
-    return S.ssub(d, S.sphere(q, SHOULDER + V(0.006, 0, 0), 0.045), 0.006)                       # where the arms seat
+    return S.ssub(d, S.sphere(q, ARMHOLE, 0.045), 0.012)                                          # where the arms seat
+
+
+def armhole_rim(p):
+    """How near p is to the rim of an armhole, as a weight that peaks there: the lattice gathers along it."""
+    return 1 + 8 * np.exp(-((S.length(S.mirror_x(p) - ARMHOLE) - 0.045) / 0.010) ** 2)
 
 
 def chest():
     """The crimson cuirass with the hall's cog on its breast, the gorget, and the winding key between his shoulder blades."""
-    out = [sculpted("chest_cuirass", "lacquer", cuirass, (V(0, 0, 0.780), V(0, 0, 0.930)), (0.15, 0.10, 0.16), (16, 10, 16)),
+    out = [sculpted("chest_cuirass", "lacquer", cuirass, (V(0, 0, 0.780), V(0, 0, 0.930)), (0.15, 0.10, 0.16), (16, 10, 16),
+                    density=armhole_rim),
            part("chest_gorget", "brass", gen.lathe_ring([(GORGET - 0.014, 0.036), (GORGET - 0.014, 0.047), (GORGET - 0.007, 0.0495),
                                                          (GORGET, 0.046), (GORGET, 0.036)], 16, sy=0.95), NECK)]
     breast = Frame(on(cuirass, V(0, 0, 0.900), FWD), FWD, LEFT)
@@ -160,23 +169,33 @@ def boot(p):
     return S.smax(d, S.plane(p, V(0, 0, 0), DOWN), 0.004)
 
 
+def tasset(thigh):
+    """A crimson plate curved over the front and outside of the thigh, flaring a little to its hem."""
+    (a0, a1), (z0, z1) = TASSET
+    a, z = np.meshgrid(np.linspace(a0, a1, 10), np.linspace(z0, z1, 4), indexing="ij")
+    face = lambda r: np.stack([r * np.cos(a), r * np.sin(a), z], axis=-1)
+    flare = 0.0595 + 0.025 * (z - z0)
+    return part("thigh_tasset", "lacquer", gen.patch(face(flare), face(flare - 0.004)), thigh, True)
+
+
 def legs():
-    """Thighs of pale wood on ball joints, and black boots to the knee with a brass band round their tops."""
+    """Navy trousers over ball-jointed knees, tucked into black calf boots, and a crimson tasset over each thigh."""
     thigh = Frame(HIP, KNEE - HIP, LEFT)
     long = np.linalg.norm(KNEE - HIP)
     prof = gen.arc(0.0, 0.046, 180, 70, 4) + [(0.050, 0.0520), (0.105, 0.0535), (0.175, 0.0465), (0.235, 0.0395),
                                                (long - 0.012, 0.0360), (long - 0.005, 0.0300), (long - 0.004, 0.0)]
-    out = [part("thigh", "wood", gen.lathe(prof, 16), thigh, True)]
+    out = [part("thigh", "navy", gen.lathe(prof, 16), thigh, True), tasset(thigh)]
 
     shin = Frame(KNEE, ANKLE - KNEE, LEFT)
     long = np.linalg.norm(ANKLE - KNEE)
-    out.append(ball("shin_knee", "wood", shin, 0.037, 12, True))
+    out.append(ball("shin_knee", "navy", shin, 0.037, 12, True))
     out += axle("shin_knee_pin", shin, 0.037, True)
-    prof = [(0.018, 0.0), (0.020, 0.0300), (0.040, 0.0440), (0.047, 0.0445), (0.058, 0.0405), (0.100, 0.0430),
-            (0.170, 0.0365), (0.235, 0.0300), (long + 0.006, 0.0310), (long + 0.007, 0.0)]
+    prof = [(0.018, 0.0), (0.020, 0.0300), (0.034, 0.0400), (0.060, 0.0420), (0.100, 0.0405), (0.140, 0.0360),
+            (0.165, 0.0335), (0.166, 0.0)]
+    out.append(part("shin_trousers", "navy", gen.lathe(prof, 16), shin, True))
+    prof = [(0.140, 0.0), (0.141, 0.0372), (0.146, 0.0388), (0.152, 0.0378), (0.170, 0.0355), (0.235, 0.0300),
+            (long + 0.006, 0.0310), (long + 0.007, 0.0)]
     out.append(part("shin_boot", "wood_dark", gen.lathe(prof, 16), shin, True))
-    out.append(part("shin_boot_band", "brass", gen.lathe_ring([(0.039, 0.0420), (0.040, 0.0462), (0.047, 0.0466), (0.048, 0.0420)],
-                                                              16), shin, True))
     out.append(sculpted("foot", "wood_dark", boot, (V(ANKLE[0], 0.030, 0.030), V(ANKLE[0], -0.075, 0.024)), (0.04, 0.10, 0.04),
                         (5, 9, 5), grain=Frame(ANKLE, FWD, LEFT), mirror=True))
     return out
