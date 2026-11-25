@@ -33,17 +33,25 @@ SKULL = V(0, -0.006, 1.100)
 TRUNK = Frame(V(0, 0.004, 0), UP, LEFT), 0.76  # the axis his hips are turned on, and how they are pressed oval
 CORE = 0.050                                   # the radius his hips are bored out to, out of sight
 NECK = Frame(V(0, -0.001, 0), UP, LEFT)
+KEY = V(0, 0.01, 0.890)                        # a point inside his chest, level with the winding key in his back
 GORGET = 1.006                                 # the top of the brass collar his neck turns in
 HELM = Frame(V(0, -0.002, 1.128), UP, LEFT), (0.93, 1.07)   # his helmet's axis from the root of its brim, and its oval
 UPPER_ARM, FOREARM = 0.215, 0.175
+KNEE_BALL, ELBOW_BALL = 0.037, 0.030           # the radii of his ball joints
 # How he carries each arm, by the sign of its side: the way its upper arm runs, its forearm, and its knuckles.
 # The left hangs at his side. The right is bent to hold the spear upright, its fist level.
 CARRY = {1: (V(0.10, 0.03, -1), V(0.05, -0.20, -1), V(0.05, -0.20, -1)),
          -1: (V(-0.12, 0.16, -1), V(-0.04, -1, -0.50), V(-0.05, -1, 0))}
 HOLLOW = V(-0.003, 0, 0.036)                   # the hollow of a fist in the hand's frame
 CAP = 0.058, 1.06, 0.92                        # a shoulder cap: its radius, and how it is pressed wide and low
+CUIRASS = (V(0, 0, 0.780), V(0, 0, 0.930)), (0.15, 0.10, 0.16)   # the axis his cuirass is wrapped about, and its rough half-size
 # How far a tasset wraps his thigh from its outside round the front, and where it hangs: from under his skirt to mid-thigh.
 TASSET = np.radians((-30, 150)), (0.030, 0.150)
+
+
+def leg_frames():
+    """The left leg's thigh and shin: each frame's z runs from its joint down the segment, and its x to his left."""
+    return Frame(HIP, KNEE - HIP, LEFT), Frame(KNEE, ANKLE - KNEE, LEFT)
 
 
 def arm_frames(sx):
@@ -57,6 +65,11 @@ def arm_frames(sx):
 
 
 GRIP = arm_frames(-1)[2].w(HOLLOW)             # where the spear's shaft passes through his right fist
+
+
+def cap_frame(sx):
+    """A shoulder cap's frame: its z out through the crown of its dome, tipped out over the arm."""
+    return Frame(SHOULDER * V(sx, 1, 1) + UP * 0.002, UP * 0.84 + LEFT * sx * 0.55, BACK)
 
 
 # ---------------------------------------------------------------- making pieces
@@ -83,24 +96,34 @@ def on(field, origin, toward):
     return S.hug(field, origin, S.normalize(toward), UP, 1, 0.0, 0.0, off=0.0)[0]
 
 
+def counts(detail):
+    """How many sides or lattice cells `detail` leaves of a count, or of each of several: n in the builders below."""
+    one = lambda count: max(3, int(round(count * detail)))
+    return lambda *given: one(*given) if len(given) == 1 else tuple(map(one, given))
+
+
 def ball(name, mat, frame, r, segs, mirror=False):
     return part(name, mat, gen.lathe(gen.arc(0.0, r, 0, 180, segs // 2 + 1), segs), frame, mirror)
 
 
-def stud(name, frame, size, mirror=False):
+def stud(name, frame, size, segs, mirror=False):
     """A brass dome rising along the frame's z."""
-    return part(name, "brass", gen.dome(size, size * 0.55, 8, 2), frame, mirror)
+    return part(name, "brass", gen.dome(size, size * 0.55, segs, 2), frame, mirror)
 
 
-def axle(name, frame, r, mirror=False):
-    """The brass caps on both ends of the pin a ball joint turns on: the frame's x."""
-    return [stud("%s_%s" % (name, end), Frame(frame.w((sx * (r - 0.003), 0, 0)), frame.dir((sx, 0, 0)), frame.dir((0, 0, 1))),
-                 0.38 * r, mirror) for end, sx in (("out", 1), ("in", -1))]
+def pin(frame, sx, r):
+    """Where one end of the pin a ball joint of radius r turns on comes out: the frame's x, on the side sx."""
+    return Frame(frame.w((sx * (r - 0.003), 0, 0)), frame.dir((sx, 0, 0)), frame.dir((0, 0, 1)))
+
+
+def axle(name, frame, r, segs, mirror=False):
+    """The brass caps on both ends of a ball joint's pin."""
+    return [stud("%s_%s" % (name, end), pin(frame, sx, r), 0.38 * r, segs, mirror) for end, sx in (("out", 1), ("in", -1))]
 
 
 # ---------------------------------------------------------------- trunk
 
-def cuirass(p):
+def cuirass(p, hem=0.706):
     q = S.mirror_x(p)
     d = S.smin(S.ellipsoid(p, V(0, 0.000, 0.895), V(0.120, 0.086, 0.120)),                       # chest
                S.ellipsoid(p, V(0, 0.002, 0.770), V(0.090, 0.068, 0.110)), 0.060)                # waist
@@ -108,7 +131,7 @@ def cuirass(p):
     d = S.smin(d, S.cone(q, V(0, 0.008, 0.990), V(0.094, 0.006, 0.958), 0.036, 0.030), 0.030)    # the slope from neck to shoulder
     d = S.smin(d, S.ellipsoid(q, V(0.047, -0.054, 0.898), V(0.054, 0.035, 0.047)), 0.035)        # the chest's two plates
     d = S.smin(d, S.ellipsoid(p, V(0, 0.040, 0.900), V(0.098, 0.046, 0.085)), 0.040)             # shoulder blades
-    d = S.smax(d, S.plane(p, V(0, 0, 0.706), DOWN), 0.008)
+    d = S.smax(d, S.plane(p, V(0, 0, hem), DOWN), 0.008)
     d = S.smax(d, S.plane(p, V(0, 0, 0.998), UP), 0.010)
     return S.ssub(d, S.sphere(q, ARMHOLE, 0.045), 0.012)                                          # where the arms seat
 
@@ -118,34 +141,33 @@ def armhole_rim(p):
     return 1 + 8 * np.exp(-((S.length(S.mirror_x(p) - ARMHOLE) - 0.045) / 0.010) ** 2)
 
 
-def chest():
+def chest(n):
     """The crimson cuirass with the hall's cog on its breast, the gorget, and the winding key between his shoulder blades."""
-    out = [sculpted("chest_cuirass", "lacquer", cuirass, (V(0, 0, 0.780), V(0, 0, 0.930)), (0.15, 0.10, 0.16), (16, 10, 16),
-                    density=armhole_rim),
+    out = [sculpted("chest_cuirass", "lacquer", cuirass, *CUIRASS, n(16, 10, 16), density=armhole_rim),
            part("chest_gorget", "brass", gen.lathe_ring([(GORGET - 0.014, 0.036), (GORGET - 0.014, 0.047), (GORGET - 0.007, 0.0495),
-                                                         (GORGET, 0.046), (GORGET, 0.036)], 16, sy=0.95), NECK)]
+                                                         (GORGET, 0.046), (GORGET, 0.036)], n(16), sy=0.95), NECK)]
     breast = Frame(on(cuirass, V(0, 0, 0.900), FWD), FWD, LEFT)
     out.append(part("chest_cog", "brass", gen.gear(10, 0.0165, 0.0210), Frame(breast.w((0, 0, 0.0030)), FWD, LEFT),
                     thickness=-0.0160))
-    out.append(stud("chest_cog_boss", Frame(breast.w((0, 0, 0.0030)), FWD, LEFT), 0.0075))
+    out.append(stud("chest_cog_boss", Frame(breast.w((0, 0, 0.0030)), FWD, LEFT), 0.0075, n(8)))
 
-    spine = Frame(on(cuirass, V(0, 0.01, 0.890), BACK) - BACK * 0.002, BACK, LEFT)
+    spine = Frame(on(cuirass, KEY, BACK) - BACK * 0.002, BACK, LEFT)
     out.append(part("chest_key_plate", "brass", gen.lathe_ring([(0.0, 0.012), (0.0, 0.021), (0.004, 0.022), (0.007, 0.019),
-                                                                (0.007, 0.012)], 12), spine))
+                                                                (0.007, 0.012)], n(12)), spine))
     out.append(part("chest_key_shaft", "brass", gen.lathe([(0.0, 0.0), (0.0, 0.0125), (0.006, 0.0125), (0.009, 0.0060),
-                                                           (0.046, 0.0052), (0.050, 0.0078), (0.054, 0.0052), (0.054, 0.0)], 8), spine))
+                                                           (0.046, 0.0052), (0.050, 0.0078), (0.054, 0.0052), (0.054, 0.0)], n(8)), spine))
     out.append(part("chest_key_neck", "brass", gen.box((0.0075, 0.0028, 0.0100)), Frame(spine.w((0, 0, 0.060)), BACK, LEFT)))
     for sx in (1, -1):
         bow = Frame(spine.w((sx * 0.0225, 0, 0.0700)), spine.dir((0, 1, 0)), spine.dir((1, 0, 0)))
         out.append(part("chest_key_bow_%d" % sx, "brass", gen.lathe_ring([(-0.0030, 0.0180), (0.0, 0.0235), (0.0030, 0.0180),
-                                                                         (0.0, 0.0125)], 12), bow))
+                                                                         (0.0, 0.0125)], n(12)), bow))
     return out
 
 
-def hips():
+def hips(n):
     """His belt and the two lacquered lames under it, turned solid: his legs come out of the lower one's flat underside."""
     axis, oval = TRUNK
-    turned = lambda section: gen.lathe_ring(section, 20, sy=oval)
+    turned = lambda section: gen.lathe_ring(section, n(20), sy=oval)
     out = [part("hips_belt", "leather", turned([(0.692, 0.074), (0.6935, 0.0885), (0.7125, 0.0885), (0.714, 0.074)]), axis),
            part("hips_lame_upper", "lacquer", turned([(0.695, CORE), (0.695, 0.0865), (0.630, 0.1065), (0.627, 0.1050),
                                                       (0.627, CORE)]), axis),
@@ -169,35 +191,34 @@ def boot(p):
     return S.smax(d, S.plane(p, V(0, 0, 0), DOWN), 0.004)
 
 
-def tasset(thigh):
+def tasset(thigh, n):
     """A crimson plate curved over the front and outside of the thigh, flaring a little to its hem."""
     (a0, a1), (z0, z1) = TASSET
-    a, z = np.meshgrid(np.linspace(a0, a1, 10), np.linspace(z0, z1, 4), indexing="ij")
+    a, z = np.meshgrid(np.linspace(a0, a1, n(10)), np.linspace(z0, z1, 4), indexing="ij")
     face = lambda r: np.stack([r * np.cos(a), r * np.sin(a), z], axis=-1)
     flare = 0.0595 + 0.025 * (z - z0)
     return part("thigh_tasset", "lacquer", gen.patch(face(flare), face(flare - 0.004)), thigh, True)
 
 
-def legs():
+def legs(n):
     """Navy trousers over ball-jointed knees, tucked into black calf boots, and a crimson tasset over each thigh."""
-    thigh = Frame(HIP, KNEE - HIP, LEFT)
+    thigh, shin = leg_frames()
     long = np.linalg.norm(KNEE - HIP)
     prof = gen.arc(0.0, 0.046, 180, 70, 4) + [(0.050, 0.0520), (0.105, 0.0535), (0.175, 0.0465), (0.235, 0.0395),
                                                (long - 0.012, 0.0360), (long - 0.005, 0.0300), (long - 0.004, 0.0)]
-    out = [part("thigh", "navy", gen.lathe(prof, 16), thigh, True), tasset(thigh)]
+    out = [part("thigh", "navy", gen.lathe(prof, n(16)), thigh, True), tasset(thigh, n)]
 
-    shin = Frame(KNEE, ANKLE - KNEE, LEFT)
     long = np.linalg.norm(ANKLE - KNEE)
-    out.append(ball("shin_knee", "navy", shin, 0.037, 12, True))
-    out += axle("shin_knee_pin", shin, 0.037, True)
+    out.append(ball("shin_knee", "navy", shin, KNEE_BALL, n(12), True))
+    out += axle("shin_knee_pin", shin, KNEE_BALL, n(8), True)
     prof = [(0.018, 0.0), (0.020, 0.0300), (0.034, 0.0400), (0.060, 0.0420), (0.100, 0.0405), (0.140, 0.0360),
             (0.165, 0.0335), (0.166, 0.0)]
-    out.append(part("shin_trousers", "navy", gen.lathe(prof, 16), shin, True))
+    out.append(part("shin_trousers", "navy", gen.lathe(prof, n(16)), shin, True))
     prof = [(0.140, 0.0), (0.141, 0.0372), (0.146, 0.0388), (0.152, 0.0378), (0.170, 0.0355), (0.235, 0.0300),
             (long + 0.006, 0.0310), (long + 0.007, 0.0)]
-    out.append(part("shin_boot", "wood_dark", gen.lathe(prof, 16), shin, True))
+    out.append(part("shin_boot", "wood_dark", gen.lathe(prof, n(16)), shin, True))
     out.append(sculpted("foot", "wood_dark", boot, (V(ANKLE[0], 0.030, 0.030), V(ANKLE[0], -0.075, 0.024)), (0.04, 0.10, 0.04),
-                        (5, 9, 5), grain=Frame(ANKLE, FWD, LEFT), mirror=True))
+                        n(5, 9, 5), grain=Frame(ANKLE, FWD, LEFT), mirror=True))
     return out
 
 
@@ -210,27 +231,27 @@ def fist(l):
     return S.smin(d, S.sphere(l, V(0, 0, 0), 0.0215), 0.006)                                            # the wrist's ball
 
 
-def arm(sx, side):
+def arm(sx, side, n):
     """One arm: a shoulder cap of crimson lacquer over a ball joint, turned upper arm and forearm, and a fist."""
     upper, fore, hand = arm_frames(sx)
     prof = gen.arc(0.0, 0.045, 180, 75, 4) + [(0.045, 0.0445), (0.095, 0.0425), (0.155, 0.0345), (UPPER_ARM - 0.012, 0.0310),
                                                (UPPER_ARM - 0.005, 0.0265), (UPPER_ARM - 0.004, 0.0)]
-    out = [part("upperarm_" + side, "wood", gen.lathe(prof, 14), upper)]
-    cap = Frame(upper.o + UP * 0.002, UP * 0.84 + LEFT * sx * 0.55, BACK)
+    out = [part("upperarm_" + side, "wood", gen.lathe(prof, n(14)), upper)]
+    cap = cap_frame(sx)
     dome = [(z * CAP[2], r) for z, r in gen.arc(0.0, CAP[0], 0, 72, 5)]
     hollow = [(0.62 * CAP[0], 0.0)]            # coned out underneath, so its rim hangs clear of the arm
-    out.append(part("upperarm_%s_cap" % side, "lacquer", gen.lathe(dome + hollow, 14, sy=CAP[1]), cap))
-    out.append(stud("upperarm_%s_cap_boss" % side, Frame(cap.w((0, 0, CAP[0] * CAP[2] - 0.001)), cap.dir((0, 0, 1)), BACK), 0.0085))
+    out.append(part("upperarm_%s_cap" % side, "lacquer", gen.lathe(dome + hollow, n(14), sy=CAP[1]), cap))
+    out.append(stud("upperarm_%s_cap_boss" % side, Frame(cap.w((0, 0, CAP[0] * CAP[2] - 0.001)), cap.dir((0, 0, 1)), BACK), 0.0085, n(8)))
 
-    out.append(ball("forearm_%s_elbow" % side, "wood", fore, 0.030, 10))
-    out += axle("forearm_%s_elbow_pin" % side, fore, 0.030)
+    out.append(ball("forearm_%s_elbow" % side, "wood", fore, ELBOW_BALL, n(10)))
+    out += axle("forearm_%s_elbow_pin" % side, fore, ELBOW_BALL, n(8))
     prof = [(0.008, 0.0), (0.009, 0.0230), (0.030, 0.0325), (0.065, 0.0335), (0.120, 0.0270), (FOREARM - 0.012, 0.0222),
             (FOREARM - 0.004, 0.0215), (FOREARM - 0.003, 0.0)]
-    out.append(part("forearm_" + side, "wood", gen.lathe(prof, 14), fore))
+    out.append(part("forearm_" + side, "wood", gen.lathe(prof, n(14)), fore))
     out.append(part("forearm_%s_band" % side, "brass", gen.lathe_ring([(FOREARM - 0.034, 0.0225), (FOREARM - 0.033, 0.0262),
-                                                                       (FOREARM - 0.019, 0.0248), (FOREARM - 0.018, 0.0210)], 14), fore))
+                                                                       (FOREARM - 0.019, 0.0248), (FOREARM - 0.018, 0.0210)], n(14)), fore))
     out.append(sculpted("hand_" + side, "wood", fist, (HOLLOW - V(0, 0, 0.024), HOLLOW + V(0, 0, 0.014)), (0.024, 0.030, 0.040),
-                        (4, 5, 6), hand, flip=sx))
+                        n(4, 5, 6), hand, flip=sx))
     return out
 
 
@@ -253,31 +274,34 @@ def face(p):
     return S.smin(d, S.cone(p, SKULL + V(0, 0.006, -0.030), NECK.w((0, 0, 0.985)), 0.0350, 0.0365), 0.012)  # the neck, down into his gorget
 
 
-def head():
+def head(n):
     """His carved head and neck with bead eyes and a moustache, under a black kettle helmet rimmed in brass."""
     axis, (sx, sy) = HELM
     features = SKULL + V(0, -0.060, -0.016)
-    out = [sculpted("head", "wood", face, (SKULL + V(0, 0, -0.060), SKULL + V(0, 0, 0.020)), (0.06, 0.07, 0.11), (11, 11, 14),
+    out = [sculpted("head", "wood", face, (SKULL + V(0, 0, -0.060), SKULL + V(0, 0, 0.020)), (0.06, 0.07, 0.11), n(11, 11, 14),
                     density=lambda p: 1 + 3 * np.exp(-(S.length(p - features) / 0.045) ** 2),
                     hidden=lambda v: (v[:, 2] > axis.o[2] + 0.012) | (v[:, 2] < GORGET - 0.006)),
-           ball("head_eye", "wood_dark", Frame(SKULL + V(0.021, -0.0570, -0.008), LEFT, UP), 0.0072, 10, True),
+           ball("head_eye", "wood_dark", Frame(SKULL + V(0.021, -0.0570, -0.008), LEFT, UP), 0.0072, n(10), True),
            part("head_moustache", "wood_dark", gen.tube(SKULL + V((0.0015, -0.0720, -0.0345), (0.0140, -0.0690, -0.0375),
-                                                                  (0.0270, -0.0600, -0.0450)), [0.0062, 0.0056, 0.0030], 6),
+                                                                  (0.0270, -0.0600, -0.0450)), [0.0062, 0.0056, 0.0030], n(6)),
                 UPRIGHT, True)]
 
     dome = [(0.010 + (CROWN - 0.010) * np.sin(t), 0.0585 * np.cos(t)) for t in np.radians((0, 20, 39, 56, 71, 82, 90))]
     prof = [(0.016, 0.0), (0.000, 0.0500), (-0.006, 0.0640), (-0.0160, 0.0900), (-0.0190, BRIM), (-0.0150, BRIM),
             (-0.0040, 0.0800), (0.0030, 0.0615)] + dome
-    out.append(part("head_helm", "wood_dark", gen.lathe(prof, 24, sx, sy), axis))
+    out.append(part("head_helm", "wood_dark", gen.lathe(prof, n(24), sx, sy), axis))
     out.append(part("head_helm_rim", "brass", gen.lathe_ring([(-0.0200, BRIM - 0.0030), (-0.0170, BRIM + 0.0022),
-                                                              (-0.0140, BRIM - 0.0030)], 24, sx, sy), axis))
-    out.append(stud("head_helm_boss", Frame(axis.w((0, 0, CROWN - 0.001)), UP, LEFT), BOSS))
+                                                              (-0.0140, BRIM - 0.0030)], n(24), sx, sy), axis))
+    out.append(stud("head_helm_boss", Frame(axis.w((0, 0, CROWN - 0.001)), UP, LEFT), BOSS, n(8)))
     for k in range(6):
         a = 2 * np.pi * (k + 0.5) / 6
         out.append(stud("head_helm_rivet_%d" % k, Frame(axis.w((0.0590 * np.cos(a) * sx, 0.0590 * np.sin(a) * sy, 0.012)),
-                                                        V(np.cos(a), np.sin(a), 0.2), UP), 0.0048))
+                                                        V(np.cos(a), np.sin(a), 0.2), UP), 0.0048, n(8)))
     return out
 
 
-def parts():
-    return chest() + hips() + legs() + arm(1, "l") + arm(-1, "r") + head()
+def parts(detail=1.0):
+    """Every piece of him. `detail` scales how many sides his turned pieces have and how finely his sculpted ones
+    are wrapped: a variant that shows more of his works pays for them with a little of it."""
+    n = counts(detail)
+    return chest(n) + hips(n) + legs(n) + arm(1, "l", n) + arm(-1, "r", n) + head(n)

@@ -34,20 +34,6 @@ None. The dev's combat direction, for this and the battle items:
 
 Not started. Enemies only appear outside. The crowd test found 40 units well within 60 fps; `Cadence` slows distant grinners' animation.
 
-## Rosalyn: rig and standing pose
-
-### Task description
-
-Rig Rosalyn: shoulders and upper body for gesturing, fingers, and her head and neck. Her wooden face does not deform. Skin the dress so the smocked bodice and skirt deform cleanly. Pose her standing with her hands clasped in front of her, and animate a quiet idle on that pose: breathing and small weight shifts. Deliver turnarounds and a contact sheet of the idle.
-
-### Open questions
-
-None. Bones are enough for the skirt while she stands. Her eyes blink and move.
-
-### Status
-
-In progress on branch `worktree-agent-a67a951fb109a0580` (unmerged WIP): 72 bones, an Idle (breathing only) and a Blink, clay-checked at half detail; shared rig, key and turn helpers in `tools/sculpt/`. Left: render the last sleeve-blend change; boxy shoulders and the raised arm's collapse; clasped fingers, the stray thumb and shards by the right wrist; gaps at the shut lids' corners; weight shifts and eyes in the idle; everything in Godot.
-
 ## Rosalyn: speech and gestures
 
 ### Task description
@@ -60,7 +46,7 @@ None. She turns her head to follow the knight, within a limited range blended in
 
 ### Status
 
-Not started.
+Not started. Her rig (80 bones), idle and blink are built. Left over from it: a fully overhead raise bulks the sleeve, a pale streak down the skirt's side in Godot, a dark tick at each outer lid corner, and a crease along the palm's edge.
 
 ## Rosalyn: a moving mouth
 
@@ -251,20 +237,6 @@ In the sword clips her upper arm sinks up to 30 mm into her chest and passes thr
 
 In progress on branch `worktree-agent-add37c3e80de4452a` (unmerged WIP): pauldrons keyed clear of the arm (`follow.py`) and the chest pocketed from the shoulders' sweep (`sweep.py`), never yet built. Left: before/after `--gaps` numbers; choose between the swept pocket and limiting the collar bone's travel (it turns 29 degrees in the Sword_Regular clips, pulling the shoulder about 9.5 cm out of its socket); end the cuff about 22 mm short of the wrist joint; check the other seats, and after shots.
 
-## Minion: exposed clockwork variations
-
-### Task description
-
-Give the minion more exposed clockwork machinery: gears, escapements, springs, ratchets and linkages showing through cut-outs, open joints or missing panels. Build many variations across distinct flavours (for example an open chest, a skeletal frame, brass-heavy, a tidy dress uniform with only glimpses, or a battered field repair). Prefer a procedural generator in `tools/minion/` with seeds and flavour settings, so the dev can pick favourite variants or adopt the algorithm. Keep the triangle budgets, detail levels and shadow stand-in. Deliver a numbered contact sheet of every variant beside the current minion.
-
-### Open questions
-
-- None; the dev picks after seeing the sheet.
-
-### Status
-
-Not started.
-
 ## Minion: rig and animation
 
 ### Task description
@@ -277,7 +249,7 @@ Rig the minion simply, with few bones, and hand-key an idle, a march, a spear th
 
 ### Status
 
-Not started. Better after the dev picks from the clockwork variations, which may add moving parts to key.
+Not started. Better after the dev picks a clockwork variant (or a flavour) from the contact sheet, `build_minion.py -- --sheet`: 36 designs in six flavours, built with `--works flavour:seed` and adopted in `build_models.ps1`. Their wheels may be worth keying.
 
 ## Battles: intelligent multi-unit fights
 
@@ -308,20 +280,6 @@ The morphable model in `tools/faces/` has ragged ears, slightly jagged nostril e
 
 Not started.
 
-## Faces: rounds and best faces in the rating tool
-
-### Task description
-
-Fold the rating steps into the launcher's two taste tools (`dev/taste.gd`, `tools/faces/rate.py`) so the dev never runs `build_faces.py` by hand. After about 40 answers on a set, render the next refinement round (`--refine`) in the background without a visible window while he keeps rating, then switch to it once ready, saying so on the status line. Add a key that shows the current best faces (`--best`), rendering them if stale. Survive closing mid-render: resume or restart the round next time.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. Waits for the new pools to finish rendering on main.
-
 ## Faces: learn the dev's taste
 
 ### Task description
@@ -334,4 +292,18 @@ Add a `dev/` tool that shows the dev two faces from the morphable model side by 
 
 ### Status
 
-Built, women and men rated apart: a face is 62 scan components, 22 MakeHuman features and 6 brow numbers, with slight random asymmetry on final faces only. The dev rates the new pools from the launcher's two rating tools (his 91 women's answers still count), `build_faces.py -- --refine --sex women` (or men) every 40 or so answers, then `--best` makes the final faces.
+Built, women and men rated apart: a face is 62 scan components, 22 MakeHuman features and 6 brow numbers, with slight random asymmetry on final faces only. The dev rates in the launcher's two rating tools (his 91 women's answers still count); every 40 answers they render the next refinement round in the background and switch to it, and B shows the best faces.
+
+## Knight: shattering on death
+
+### Task description
+
+When the knight's health runs out, break her apart: armour plates, limbs and clockwork pieces come loose and scatter with simple physics, then settle on the ground before the screen fades. Split her along her existing parts where possible, add a few gears and springs flung from inside, and keep it cheap. Record clips from two angles.
+
+### Open questions
+
+- Does she shatter in place of the collapse, or after kneeling?
+
+### Status
+
+Low priority. Not started. Builds on the collapse and restart from "Enemy: behaviour and combat".
