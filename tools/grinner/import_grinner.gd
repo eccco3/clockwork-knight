@@ -12,6 +12,7 @@ extends EditorScenePostImport
 ## named after the phase: `hit` and `recover` on every attack, and `leap` before them on a pounce. An attack is
 ## winding up until its first marker, and its hit window is open from `hit` to `recover`.
 
+const Levels := preload("res://tools/sculpt/levels.gd")
 const BEGIN: Array[float] = [0.0, 6.0, 12.0, 22.0]
 const MARGIN := 0.5
 const INTERRUPTION := "Flinch"
@@ -21,7 +22,7 @@ const FADE_OUT := 0.25
 const CUT := 0.08
 
 func _post_import(scene: Node) -> Object:
-	_chain_levels(scene)
+	Levels.chain(scene, "*_lod?", BEGIN, MARGIN)
 
 	var player: AnimationPlayer = scene.find_child("AnimationPlayer")
 	var extras: Dictionary = scene.find_children("*").filter(func(n: Node) -> bool: return n.has_meta("extras"))[0].get_meta("extras")
@@ -57,23 +58,6 @@ func _post_import(scene: Node) -> Object:
 	tree.anim_player = tree.get_path_to(player)
 	tree.root_motion_track = NodePath("%s:root" % scene.get_path_to(scene.find_child("Skeleton3D")))
 	return scene
-
-
-## Each level is the visibility parent of the next finer one, which draws only while its parent is hidden for
-## being nearer than its begin. One level decides each boundary, with its margin as hysteresis, so exactly one
-## draws even where a grinner or camera first appears inside a margin. (Paired begin and end ranges keep a
-## state each, and a fresh pair both stands back from the boundary, drawing nothing there.)
-func _chain_levels(scene: Node) -> void:
-	var levels: Array[MeshInstance3D] = []
-	levels.resize(BEGIN.size())
-	for mesh: MeshInstance3D in scene.find_children("*_lod?", "MeshInstance3D"):
-		levels[String(mesh.name).right(1).to_int()] = mesh
-	for level in levels.size():
-		var mesh := levels[level]
-		mesh.visibility_range_begin = BEGIN[level]
-		mesh.visibility_range_begin_margin = MARGIN if level > 0 else 0.0
-		if level + 1 < levels.size():
-			mesh.visibility_parent = mesh.get_path_to(levels[level + 1])
 
 
 func _clip(name: String) -> AnimationNodeAnimation:

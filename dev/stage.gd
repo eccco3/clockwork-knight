@@ -2,6 +2,7 @@ extends Node3D
 ## Bare test stage for the knight: a gridded floor (so foot sliding shows), a couple of blocks
 ## to bump into, sky lighting and a warm key light. With dev/shot.tscn, call=stand:<model path>
 ## puts a model in the knight's place, call=spread:<model path> its detail levels side by side,
+## call=beside:<model path>,<model path> stands models in a row at her left, a metre apart, for scale,
 ## and call=pose:<clip>@<seconds> holds the knight still at that moment of a clip.
 
 func _ready() -> void:
@@ -99,6 +100,14 @@ func stand(path: String) -> Node3D:
 	var model: Node3D = load(path).instantiate()
 	add_child(model)
 	return model
+
+
+func beside(paths: String) -> void:
+	var models := paths.split(",")
+	for i in models.size():
+		var model: Node3D = load(models[i]).instantiate()
+		model.position.x = i + 1.0
+		add_child(model)
 
 
 func spread(path: String) -> void:

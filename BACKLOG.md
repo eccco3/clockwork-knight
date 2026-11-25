@@ -277,34 +277,6 @@ In the sword clips her upper arm sinks up to 30 mm into her chest and passes thr
 
 In progress on branch `worktree-agent-add37c3e80de4452a` (unmerged WIP): pauldrons keyed clear of the arm (`follow.py`) and the chest pocketed from the shoulders' sweep (`sweep.py`), never yet built. Left: before/after `--gaps` numbers; choose between the swept pocket and limiting the collar bone's travel (it turns 29 degrees in the Sword_Regular clips, pulling the shoulder about 9.5 cm out of its socket); end the cuff about 22 mm short of the wrist joint; check the other seats, and after shots.
 
-## Minion: sculpt the model
-
-### Task description
-
-Build a small clockwork soldier as `assets/models/minion.glb` from a new `tools/minion/` builder on the shared sculpt toolkit: an adult man two-thirds the knight's height, a regular, reasonably strong-looking soldier (not stocky), carrying a short spear. He is the knight's ally; the grinners are the enemy's minions. He needs far less human likeness than the knight or Rosalyn; a simple, readable, mechanical design is right, since many share the field. Give him detail levels and a cheap shadow stand-in from the start. Deliver clay and painted turnarounds beside the knight's.
-
-### Open questions
-
-- None. About 12,000 triangles at full detail.
-
-### Status
-
-In progress on branch `worktree-agent-a97a4c5fc7017908a` (unmerged WIP): a wooden soldier with a crimson cuirass and short spear, 11,472 / 5,910 / 2,954 triangles and a 799-triangle shadow stand-in, passing `dev/detail_check.gd`. Left: fresh Godot turnarounds and line-up, a `build_models.ps1` step, CLAUDE.md notes, the spear blade's crease and the armholes' jagged edge.
-
-## Minion: cover his legs
-
-### Task description
-
-The minion's lower half reads wrong for a soldier: a short skirt with bare thighs, knee-high boots and stockings. Give him a soldier's legs instead: breeches or trousers to the boot tops, a tunic or tassets reaching mid-thigh under the cuirass, and plain calf or ankle boots, in the same lacquered wooden toy style. Keep his height, triangle budgets and detail levels, and deliver turnarounds and the line-up beside the knight again.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. Needs the minion's sculpt merged (branch `worktree-agent-a97a4c5fc7017908a`); it may be done as part of finishing that item.
-
 ## Minion: rig and animation
 
 ### Task description
@@ -317,7 +289,7 @@ Rig the minion simply, with few bones, and hand-key an idle, a march, a spear th
 
 ### Status
 
-Not started. Needs the minion's sculpt.
+Not started. The sculpt is built by `tools/minion/build_minion.py`.
 
 ## Battles: intelligent multi-unit fights
 
