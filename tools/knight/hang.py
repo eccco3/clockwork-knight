@@ -12,6 +12,8 @@ import numpy as np
 from mathutils import Matrix
 from sculpt.num import smoothstep
 
+from knight.clips import add
+
 STEP = np.radians(1.5)             # between the angles tried
 CLEAR = 0.006                      # air kept between a hinge and what it rests on
 TUCKS = np.radians((60, 125))      # a thigh swung this far forward starts to draw a hinge in under her, and draws it fully
@@ -145,12 +147,5 @@ def bake(arm, clips, hinges, legs, pose, body):
         if loops:
             keys[last] = keys[first]
         for h in hinges:
-            path = 'pose.bones["%s"].rotation_quaternion' % h.bone
             half = 0.5 * np.array([keys[f][h.bone] for f in frames])
-            for index, values in enumerate((np.cos(half), np.sin(half), 0.0 * half, 0.0 * half)):
-                curve = action.fcurves.new(path, index=index, action_group=h.bone)
-                curve.keyframe_points.add(len(frames))
-                curve.keyframe_points.foreach_set("co", np.stack([frames, values], axis=1).ravel())
-                for point in curve.keyframe_points:
-                    point.interpolation = "LINEAR"
-                curve.update()
+            add(action, h.bone, "rotation_quaternion", frames, np.stack([np.cos(half), np.sin(half), 0.0 * half, 0.0 * half], axis=1))

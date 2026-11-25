@@ -21,7 +21,7 @@ from sculpt.bl import opt
 from sculpt.sdf import V
 from sculpt.gen import Frame
 from sculpt.num import smoothstep
-from knight import follow, gaps, hang, head, roll, shadow, sweep
+from knight import collar, follow, gaps, hang, head, roll, shadow
 
 DL = os.path.join(os.path.dirname(HERE), "downloads")
 REF_RIG = os.path.join(DL, "ual2", "Universal Animation Library 2[Standard]", "Female Mannequin", "Unreal-Godot", "Mannequin_F.glb")
@@ -145,7 +145,7 @@ def slim_hands(arm):
 
 def add_bones(arm, J, T):
     """Helper bones: eyes, sword socket, clockwork, and the floating guards. The couter and poleyn follow their
-    joints at half angle; `follow` keys the pauldron's turn."""
+    joints at half angle; `float_pauldrons` keys the pauldrons."""
     bpy.context.view_layer.objects.active = arm
     bpy.ops.object.mode_set(mode="EDIT")
     eb = arm.data.edit_bones
@@ -207,9 +207,7 @@ def add_bones(arm, J, T):
 
 # ============================================================== torso
 
-CHEST_AXIS = V(0, -0.015, 1.345), V(0, -0.015, 1.430)      # a line inside her chest, and the chest's rough half-size about its middle
-CHEST_HALF = V(0.16, 0.13, 0.11)
-POCKET_CLEAR, POCKET_EASE = 0.002, 0.008       # air kept round what the chest's pockets hold, and how softly their rims are cut
+SOCKET_OUT, SOCKET_R = 0.006, 0.053           # each shoulder's socket: how far outside the joint it is centred, and its radius
 WIN_C = V(0, -0.108, 1.392)                    # heart-window gear plane centre
 WIN_R = 0.034
 _WF = Frame(WIN_C, FWD, LEFT)                  # local x = left, y = up, z = out of the chest
@@ -220,9 +218,10 @@ GEARS = {
 }
 
 
-def torso(J, swept):
-    """Her trunk. `swept` is a sculpt of all that her upper arms and pauldrons pass through, as her chest sees
-    it and alike on both sides: the chest is cut back from it into a pocket at each shoulder."""
+def chest_shape(J):
+    """Her chest, as a sculpt at rest."""
+    socket = J["upperarm_l"] + V(SOCKET_OUT, 0, 0)
+
     def chest(p):
         q = S.mirror_x(p)
         rib = S.ellipsoid(p, V(0, -0.015, 1.380), V(0.138, 0.108, 0.135))
@@ -234,18 +233,21 @@ def torso(J, swept):
         d = S.smin(d, keel, 0.03)
         d = S.smax(d, S.plane(p, V(0, 0, 1.300), DOWN), 0.012)
         d = S.smax(d, S.plane(p, V(0, 0, 1.476), UP), 0.016)
-        pocket = np.ones(len(p))
-        near = d < POCKET_EASE                 # further out than this, nothing is left to cut
-        pocket[near] = swept(q[near]) - POCKET_CLEAR
-        d = S.ssub(d, pocket, POCKET_EASE)
+        d = S.ssub(d, S.sphere(q, socket, SOCKET_R), 0.008)
         win = S.cylinder(p, V(0, -0.22, WIN_C[2]), V(0, -0.100, WIN_C[2]), WIN_R, 0.002)
         return S.ssub(d, win, 0.0025)
+    return chest
+
+
+def torso(J):
+    chest = chest_shape(J)
 
     def win_edge(p):
         r = np.sqrt(p[:, 0] ** 2 + (p[:, 2] - WIN_C[2]) ** 2)
         return np.where(p[:, 1] < -0.05, r - WIN_R, 1.0)
 
-    v, f, n = mesher.wrap(chest, *CHEST_AXIS, CHEST_HALF, (44, 32, 32), relax=10, snap=win_edge)
+    v, f, n = mesher.wrap(chest, V(0, -0.015, 1.345), V(0, -0.015, 1.430), (0.16, 0.13, 0.11), (44, 32, 32),
+                          relax=10, snap=win_edge)
     add("chest", "spine_03", "wood_dark", v, f, normals=n, hard=False)
     loop = S.hug(chest, V(0, -0.015, 1.3075), LEFT, FWD, 72, 0.0, 2 * np.pi * 71 / 72, off=0.0005)
     v, f = gen.tube(loop, 0.0036, 8, closed=True)
@@ -470,6 +472,8 @@ FACE_REACH, FACE_ROUND = 0.036, 0.090          # the face's crown from the joint
 
 
 REREBRACE = (0.056, 0.154, 0.0058)             # the rerebrace: from where to where down her upper arm, and how far it stands off it, trim and rivets too
+CUFF_SHORT, CUFF_FLARE = 0.022, 0.14           # the cuff ends this far short of the wrist, clear of her palm as it bends, and widens this fast toward it
+PAULDRON_LIFT = V(0.4, 0, 1)                   # the way her left pauldron rides up off her chest
 
 
 def upper_arm(J):
@@ -540,11 +544,13 @@ def arms(J, T):
     band("vambrace_trim_a", "lowerarm_l", "brass", fa, [(0.034, 0.0410), (0.041, 0.0410)], 0.0016)
     band("vambrace_trim_b", "lowerarm_l", "brass", fa, [(0.188, 0.0312), (0.195, 0.0306)], 0.0016)
     rivets("vambrace_rivet", "lowerarm_l", fa, 0.058, 0.0425, 8)
-    sec = [(0.212, 0.020), (0.212, 0.0272), (0.216, 0.0287), (Lf - 0.004, 0.0360), (Lf, 0.0370), (Lf + 0.002, 0.0360),
-           (Lf + 0.002, 0.0330), (0.220, 0.020)]
+    lip = Lf - CUFF_SHORT - 0.002
+    rim = 0.0287 + CUFF_FLARE * (lip - 0.220)
+    sec = [(0.212, 0.020), (0.212, 0.0272), (0.216, 0.0287), (lip - 0.004, rim), (lip, rim + 0.0010), (lip + 0.002, rim),
+           (lip + 0.002, rim - 0.0030), (0.220, 0.020)]
     v, f = gen.lathe_ring(sec, 32)
     add("cuff", "lowerarm_l", "wood_dark", fa.w(v), f, grain=fa, mirror=True)
-    band("cuff_trim", "lowerarm_l", "brass", fa, [(Lf - 0.003, 0.0358), (Lf + 0.0025, 0.0362)], 0.0018)
+    band("cuff_trim", "lowerarm_l", "brass", fa, [(lip - 0.003, rim - 0.0002), (lip + 0.0025, rim + 0.0002)], 0.0018)
 
     # floating guards
     pf = Frame(J["upperarm_l"] + V(0, 0, 0.002), UP, LEFT)     # local x toward the arm, y back
@@ -1042,20 +1048,6 @@ def unpose(arm):
         pb.matrix_basis.identity()
 
 
-def seen(arm, by, bones):
-    """How each of `bones` has moved from rest as the bone `by` sees it, in every frame of each clip in turn:
-    {clip: {bone: (frames, 4, 4)}}."""
-    unrest = {b: np.array(arm.data.bones[b].matrix_local.inverted()) for b in (by, *bones)}
-    moved = lambda b: np.array(arm.pose.bones[b].matrix) @ unrest[b]
-    runs = {}
-    for label in every_frame(arm):
-        run = runs.setdefault(label.rsplit(":", 1)[0], {b: [] for b in bones})
-        here = np.linalg.inv(moved(by))
-        for b in bones:
-            run[b].append(here @ moved(b))
-    return {clip: {b: np.array(m) for b, m in run.items()} for clip, run in runs.items()}
-
-
 def held(arm, pose):
     """Poses the rig in the one `pose`, a clip and frame as "Action:frame", yielding its name."""
     set_pose(arm, *pose.split(":"))
@@ -1075,42 +1067,28 @@ def carried(bone):
         elif pc["bone"] == bone:
             parts.append(pc["verts"])
         elif pc["mirror"] and bone == pc["bone"][:-2] + "_r":
-            parts.append(pc["verts"] * V(-1, 1, 1))
+            parts.append(pc["verts"] * MIRROR)
     return np.concatenate(parts)
 
 
-def surfaces(bone):
-    """The vertices at rest and the faces of every piece that `bone` alone carries, as one mesh."""
-    verts, faces = [], []
-    for pc in PIECES:
-        if pc["bone"] == bone:
-            faces += [tuple(i + sum(map(len, verts)) for i in face) for face in pc["faces"]]
-            verts.append(pc["verts"])
-    return np.concatenate(verts), faces
+def settle_shoulders(arm, J):
+    """Keeps her shoulders out of her chest in every clip, and her upper arms out of her chest and face."""
+    points = carried("upperarm_l")
+    points = points[np.linalg.norm(points - J["upperarm_l"] - V(SOCKET_OUT, 0, 0), axis=1) > SOCKET_R]
+    bodies = {"spine_03": chest_shape(J), "Head": lambda p: head.field(to_head(p))}
+    for name in CLIPS:
+        collar.settle(arm, bpy.data.actions[name], {"l": points, "r": points * MIRROR}, bodies)
 
 
 def float_pauldrons(arm, J):
-    """Keys her pauldrons' turns into the clips."""
-    solid, points = sleeved_arm(J), carried("pauldron_l")
+    """Keys her pauldrons' turns and lifts into the clips."""
+    solid, points, chest = sleeved_arm(J), carried("pauldron_l"), chest_shape(J)
     follow.bake(arm, {name: bpy.data.actions[name] for name in CLIPS},
-               [follow.Guard("pauldron_l", "upperarm_l", solid, points),
-                follow.Guard("pauldron_r", "upperarm_r", lambda p: solid(p * MIRROR), points * MIRROR)], set_pose)
+               [follow.Guard("pauldron_l", "upperarm_l", solid, points, chest, "spine_03", PAULDRON_LIFT),
+                follow.Guard("pauldron_r", "upperarm_r", lambda p: solid(p * MIRROR), points * MIRROR, chest, "spine_03",
+                             PAULDRON_LIFT * MIRROR)],
+               set_pose)
     unpose(arm)
-
-
-def shoulder_sweep(arm, J):
-    """All that her upper arms and pauldrons pass through over her clips, as her chest sees it, each side's laid over the other's too."""
-    mid = 0.5 * (CHEST_AXIS[0] + CHEST_AXIS[1])
-    swept = sweep.Sweep(mid - CHEST_HALF * V(0, 1, 1), mid + CHEST_HALF)
-    balls = {"upperarm": sweep.along(carried("upperarm_l"), J["upperarm_l"], J["lowerarm_l"]),
-             "pauldron": sweep.over(*surfaces("pauldron_l"))}
-    flip = np.diag([*MIRROR, 1.0])
-    for run in seen(arm, "spine_03", [part + s for part in balls for s in ("_l", "_r")]).values():
-        for part, (centres, radii) in balls.items():
-            for moves in (run[part + "_l"], flip @ run[part + "_r"] @ flip):
-                swept.add(centres, radii, moves)
-                swept.add(centres, radii, flip @ moves @ flip)
-    return swept
 
 
 def hung():
@@ -1174,9 +1152,10 @@ def main():
     add_bones(arm, J, T)
     only = opt("--only")
     only = only.split(",") if only else None
+    torso(J)
     arms(J, T)
+    settle_shoulders(arm, J)
     float_pauldrons(arm, J)
-    torso(J, shoulder_sweep(arm, J).field)
     hands(J, T)
     legs(J, T)
     head_pieces(int(opt("--res", "96")))
