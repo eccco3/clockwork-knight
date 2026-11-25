@@ -1,16 +1,19 @@
-extends SceneTree
-## Dev check (not used at runtime), needs a renderer:  godot --path . --script res://dev/detail_check.gd
-## Proves a grinner draws exactly one detail level wherever the camera is. Each grinner gets a world of its
-## own with the camera already in place before its first frame, in the middle of every band and inside
-## every boundary's margin, and what that world drew must be one level, the band's own outside the margins.
+﻿extends SceneTree
+## Dev check (not used at runtime), needs a renderer:  godot --path . --script res://dev/detail_check.gd [-- <model>]
+## Proves a figure's model, the grinner's unless another is named, draws exactly one detail level wherever the
+## camera is. Each figure gets a world of its own with the camera already in place before its first frame, in the
+## middle of every band and inside every boundary's margin, and what that world drew must be one level, the band's
+## own outside the margins.
 ## Then a camera that hovers across each boundary must keep its level until it leaves the margin.
 ## The boundaries are read from the imported model. Exits with the number of failures.
 
 const SIZE := Vector2i(160, 120)
 const SETTLE := 3
-const INSIDE := 0.6  # of the margin: where a fresh grinner may show either neighbour, and a hover must not switch
+const INSIDE := 0.6  # of the margin: where a fresh figure may show either neighbour, and a hover must not switch
 const OUTSIDE := 1.5
+const GRINNER := "res://assets/models/grinner.glb"
 
+var _model: PackedScene
 var _levels: Array[MeshInstance3D] = []
 var _failures := 0
 
@@ -21,9 +24,11 @@ func _init() -> void:
 
 func _run() -> void:
 	await process_frame
-	var probe := Grinner.new()
+	var named := OS.get_cmdline_user_args()
+	_model = load(named[0] if named else GRINNER)
+	var probe := _model.instantiate()
 	root.add_child(probe)
-	for mesh: MeshInstance3D in probe.find_children("grinner_lod?", "MeshInstance3D", true, false):
+	for mesh: MeshInstance3D in probe.find_children("*_lod?", "MeshInstance3D", true, false):
 		_levels.append(mesh)
 	_levels.sort_custom(func(a: MeshInstance3D, b: MeshInstance3D) -> bool: return String(a.name) < String(b.name))
 	print("levels: ", _levels.map(func(m: MeshInstance3D) -> String:
@@ -77,8 +82,7 @@ func _world(distance: float) -> SubViewport:
 	world.own_world_3d = true
 	world.mesh_lod_threshold = 0.0
 	world.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	var grinner := Grinner.new()
-	world.add_child(grinner)
+	world.add_child(_model.instantiate())
 	var camera := Camera3D.new()
 	world.add_child(camera)
 	camera.current = true
@@ -87,10 +91,9 @@ func _world(distance: float) -> SubViewport:
 	return world
 
 
-## Puts the camera `distance` metres from the centre of the grinner's full-detail mesh, facing it.
+## Puts the camera `distance` metres from the centre of the figure's full-detail mesh, facing it.
 func _place(world: SubViewport, distance: float) -> void:
-	var grinner: Node3D = world.get_child(0)
-	var mesh: MeshInstance3D = grinner.find_child("grinner_lod0", true, false)
+	var mesh: MeshInstance3D = world.get_child(0).find_child("*_lod0", true, false)
 	var centre := mesh.global_transform * mesh.get_aabb().get_center()
 	var camera: Camera3D = world.get_child(1)
 	camera.global_position = centre + Vector3(0, 0, distance)
