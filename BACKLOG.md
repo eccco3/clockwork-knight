@@ -334,6 +334,20 @@ The morphable model in `tools/faces/` has ragged ears, slightly jagged nostril e
 
 Not started.
 
+## Faces: rounds and best faces in the rating tool
+
+### Task description
+
+Fold the rating steps into the launcher's two taste tools (`dev/taste.gd`, `tools/faces/rate.py`) so the dev never runs `build_faces.py` by hand. After about 40 answers on a set, render the next refinement round (`--refine`) in the background without a visible window while he keeps rating, then switch to it once ready, saying so on the status line. Add a key that shows the current best faces (`--best`), rendering them if stale. Survive closing mid-render: resume or restart the round next time.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. Waits for the new pools to finish rendering on main.
+
 ## Faces: learn the dev's taste
 
 ### Task description
