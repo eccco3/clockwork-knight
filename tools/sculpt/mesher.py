@@ -80,12 +80,15 @@ class Rail:
         self.ring, self.g = ring, g
 
 
-def wrap(f, a, b, extent, dims, relax=10, tmax=None, density=None, snap=None, snap_inner=None, rails=(), warp=None):
+def wrap(f, a, b, extent, dims, relax=10, tmax=None, density=None, snap=None, snap_inner=None, rails=(), warp=None,
+         slope=None):
     """Mesh sculpt f. a,b: inner axis segment (inside the shape). extent: rough
     half-size (x,y,z) of the shape about the segment midpoint. dims: lattice
     resolution (nx,ny,nz). density: optional p -> weight; quads shrink where
     it is large. rails: rings held on features. warp: optional reshaping of the unit sphere
-    the lattice starts on. Returns verts (N,3), quads (Q,4), normals (N,3)."""
+    the lattice starts on. slope: optional p -> the steepest fall (metres in per metre across) from
+    a neighbour; the rays cannot see under an overhang such as an ear's rim, so where the surface
+    they find falls further it is bridged at that slope. Returns verts (N,3), quads (Q,4), normals (N,3)."""
     a = np.asarray(a, dtype=np.float64)
     b = np.asarray(b, dtype=np.float64)
     unit, quads = cube_lattice(*dims)
@@ -137,6 +140,27 @@ def wrap(f, a, b, extent, dims, relax=10, tmax=None, density=None, snap=None, sn
             q = place(q - grad * ((gq - goal) / n2)[:, None])
         return q, S.normalize(grad)
 
+    def bridge(p):
+        """Raise points along their rays until none lies further in than its `slope` times its distance from
+        a neighbour's ray below that neighbour."""
+        if slope is None:
+            return p
+        o = _closest_on_segment(p, a, b)
+        d = S.normalize(p - o)
+        r = ((p - o) * d).sum(-1)
+        steep = slope(p)
+        for _ in range(100):
+            need = r.copy()
+            for i, j in ((edges[:, 0], edges[:, 1]), (edges[:, 1], edges[:, 0])):
+                q = p[j] - o[i]
+                along = (q * d[i]).sum(-1)
+                np.maximum.at(need, i, along - steep[i] * S.length(q - d[i] * along[:, None]))
+            if (need - r).max() < 1e-6:
+                break
+            r = need
+            p = o + d * r[:, None]
+        return p
+
     lattice = np.rint((unit + 1.0) / 2.0 * np.array(dims)).astype(np.int64)
     side = np.flatnonzero((lattice[:, 0] % dims[0] == 0) | (lattice[:, 1] % dims[1] == 0))
     columns = side[np.lexsort(lattice[side].T[::-1])].reshape(-1, dims[2] + 1)
@@ -149,7 +173,7 @@ def wrap(f, a, b, extent, dims, relax=10, tmax=None, density=None, snap=None, sn
         p[held], away = slide(g, p[held], 0.0, project, steps)
         return away
 
-    p = project(p, local=False)
+    p = bridge(project(p, local=False))
     if rails:                                                   # spread the rings between the rails evenly
         settle(7)
         rings = sorted({0, dims[2]} | {r.ring for r in rails})
@@ -158,6 +182,7 @@ def wrap(f, a, b, extent, dims, relax=10, tmax=None, density=None, snap=None, sn
             t = ((k - lo) / (hi - lo))[None, :, None]
             p[columns[:, k]] = p[columns[:, [lo]]] * (1.0 - t) + p[columns[:, [hi]]] * t
         p[side] = project(p[side], local=False)
+        p = bridge(p)
     for _ in range(relax):
         acc = np.zeros_like(p)
         if density is None:
@@ -171,7 +196,7 @@ def wrap(f, a, b, extent, dims, relax=10, tmax=None, density=None, snap=None, sn
             np.add.at(acc, edges[:, 1], p[edges[:, 0]] * w[:, None])
             np.add.at(tot, edges[:, 0], w)
             np.add.at(tot, edges[:, 1], w)
-        p = project(0.5 * p + 0.5 * acc / tot[:, None])
+        p = bridge(project(0.5 * p + 0.5 * acc / tot[:, None]))
         if rails:
             settle(1)
     away = settle(7) if rails else None

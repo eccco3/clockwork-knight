@@ -134,8 +134,9 @@ def dilate(img, filled, steps):
 
 def bake(pieces, size, occluder, grain, scale, log=print):
     """Textures for the pieces sharing one material. Each piece gives tris (T,3), uv (T,3,2), v, n, tan
-    (T,3,3), sign (T,3) and either detail + paint (sculpted) or chart + paint (made by formula).
-    grain(u, v, pitch) is the material's fine relief and `scale` its texture units per metre.
+    (T,3,3), sign (T,3) and either detail + paint (sculpted) or chart + paint (made by formula). A sculpted
+    piece whose detail is a mesh, whose gradient would show its faces, gives its smooth normals (points ->
+    unit normals) as well. grain(u, v, pitch) is the material's fine relief and `scale` its texture units per metre.
     Returns albedo, normal and occlusion-roughness-metallic images, (size, size, 3) in 0..1, row 0 at v = 0."""
     uv = np.concatenate([pc["uv"] for pc in pieces])
     owner = np.concatenate([np.full(len(pc["uv"]), k) for k, pc in enumerate(pieces)])
@@ -162,7 +163,7 @@ def bake(pieces, size, occluder, grain, scale, log=print):
             n, ao, fiber = n0, np.ones(len(tx)), rest[0] if rest else np.zeros(len(tx))
         else:
             ps = chunked(lambda a: onto(pc["detail"], a[:, :3], a[:, 3:]), np.concatenate([p0, n0], axis=1))
-            n = chunked(lambda a: normal(pc["detail"], a, 0.6 / (scale * size)), ps)
+            n = chunked(pc.get("normals") or (lambda a: normal(pc["detail"], a, 0.6 / (scale * size))), ps)
             col, rough, metal, fiber = chunked(pc["paint"], ps)
             half = (tx % size % 2 == 0) & (tx // size % 2 == 0)             # occlusion at half resolution
             both = np.concatenate([ps, n], axis=1)

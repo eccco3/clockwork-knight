@@ -1,5 +1,6 @@
-# Rebuilds the git-ignored models (assets/models/*.glb) from source, imports them into Godot and
-# bakes the hall's lightmap (assets/lightmaps/). The bake runs the Godot editor on a hidden desktop for a few minutes.
+# Rebuilds the git-ignored models (assets/models/*.glb, and tools/faces/model.npz, which the bust's face is drawn
+# from) from source, imports them into Godot and bakes the hall's lightmap (assets/lightmaps/). The bake runs the
+# Godot editor on a hidden desktop for a few minutes.
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $blender = Join-Path $root 'toolchain\blender\blender.exe'
@@ -27,7 +28,10 @@ try {
     '--', '--out', 'assets/models/rosalyn.glb')
   Invoke-Step 'minion' $blender @('--background', '--python-exit-code', '1', '--python', 'tools/minion/build_minion.py',
     '--', '--out', 'assets/models/minion.glb')
-  foreach ($model in 'hall', 'knight', 'grinner', 'scuttler', 'rosalyn', 'minion') {
+  Invoke-Step 'faces' $blender @('--background', '--python-exit-code', '1', '--python', 'tools/faces/build_faces.py')
+  Invoke-Step 'bust' $blender @('--background', '--python-exit-code', '1', '--python', 'tools/faces/build_bust.py',
+    '--', '--out', 'assets/models/bust.glb')
+  foreach ($model in 'hall', 'knight', 'grinner', 'scuttler', 'rosalyn', 'minion', 'bust') {
     if (-not (Test-Path "assets\models\$model.glb")) { throw "$model.glb was not written" }
   }
   Invoke-Step 'import' $godot @('--path', '.', '--headless', '--import')

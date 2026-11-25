@@ -41,7 +41,7 @@ A roguelite: the workshop and hall are the safe hub; enemies appear only outdoor
 - `tools/sculpt/` is the characters' shared toolkit.
 - `tools/knight/` builds the knight, `assets/textures/knight/face_paint.png` and its placement `face_paint.json`; `tools/build_hall.py` and `builders/hall_*.gd` build the hall; `tools/workshop_shell.py`'s constants size the workshop beyond its east doors.
 - Only stand-ins such as `KnightShadow` (`tools/knight/shadow.py`) cast figures' shadows.
-- `tools/faces/`: ICT-FaceKit model, MakeHuman features, sex labels (`dev/labels.tscn`), taste (`dev/taste_*.tscn` renders rounds); see `taste.py`.
+- `tools/faces/`: ICT-FaceKit model, MakeHuman features, sex labels (`dev/labels.tscn`), taste (`dev/taste_*.tscn`, `taste.py`), a bust (`build_bust.py`).
 - `tools/grinner/` builds the grinner and four-legged scuttler, rigged and hand-keyed; `import_grinner.gd` adds its AnimationTree; `scripts/grinner.gd` moves both. `dev/stage.tscn` stands models (see its header), and `dev/waddler.tscn` or `scuttler.tscn` moving.
 - `tools/minion/` builds the unrigged minion; `tools/sculpt/levels.gd` chains detail levels, proven by `dev/detail_check.gd -- <model>`.
 

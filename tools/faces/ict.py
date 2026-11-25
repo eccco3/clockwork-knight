@@ -42,7 +42,8 @@ def _sphere(p):
 class Heads:
     """mean (N, 3) and modes (MODES, N, 3): a head is the mean plus the modes weighted by unit normal numbers.
     skin and eyeballs: the closed shells of triangles over those vertices. On the mean, eye is the centre of
-    the eyeball on +x, nose the tip of the nose and parting the line the lips meet on, from corner to corner."""
+    the eyeball on +x, nose the tip of the nose, lips the inner edges of the upper and lower lip (5, 2, 3)
+    and parting the line between them, from corner to corner."""
 
     def __init__(self):
         raw, faces = _read("generic_neutral_mesh")
@@ -62,4 +63,5 @@ class Heads:
                                for k in range(MODES)])
         self.eye = (eye - origin) @ AXES.T * np.array([-1.0, 1.0, 1.0])
         self.nose = self.mean[index[NOSE_TIP]]
-        self.parting = self.mean[index[np.array(LIPS)]].mean(1)
+        self.lips = self.mean[index[np.array(LIPS)]]
+        self.parting = self.lips.mean(1)

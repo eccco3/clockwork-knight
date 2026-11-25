@@ -9,6 +9,7 @@ are zero, so a face written before a feature was added is still that face. Every
 has the topology `fit.py` gave the mean, a lattice wrapped by the sculpt toolkit's mesher, in the head
 frame the figures sculpt in: +y out of the face, +z up, metres.
 """
+import os
 import numpy as np
 
 SPREAD = 0.65                                  # faces are drawn at this share of the people's standard deviation
@@ -29,15 +30,16 @@ def twins(v):
     return twin
 
 
-def components(modes, keep=KEEP):
+def principal(modes, keep=KEEP):
     """Principal components of the heads spanned by modes (M, N, 3) with independent unit normal weights,
-    largest first, each scaled to one standard deviation, and the share of the variance each explains."""
+    largest first, each scaled to one standard deviation: how each mixes the modes (K, M), and the share of
+    the variance each explains."""
     flat = modes.reshape(len(modes), -1)
     variance, turn = np.linalg.eigh(flat @ flat.T)
     variance, turn = variance[::-1], turn[:, ::-1]
     share = variance / variance.sum()
     count = int(np.searchsorted(np.cumsum(share), keep)) + 1
-    return (turn[:, :count].T @ flat).reshape(count, *modes.shape[1:]), share[:count]
+    return turn[:, :count].T, share[:count]
 
 
 def normals(v, quads):
@@ -53,11 +55,13 @@ class Model:
     """mean (N, 3), components (K, N, 3) in metres per standard deviation, share (K,) of the variance each
     explains, and the lattice the vertices lie on: quads (Q, 4) and lattice points lat (N, 3). Then the
     features (F, N, 3), in metres per unit, with their names, and the asymmetries (A, N, 3), the largest
-    first, in metres per standard deviation of the scanned heads."""
+    first, in metres per standard deviation of the scanned heads; fitted is the version of fit.py that
+    made the lattice, and eyes (N,) which of its vertices lie on the eyeballs, between the lids."""
 
-    def __init__(self, mean, components, share, quads, lat, asymmetries=None, names=(), features=None):
+    def __init__(self, mean, components, share, quads, lat, asymmetries=None, names=(), features=None, fitted=1,
+                 eyes=None):
         blank = np.zeros((0,) + mean.shape)
-        self.mean, self.share, self.quads, self.lat = mean, share, quads, lat
+        self.mean, self.share, self.quads, self.lat, self.fitted, self.eyes = mean, share, quads, lat, fitted, eyes
         self.asymmetries = blank if asymmetries is None else asymmetries
         self.names, self.directions = list(names), np.concatenate([components, blank if features is None else features])
 
@@ -85,10 +89,13 @@ class Model:
         return v, self.quads, normals(v, self.quads), self.lat
 
     def save(self, path):
-        np.savez_compressed(path, mean=self.mean.astype(np.float32), components=self.components.astype(np.float32),
-                            share=self.share, quads=self.quads.astype(np.int32), lat=self.lat.astype(np.int32),
-                            asymmetries=self.asymmetries.astype(np.float32), names=np.array(self.names, dtype=str),
-                            features=self.features.astype(np.float32))
+        """Writes the model whole or not at all, since the rating tool may be reading it."""
+        with open(path + ".part", "wb") as f:
+            np.savez_compressed(f, mean=self.mean.astype(np.float32), components=self.components.astype(np.float32),
+                                share=self.share, quads=self.quads.astype(np.int32), lat=self.lat.astype(np.int32),
+                                asymmetries=self.asymmetries.astype(np.float32), names=np.array(self.names, dtype=str),
+                                features=self.features.astype(np.float32), fitted=self.fitted, eyes=self.eyes)
+        os.replace(path + ".part", path)
 
     @classmethod
     def load(cls, path):
@@ -96,4 +103,5 @@ class Model:
             more = [f[key].astype(np.float64) if key in f.files else None for key in ("asymmetries", "features")]
             return cls(f["mean"].astype(np.float64), f["components"].astype(np.float64), f["share"],
                        f["quads"].astype(np.int64), f["lat"].astype(np.int64), more[0],
-                       f["names"].tolist() if "names" in f.files else (), more[1])
+                       f["names"].tolist() if "names" in f.files else (), more[1],
+                       int(f["fitted"]) if "fitted" in f.files else 1, f["eyes"] if "eyes" in f.files else None)
