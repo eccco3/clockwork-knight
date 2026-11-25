@@ -47,7 +47,7 @@ class Posterior:
 
     def logit(self, x):
         """Mean and variance of w . x for rows x (..., P)."""
-        return x @ self.mean, np.einsum("...i,ij,...j->...", x, self.cov, x)
+        return x @ self.mean, ((x @ self.cov) * x).sum(-1)
 
     def information(self, x):
         """Expected information, in bits, an answer on each row x gives about w (BALD)."""

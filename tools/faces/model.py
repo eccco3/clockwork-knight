@@ -1,9 +1,13 @@
-"""The morphable model of human faces: a mean head and uncorrelated shape components.
+"""The morphable model of human faces: a mean head, uncorrelated shape components, and hand-made features.
 
 A face is the mean plus the components weighted by its coefficients, which are independent and unit normal
-over the people the model was learnt from; `sample` draws them closer to the mean than that. Every face is
-symmetric and has the topology `fit.py` gave the mean, a lattice wrapped by the sculpt toolkit's mesher,
-in the head frame the figures sculpt in: +y out of the face, +z up, metres.
+over the people the model was learnt from; `sample` draws them closer to the mean than that. The scans
+vary little in some features people notice at once, so the coefficients go on to weigh hand-made shapes of
+those (makehuman.py), each in units of about what people commonly differ by. Coefficients left off the end
+are zero, so a face written before a feature was added is still that face. Every such face is symmetric;
+`lopsided` adds the slight ways the scanned heads' two halves differ, which no coefficient holds. A face
+has the topology `fit.py` gave the mean, a lattice wrapped by the sculpt toolkit's mesher, in the head
+frame the figures sculpt in: +y out of the face, +z up, metres.
 """
 import numpy as np
 
@@ -47,29 +51,49 @@ def normals(v, quads):
 
 class Model:
     """mean (N, 3), components (K, N, 3) in metres per standard deviation, share (K,) of the variance each
-    explains, and the lattice the vertices lie on: quads (Q, 4) and lattice points lat (N, 3)."""
+    explains, and the lattice the vertices lie on: quads (Q, 4) and lattice points lat (N, 3). Then the
+    features (F, N, 3), in metres per unit, with their names, and the asymmetries (A, N, 3), the largest
+    first, in metres per standard deviation of the scanned heads."""
 
-    def __init__(self, mean, components, share, quads, lat):
-        self.mean, self.components, self.share, self.quads, self.lat = mean, components, share, quads, lat
+    def __init__(self, mean, components, share, quads, lat, asymmetries=None, names=(), features=None):
+        blank = np.zeros((0,) + mean.shape)
+        self.mean, self.share, self.quads, self.lat = mean, share, quads, lat
+        self.asymmetries = blank if asymmetries is None else asymmetries
+        self.names, self.directions = list(names), np.concatenate([components, blank if features is None else features])
+
+    @property
+    def components(self):
+        return self.directions[:len(self.share)]
+
+    @property
+    def features(self):
+        return self.directions[len(self.share):]
 
     def sample(self, rng, spread=SPREAD):
-        """Coefficients of a random face."""
-        return rng.normal(0.0, spread, len(self.components))
+        """The coefficients on the components of a random face."""
+        return rng.normal(0.0, spread, len(self.share))
 
-    def shape(self, coefficients):
-        return self.mean + np.tensordot(coefficients, self.components, axes=1)
+    def shape(self, coefficients, lopsided=()):
+        """A face's vertices; `lopsided` weighs the first of the asymmetries."""
+        weights = np.asarray(coefficients, float)[:len(self.directions)]
+        return (self.mean + np.tensordot(weights, self.directions[:len(weights)], axes=1)
+                + np.tensordot(np.asarray(lopsided, float), self.asymmetries[:len(lopsided)], axes=1))
 
-    def mesh(self, coefficients):
+    def mesh(self, coefficients, lopsided=()):
         """A face as a piece's mesh: verts, quads, normals and lattice points."""
-        v = self.shape(coefficients)
+        v = self.shape(coefficients, lopsided)
         return v, self.quads, normals(v, self.quads), self.lat
 
     def save(self, path):
         np.savez_compressed(path, mean=self.mean.astype(np.float32), components=self.components.astype(np.float32),
-                            share=self.share, quads=self.quads.astype(np.int32), lat=self.lat.astype(np.int32))
+                            share=self.share, quads=self.quads.astype(np.int32), lat=self.lat.astype(np.int32),
+                            asymmetries=self.asymmetries.astype(np.float32), names=np.array(self.names, dtype=str),
+                            features=self.features.astype(np.float32))
 
     @classmethod
     def load(cls, path):
         with np.load(path) as f:
+            more = [f[key].astype(np.float64) if key in f.files else None for key in ("asymmetries", "features")]
             return cls(f["mean"].astype(np.float64), f["components"].astype(np.float64), f["share"],
-                       f["quads"].astype(np.int64), f["lat"].astype(np.int64))
+                       f["quads"].astype(np.int64), f["lat"].astype(np.int64), more[0],
+                       f["names"].tolist() if "names" in f.files else (), more[1])
