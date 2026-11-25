@@ -280,20 +280,6 @@ The morphable model in `tools/faces/` has ragged ears, slightly jagged nostril e
 
 Not started.
 
-## Faces: rounds and best faces in the rating tool
-
-### Task description
-
-Fold the rating steps into the launcher's two taste tools (`dev/taste.gd`, `tools/faces/rate.py`) so the dev never runs `build_faces.py` by hand. After about 40 answers on a set, render the next refinement round (`--refine`) in the background without a visible window while he keeps rating, then switch to it once ready, saying so on the status line. Add a key that shows the current best faces (`--best`), rendering them if stale. Survive closing mid-render: resume or restart the round next time.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. The new pools are rendered on main.
-
 ## Faces: learn the dev's taste
 
 ### Task description
@@ -306,7 +292,7 @@ Add a `dev/` tool that shows the dev two faces from the morphable model side by 
 
 ### Status
 
-Built, women and men rated apart: a face is 62 scan components, 22 MakeHuman features and 6 brow numbers, with slight random asymmetry on final faces only. The dev rates the new pools from the launcher's two rating tools (his 91 women's answers still count), `build_faces.py -- --refine --sex women` (or men) every 40 or so answers, then `--best` makes the final faces.
+Built, women and men rated apart: a face is 62 scan components, 22 MakeHuman features and 6 brow numbers, with slight random asymmetry on final faces only. The dev rates in the launcher's two rating tools (his 91 women's answers still count); every 40 answers they render the next refinement round in the background and switch to it, and B shows the best faces.
 
 ## Knight: shattering on death
 

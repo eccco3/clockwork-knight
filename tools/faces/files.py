@@ -27,6 +27,19 @@ def exists(folder):
     return os.path.exists(os.path.join(folder, "pool.npz"))
 
 
+def progress(folder):
+    """How many of the set's faces have their picture, of how many: (0, 0) before its faces are drawn."""
+    if not exists(folder):
+        return 0, 0
+    size = len(rendered(folder)[0])
+    return sum(os.path.exists(picture(i, folder)) for i in range(size)), size
+
+
+def complete(folder):
+    done, size = progress(folder)
+    return 0 < size == done
+
+
 class Log:
     def __init__(self, path):
         self.path = path

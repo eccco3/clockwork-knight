@@ -17,14 +17,15 @@ whatever set it was given on, and whatever numbers faces have gained since: thos
 Pool pairs are mostly ordinary faces against ordinary ones, which teach what he dislikes more than what
 makes a face he likes better still. So after FIRST or so answers on the pool, refinement rounds (refine)
 replace it with REFINE_SIZE faces each likely to be among his favourites, differing where his taste is
-still unclear, a new round every ROUND or so answers. Every round's answers join the same file, each line
-naming its set, and all of them teach w. simulate.py measures what these choices cost in answers.
+still unclear, a new round every ROUND or so answers; the rating tool renders each in the background and
+switches to it once rendered (rate.py). Every round's answers join the same file, each line naming its
+set, and all of them teach w. simulate.py measures what these choices cost in answers.
 """
-import os, time
+import json, os, shutil, time
 import numpy as np
 
 from . import brows
-from .files import HERE, Log, exists, folder, rendered
+from .files import HERE, Log, complete, exists, folder, rendered
 from .logistic import Posterior
 from .sexes import SEXES
 
@@ -92,6 +93,37 @@ def pool(sex, size=POOL_SIZE):
 def refine_folder(name):
     """Where the latest refinement round of the sex of that name is rendered."""
     return folder(name + "_refine")
+
+
+def next_folder(name):
+    """Where the next refinement round of the sex of that name is rendered while he rates the latest."""
+    return folder(name + "_next")
+
+
+def advance(name):
+    """Puts the sex's next refinement round in place of the latest once every face of it is rendered;
+    returns whether it did."""
+    if not complete(next_folder(name)):
+        return False
+    if os.path.exists(refine_folder(name)):
+        shutil.rmtree(refine_folder(name))
+    os.replace(next_folder(name), refine_folder(name))
+    return True
+
+
+def best_picture(name):
+    """Where the best faces of the sex of that name are rendered (build_faces.py --best), their numbers
+    beside it: a .json holding how many answers they were learnt from."""
+    return os.path.join(HERE, "pool", name + "_best.png")
+
+
+def best_answers(name):
+    """How many answers the sex's best faces were rendered from, or None if they are not rendered."""
+    numbers = os.path.splitext(best_picture(name))[0] + ".json"
+    if not (os.path.exists(best_picture(name)) and os.path.exists(numbers)):
+        return None
+    with open(numbers, encoding="utf-8") as f:
+        return json.load(f)["answers"]
 
 
 def current(name):
@@ -162,6 +194,15 @@ class Session:
         """Whether an answer was given on this set."""
         return line.get("set", "pool") == self.set
 
+    def here(self):
+        """How many answers were given on this set."""
+        return sum(map(self.mine, self.answers.lines))
+
+    def quota(self):
+        """The answers on this set after which the next refinement round is due: FIRST on the pool, ROUND
+        on a round."""
+        return ROUND if self.set.startswith("refine") else FIRST
+
     def repeatable(self):
         """Earlier first-time answers on this set's faces that have not been re-shown."""
         again = {line["repeat_of"] for line in self.answers.lines}
@@ -219,5 +260,5 @@ class Session:
 
     def status(self):
         agreed, again = self.answers.consistency()
-        return dict(set=self.set, answers=len(self.answers), agreed=agreed, repeats=again,
-                    settled=round(self.posterior.settled(self.rng), 3))
+        return dict(set=self.set, answers=len(self.answers), here=self.here(), quota=self.quota(), agreed=agreed,
+                    repeats=again, settled=round(self.posterior.settled(self.rng), 3))
