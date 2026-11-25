@@ -14,26 +14,6 @@ After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% wit
 
 Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 Ãƒâ€šÃ‚Â°C; 50% gave 43 W and 70 Ãƒâ€šÃ‚Â°C.
 
-## Enemy: behaviour and combat
-
-### Task description
-
-Extend `scripts/grinner.gd`, which now only plays the idle and waddle: it waddles straight at the knight, pounces from mid range and swipes up close, with cooldowns. Add the least combat both sides need: health, sword hits that land on grinners, claw hits on the knight, and reactions. A grinner dies to three hits, and flinches only when hit during a wind-up. When the knight's health runs out she collapses, the screen fades and the scene restarts. Replace the stand-in pacing grinners in `scripts/outdoors.gd` with three real ones and record a scripted fight.
-
-### Open questions
-
-None. The dev's combat direction, for this and the battle items:
-
-- Kills are quick, soulslike; each grinner hits a bit softer than a soulslike enemy, and the danger comes from being surrounded.
-- Stamina limits how many she can take on at once.
-- No attack tokens: grinners do not take turns to attack.
-- Clear wind-ups only on the more powerful enemy attacks.
-- She starts closer to one among equals (low stamina, damage about a minion's) and becomes a hero through her upgrades.
-
-### Status
-
-Not started. Enemies only appear outside. The crowd test found 40 units well within 60 fps; `Cadence` slows distant grinners' animation.
-
 ## Rosalyn: speech and gestures
 
 ### Task description
@@ -264,7 +244,22 @@ Make fights between groups outdoors, in the shape of a MOBA lane: waves of minio
 
 ### Status
 
-Not started. Needs the minion's animation and the grinner's behaviour and combat.
+Not started. Needs the minion's animation. Grinners fight the knight (fighters carry `Health`, `Hurtbox`, `Strike`), but stand still while their attacks recharge, and their cost at 40 units is unmeasured.
+
+## Combat: tuning from the dev's playtest
+
+### Task description
+
+The grinners and the knight now fight outdoors (`scripts/grinner.gd`, `player.gd`; numbers in the report of commit "Enemy: grinners fight"). Playtest with the dev and tune: the waddle's 0.29 m/s barely closes on her, the swipe has no clear wind-up, ichor and sparks are specks from the game camera, unaimed attacks follow her facing, and corpses stay. Re-key the waddle or add a run in `tools/grinner` if needed.
+
+### Open questions
+
+- Should grinners run at her, or stay slow and dangerous only in numbers?
+- Do corpses fade, sink or stay?
+
+### Status
+
+Not started. Needs the dev's playtest.
 
 ## Faces: crisper features and use in a figure
 

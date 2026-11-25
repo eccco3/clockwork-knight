@@ -1,7 +1,12 @@
 class_name CameraRig
 extends Node3D
 ## Third-person orbit camera. Mouse or right stick turns it about the character, the wheel
-## zooms, and it pulls in smoothly when a wall or beam would come between it and her.
+## zooms, and it pulls in smoothly when a wall or beam would come between it and her. shake()
+## jolts the view when blows land.
+
+## Degrees the view turns at the most shaken, about each axis, and how fast shaking dies away.
+const SHAKE_ANGLES := Vector3(1.4, 1.4, 0.9)
+const SHAKE_FADE := 1.6
 
 @export var target: Node3D
 @export var pivot_height := 1.36
@@ -21,6 +26,8 @@ var _arm: SpringArm3D
 var _cam_dist := 3.3
 var _focus := Vector3.ZERO
 var _has_focus := false
+var _shaken := 0.0
+var _clock := 0.0
 
 
 func _ready() -> void:
@@ -83,7 +90,23 @@ func _process(dt: float) -> void:
 		_cam_dist = lerpf(_cam_dist, hit, 1.0 - exp(-dt * 40.0))
 	else:
 		_cam_dist = lerpf(_cam_dist, hit, 1.0 - exp(-dt * 5.0))
-	camera.global_transform = Transform3D(b, pivot + b.z * _cam_dist)
+	camera.global_transform = Transform3D(b * _shake(dt), pivot + b.z * _cam_dist)
+
+
+## Shakes the view by `amount`, 1 being the most; shakes add up to that.
+func shake(amount: float) -> void:
+	_shaken = minf(_shaken + amount, 1.0)
+
+
+## This frame's turn of the view by the shaking, which grows with the square of how shaken it is.
+func _shake(dt: float) -> Basis:
+	_clock += dt
+	_shaken = maxf(_shaken - SHAKE_FADE * dt, 0.0)
+	if _shaken <= 0.0:
+		return Basis.IDENTITY
+	var t := _clock * 40.0
+	var turn := Vector3(sin(t * 1.13) * sin(t * 0.31 + 1.0), sin(t * 0.97 + 2.0) * sin(t * 0.43), sin(t * 1.29 + 4.0))
+	return Basis.from_euler(turn * SHAKE_ANGLES * (PI / 180.0) * _shaken * _shaken)
 
 
 ## Turns a 2D stick / key vector into a world direction on the ground, relative to the view.

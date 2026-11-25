@@ -66,6 +66,11 @@ func _player() -> Node3D:
 	return get_tree().get_first_node_in_group("player")
 
 
+func restart_scene() -> void:
+	super()
+	_subjects.clear()
+
+
 ## A scripted camera's shot. While it glides in, it blends from the shot before, which keeps moving.
 class Shot:
 	var at: String
