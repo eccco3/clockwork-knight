@@ -15,16 +15,21 @@ def picture(i, folder):
     return os.path.join(folder, "%03d.png" % i)
 
 
+def index(folder):
+    """The file that holds the rendered set's faces and how they were drawn and rendered."""
+    return os.path.join(folder, "pool.npz")
+
+
 def rendered(folder):
     """The rendered set's faces (F, their numbers), the share of his taste each number is expected to hold
     and the spread the faces were drawn at, one number or one per number of a face (taste.prior), and the
     set's name in the answers: a pool's, or "refine n" for the nth refinement round (taste.refine)."""
-    with np.load(os.path.join(folder, "pool.npz")) as f:
+    with np.load(index(folder)) as f:
         return f["faces"], f["share"], f["spread"], str(f["set"]) if "set" in f.files else "pool"
 
 
 def exists(folder):
-    return os.path.exists(os.path.join(folder, "pool.npz"))
+    return os.path.exists(index(folder))
 
 
 def progress(folder):
