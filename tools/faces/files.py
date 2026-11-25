@@ -17,9 +17,9 @@ def picture(i, folder):
 
 def rendered(folder):
     """The rendered set's coefficients (F, K), the model's share of the variance per component, and the
-    spread the faces were drawn at."""
+    spread the faces were drawn at, one number or one per component."""
     with np.load(os.path.join(folder, "pool.npz")) as f:
-        return f["faces"], f["share"], float(f["spread"])
+        return f["faces"], f["share"], f["spread"]
 
 
 class Log:
