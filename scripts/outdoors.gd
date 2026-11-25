@@ -28,6 +28,9 @@ const GRINNERS := [[Vector3(4, 0, 11), PI + 0.4, true], [Vector3(-0.5, 0, 8), 0.
 const PACE_WALK := 7.0
 const PACE_TURN := 3.0
 
+## Whether it places its own grinners; dev/crowd.gd places a crowd instead.
+@export var grinners := true
+
 var _pacers: Array[Grinner] = []
 var _t := 0.0
 var _relief := FastNoiseLite.new()
@@ -51,7 +54,8 @@ func _ready() -> void:
 	_build_ground()
 	_build_grass()
 	_build_walls()
-	_place_grinners()
+	if grinners:
+		_place_grinners()
 	var p := Player.new()
 	p.name = "Player"
 	p.position = Vector3(0, height(0, 0) + 0.02, 0)

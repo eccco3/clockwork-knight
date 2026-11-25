@@ -26,7 +26,7 @@ A roguelite: the workshop and hall are the safe hub; enemies appear only outdoor
 - Scripted play: `dev/drive.tscn` with `--fixed-fps 60`; `dev/shot.tscn` photographs a scene. Their headers list arguments.
 - Never open Godot windows on the dev's screen for tests or bakes, unless he is playtesting: replace `godot` with `toolchain\blender\4.5\python\bin\python.exe -I dev\quiet.py`; `--timing` first for GPU timing waits until nothing else runs.
 - Clips: `tools\clip.py out.mp4 <drive arguments>` (that Python) records `dev/drive.tscn` hidden.
-- Capped at 60 fps. Frame times: `dev/drive.tscn` events `perf:start` and `perf:stop`, run with `--disable-vsync --max-fps 0`.
+- Capped at 60 fps. Frame times: `dev/drive.tscn` events `perf:start`, `perf:stop` with `--disable-vsync --max-fps 0`; crowds: `dev/crowd.tscn`.
 
 ## Where things are
 

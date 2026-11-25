@@ -32,20 +32,8 @@ None. The dev's combat direction, for this and the battle items:
 
 ### Status
 
-Not started. Enemies only appear outside; see the crowd item.
-## Enemy: crowd performance test
+Not started. Enemies only appear outside. The crowd test found 40 units well within 60 fps; `Cadence` slows distant grinners' animation.
 
-### Task description
-
-Add a `dev/` scene that spawns a chosen number of grinners around the knight outdoors, and run it with the scripted-play harness at 1, 6, 12, 24 and 40. Record frame time, GPU time, CPU time spent on scripts and animation, triangles and draw calls. Find where 60 fps breaks and where GPU time crosses 6.5 ms. Then cut the largest costs, for example shadows and update rate for distant grinners, and report before and after.
-
-### Open questions
-
-- None. Up to 12 grinners on screen; later, up to 40 allies and enemies in all.
-
-### Status
-
-Not started. For comparison, one knight costs the GPU about 0.25 ms at mid distance.
 ## Rosalyn: rig and standing pose
 
 ### Task description
@@ -151,20 +139,6 @@ Plan the game's opening scene with the dev in the main chat; this is not a subag
 
 Not started. Needs the dev; the workshop items build the room.
 
-## Workshop: shorten it and the apartment
-
-### Task description
-
-The workshop blockout feels too large. Shorten the workshop by a quarter, three bays (from 72 m to 54 m), and the apartment by a third, one bay (from 18 m to 12 m), through the constants in `tools/workshop_shell.py`, keeping its width, height and the doors from the hall where they are. Rebuild the hall, rebake its lightmap, and deliver the overhead plan and the views down the workshop's length again.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. It rebakes the hall, so nothing else may bake at the same time.
-
 ## Workshop: windows and surfaces
 
 ### Task description
@@ -177,7 +151,7 @@ None. Windows along both of the workshop's long walls, every few metres; none on
 
 ### Status
 
-Not started. Needs the workshop's walls.
+Not started. The walls are built: 54 m workshop, 12 m apartment.
 
 ## Workshop: lamps and bake
 
@@ -205,7 +179,7 @@ None. Dense around the edges and the benches, with one or two clear aisles about
 
 ### Status
 
-Not started. Needs the workshop's walls.
+Not started. The walls are built: 54 m workshop, 12 m apartment.
 
 ## Workshop: clocks
 

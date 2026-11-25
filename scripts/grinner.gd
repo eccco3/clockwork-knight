@@ -23,6 +23,7 @@ const HIT := &"hit"
 var _tree: AnimationTree
 var _clips: AnimationPlayer
 var _playback: AnimationNodeStateMachinePlayback
+var _cadence := Cadence.new()
 
 
 func _ready() -> void:
@@ -32,13 +33,19 @@ func _ready() -> void:
 	for v: VisualInstance3D in figure.find_children("*", "VisualInstance3D", true, false):
 		v.layers = Layers.CHARACTERS
 	_tree = figure.get_node("AnimationTree")
+	_tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	_clips = _tree.get_node(_tree.anim_player)
 	_playback = _tree[PLAYBACK]
 	_tree[GAIT] = gait
 
 
-func _process(_dt: float) -> void:
-	global_position += global_basis * _tree.get_root_motion_position()
+## Animates and travels at its Cadence. Far away or out of view it steps every few frames, and a move asked
+## for there begins up to three frames late.
+func _process(dt: float) -> void:
+	var step := _cadence.step(self, dt)
+	if step > 0.0:
+		_tree.advance(step)
+		global_position += global_basis * _tree.get_root_motion_position()
 
 
 func pounce() -> void:
