@@ -1,10 +1,8 @@
-"""The grinner's clips, keyed by hand on the controls of `pose`, and the poses that test its skin.
-
-A clip is a function of phase (0..1 from its start to its end) returning controls. Idle and Waddle loop;
-the moves of `moves` play once, and their marks say when their phases begin.
+"""The walking grinner: its looping clips, keyed by hand on the controls of `pose`, and the poses that test its
+skin. Idle and Waddle loop; the moves of `moves` play once, and their marks say when their phases begin.
 """
 from .body import FINGERS
-from .keys import FPS, Curve, twice, swaying, sided, both, borne
+from .keys import Curve, Kind, twice, swaying, sided, both, borne
 from .moves import MOVES
 
 STRIDE = 0.46                                  # metres walked in one waddle cycle
@@ -98,20 +96,6 @@ def idle(phase):
     return borne(out)
 
 
-def _whole(move, seconds):
-    return lambda phase: move(phase * seconds)
-
-
-LOOPS = {"Idle": (idle, 180), "Waddle": (waddle, 48)}
-CLIPS = dict(LOOPS, **{name: (_whole(move, seconds), round(seconds * FPS)) for name, (move, seconds, marks) in MOVES.items()})
-MARKS = {name: marks for name, (move, seconds, marks) in MOVES.items()}       # clip -> phase -> the second it begins
-
-
-def phase(clip, seconds):
-    """The phase a clip is in: the last of its marks to have begun, or None before the first."""
-    begun = [(at, name) for name, at in MARKS.get(clip, {}).items() if at <= seconds]
-    return max(begun)[1] if begun else None
-
 # ---------------------------------------------------------------- poses that test the skin
 
 CLAWED = dict(curl_pinky=70.0, curl_ring=70.0, curl_middle=70.0, curl_index=70.0, thumb_curl=70.0, thumb_in=20.0)
@@ -132,3 +116,5 @@ POSES = {
     "claw": both(dict(CLAWED, wrist_curl=25.0)),
     "splay": both(dict(SPLAYED, wrist_curl=-20.0)),
 }
+
+GRINNER = Kind("grinner", {"Idle": (idle, 180), "Waddle": (waddle, 48)}, MOVES, POSES)
