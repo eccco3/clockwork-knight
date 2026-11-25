@@ -19,6 +19,10 @@ from .logistic import Posterior, shape_prior
 from .sexes import SEXES
 
 POOL_SEED, POOL_SIZE = 7, 240
+# The pools' faces are drawn this close to the average face: about half as far as the model draws faces,
+# since a face drawn at random in some sixty directions lands far out along many of them at once and looks
+# extreme. Their place along the female-male direction is kept (sexes.MARGIN), so they still read as a sex.
+POOL_SPREAD = 0.35
 PRIOR_LOGIT = 2.0
 CLEAR = 20
 REPEAT = 0.05
@@ -34,7 +38,7 @@ def answers(name):
 def pool(sex, size=POOL_SIZE):
     """Coefficients of the faces of a sex (sexes.Sex) the dev is shown."""
     rng = np.random.default_rng((POOL_SEED, list(SEXES).index(sex.name)))
-    return np.stack([sex.sample(rng) for _ in range(size)])
+    return np.stack([sex.sample(rng, POOL_SPREAD) for _ in range(size)])
 
 
 def load_pool(name):
@@ -52,7 +56,7 @@ def best(posterior, sex, rng, count, draws=4000):
     """The `count` faces, of `draws` random ones of the sex, furthest along the learnt direction, best first:
     faces the pool could hold, with their other features left to chance. Returns their coefficients and the
     logits of his preferring each to the mean face."""
-    faces = np.stack([sex.sample(rng) for _ in range(draws)])
+    faces = np.stack([sex.sample(rng, POOL_SPREAD) for _ in range(draws)])
     score = faces @ posterior.mean
     keep = np.argsort(-score)[:count]
     return faces[keep], score[keep]

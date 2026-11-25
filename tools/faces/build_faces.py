@@ -189,14 +189,14 @@ def render_set(model, name, faces, spread, light):
 def pool(model, name, light):
     """Renders taste.py's pool of faces of the sex; answers given on an earlier pool go with it."""
     answers = taste.answers(name)
-    if render_set(model, name, taste.pool(Sex(model, name)), SPREAD, light) and os.path.exists(answers):
+    if render_set(model, name, taste.pool(Sex(model, name)), taste.POOL_SPREAD, light) and os.path.exists(answers):
         os.remove(answers)
         print("DISCARDED", answers, "given on the earlier pool")
 
 
 def best(model, sex, path, answers, seed, view, light):
     answers = taste.Answers(answers)
-    posterior = answers.posterior(taste.prior(model.share, SPREAD))
+    posterior = answers.posterior(taste.prior(model.share, taste.POOL_SPREAD))
     faces, score = taste.best(posterior, sex, np.random.default_rng(seed), SIDE * SIDE)
     coefficients = os.path.splitext(path)[0] + ".json"
     with open(coefficients, "w", encoding="utf-8", newline="\n") as f:
