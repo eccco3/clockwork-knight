@@ -102,6 +102,23 @@ None. She stands by one of the windows closer to the first one, between that win
 
 Not started.
 
+## Plan the balance model with the dev
+
+### Task description
+
+Settle how a run stays balanced before combat numbers are built. Within a run she goes from one among equals to hero, starting low each time; her offence and defence upgrades keep pace with growing enemy damage and numbers. The meta loop widens her options and moves, with small number bonuses. Her minions can be chosen, added to or modified. Candidate model: one unit (grinner-equivalents) for threat and power, fixed upgrade axes priced in it, army size as slot points, minions stronger near her, fresh waves per area, and headless simulated runs.
+
+### Open questions
+
+- Do surviving minions carry over to the next area: all, none, or a few veterans?
+- Does she order her minions (hold, push, follow), or do they act on their own?
+- Can the army win a lane without her?
+- Which minion upgrades belong to runs and which to the meta loop?
+
+### Status
+
+Planning with the dev; not for an agent.
+
 ## Plan the Clockmaker with the dev
 
 ### Task description
