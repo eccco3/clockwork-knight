@@ -58,7 +58,7 @@ None. Bones are enough for the skirt while she stands. Her eyes blink and move.
 
 ### Status
 
-Not started.
+In progress on branch `worktree-agent-a67a951fb109a0580` (unmerged WIP): 72 bones, an Idle (breathing only) and a Blink, clay-checked at half detail; shared rig, key and turn helpers in `tools/sculpt/`. Left: render the last sleeve-blend change; boxy shoulders and the raised arm's collapse; clasped fingers, the stray thumb and shards by the right wrist; gaps at the shut lids' corners; weight shifts and eyes in the idle; everything in Godot.
 
 ## Rosalyn: speech and gestures
 
@@ -247,7 +247,7 @@ In the sword clips her upper arm sinks up to 30 mm into her chest and passes thr
 
 ### Status
 
-Not started. Shares the knight's builder with her hand and seat items.
+In progress on branch `worktree-agent-add37c3e80de4452a` (unmerged WIP): pauldrons keyed clear of the arm (`follow.py`) and the chest pocketed from the shoulders' sweep (`sweep.py`), never yet built. Left: before/after `--gaps` numbers; choose between the swept pocket and limiting the collar bone's travel (it turns 29 degrees in the Sword_Regular clips, pulling the shoulder about 9.5 cm out of its socket); end the cuff about 22 mm short of the wrist joint; check the other seats, and after shots.
 
 ## Minion: sculpt the model
 
@@ -261,7 +261,7 @@ Build a small clockwork soldier as `assets/models/minion.glb` from a new `tools/
 
 ### Status
 
-Not started.
+In progress on branch `worktree-agent-a97a4c5fc7017908a` (unmerged WIP): a wooden soldier with a crimson cuirass and short spear, 11,472 / 5,910 / 2,954 triangles and a 799-triangle shadow stand-in, passing `dev/detail_check.gd`. Left: fresh Godot turnarounds and line-up, a `build_models.ps1` step, CLAUDE.md notes, the spear blade's crease and the armholes' jagged edge.
 
 ## Minion: rig and animation
 
