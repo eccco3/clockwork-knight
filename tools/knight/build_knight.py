@@ -41,7 +41,7 @@ BLADE_DIR = V(0.0, -1.0, 0.0)
 # with its thigh. "wrap": her tassets carried on round the back of her thighs. "armour": plates hinged all
 # round her fauld in her tassets' place, sprung in against her legs. "tabard": a cloth panel before and behind,
 # over the wrap's tassets. Under the last two her seat is a flat block set back between the tops of her thighs.
-SEAT = opt("--seat", "culet")
+SEAT = opt("--seat", "tabard")
 RECESSED = SEAT in ("armour", "tabard")
 FAULD = Frame(V(0, 0.008, 0)), V(1.07, 0.70, 1)    # the axis her fauld is turned on, and how it is pressed oval
 SEAT_FLOOR = 0.946                                 # where her pelvis is cut flat over the block, level with the fauld's lower edge
