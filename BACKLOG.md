@@ -22,7 +22,13 @@ Extend `scripts/grinner.gd`, which now only plays the idle and waddle: it waddle
 
 ### Open questions
 
-- None.
+None. The dev's combat direction, for this and the battle items:
+
+- Kills are quick, soulslike; each grinner hits a bit softer than a soulslike enemy, and the danger comes from being surrounded.
+- Stamina limits how many she can take on at once.
+- No attack tokens: grinners do not take turns to attack.
+- Clear wind-ups only on the more powerful enemy attacks.
+- She starts closer to one among equals (low stamina, damage about a minion's) and becomes a hero through her upgrades.
 
 ### Status
 
@@ -258,7 +264,7 @@ Not started. Needs the minion's sculpt.
 
 ### Task description
 
-Make fights between groups outdoors, in the shape of a MOBA lane: waves of minions and grinners advance, meet and fight, with the knight among them. Units pick targets sensibly, hold formation, surround without stacking, spread their attacks over time, and retreat or regroup when losing. Keep it cheap enough for 40 units at 60 fps, for example with staggered thinking and simple avoidance. Record a scripted battle and measure its CPU time.
+Make fights between groups outdoors, in the shape of a MOBA lane: waves of minions and grinners advance, meet and fight, with the knight among them. Units pick targets sensibly, hold formation, surround without stacking, and retreat or regroup when losing. Keep it cheap enough for 40 units at 60 fps, for example with staggered thinking and simple avoidance. Record a scripted battle and measure its CPU time.
 
 ### Open questions
 
