@@ -1,5 +1,6 @@
 # Draws playtest.ico, compiles playtest.exe from launcher.cs and adds a shortcut to it to the Start menu,
-# where the dev pins it to the taskbar. Run it in the main checkout, so the pin follows main.
+# where the dev pins it to the taskbar, and gives it the picker's app ID, so the picker's windows show on the
+# pin. Run it in the main checkout, so the pin follows main.
 param([string]$ShortcutFolder = [Environment]::GetFolderPath('Programs'))
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
@@ -79,3 +80,32 @@ $shortcut.IconLocation = "$exe,0"
 $shortcut.Description = 'Play a scene from the main checkout or a worktree'
 $shortcut.Save()
 "Shortcut: $($shortcut.FullName)"
+
+# The picker's windows show on the pinned launcher when its shortcut carries the ID they take (playtest.ps1's
+# $AppId). Pinning copies the shortcut, so the pinned copy gets it too, if it is pinned already.
+Add-Type -Namespace Playtest -Name Shortcut -MemberDefinition @'
+[StructLayout(LayoutKind.Sequential, Pack = 4)] public struct Key { public Guid Format; public int Id; }
+[StructLayout(LayoutKind.Sequential)] public struct Variant { public ushort Type; ushort A, B, C; public IntPtr Value; IntPtr D; }
+[ComImport, Guid("886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IPropertyStore {
+  void GetCount(out uint count); void GetAt(uint index, out Key key); void GetValue(ref Key key, out Variant value);
+  void SetValue(ref Key key, ref Variant value); void Commit();
+}
+[DllImport("shell32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
+static extern void SHGetPropertyStoreFromParsingName(string path, IntPtr bind, int flags, ref Guid iid, out IPropertyStore store);
+public static void SetAppId(string path, string id) {
+  Guid iid = typeof(IPropertyStore).GUID;
+  IPropertyStore store;
+  SHGetPropertyStoreFromParsingName(path, IntPtr.Zero, 2, ref iid, out store);          // GPS_READWRITE
+  Key key = new Key { Format = new Guid("9F4C2855-9F79-4B39-A8D0-E1D42DE1D5F3"), Id = 5 };   // System.AppUserModel.ID
+  Variant value = new Variant { Type = 31, Value = Marshal.StringToCoTaskMemUni(id) };       // VT_LPWSTR
+  try { store.SetValue(ref key, ref value); store.Commit(); }
+  finally { Marshal.FreeCoTaskMem(value.Value); Marshal.ReleaseComObject(store); }
+}
+'@
+$appId = if ((Get-Content -Raw (Join-Path $PSScriptRoot 'playtest.ps1')) -match "(?m)^\`$AppId = '(.+)'") { $Matches[1] } else { throw 'No $AppId in playtest.ps1' }
+$pinned = Join-Path $env:APPDATA "Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\$(Split-Path -Leaf $shortcut.FullName)"
+foreach ($link in @($shortcut.FullName) + @($pinned | Where-Object { Test-Path -LiteralPath $_ })) {
+  [Playtest.Shortcut]::SetAppId($link, $appId)
+  "App ID $appId on $link"
+}

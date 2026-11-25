@@ -7,6 +7,13 @@ param([switch]$DryRun, [string]$Pick, [string]$Scene)
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Windows.Forms, System.Drawing
 try { [Console]::OutputEncoding = [Text.Encoding]::UTF8 } catch {}
+# The picker is a PowerShell window, which the taskbar would group with PowerShell's. Under this ID, which
+# install.ps1 gives the shortcut the dev pins, it shows on the pinned launcher instead.
+$AppId = 'ClockworkKnight.Playtest'
+if (-not $DryRun) {
+  Add-Type -Name Shell -Namespace Playtest -MemberDefinition '[DllImport("shell32.dll", CharSet = CharSet.Unicode)] public static extern int SetCurrentProcessExplicitAppUserModelID(string id);'
+  [Playtest.Shell]::SetCurrentProcessExplicitAppUserModelID($AppId) | Out-Null
+}
 
 $script:Report = { param($line) Write-Host $line }
 $script:Progress = { param($text, $percent) }      # a long step's progress: text, or none once done; percent, or -1 if unknown
