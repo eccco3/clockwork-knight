@@ -23,6 +23,8 @@ const JOG_LANDS := 0.025
 const JOG_PUSHES_OFF := 0.185
 const JOG_FLIGHT_RATE := 2.3
 const JOG_FLIGHT_RISE := 0.22
+## Her legs and what hangs over them, by the start of each bone's name: what keeps the jump's pose under an action in the air.
+const LEG_BONES: Array[String] = ["thigh", "calf", "foot", "ball", "poleyn", "skirt", "tabard"]
 
 var model: Node3D
 var skel: Skeleton3D
@@ -104,6 +106,7 @@ func _ready() -> void:
 		"brass_dark": Looks.dull_brass(Color(0.46, 0.33, 0.15)),
 		"steel": Looks.steel(Color(0.76, 0.77, 0.79), Color(0.36, 0.36, 0.38)),
 		"leather": Looks.leather(Color(0.13, 0.060, 0.032), Color(0.07, 0.03, 0.018)),
+		"cloth": Looks.wool(Color(0.060, 0.185, 0.160), Color(0.030, 0.085, 0.075)),
 		"eye": Looks.glass_eye(Color(0.10, 0.22, 0.19), Color(0.56, 0.44, 0.19), 0.385, 0.335),
 	})
 	_setup_extras()
@@ -158,10 +161,8 @@ func _setup_extras() -> void:
 		var n := skel.get_bone_name(b)
 		if n == "pelvis":
 			_legs_mask[b] = 0.5
-		elif n.ends_with("_l") or n.ends_with("_r"):
-			if n.begins_with("thigh") or n.begins_with("calf") or n.begins_with("foot") or n.begins_with("ball") \
-					or n.begins_with("poleyn") or n.begins_with("skirt"):
-				_legs_mask[b] = 1.0
+		elif LEG_BONES.any(func(start: String) -> bool: return n.begins_with(start)):
+			_legs_mask[b] = 1.0
 	_rng.seed = 20261122
 
 

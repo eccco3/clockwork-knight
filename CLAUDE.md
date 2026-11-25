@@ -6,11 +6,11 @@ A roguelite: the workshop and hall are the safe hub; enemies appear only outdoor
 
 ## Tools
 
-Everything the project needs is here; `.gdignore` hides third-party `toolchain/` from Godot.
+`.gdignore` hides third-party `toolchain/` from Godot.
 
 - Godot 4.7.2: `toolchain\godot\Godot_v4.7.2-stable_win64_console.exe`
 - Blender 4.5.16: `toolchain\blender\blender.exe`
-- Both are Windows-native: use PowerShell, not WSL.
+- Both are Windows-native: use PowerShell.
 - System `python` is a hanging Store stub: use `toolchain\blender\4.5\python\bin\python.exe -I`.
 
 ## Build and run
@@ -18,13 +18,13 @@ Everything the project needs is here; `.gdignore` hides third-party `toolchain/`
 - All models, the Godot import and the lightmap: `tools\build_models.ps1`. Needed after cloning.
 - Lightmap alone: `godot --editor --path . res://scenes/hall.tscn -- bake-lightmaps` takes fourteen minutes; `draft` two. Rebake after rebuilding.
 - Materials, then scene: `godot --headless --path . --script res://builders/hall_materials.gd`, then `hall_scene.gd`.
-- Knight: `blender --background --python tools/knight/build_knight.py -- --out assets/models/knight.glb` (80 s), then `godot --path . --headless --import`.
+- Knight: `blender --background --python tools/knight/build_knight.py -- --out assets/models/knight.glb` (80 s), then `godot --path . --headless --import`. `--seat armour|tabard` tries another seat (`hang.py`).
 - Grinner: `blender --background --python tools/grinner/build_grinner.py -- --out assets/models/grinner.glb` (seven minutes), then import. `--shots dir` adds turnarounds; `--clay a.png` alone previews the bare mesh.
 - Rosalyn: likewise (`rosalyn`, seven minutes); `--detail 0.7` halves her triangles; `scripts/rosalyn.gd`, her model's root, dresses her.
 - Never combine `--only` with `--out`: it overwrites the full model.
 - Run: `godot --path .`. Playtest picker to pin: `tools\playtest\install.ps1` in the main checkout; `playtest.ps1 -DryRun` tests it.
 - Scripted play and screenshots: `dev/drive.tscn` with `--fixed-fps 60`; `dev/shot.tscn` photographs a scene. Both list arguments in their headers; `lamps=baked` drops live character lights.
-- Never open Godot windows on the dev's screen for tests or bakes, unless he is playtesting: replace `godot` with `toolchain\blender\4.5\python\bin\python.exe -I dev\quiet.py` (hidden desktop); `--timing` first for GPU timing waits until nothing else runs.
+- Never open Godot windows on the dev's screen for tests or bakes, unless he is playtesting: replace `godot` with `toolchain\blender\4.5\python\bin\python.exe -I dev\quiet.py`; `--timing` first for GPU timing waits until nothing else runs.
 - Clips: that Python runs `tools\clip.py out.mp4 <drive arguments>`: records `dev/drive.tscn` hidden, encodes H.264.
 - Capped at 60 fps. Frame times: `dev/drive.tscn` events `perf:start` and `perf:stop`, run with `--disable-vsync --max-fps 0`.
 
@@ -42,7 +42,7 @@ Everything the project needs is here; `.gdignore` hides third-party `toolchain/`
 - `tools/knight/` builds the knight, `assets/textures/knight/face_paint.png` and its placement `face_paint.json`; `tools/build_hall.py` and `builders/hall_*.gd` build the hall; `tools/workshop_shell.py`'s constants size the workshop beyond its east doors.
 - Only `KnightShadow`, a 4,700-triangle copy from `tools/knight/shadow.py`, casts the knight's shadows.
 - `tools/faces/`: ICT-FaceKit face model, sex labels (`dev/labels.tscn`), taste per sex (`dev/taste_*.tscn`); see `sexes.py`.
-- `tools/grinner/` builds the first enemy, its rig and hand-keyed clips; `import_grinner.gd` sets its detail distances and adds the AnimationTree. `scripts/grinner.gd` walks it. Shot shows it on `dev/stage.tscn`: `call=stand:res://assets/models/grinner.glb`, `stand:res://dev/waddler.tscn` waddling, `spread:` detail levels.
+- `tools/grinner/` builds the first enemy, its rig and hand-keyed clips; `import_grinner.gd` sets its detail distances and adds the AnimationTree. `scripts/grinner.gd` walks it. Shot shows it on `dev/stage.tscn`: `call=stand:res://assets/models/grinner.glb`, `stand:res://dev/waddler.tscn` waddling, `spread:` detail levels, `pose:Roll@0.47` poses the knight.
 
 ## Repository
 

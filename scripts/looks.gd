@@ -62,6 +62,12 @@ static func leather(colour: Color, tarnish: Color) -> ShaderMaterial:
 		"streak": 0.0, "grain_scale": 520.0, "bump": 1.4})
 
 
+## Felted wool, matt and ribbed along its weave. `worn` colours its faded patches.
+static func wool(colour: Color, worn: Color) -> ShaderMaterial:
+	return _surface(colour, {"metallic": 0.0, "roughness": 0.88, "tarnish": 0.35, "tarnish_color": worn,
+		"streak": 0.85, "grain_scale": 700.0, "bump": 1.6})
+
+
 ## An enamelled glass eye, its iris `inner` round the pupil and `outer` at the rim. `iris_size` and
 ## `lid_height` are angles on the eyeball in radians, as the figure's head sculpt has them: the
 ## iris's radius, and where the upper lid rests and shades the eye.
