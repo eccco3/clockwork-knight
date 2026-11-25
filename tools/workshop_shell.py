@@ -6,17 +6,17 @@ from hall_lib import *
 import hall_shell as H
 from hall_props import WARM
 
+BAY = 6.0                   # truss spacing along the length
 WIDTH = 2 * H.HL            # across: the hall's length
-LENGTH = 3 * WIDTH          # away from the hall
+LENGTH = 9 * BAY            # away from the hall
 EAVES = H.EH                # top of the side walls
 APEX = H.APEX               # underside of the roof boarding at the ridge
 SOFFIT = EAVES + 0.25       # underside of the roof boarding above the inner wall face
-BAY = 6.0                   # truss spacing along the length
 NAVE = WIDTH / 2            # between the two rows of posts that carry the trusses
 POST = 0.30                 # post section
 PURLINS = (0.25, 0.5, 0.75)   # along each slope, as fractions of it
 APT_WIDTH = WIDTH / 3       # apartment: across the workshop
-APT_LENGTH = LENGTH / 4     # apartment: along the workshop
+APT_LENGTH = 2 * BAY        # apartment: along the workshop
 APT_HEIGHT = EAVES          # apartment: top of its walls, where its lid lies
 APT_SIDE = 1                # the long wall the apartment stands against: +1 or -1 in workshop x
 APT_DOOR_W, APT_DOOR_H = 1.0, 2.2
