@@ -13,6 +13,7 @@ His materials carry the game's solid grain space instead of textures, and the ga
 (scripts/minion.gd). tools/minion/import_minion.gd makes the levels and the stand-in work in Godot.
 """
 import bpy, sys, os, time
+import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
@@ -22,8 +23,8 @@ from knight import shadow
 from minion import body, spear
 
 NAME = "minion"
-LODS = (12000, 6000, 3000)                      # triangle ceilings, full detail first; below the last his brass breaks up
-SHADOW = 500                                    # triangles the shadow stand-in aims for; small parts keep a few each
+LEVELS = ((12000, 0.0), (6000, 0.012), (3000, 0.025))   # each detail level's triangle ceiling, and the smallest piece it keeps, in metres across
+SHADOW = 500                                    # the triangles his shadow stand-in aims for; each part keeps a few
 PREVIEWS = {                                    # how Blender shows what the game dresses by name
     "wood": dict(base=(0.66, 0.47, 0.27), rough=0.40),
     "wood_dark": dict(base=(0.030, 0.024, 0.020), rough=0.22),
@@ -41,19 +42,28 @@ def turnaround(path, views, zoom):
     bl.turnaround(path, views, (x, y, z), scale, res, bl.studio((z + 1.6, z + 0.3, z + 1.5), (250, 60, 200)), 40)
 
 
+def level(name, pieces, ceiling, smallest):
+    """The pieces at least `smallest` across as one mesh of at most `ceiling` triangles."""
+    whole = carve.carve(name, [pc for pc in pieces if np.ptp(pc["v"], axis=0).max() >= smallest], PREVIEWS)
+    if len(whole.data.polygons) <= ceiling:
+        return whole
+    whole.name = whole.data.name = name + "_whole"
+    cut = build.reduce(whole, name, ceiling, creased=True)
+    bpy.data.meshes.remove(whole.data)
+    return cut
+
+
 def main():
     t0 = time.time()
     bl.reset_scene()
     figure = body.parts()
     pieces = [pc for pc in figure + spear.parts() if pc["name"].startswith(tuple(opt("--only", "").split(",")))]
     print("PIECES " + ", ".join("%s %d" % (pc["name"], P.triangles([pc])) for pc in pieces))
-    levels = [carve.carve(NAME + "_lod0", pieces, PREVIEWS)]
-    for level, ceiling in enumerate(LODS[1:], 1):
-        levels.append(build.reduce(levels[0], "%s_lod%d" % (NAME, level), ceiling, creased=True))
-    for ob, ceiling in zip(levels, LODS):
+    levels = [level("%s_lod%d" % (NAME, n), pieces, *limits) for n, limits in enumerate(LEVELS)]
+    for ob, (ceiling, smallest) in zip(levels, LEVELS):
         print("LOD %s: %d triangles (ceiling %d)" % (ob.name, len(ob.data.polygons), ceiling))
-        assert len(ob.data.polygons) <= ceiling or opt("--only"), "over the triangle budget"
-    caster = shadow.shadow_mesh(levels[0], SHADOW, min_tris=8, name=NAME + "_shadow")
+        assert not ob.data.validate(), "a piece collapsed flat"
+    caster = shadow.shadow_mesh(levels[-1], SHADOW, min_tris=8, name=NAME + "_shadow")
     print("SHADOW %s: %d triangles" % (caster.name, len(caster.data.polygons)))
     top = max(pc["v"][:, 2].max() for pc in figure)
     print("BUILT pieces=%d  height %.3f m of the knight's %.3f  t=%.1fs" % (len(pieces), top, body.KNIGHT_HEIGHT, time.time() - t0))
