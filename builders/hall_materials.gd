@@ -6,6 +6,7 @@ extends SceneTree
 
 const PATH := "res://materials/hall_%s.tres"
 const TEX := "res://assets/textures/%s/%s.jpg"
+const LAYOUT := "res://assets/models/hall_layout.json"
 
 
 func _init() -> void:
@@ -76,6 +77,21 @@ func _shader(n: String, shader: String, params := {}) -> ShaderMaterial:
 	return m
 
 
+## A scanned surface and, given a wear map, its worn variant for the workshop.
+func _surface(n: String, params: Dictionary, wear := {}) -> void:
+	_shader(n, "hall_surface", params)
+	if not wear.is_empty():
+		_shader(n + "_worn", "hall_surface_worn", params.merged(wear))
+
+
+## The workshop's wear map and where it lies, from its mark in the layout (tools/workshop_shell.py).
+func _wear() -> Dictionary:
+	var layout: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(LAYOUT))
+	var m: Dictionary = layout["marks"]["wear"][0]
+	var r: Array = m["rect"]
+	return {"wear_tex": load(m["image"]), "wear_rect": Vector4(r[0], r[1], r[2], r[3])}
+
+
 func _save(res: Resource, path: String) -> void:
 	var err := ResourceSaver.save(res, path)
 	if err != OK:
@@ -115,21 +131,22 @@ func _materials() -> void:
 	var soft := _noise("soft", FastNoiseLite.TYPE_SIMPLEX_SMOOTH, 0.012, 5)
 	var flame := _noise("flame", FastNoiseLite.TYPE_SIMPLEX_SMOOTH, 0.02, 4)
 	var cell := _noise("cell", FastNoiseLite.TYPE_SIMPLEX_SMOOTH, 0.03, 5)
+	var wear := _wear()
 
 	# --- timber -------------------------------------------------------------
 	_std("wood_beam", "rough_wood", Color(0.98, 0.86, 0.76), 0.92, {"normal": 1.3, "ao_affect": 0.5})
-	_shader("wood_floor", "hall_surface", {
+	_surface("wood_floor", {
 		"albedo_tex": _tex("wood_table_worn", "albedo"), "normal_tex": _tex("wood_table_worn", "normal"),
 		"orm_tex": _tex("wood_table_worn", "arm"), "macro_tex": soft,
 		"tint": Vector3(1.08, 1.0, 0.9), "normal_strength": 0.9, "macro_strength": 0.2, "macro_scale": 0.13,
 		"roughness_scale": 0.62, "saturation": 0.8,
-	})
-	_shader("wood_panel", "hall_surface", {
+	}, wear)
+	_surface("wood_panel", {
 		"albedo_tex": _tex("wood_cabinet_worn_long", "albedo"), "normal_tex": _tex("wood_cabinet_worn_long", "normal"),
 		"orm_tex": _tex("wood_cabinet_worn_long", "arm"), "macro_tex": soft,
 		"tint": Vector3(0.9, 0.86, 0.8), "normal_strength": 1.0, "macro_strength": 0.15, "macro_scale": 0.3,
 		"roughness_scale": 0.8, "saturation": 0.7,
-	})
+	}, wear)
 	_std("wood_dark", "fine_grained_wood", Color(1.1, 1.0, 0.92), 0.7)
 	_std("wood_red", "dark_wood", Color(0.85, 0.8, 0.78), 0.6)
 	_std("wood_oak", "oak_veneer_01", Color(0.62, 0.48, 0.36), 0.75)
@@ -141,18 +158,18 @@ func _materials() -> void:
 		eg.albedo_texture = _gen("endgrain")
 		_save(eg, PATH % "endgrain")
 	# --- masonry / plaster --------------------------------------------------
-	_shader("plaster", "hall_surface", {
+	_surface("plaster", {
 		"albedo_tex": _tex("painted_plaster_wall", "albedo"), "normal_tex": _tex("white_rough_plaster", "normal"),
 		"orm_tex": _tex("painted_plaster_wall", "arm"), "macro_tex": soft,
 		"tint": Vector3(1.32, 1.2, 0.98), "normal_strength": 0.55, "macro_strength": 0.22, "macro_scale": 0.11,
 		"roughness_scale": 1.0, "grime_height": 2.2, "grime_strength": 0.12,
 	})
-	_shader("stone", "hall_surface", {
+	_surface("stone", {
 		"albedo_tex": _tex("rough_concrete", "albedo"), "normal_tex": _tex("rough_concrete", "normal"),
 		"orm_tex": _tex("rough_concrete", "arm"), "macro_tex": soft,
 		"tint": Vector3(0.9, 0.83, 0.74), "normal_strength": 1.4, "macro_strength": 0.3, "macro_scale": 0.45,
 		"roughness_scale": 1.0, "grime_height": 0.0, "grime_strength": 0.0,
-	})
+	}, wear)
 	_std("stone_flag", "rock_surface", Color(1.25, 1.18, 1.1), 0.85, {"normal": 1.2})
 	_std("mortar", "", Color(0.36, 0.33, 0.29), 1.0)
 	# --- metal --------------------------------------------------------------

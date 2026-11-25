@@ -54,10 +54,7 @@ func _omni(n: String, pos: Vector3, color: Color, energy: float, rng: float, sha
 
 
 func _scene() -> void:
-	_layout = JSON.parse_string(FileAccess.get_file_as_string("res://assets/models/hall_layout.json"))
-	var dims: Dictionary = _layout["dims"]
-	var hw: float = dims["hw"]
-	var hl: float = dims["hl"]
+	_layout = JSON.parse_string(FileAccess.get_file_as_string(HallMaterials.LAYOUT))
 	_root = Node3D.new()
 	_root.name = "Hall"
 	_root.set_script(load("res://scripts/hall.gd"))
@@ -150,7 +147,6 @@ func _scene() -> void:
 	# --- windows ------------------------------------------------------------
 	var win := Node3D.new()
 	_add(win, null, "Windows")
-	var rot := {"R": -PI / 2, "L": PI / 2, "D": PI, "F": 0.0}
 	var gmat := _material("glass")
 	i = 0
 	for g in _marks("glass"):
@@ -162,11 +158,11 @@ func _scene() -> void:
 		q.material = gm
 		mi.mesh = q
 		mi.position = _v(g["pos"])
-		mi.rotation.y = rot[g["wall"]]
+		mi.rotation.y = g["yaw"]
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 		_add(mi, win, "Glass%d" % i)
-		_fog_light(win, i, mi.position, Vector3(0, 0, 1).rotated(Vector3.UP, rot[g["wall"]]))
+		_fog_light(win, i, mi.position, Vector3(0, 0, 1).rotated(Vector3.UP, g["yaw"]))
 		i += 1
 
 	# --- hearth fire ----------------------------------------------------------
@@ -195,19 +191,22 @@ func _scene() -> void:
 			o.add_to_group(Hall.CHARACTER_LIGHTS, true)
 		i += 1
 
-	# --- reflection + lightmap ------------------------------------------------------
-	var probe := ReflectionProbe.new()
-	probe.position = Vector3(0, 3.0, 0)
-	probe.size = Vector3(hw * 2 + 0.4, 6.4, hl * 2 + 0.4)
-	probe.origin_offset = Vector3(0, -1.2, 2.0)
-	probe.box_projection = true
-	probe.interior = true
-	probe.enable_shadows = false
-	probe.update_mode = ReflectionProbe.UPDATE_ONCE
-	probe.ambient_mode = ReflectionProbe.AMBIENT_DISABLED
-	probe.intensity = 0.8
-	probe.max_distance = 40.0
-	_add(probe, null, "ReflectionProbe")
+	# --- reflections, one probe a room, + lightmap -----------------------------------------
+	i = 0
+	for p in _marks("probe"):
+		var probe := ReflectionProbe.new()
+		probe.position = _v(p["pos"])
+		probe.size = _v(p["size"])
+		probe.origin_offset = _v(p["offset"])
+		probe.box_projection = true
+		probe.interior = true
+		probe.enable_shadows = false
+		probe.update_mode = ReflectionProbe.UPDATE_ONCE
+		probe.ambient_mode = ReflectionProbe.AMBIENT_DISABLED
+		probe.intensity = 0.8
+		probe.max_distance = 40.0
+		_add(probe, null, "ReflectionProbe%d" % i)
+		i += 1
 
 	var lm := LightmapGI.new()
 	lm.quality = LightmapGI.BAKE_QUALITY_HIGH

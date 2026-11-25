@@ -1,6 +1,7 @@
 """Great hall and workshop generator. Run:  blender --background --python tools/build_hall.py
-Writes assets/models/hall.glb (+ .import with external material mapping) and
-assets/models/hall_layout.json (colliders, candle/light/glass positions for the Godot side)."""
+Writes assets/models/hall.glb (+ .import with external material mapping),
+assets/models/hall_layout.json (colliders, candle/light/glass positions for the Godot side) and the
+workshop's wear map, assets/textures/hall_gen/workshop_wear.png."""
 import bpy, sys, os, json, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -21,6 +22,9 @@ for name, size, grain in [
     ('clockface', 1.0, 'v'), ('shield', 1.0, 'v'), ('food', 0.3, 'v'), ('rope', 0.2, 'v'),
 ]:
     defmat(name, size, grain)
+# the workshop's, worn where a craftsman works
+for name in ('wood_floor', 'wood_panel', 'stone'):
+    defmat(name + '_worn', *MATS[name])
 
 import hall_shell, hall_fireplace, hall_props, workshop_shell
 
@@ -47,8 +51,7 @@ bpy.ops.export_scene.gltf(filepath=out, export_format='GLB', export_yup=False, e
                           export_lights=False, export_animations=False, export_skins=False, export_morph=False)
 
 with open(os.path.join(ROOT, 'assets', 'models', 'hall_layout.json'), 'w') as f:
-    json.dump({'colliders': b.colliders, 'marks': b.marks,
-               'dims': {'hw': hall_shell.HW, 'hl': hall_shell.HL, 'eaves': hall_shell.EH, 'apex': hall_shell.APEX}}, f)
+    json.dump({'colliders': b.colliders, 'marks': b.marks}, f)
 
 # .import with every material redirected to an external Godot material
 imp = out + '.import'

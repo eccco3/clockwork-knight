@@ -151,6 +151,11 @@ _subresources={
 "use_external/fallback_path": "res://materials/hall_stone_flag.tres",
 "use_external/path": "res://materials/hall_stone_flag.tres"
 },
+"hall_stone_worn": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_stone_worn.tres",
+"use_external/path": "res://materials/hall_stone_worn.tres"
+},
 "hall_tapestry": {
 "use_external/enabled": true,
 "use_external/fallback_path": "res://materials/hall_tapestry.tres",
@@ -181,6 +186,11 @@ _subresources={
 "use_external/fallback_path": "res://materials/hall_wood_floor.tres",
 "use_external/path": "res://materials/hall_wood_floor.tres"
 },
+"hall_wood_floor_worn": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_wood_floor_worn.tres",
+"use_external/path": "res://materials/hall_wood_floor_worn.tres"
+},
 "hall_wood_oak": {
 "use_external/enabled": true,
 "use_external/fallback_path": "res://materials/hall_wood_oak.tres",
@@ -190,6 +200,11 @@ _subresources={
 "use_external/enabled": true,
 "use_external/fallback_path": "res://materials/hall_wood_panel.tres",
 "use_external/path": "res://materials/hall_wood_panel.tres"
+},
+"hall_wood_panel_worn": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://materials/hall_wood_panel_worn.tres",
+"use_external/path": "res://materials/hall_wood_panel_worn.tres"
 },
 "hall_wood_red": {
 "use_external/enabled": true,

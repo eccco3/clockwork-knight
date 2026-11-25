@@ -1,0 +1,27 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/hall_surface_worn.gdshader" id="1_yarvc"]
+[ext_resource type="Texture2D" path="res://assets/textures/wood_table_worn/albedo.jpg" id="2_2x24w"]
+[ext_resource type="Texture2D" path="res://materials/hall_noise_soft.tres" id="3_bugg2"]
+[ext_resource type="Texture2D" path="res://assets/textures/wood_table_worn/normal.jpg" id="4_a2rm8"]
+[ext_resource type="Texture2D" path="res://assets/textures/wood_table_worn/arm.jpg" id="5_p3n00"]
+[ext_resource type="Texture2D" path="res://assets/textures/hall_gen/workshop_wear.png" id="6_s6ygi"]
+
+[resource]
+resource_name = "hall_wood_floor_worn"
+render_priority = 0
+shader = ExtResource("1_yarvc")
+shader_parameter/albedo_tex = ExtResource("2_2x24w")
+shader_parameter/normal_tex = ExtResource("4_a2rm8")
+shader_parameter/orm_tex = ExtResource("5_p3n00")
+shader_parameter/macro_tex = ExtResource("3_bugg2")
+shader_parameter/tint = Vector3(1.08, 1, 0.9)
+shader_parameter/normal_strength = 0.9
+shader_parameter/macro_strength = 0.2
+shader_parameter/macro_scale = 0.13
+shader_parameter/roughness_scale = 0.62
+shader_parameter/grime_height = null
+shader_parameter/grime_strength = null
+shader_parameter/saturation = 0.8
+shader_parameter/wear_tex = ExtResource("6_s6ygi")
+shader_parameter/wear_rect = Vector4(7.1, -12, 54, 24)

@@ -238,133 +238,202 @@ size = Vector3(2, 0.45, 0.34)
 size = Vector3(27, 1, 57)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_yry47"]
-size = Vector3(54.6, 10.3, 1)
+size = Vector3(10.58, 1.3, 0.1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_xsw6p"]
-size = Vector3(54.6, 10.3, 1)
+size = Vector3(10.58, 1.3, 0.1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_x14a3"]
-size = Vector3(24, 10.3, 1)
+size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6ir3b"]
-size = Vector3(13.9156, 0.4, 55.4)
+size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_gvvqc"]
-size = Vector3(13.9156, 0.4, 55.4)
+size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_8prvj"]
 size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wlsr8"]
-size = Vector3(0.3, 4.8, 0.3)
+size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_v31pw"]
 size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6rrxx"]
-size = Vector3(0.3, 4.8, 0.3)
+size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_1qgvk"]
 size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_r5dav"]
-size = Vector3(0.3, 4.8, 0.3)
+size = Vector3(42, 1.3, 0.1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_rikqi"]
 size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_usocs"]
-size = Vector3(0.3, 4.8, 0.3)
+size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_e70jh"]
 size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_jmqxx"]
-size = Vector3(0.3, 4.8, 0.3)
+size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_3tjve"]
 size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_echur"]
-size = Vector3(0.3, 4.8, 0.3)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_q052w"]
 size = Vector3(0.34, 4.8, 0.3)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_q052w"]
+size = Vector3(54.6, 10.3, 1)
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_aeuls"]
-size = Vector3(0.3, 4.8, 0.3)
+size = Vector3(54, 1.3, 0.1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_xv1jg"]
 size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_segx3"]
-size = Vector3(0.3, 4.8, 0.3)
+size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_qu0f3"]
 size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_3rqe4"]
-size = Vector3(0.3, 4.8, 0.3)
+size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_rt1ow"]
 size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_m7yxr"]
-size = Vector3(0.3, 4.8, 0.3)
+size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_4p52g"]
 size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_0ye3g"]
-size = Vector3(0.3, 4.8, 0.3)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_66lrc"]
 size = Vector3(0.34, 4.8, 0.3)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_66lrc"]
+size = Vector3(54.6, 10.3, 1)
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_4qyea"]
-size = Vector3(0.3, 4.8, 0.3)
+size = Vector3(16, 1.3, 0.1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6chct"]
 size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ewxhb"]
-size = Vector3(0.3, 4.8, 0.3)
+size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_g4fxw"]
 size = Vector3(0.34, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_iq4ed"]
-size = Vector3(0.3, 4.8, 0.3)
+size = Vector3(24, 10.3, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_bnxou"]
-size = Vector3(0.34, 4.8, 0.3)
+size = Vector3(13.9156, 0.4, 55.4)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_qxv0i"]
-size = Vector3(0.3, 4.8, 0.3)
+size = Vector3(13.9156, 0.4, 55.4)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_l2au6"]
-size = Vector3(0.34, 4.8, 0.3)
+size = Vector3(0.3, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_n4slo"]
 size = Vector3(0.3, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_3qfe2"]
-size = Vector3(1, 2.2, 0.06)
+size = Vector3(0.3, 4.8, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_0hs0h"]
+size = Vector3(0.3, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_t5t3r"]
+size = Vector3(0.3, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_5myms"]
+size = Vector3(0.3, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_adavy"]
+size = Vector3(0.3, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_8dett"]
+size = Vector3(0.3, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_8jj61"]
+size = Vector3(0.3, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ig4fe"]
+size = Vector3(0.3, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wpumx"]
+size = Vector3(0.3, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4o43s"]
+size = Vector3(0.3, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_d01v6"]
+size = Vector3(0.3, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_16eqf"]
+size = Vector3(0.3, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_le68a"]
+size = Vector3(0.3, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_18f6y"]
+size = Vector3(0.3, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_moofs"]
+size = Vector3(3.28, 1.3, 0.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ec8vl"]
+size = Vector3(3.28, 1.3, 0.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_12re6"]
+size = Vector3(0.34, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7qicb"]
+size = Vector3(0.34, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_0pvjh"]
+size = Vector3(0.34, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_60efn"]
+size = Vector3(0.34, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6d2yp"]
+size = Vector3(1, 2.2, 0.06)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_qyirk"]
+size = Vector3(12, 1.3, 0.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mfcuy"]
+size = Vector3(0.34, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_3b6k8"]
+size = Vector3(0.34, 4.8, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4tmpy"]
 size = Vector3(8, 5, 12)
 
-[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_t5t3r"]
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_ao30h"]
 panorama = ExtResource("3_avp52")
 energy_multiplier = 0.35
 
-[sub_resource type="Sky" id="Sky_5myms"]
-sky_material = SubResource("PanoramaSkyMaterial_t5t3r")
+[sub_resource type="Sky" id="Sky_sq170"]
+sky_material = SubResource("PanoramaSkyMaterial_ao30h")
 radiance_size = 2
 
-[sub_resource type="Environment" id="Environment_adavy"]
+[sub_resource type="Environment" id="Environment_e31qn"]
 background_mode = 2
-sky = SubResource("Sky_5myms")
+sky = SubResource("Sky_sq170")
 ambient_light_source = 2
 ambient_light_color = Color(0.36, 0.3, 0.3, 1)
 ambient_light_energy = 0.12
@@ -399,7 +468,7 @@ adjustment_enabled = true
 adjustment_contrast = 1.08
 adjustment_saturation = 1.06
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_8dett"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4j6pl"]
 resource_name = "hall_glass"
 render_priority = 0
 shader = ExtResource("4_p2qom")
@@ -409,11 +478,11 @@ shader_parameter/fog_high = null
 shader_parameter/fog_low = null
 shader_parameter/energy = null
 
-[sub_resource type="QuadMesh" id="QuadMesh_8jj61"]
-material = SubResource("ShaderMaterial_8dett")
+[sub_resource type="QuadMesh" id="QuadMesh_8hsf2"]
+material = SubResource("ShaderMaterial_4j6pl")
 size = Vector2(1.6, 2.5)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_ig4fe"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_evsd4"]
 resource_name = "hall_glass"
 render_priority = 0
 shader = ExtResource("4_p2qom")
@@ -423,11 +492,11 @@ shader_parameter/fog_high = null
 shader_parameter/fog_low = null
 shader_parameter/energy = null
 
-[sub_resource type="QuadMesh" id="QuadMesh_wpumx"]
-material = SubResource("ShaderMaterial_ig4fe")
+[sub_resource type="QuadMesh" id="QuadMesh_8inmc"]
+material = SubResource("ShaderMaterial_evsd4")
 size = Vector2(1.6, 2.5)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_4o43s"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_76g1e"]
 resource_name = "hall_glass"
 render_priority = 0
 shader = ExtResource("4_p2qom")
@@ -437,11 +506,11 @@ shader_parameter/fog_high = null
 shader_parameter/fog_low = null
 shader_parameter/energy = null
 
-[sub_resource type="QuadMesh" id="QuadMesh_d01v6"]
-material = SubResource("ShaderMaterial_4o43s")
+[sub_resource type="QuadMesh" id="QuadMesh_jxdwr"]
+material = SubResource("ShaderMaterial_76g1e")
 size = Vector2(1.6, 2.5)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_16eqf"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8qk72"]
 resource_name = "hall_glass"
 render_priority = 0
 shader = ExtResource("4_p2qom")
@@ -451,58 +520,506 @@ shader_parameter/fog_high = null
 shader_parameter/fog_low = null
 shader_parameter/energy = null
 
-[sub_resource type="QuadMesh" id="QuadMesh_le68a"]
-material = SubResource("ShaderMaterial_16eqf")
+[sub_resource type="QuadMesh" id="QuadMesh_3thw2"]
+material = SubResource("ShaderMaterial_8qk72")
 size = Vector2(1.6, 2.5)
 
-[sub_resource type="QuadMesh" id="QuadMesh_18f6y"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_55260"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_fypkj"]
+material = SubResource("ShaderMaterial_55260")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8mbyy"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_3q00a"]
+material = SubResource("ShaderMaterial_8mbyy")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_l5n84"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_ggpdl"]
+material = SubResource("ShaderMaterial_l5n84")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_i7s6m"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_yd3db"]
+material = SubResource("ShaderMaterial_i7s6m")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_wgv41"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_gjt03"]
+material = SubResource("ShaderMaterial_wgv41")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_a85u2"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_744cn"]
+material = SubResource("ShaderMaterial_a85u2")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ag5u4"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_r80t2"]
+material = SubResource("ShaderMaterial_ag5u4")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ifqlj"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_j6lor"]
+material = SubResource("ShaderMaterial_ifqlj")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_38lpk"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_h5vko"]
+material = SubResource("ShaderMaterial_38lpk")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_jnvni"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_1onby"]
+material = SubResource("ShaderMaterial_jnvni")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5d1vf"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_i7v4v"]
+material = SubResource("ShaderMaterial_5d1vf")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1ll3j"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_tgl7s"]
+material = SubResource("ShaderMaterial_1ll3j")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_besyd"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_crvmn"]
+material = SubResource("ShaderMaterial_besyd")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fftbq"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_xbequ"]
+material = SubResource("ShaderMaterial_fftbq")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bbwtk"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_k4hjw"]
+material = SubResource("ShaderMaterial_bbwtk")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5382k"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_rdpl8"]
+material = SubResource("ShaderMaterial_5382k")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ido4p"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_irctn"]
+material = SubResource("ShaderMaterial_ido4p")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_3xddw"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_hocks"]
+material = SubResource("ShaderMaterial_3xddw")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_txs13"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_e1qov"]
+material = SubResource("ShaderMaterial_txs13")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4ltey"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_3p1yq"]
+material = SubResource("ShaderMaterial_4ltey")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_u8gnq"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_bjvgg"]
+material = SubResource("ShaderMaterial_u8gnq")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_px1lf"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_w6gev"]
+material = SubResource("ShaderMaterial_px1lf")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_uvtop"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_7puhv"]
+material = SubResource("ShaderMaterial_uvtop")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tngbd"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_sg8un"]
+material = SubResource("ShaderMaterial_tngbd")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_h2se2"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_h3k18"]
+material = SubResource("ShaderMaterial_h2se2")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1gp2o"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_14q8m"]
+material = SubResource("ShaderMaterial_1gp2o")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ilixq"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_jfyon"]
+material = SubResource("ShaderMaterial_ilixq")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_l5q88"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_m7kh6"]
+material = SubResource("ShaderMaterial_l5q88")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1ybum"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_nih6l"]
+material = SubResource("ShaderMaterial_1ybum")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pbyej"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_17fdq"]
+material = SubResource("ShaderMaterial_pbyej")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_awemb"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_yktju"]
+material = SubResource("ShaderMaterial_awemb")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_edw5g"]
+resource_name = "hall_glass"
+render_priority = 0
+shader = ExtResource("4_p2qom")
+shader_parameter/size = Vector2(1.6, 2.5)
+shader_parameter/pane = null
+shader_parameter/fog_high = null
+shader_parameter/fog_low = null
+shader_parameter/energy = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_pvuan"]
+material = SubResource("ShaderMaterial_edw5g")
+size = Vector2(1.6, 2.5)
+
+[sub_resource type="QuadMesh" id="QuadMesh_th6qr"]
 material = ExtResource("5_27y0h")
 size = Vector2(1.05, 1.15)
 center_offset = Vector3(0, 0.575, 0)
 
-[sub_resource type="QuadMesh" id="QuadMesh_moofs"]
+[sub_resource type="QuadMesh" id="QuadMesh_padke"]
 material = ExtResource("6_v3g6v")
 size = Vector2(0.7, 0.85)
 center_offset = Vector3(0, 0.425, 0)
 
-[sub_resource type="QuadMesh" id="QuadMesh_ec8vl"]
+[sub_resource type="QuadMesh" id="QuadMesh_xiv2n"]
 material = ExtResource("7_wyflw")
 size = Vector2(0.72, 0.9)
 center_offset = Vector3(0, 0.45, 0)
 
-[sub_resource type="QuadMesh" id="QuadMesh_12re6"]
+[sub_resource type="QuadMesh" id="QuadMesh_2k1qy"]
 material = ExtResource("8_j2h53")
 size = Vector2(0.6, 0.95)
 center_offset = Vector3(0, 0.475, 0)
 
-[sub_resource type="QuadMesh" id="QuadMesh_7qicb"]
+[sub_resource type="QuadMesh" id="QuadMesh_7vtx1"]
 material = ExtResource("7_wyflw")
 size = Vector2(0.5, 0.6)
 center_offset = Vector3(0, 0.3, 0)
 
-[sub_resource type="QuadMesh" id="QuadMesh_0pvjh"]
+[sub_resource type="QuadMesh" id="QuadMesh_1wou0"]
 material = ExtResource("6_v3g6v")
 size = Vector2(0.45, 0.55)
 center_offset = Vector3(0, 0.275, 0)
 
-[sub_resource type="QuadMesh" id="QuadMesh_60efn"]
+[sub_resource type="QuadMesh" id="QuadMesh_cm56a"]
 material = ExtResource("8_j2h53")
 size = Vector2(0.4, 0.5)
 center_offset = Vector3(0, 0.25, 0)
 
-[sub_resource type="QuadMesh" id="QuadMesh_6d2yp"]
+[sub_resource type="QuadMesh" id="QuadMesh_av0a8"]
 material = ExtResource("5_27y0h")
 size = Vector2(0.38, 0.48)
 center_offset = Vector3(0, 0.24, 0)
 
-[sub_resource type="Gradient" id="Gradient_qyirk"]
+[sub_resource type="Gradient" id="Gradient_swusl"]
 offsets = PackedFloat32Array(0, 0.15, 0.7, 1)
 colors = PackedColorArray(1, 0.8, 0.4, 0, 1, 0.7, 0.3, 1, 1, 0.3, 0.05, 0.8, 0.6, 0.1, 0, 0)
 
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_mfcuy"]
-gradient = SubResource("Gradient_qyirk")
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_ykrkx"]
+gradient = SubResource("Gradient_swusl")
 
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_3b6k8"]
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_8ttte"]
 emission_shape = 3
 emission_box_extents = Vector3(0.4, 0.08, 0.2)
 direction = Vector3(0, 1, 0)
@@ -514,476 +1031,568 @@ damping_min = 0.2
 damping_max = 0.6
 scale_min = 0.5
 scale_max = 1.3
-color_ramp = SubResource("GradientTexture1D_mfcuy")
+color_ramp = SubResource("GradientTexture1D_ykrkx")
 turbulence_enabled = true
 turbulence_noise_strength = 0.6
 turbulence_noise_scale = 2.5
 turbulence_influence_min = 0.05
 turbulence_influence_max = 0.2
 
-[sub_resource type="QuadMesh" id="QuadMesh_4tmpy"]
+[sub_resource type="QuadMesh" id="QuadMesh_727cf"]
 material = ExtResource("9_2x4b0")
 size = Vector2(0.012, 0.012)
 
-[sub_resource type="QuadMesh" id="QuadMesh_ao30h"]
+[sub_resource type="QuadMesh" id="QuadMesh_nnt8n"]
 material = ExtResource("12_du0u5")
 size = Vector2(0.3, 0.3)
 center_offset = Vector3(0, 0.038, 0)
 
-[node name="Hall" type="Node3D" unique_id=1003963620]
+[node name="Hall" type="Node3D" unique_id=181507199]
 script = ExtResource("1_2qo4b")
 
-[node name="Geometry" parent="." unique_id=1096271378 instance=ExtResource("2_ppqcu")]
+[node name="Geometry" parent="." unique_id=413963305 instance=ExtResource("2_ppqcu")]
 
-[node name="Collision" type="StaticBody3D" parent="." unique_id=61235397]
+[node name="Collision" type="StaticBody3D" parent="." unique_id=1510836483]
 collision_mask = 0
 
-[node name="C000" type="CollisionShape3D" parent="Collision" unique_id=390217702]
+[node name="C000" type="CollisionShape3D" parent="Collision" unique_id=1319914443]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 shape = SubResource("BoxShape3D_fgyqt")
 
-[node name="C001" type="CollisionShape3D" parent="Collision" unique_id=1533158337]
+[node name="C001" type="CollisionShape3D" parent="Collision" unique_id=1391345877]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.45, 0.65, -6.71)
 shape = SubResource("BoxShape3D_66g17")
 
-[node name="C002" type="CollisionShape3D" parent="Collision" unique_id=1395647246]
+[node name="C002" type="CollisionShape3D" parent="Collision" unique_id=883704251]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.45, 0.65, 6.71)
 shape = SubResource("BoxShape3D_rfgeu")
 
-[node name="C003" type="CollisionShape3D" parent="Collision" unique_id=872961144]
+[node name="C003" type="CollisionShape3D" parent="Collision" unique_id=1049418372]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.37, 2.4, -10)
 shape = SubResource("BoxShape3D_7j1nj")
 
-[node name="C004" type="CollisionShape3D" parent="Collision" unique_id=1881531461]
+[node name="C004" type="CollisionShape3D" parent="Collision" unique_id=765566893]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.37, 2.4, -6)
 shape = SubResource("BoxShape3D_f7yir")
 
-[node name="C005" type="CollisionShape3D" parent="Collision" unique_id=31101045]
+[node name="C005" type="CollisionShape3D" parent="Collision" unique_id=1616695832]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.37, 2.4, -2)
 shape = SubResource("BoxShape3D_fwq77")
 
-[node name="C006" type="CollisionShape3D" parent="Collision" unique_id=453965094]
+[node name="C006" type="CollisionShape3D" parent="Collision" unique_id=1540305139]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.37, 2.4, 2)
 shape = SubResource("BoxShape3D_6k7pj")
 
-[node name="C007" type="CollisionShape3D" parent="Collision" unique_id=820613734]
+[node name="C007" type="CollisionShape3D" parent="Collision" unique_id=1430943058]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.37, 2.4, 6)
 shape = SubResource("BoxShape3D_sho3r")
 
-[node name="C008" type="CollisionShape3D" parent="Collision" unique_id=2028648348]
+[node name="C008" type="CollisionShape3D" parent="Collision" unique_id=1432522976]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.37, 2.4, 10)
 shape = SubResource("BoxShape3D_3g02j")
 
-[node name="C009" type="CollisionShape3D" parent="Collision" unique_id=1298853279]
+[node name="C009" type="CollisionShape3D" parent="Collision" unique_id=230971030]
 transform = Transform3D(-0.6427912, 0, -0.76604146, 0, 1, 0, 0.76604146, 0, -0.6427912, 7.64567, 1.45, -1.65963)
 shape = SubResource("BoxShape3D_avoui")
 
-[node name="C010" type="CollisionShape3D" parent="Collision" unique_id=1656071191]
+[node name="C010" type="CollisionShape3D" parent="Collision" unique_id=1764159200]
 transform = Transform3D(0.6427912, 0, -0.76604146, 0, 1, 0, 0.76604146, 0, 0.6427912, 7.64567, 1.45, 1.65963)
 shape = SubResource("BoxShape3D_o13hs")
 
-[node name="C011" type="CollisionShape3D" parent="Collision" unique_id=1686251657]
+[node name="C011" type="CollisionShape3D" parent="Collision" unique_id=316265453]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.8, 5.15, -6.9)
 shape = SubResource("BoxShape3D_xabks")
 
-[node name="C012" type="CollisionShape3D" parent="Collision" unique_id=840400240]
+[node name="C012" type="CollisionShape3D" parent="Collision" unique_id=620444799]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.8, 6.6, 0)
 shape = SubResource("BoxShape3D_pk1sp")
 
-[node name="C013" type="CollisionShape3D" parent="Collision" unique_id=1220885020]
+[node name="C013" type="CollisionShape3D" parent="Collision" unique_id=1416284197]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.8, 5.15, 6.9)
 shape = SubResource("BoxShape3D_s8cf7")
 
-[node name="C014" type="CollisionShape3D" parent="Collision" unique_id=1645107868]
+[node name="C014" type="CollisionShape3D" parent="Collision" unique_id=679265544]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -6.45, 0.65, 0)
 shape = SubResource("BoxShape3D_5mrbs")
 
-[node name="C015" type="CollisionShape3D" parent="Collision" unique_id=1299314637]
+[node name="C015" type="CollisionShape3D" parent="Collision" unique_id=293530319]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -6.37, 2.4, -10)
 shape = SubResource("BoxShape3D_6b2cp")
 
-[node name="C016" type="CollisionShape3D" parent="Collision" unique_id=267683520]
+[node name="C016" type="CollisionShape3D" parent="Collision" unique_id=1317355484]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -6.37, 2.4, -6)
 shape = SubResource("BoxShape3D_c474d")
 
-[node name="C017" type="CollisionShape3D" parent="Collision" unique_id=647971500]
+[node name="C017" type="CollisionShape3D" parent="Collision" unique_id=1958992180]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -6.37, 2.4, -2)
 shape = SubResource("BoxShape3D_p0t5e")
 
-[node name="C018" type="CollisionShape3D" parent="Collision" unique_id=351129932]
+[node name="C018" type="CollisionShape3D" parent="Collision" unique_id=818098708]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -6.37, 2.4, 2)
 shape = SubResource("BoxShape3D_aljf4")
 
-[node name="C019" type="CollisionShape3D" parent="Collision" unique_id=1399322053]
+[node name="C019" type="CollisionShape3D" parent="Collision" unique_id=1253841027]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -6.37, 2.4, 6)
 shape = SubResource("BoxShape3D_0uarj")
 
-[node name="C020" type="CollisionShape3D" parent="Collision" unique_id=184709274]
+[node name="C020" type="CollisionShape3D" parent="Collision" unique_id=115487964]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -6.37, 2.4, 10)
 shape = SubResource("BoxShape3D_x07or")
 
-[node name="C021" type="CollisionShape3D" parent="Collision" unique_id=1501684390]
+[node name="C021" type="CollisionShape3D" parent="Collision" unique_id=533197531]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -6.97, 5.15, 0)
 shape = SubResource("BoxShape3D_htip5")
 
-[node name="C022" type="CollisionShape3D" parent="Collision" unique_id=683000865]
+[node name="C022" type="CollisionShape3D" parent="Collision" unique_id=490511375]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 5.15, 12.47)
 shape = SubResource("BoxShape3D_c8mjm")
 
-[node name="C023" type="CollisionShape3D" parent="Collision" unique_id=1601376765]
+[node name="C023" type="CollisionShape3D" parent="Collision" unique_id=325411988]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 3.75, 0.65, 11.95)
 shape = SubResource("BoxShape3D_ucj7p")
 
-[node name="C024" type="CollisionShape3D" parent="Collision" unique_id=1516478065]
+[node name="C024" type="CollisionShape3D" parent="Collision" unique_id=476681884]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -3.75, 0.65, 11.95)
 shape = SubResource("BoxShape3D_w8dyo")
 
-[node name="C025" type="CollisionShape3D" parent="Collision" unique_id=947320790]
+[node name="C025" type="CollisionShape3D" parent="Collision" unique_id=1247008363]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 1.25, 12.13)
 shape = SubResource("BoxShape3D_j0btn")
 
-[node name="C026" type="CollisionShape3D" parent="Collision" unique_id=1917761172]
+[node name="C026" type="CollisionShape3D" parent="Collision" unique_id=612188714]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.15, -12.47)
 shape = SubResource("BoxShape3D_oy65x")
 
-[node name="C027" type="CollisionShape3D" parent="Collision" unique_id=2100847913]
+[node name="C027" type="CollisionShape3D" parent="Collision" unique_id=2014400015]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.45, 0)
 shape = SubResource("BoxShape3D_otljo")
 
-[node name="C028" type="CollisionShape3D" parent="Collision" unique_id=1324260745]
+[node name="C028" type="CollisionShape3D" parent="Collision" unique_id=623999479]
 transform = Transform3D(0.83401734, 0.5517382, 0, -0.5517382, 0.83401734, 0, 0, 0, 1, 3.54, 7.24796, 0)
 shape = SubResource("BoxShape3D_uq12v")
 
-[node name="C029" type="CollisionShape3D" parent="Collision" unique_id=1856638482]
+[node name="C029" type="CollisionShape3D" parent="Collision" unique_id=179710059]
 transform = Transform3D(-0.83401734, 0.5517382, 0, -0.5517382, -0.83401734, 0, 0, 0, 1, -3.91035, 7.00296, 0)
 shape = SubResource("BoxShape3D_s7a4w")
 
-[node name="C030" type="CollisionShape3D" parent="Collision" unique_id=552803328]
+[node name="C030" type="CollisionShape3D" parent="Collision" unique_id=1031807028]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.15, 1.125, -11.2)
 shape = SubResource("BoxShape3D_0kjyh")
 
-[node name="C031" type="CollisionShape3D" parent="Collision" unique_id=959223270]
+[node name="C031" type="CollisionShape3D" parent="Collision" unique_id=1532948738]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.15, 1.125, -11.2)
 shape = SubResource("BoxShape3D_h3c76")
 
-[node name="C032" type="CollisionShape3D" parent="Collision" unique_id=940334021]
+[node name="C032" type="CollisionShape3D" parent="Collision" unique_id=2099980124]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.85, -11.2)
 shape = SubResource("BoxShape3D_518u6")
 
-[node name="C033" type="CollisionShape3D" parent="Collision" unique_id=174690106]
+[node name="C033" type="CollisionShape3D" parent="Collision" unique_id=345343196]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.195, -11.105)
 shape = SubResource("BoxShape3D_w5pw7")
 
-[node name="C034" type="CollisionShape3D" parent="Collision" unique_id=1043240320]
+[node name="C034" type="CollisionShape3D" parent="Collision" unique_id=826091330]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.745, -11.5)
 shape = SubResource("BoxShape3D_ylcpd")
 
-[node name="C035" type="CollisionShape3D" parent="Collision" unique_id=1184472470]
+[node name="C035" type="CollisionShape3D" parent="Collision" unique_id=1853624723]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.06, -9.925)
 shape = SubResource("BoxShape3D_o31n2")
 
-[node name="C036" type="CollisionShape3D" parent="Collision" unique_id=1513106492]
+[node name="C036" type="CollisionShape3D" parent="Collision" unique_id=1456728550]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.775, -11.325)
 shape = SubResource("BoxShape3D_uen7r")
 
-[node name="C037" type="CollisionShape3D" parent="Collision" unique_id=1578559971]
+[node name="C037" type="CollisionShape3D" parent="Collision" unique_id=1721544960]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7, 0.725, -10.15)
 shape = SubResource("CylinderShape3D_afb2t")
 
-[node name="C038" type="CollisionShape3D" parent="Collision" unique_id=1106906068]
+[node name="C038" type="CollisionShape3D" parent="Collision" unique_id=827174622]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.7, 0.725, -10.15)
 shape = SubResource("CylinderShape3D_lktu8")
 
-[node name="C039" type="CollisionShape3D" parent="Collision" unique_id=600570322]
+[node name="C039" type="CollisionShape3D" parent="Collision" unique_id=1816190201]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 0.725, 11.2)
 shape = SubResource("CylinderShape3D_iy3tu")
 
-[node name="C040" type="CollisionShape3D" parent="Collision" unique_id=1999129781]
+[node name="C040" type="CollisionShape3D" parent="Collision" unique_id=1320587789]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 0.725, 11.2)
 shape = SubResource("CylinderShape3D_jtupa")
 
-[node name="C041" type="CollisionShape3D" parent="Collision" unique_id=230278418]
+[node name="C041" type="CollisionShape3D" parent="Collision" unique_id=1472005345]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -5.3, 0.38, 2)
 shape = SubResource("BoxShape3D_xohrd")
 
-[node name="C042" type="CollisionShape3D" parent="Collision" unique_id=3678312]
+[node name="C042" type="CollisionShape3D" parent="Collision" unique_id=1902168306]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -4.52, 0.225, 2)
 shape = SubResource("BoxShape3D_7cbnb")
 
-[node name="C043" type="CollisionShape3D" parent="Collision" unique_id=1534506942]
+[node name="C043" type="CollisionShape3D" parent="Collision" unique_id=1163795564]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -6.08, 0.225, 2)
 shape = SubResource("BoxShape3D_juxfp")
 
-[node name="C044" type="CollisionShape3D" parent="Collision" unique_id=1627847901]
+[node name="C044" type="CollisionShape3D" parent="Collision" unique_id=1956794244]
 transform = Transform3D(-0.81387675, 0, 0.58103764, 0, 1, 0, -0.58103764, 0, -0.81387675, -2.75, 0.35, -8.35)
 shape = SubResource("BoxShape3D_ejptj")
 
-[node name="C045" type="CollisionShape3D" parent="Collision" unique_id=761805844]
+[node name="C045" type="CollisionShape3D" parent="Collision" unique_id=2079846070]
 transform = Transform3D(-0.81387675, 0, 0.58103764, 0, 1, 0, -0.58103764, 0, -0.81387675, -2.87783, 1.05, -8.17095)
 shape = SubResource("BoxShape3D_j5ebk")
 
-[node name="C046" type="CollisionShape3D" parent="Collision" unique_id=1993212515]
+[node name="C046" type="CollisionShape3D" parent="Collision" unique_id=379049306]
 transform = Transform3D(-0.81387675, 0, -0.58103764, 0, 1, 0, 0.58103764, 0, -0.81387675, 2.75, 0.35, -8.35)
 shape = SubResource("BoxShape3D_faj7l")
 
-[node name="C047" type="CollisionShape3D" parent="Collision" unique_id=496702283]
+[node name="C047" type="CollisionShape3D" parent="Collision" unique_id=433266079]
 transform = Transform3D(-0.81387675, 0, -0.58103764, 0, 1, 0, 0.58103764, 0, -0.81387675, 2.87783, 1.05, -8.17095)
 shape = SubResource("BoxShape3D_5ii43")
 
-[node name="C048" type="CollisionShape3D" parent="Collision" unique_id=2039470194]
+[node name="C048" type="CollisionShape3D" parent="Collision" unique_id=1283767168]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.7, 0.27, -8.9)
 shape = SubResource("CylinderShape3D_as1vf")
 
-[node name="C049" type="CollisionShape3D" parent="Collision" unique_id=64704870]
+[node name="C049" type="CollisionShape3D" parent="Collision" unique_id=2063774799]
 transform = Transform3D(0.87758017, 0, 0.47943008, 0, 1, 0, -0.47943008, 0, 0.87758017, -2.25, 0.16, -9.3)
 shape = SubResource("BoxShape3D_bv4mh")
 
-[node name="C050" type="CollisionShape3D" parent="Collision" unique_id=1201340952]
+[node name="C050" type="CollisionShape3D" parent="Collision" unique_id=998215009]
 transform = Transform3D(0.92106026, 0, 0.3894201, 0, 1, 0, -0.3894201, 0, 0.92106026, 2.98, 0.225, -9.7)
 shape = SubResource("CylinderShape3D_7jycm")
 
-[node name="C051" type="CollisionShape3D" parent="Collision" unique_id=1530551441]
+[node name="C051" type="CollisionShape3D" parent="Collision" unique_id=1209229869]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.75, 0.625, -11.69)
 shape = SubResource("BoxShape3D_qew13")
 
-[node name="C052" type="CollisionShape3D" parent="Collision" unique_id=207450037]
+[node name="C052" type="CollisionShape3D" parent="Collision" unique_id=1706707347]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.35, 1.1, -11.77)
 shape = SubResource("BoxShape3D_054wv")
 
-[node name="C053" type="CollisionShape3D" parent="Collision" unique_id=801526264]
+[node name="C053" type="CollisionShape3D" parent="Collision" unique_id=192478722]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -6.24, 1.375, -8)
 shape = SubResource("BoxShape3D_jkifq")
 
-[node name="C054" type="CollisionShape3D" parent="Collision" unique_id=389770097]
+[node name="C054" type="CollisionShape3D" parent="Collision" unique_id=1355192329]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.24, 1.375, -8)
 shape = SubResource("BoxShape3D_2krti")
 
-[node name="C055" type="CollisionShape3D" parent="Collision" unique_id=1849655347]
+[node name="C055" type="CollisionShape3D" parent="Collision" unique_id=1070930472]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.185, 0.28, -4)
 shape = SubResource("BoxShape3D_30ehn")
 
-[node name="C056" type="CollisionShape3D" parent="Collision" unique_id=178716774]
+[node name="C056" type="CollisionShape3D" parent="Collision" unique_id=620684530]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.185, 0.28, 4)
 shape = SubResource("BoxShape3D_uym5u")
 
-[node name="C057" type="CollisionShape3D" parent="Collision" unique_id=1807661121]
+[node name="C057" type="CollisionShape3D" parent="Collision" unique_id=127525137]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.18, 0.475, 8)
 shape = SubResource("BoxShape3D_chy7p")
 
-[node name="C058" type="CollisionShape3D" parent="Collision" unique_id=1967361039]
+[node name="C058" type="CollisionShape3D" parent="Collision" unique_id=961527721]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.22, 0.75, 10.9)
 shape = SubResource("BoxShape3D_65vmq")
 
-[node name="C059" type="CollisionShape3D" parent="Collision" unique_id=867774893]
+[node name="C059" type="CollisionShape3D" parent="Collision" unique_id=1024108992]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -6.185, 0.28, -4)
 shape = SubResource("BoxShape3D_2vtwd")
 
-[node name="C060" type="CollisionShape3D" parent="Collision" unique_id=502165882]
+[node name="C060" type="CollisionShape3D" parent="Collision" unique_id=1373084182]
 transform = Transform3D(-0.049980015, 0, 0.99875027, 0, 1, 0, -0.99875027, 0, -0.049980015, -5.7, 0.31, 8)
 shape = SubResource("BoxShape3D_1ntal")
 
-[node name="C061" type="CollisionShape3D" parent="Collision" unique_id=1130294716]
+[node name="C061" type="CollisionShape3D" parent="Collision" unique_id=305280793]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.75, 0.475, 11.2)
 shape = SubResource("CylinderShape3D_rl70t")
 
-[node name="C062" type="CollisionShape3D" parent="Collision" unique_id=150506999]
+[node name="C062" type="CollisionShape3D" parent="Collision" unique_id=1652689999]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.45, 11.35)
 shape = SubResource("CylinderShape3D_02bjg")
 
-[node name="C063" type="CollisionShape3D" parent="Collision" unique_id=1913308419]
+[node name="C063" type="CollisionShape3D" parent="Collision" unique_id=752932048]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.6, 0.4, 10.45)
 shape = SubResource("CylinderShape3D_jhxxx")
 
-[node name="C064" type="CollisionShape3D" parent="Collision" unique_id=1349465196]
+[node name="C064" type="CollisionShape3D" parent="Collision" unique_id=1813590695]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.3, 0.31, 11.4)
 shape = SubResource("CylinderShape3D_1h7d7")
 
-[node name="C065" type="CollisionShape3D" parent="Collision" unique_id=1383347140]
+[node name="C065" type="CollisionShape3D" parent="Collision" unique_id=937834921]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.75, 0.17, 10.7)
 shape = SubResource("CylinderShape3D_4f2bo")
 
-[node name="C066" type="CollisionShape3D" parent="Collision" unique_id=1179762402]
+[node name="C066" type="CollisionShape3D" parent="Collision" unique_id=1676795554]
 transform = Transform3D(0.99500453, 0, 0.099830456, 0, 1, 0, -0.099830456, 0, 0.99500453, -3.5, 0.31, 11.45)
 shape = SubResource("BoxShape3D_xxmuv")
 
-[node name="C067" type="CollisionShape3D" parent="Collision" unique_id=464824979]
+[node name="C067" type="CollisionShape3D" parent="Collision" unique_id=864892671]
 transform = Transform3D(0.87758017, 0, 0.47943008, 0, 1, 0, -0.47943008, 0, 0.87758017, -3.45, 0.83, 11.47)
 shape = SubResource("BoxShape3D_xdaxb")
 
-[node name="C068" type="CollisionShape3D" parent="Collision" unique_id=1509042884]
+[node name="C068" type="CollisionShape3D" parent="Collision" unique_id=457701431]
 transform = Transform3D(-0.07991017, 0, -0.9968021, 0, 1, 0, 0.9968021, 0, -0.07991017, 5.45, 0.3, 9.75)
 shape = SubResource("BoxShape3D_oj5q8")
 
-[node name="C069" type="CollisionShape3D" parent="Collision" unique_id=1658114305]
+[node name="C069" type="CollisionShape3D" parent="Collision" unique_id=943678247]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 3.95, 0.225, 11.7)
 shape = SubResource("BoxShape3D_te0y1")
 
-[node name="C070" type="CollisionShape3D" parent="Collision" unique_id=759194744]
+[node name="C070" type="CollisionShape3D" parent="Collision" unique_id=646918085]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 34.1, -0.5, 0)
 shape = SubResource("BoxShape3D_5d2dl")
 
-[node name="C071" type="CollisionShape3D" parent="Collision" unique_id=599294860]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.4, 5.15, -12.47)
+[node name="C071" type="CollisionShape3D" parent="Collision" unique_id=115400268]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 7.15, 0.65, 6.71)
 shape = SubResource("BoxShape3D_yry47")
 
-[node name="C072" type="CollisionShape3D" parent="Collision" unique_id=633971418]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 34.4, 5.15, 12.47)
+[node name="C072" type="CollisionShape3D" parent="Collision" unique_id=308883402]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 7.15, 0.65, -6.71)
 shape = SubResource("BoxShape3D_xsw6p")
 
-[node name="C073" type="CollisionShape3D" parent="Collision" unique_id=1913334649]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 61.57, 5.15, 1e-05)
+[node name="C073" type="CollisionShape3D" parent="Collision" unique_id=146312513]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 7.23, 2.4, 11.85)
 shape = SubResource("BoxShape3D_x14a3")
 
-[node name="C074" type="CollisionShape3D" parent="Collision" unique_id=1799522540]
-transform = Transform3D(0, 0, 1, -0.33732888, 0.9413868, 0, -0.9413868, -0.33732888, 0, 34.5, 7.1912, -6.61746)
+[node name="C074" type="CollisionShape3D" parent="Collision" unique_id=1078985923]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 7.23, 2.4, -11.85)
 shape = SubResource("BoxShape3D_6ir3b")
 
-[node name="C075" type="CollisionShape3D" parent="Collision" unique_id=504655243]
-transform = Transform3D(0, 0, 1, -0.33732888, -0.9413868, 0, 0.9413868, -0.33732888, 0, 34.5, 7.19119, 6.61747)
+[node name="C075" type="CollisionShape3D" parent="Collision" unique_id=461017107]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 7.23, 2.4, -10)
 shape = SubResource("BoxShape3D_gvvqc")
 
-[node name="C076" type="CollisionShape3D" parent="Collision" unique_id=1643850648]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 13.1, 2.4, 11.83)
+[node name="C076" type="CollisionShape3D" parent="Collision" unique_id=637639810]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 7.23, 2.4, -6)
 shape = SubResource("BoxShape3D_8prvj")
 
-[node name="C077" type="CollisionShape3D" parent="Collision" unique_id=199183331]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 13.1, 2.4, 6)
+[node name="C077" type="CollisionShape3D" parent="Collision" unique_id=1219384419]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 7.23, 2.4, -2)
 shape = SubResource("BoxShape3D_wlsr8")
 
-[node name="C078" type="CollisionShape3D" parent="Collision" unique_id=2087211762]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 13.1, 2.4, -11.83)
+[node name="C078" type="CollisionShape3D" parent="Collision" unique_id=1056667884]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 7.23, 2.4, 2)
 shape = SubResource("BoxShape3D_v31pw")
 
-[node name="C079" type="CollisionShape3D" parent="Collision" unique_id=1445875482]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 13.1, 2.4, -6)
+[node name="C079" type="CollisionShape3D" parent="Collision" unique_id=538612847]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 7.23, 2.4, 6)
 shape = SubResource("BoxShape3D_6rrxx")
 
-[node name="C080" type="CollisionShape3D" parent="Collision" unique_id=2013252238]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 19.1, 2.4, 11.83)
+[node name="C080" type="CollisionShape3D" parent="Collision" unique_id=651799429]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 7.23, 2.4, 10)
 shape = SubResource("BoxShape3D_1qgvk")
 
-[node name="C081" type="CollisionShape3D" parent="Collision" unique_id=2071570565]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 19.1, 2.4, 6)
+[node name="C081" type="CollisionShape3D" parent="Collision" unique_id=656464630]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.1, 0.65, -11.95)
 shape = SubResource("BoxShape3D_r5dav")
 
-[node name="C082" type="CollisionShape3D" parent="Collision" unique_id=1660606625]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 19.1, 2.4, -11.83)
+[node name="C082" type="CollisionShape3D" parent="Collision" unique_id=1021796355]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.1, 2.4, -11.87)
 shape = SubResource("BoxShape3D_rikqi")
 
-[node name="C083" type="CollisionShape3D" parent="Collision" unique_id=369171064]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 19.1, 2.4, -6)
+[node name="C083" type="CollisionShape3D" parent="Collision" unique_id=311363215]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.1, 2.4, -11.87)
 shape = SubResource("BoxShape3D_usocs")
 
-[node name="C084" type="CollisionShape3D" parent="Collision" unique_id=1253586627]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 25.1, 2.4, 11.83)
+[node name="C084" type="CollisionShape3D" parent="Collision" unique_id=1872375348]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.1, 2.4, -11.87)
 shape = SubResource("BoxShape3D_e70jh")
 
-[node name="C085" type="CollisionShape3D" parent="Collision" unique_id=759739397]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 25.1, 2.4, 6)
+[node name="C085" type="CollisionShape3D" parent="Collision" unique_id=1109766491]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.1, 2.4, -11.87)
 shape = SubResource("BoxShape3D_jmqxx")
 
-[node name="C086" type="CollisionShape3D" parent="Collision" unique_id=571080536]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 25.1, 2.4, -11.83)
+[node name="C086" type="CollisionShape3D" parent="Collision" unique_id=1279494037]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.1, 2.4, -11.87)
 shape = SubResource("BoxShape3D_3tjve")
 
-[node name="C087" type="CollisionShape3D" parent="Collision" unique_id=1645175750]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 25.1, 2.4, -6)
+[node name="C087" type="CollisionShape3D" parent="Collision" unique_id=1801890482]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43.1, 2.4, -11.86999)
 shape = SubResource("BoxShape3D_echur")
 
-[node name="C088" type="CollisionShape3D" parent="Collision" unique_id=989520688]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 31.1, 2.4, 11.83)
+[node name="C088" type="CollisionShape3D" parent="Collision" unique_id=1159187382]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.4, 5.15, -12.47)
 shape = SubResource("BoxShape3D_q052w")
 
-[node name="C089" type="CollisionShape3D" parent="Collision" unique_id=608846880]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 31.1, 2.4, 6)
+[node name="C089" type="CollisionShape3D" parent="Collision" unique_id=344450220]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 34.1, 0.65, 11.95001)
 shape = SubResource("BoxShape3D_aeuls")
 
-[node name="C090" type="CollisionShape3D" parent="Collision" unique_id=2064003679]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 31.1, 2.4, -11.83)
+[node name="C090" type="CollisionShape3D" parent="Collision" unique_id=1859356763]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 13.1, 2.4, 11.87)
 shape = SubResource("BoxShape3D_xv1jg")
 
-[node name="C091" type="CollisionShape3D" parent="Collision" unique_id=727735722]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 31.1, 2.4, -6)
+[node name="C091" type="CollisionShape3D" parent="Collision" unique_id=389755288]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 19.1, 2.4, 11.87)
 shape = SubResource("BoxShape3D_segx3")
 
-[node name="C092" type="CollisionShape3D" parent="Collision" unique_id=1680443227]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 37.1, 2.4, 11.83)
+[node name="C092" type="CollisionShape3D" parent="Collision" unique_id=532778242]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 25.1, 2.4, 11.87)
 shape = SubResource("BoxShape3D_qu0f3")
 
-[node name="C093" type="CollisionShape3D" parent="Collision" unique_id=424856122]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 37.1, 2.4, 6)
+[node name="C093" type="CollisionShape3D" parent="Collision" unique_id=570944231]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 31.1, 2.4, 11.87)
 shape = SubResource("BoxShape3D_3rqe4")
 
-[node name="C094" type="CollisionShape3D" parent="Collision" unique_id=1322148980]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 37.1, 2.4, -11.83)
+[node name="C094" type="CollisionShape3D" parent="Collision" unique_id=187773730]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 37.1, 2.4, 11.87001)
 shape = SubResource("BoxShape3D_rt1ow")
 
-[node name="C095" type="CollisionShape3D" parent="Collision" unique_id=373321034]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 37.1, 2.4, -6)
+[node name="C095" type="CollisionShape3D" parent="Collision" unique_id=1221870999]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 43.1, 2.4, 11.87001)
 shape = SubResource("BoxShape3D_m7yxr")
 
-[node name="C096" type="CollisionShape3D" parent="Collision" unique_id=1543186537]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 43.1, 2.4, 11.83)
+[node name="C096" type="CollisionShape3D" parent="Collision" unique_id=101003188]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 49.1, 2.4, 11.87001)
 shape = SubResource("BoxShape3D_4p52g")
 
-[node name="C097" type="CollisionShape3D" parent="Collision" unique_id=572052357]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 43.1, 2.4, 6)
+[node name="C097" type="CollisionShape3D" parent="Collision" unique_id=985792982]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 55.1, 2.4, 11.87001)
 shape = SubResource("BoxShape3D_0ye3g")
 
-[node name="C098" type="CollisionShape3D" parent="Collision" unique_id=982781131]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 43.1, 2.4, -11.83)
+[node name="C098" type="CollisionShape3D" parent="Collision" unique_id=1594770369]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 34.4, 5.15, 12.47001)
 shape = SubResource("BoxShape3D_66lrc")
 
-[node name="C099" type="CollisionShape3D" parent="Collision" unique_id=1644461606]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 43.1, 2.4, -6)
+[node name="C099" type="CollisionShape3D" parent="Collision" unique_id=1429966220]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 61.05, 0.65, 4.00001)
 shape = SubResource("BoxShape3D_4qyea")
 
-[node name="C100" type="CollisionShape3D" parent="Collision" unique_id=1448740936]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 49.1, 2.4, 11.83001)
+[node name="C100" type="CollisionShape3D" parent="Collision" unique_id=1324552723]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 60.97, 2.4, 1e-05)
 shape = SubResource("BoxShape3D_6chct")
 
-[node name="C101" type="CollisionShape3D" parent="Collision" unique_id=385828931]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 49.1, 2.4, 6.00001)
+[node name="C101" type="CollisionShape3D" parent="Collision" unique_id=1792344732]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 60.97, 2.4, 6.00001)
 shape = SubResource("BoxShape3D_ewxhb")
 
-[node name="C102" type="CollisionShape3D" parent="Collision" unique_id=913758482]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 49.1, 2.4, -11.82999)
+[node name="C102" type="CollisionShape3D" parent="Collision" unique_id=1658043228]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 60.97, 2.4, 11.85001)
 shape = SubResource("BoxShape3D_g4fxw")
 
-[node name="C103" type="CollisionShape3D" parent="Collision" unique_id=1866870508]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 49.1, 2.4, -5.99999)
+[node name="C103" type="CollisionShape3D" parent="Collision" unique_id=909966077]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 61.57, 5.15, 1e-05)
 shape = SubResource("BoxShape3D_iq4ed")
 
-[node name="C104" type="CollisionShape3D" parent="Collision" unique_id=1896307136]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 55.1, 2.4, 11.83001)
+[node name="C104" type="CollisionShape3D" parent="Collision" unique_id=1079346742]
+transform = Transform3D(0, 0, 1, -0.33732888, 0.9413868, 0, -0.9413868, -0.33732888, 0, 34.5, 7.1912, -6.61746)
 shape = SubResource("BoxShape3D_bnxou")
 
-[node name="C105" type="CollisionShape3D" parent="Collision" unique_id=980888905]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 55.1, 2.4, 6.00001)
+[node name="C105" type="CollisionShape3D" parent="Collision" unique_id=747273429]
+transform = Transform3D(0, 0, 1, -0.33732888, -0.9413868, 0, 0.9413868, -0.33732888, 0, 34.5, 7.19119, 6.61747)
 shape = SubResource("BoxShape3D_qxv0i")
 
-[node name="C106" type="CollisionShape3D" parent="Collision" unique_id=1709257373]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 55.1, 2.4, -11.82999)
+[node name="C106" type="CollisionShape3D" parent="Collision" unique_id=1266903397]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 13.1, 2.4, 6)
 shape = SubResource("BoxShape3D_l2au6")
 
-[node name="C107" type="CollisionShape3D" parent="Collision" unique_id=145880567]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 55.1, 2.4, -5.99999)
+[node name="C107" type="CollisionShape3D" parent="Collision" unique_id=221024396]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 13.1, 2.4, -6)
 shape = SubResource("BoxShape3D_n4slo")
 
-[node name="C108" type="CollisionShape3D" parent="Collision" unique_id=1588656786]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 48.94, 1.1, -7.99999)
+[node name="C108" type="CollisionShape3D" parent="Collision" unique_id=85685360]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 19.1, 2.4, 6)
 shape = SubResource("BoxShape3D_3qfe2")
 
-[node name="C109" type="CollisionShape3D" parent="Collision" unique_id=1449796431]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 55.1, 2.5, -7.99999)
+[node name="C109" type="CollisionShape3D" parent="Collision" unique_id=584534562]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 19.1, 2.4, -6)
 shape = SubResource("BoxShape3D_0hs0h")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1986019661]
-environment = SubResource("Environment_adavy")
+[node name="C110" type="CollisionShape3D" parent="Collision" unique_id=919252326]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 25.1, 2.4, 6)
+shape = SubResource("BoxShape3D_t5t3r")
 
-[node name="Lights" type="Node3D" parent="." unique_id=1596983143]
+[node name="C111" type="CollisionShape3D" parent="Collision" unique_id=1436340663]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 25.1, 2.4, -6)
+shape = SubResource("BoxShape3D_5myms")
 
-[node name="Chandelier0" type="OmniLight3D" parent="Lights" unique_id=704024355 groups=["character_lights", "shadow_lights"]]
+[node name="C112" type="CollisionShape3D" parent="Collision" unique_id=2061662511]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 31.1, 2.4, 6)
+shape = SubResource("BoxShape3D_adavy")
+
+[node name="C113" type="CollisionShape3D" parent="Collision" unique_id=1335269952]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 31.1, 2.4, -6)
+shape = SubResource("BoxShape3D_8dett")
+
+[node name="C114" type="CollisionShape3D" parent="Collision" unique_id=2024151035]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 37.1, 2.4, 6)
+shape = SubResource("BoxShape3D_8jj61")
+
+[node name="C115" type="CollisionShape3D" parent="Collision" unique_id=1275972258]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 37.1, 2.4, -6)
+shape = SubResource("BoxShape3D_ig4fe")
+
+[node name="C116" type="CollisionShape3D" parent="Collision" unique_id=1123420749]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 43.1, 2.4, 6)
+shape = SubResource("BoxShape3D_wpumx")
+
+[node name="C117" type="CollisionShape3D" parent="Collision" unique_id=1485623859]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 43.1, 2.4, -6)
+shape = SubResource("BoxShape3D_4o43s")
+
+[node name="C118" type="CollisionShape3D" parent="Collision" unique_id=949983997]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 49.1, 2.4, 6.00001)
+shape = SubResource("BoxShape3D_d01v6")
+
+[node name="C119" type="CollisionShape3D" parent="Collision" unique_id=1237021966]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 49.1, 2.4, -5.99999)
+shape = SubResource("BoxShape3D_16eqf")
+
+[node name="C120" type="CollisionShape3D" parent="Collision" unique_id=188870228]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 55.1, 2.4, 6.00001)
+shape = SubResource("BoxShape3D_le68a")
+
+[node name="C121" type="CollisionShape3D" parent="Collision" unique_id=939199452]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 55.1, 2.4, -5.99999)
+shape = SubResource("BoxShape3D_18f6y")
+
+[node name="C122" type="CollisionShape3D" parent="Collision" unique_id=78614073]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 49.05, 0.65, -10.35999)
+shape = SubResource("BoxShape3D_moofs")
+
+[node name="C123" type="CollisionShape3D" parent="Collision" unique_id=72329314]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 49.05, 0.65, -5.63999)
+shape = SubResource("BoxShape3D_ec8vl")
+
+[node name="C124" type="CollisionShape3D" parent="Collision" unique_id=446689686]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 48.97001, 2.4, -11.84999)
+shape = SubResource("BoxShape3D_12re6")
+
+[node name="C125" type="CollisionShape3D" parent="Collision" unique_id=1647980586]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 48.97, 2.4, -8.86999)
+shape = SubResource("BoxShape3D_7qicb")
+
+[node name="C126" type="CollisionShape3D" parent="Collision" unique_id=1949227338]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 48.97, 2.4, -7.12999)
+shape = SubResource("BoxShape3D_0pvjh")
+
+[node name="C127" type="CollisionShape3D" parent="Collision" unique_id=120705696]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 48.97, 2.4, -3.99999)
+shape = SubResource("BoxShape3D_60efn")
+
+[node name="C128" type="CollisionShape3D" parent="Collision" unique_id=326075357]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 48.94, 1.1, -7.99999)
+shape = SubResource("BoxShape3D_6d2yp")
+
+[node name="C129" type="CollisionShape3D" parent="Collision" unique_id=760141830]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55.1, 0.65, -3.94999)
+shape = SubResource("BoxShape3D_qyirk")
+
+[node name="C130" type="CollisionShape3D" parent="Collision" unique_id=2045932558]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55.1, 2.4, -3.86999)
+shape = SubResource("BoxShape3D_mfcuy")
+
+[node name="C131" type="CollisionShape3D" parent="Collision" unique_id=1815130163]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60.95, 2.4, -3.86999)
+shape = SubResource("BoxShape3D_3b6k8")
+
+[node name="C132" type="CollisionShape3D" parent="Collision" unique_id=1593829883]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 55.1, 2.5, -7.99999)
+shape = SubResource("BoxShape3D_4tmpy")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=210761968]
+environment = SubResource("Environment_e31qn")
+
+[node name="Lights" type="Node3D" parent="." unique_id=654831358]
+
+[node name="Chandelier0" type="OmniLight3D" parent="Lights" unique_id=423931936 groups=["character_lights", "shadow_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.43, -8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 2.6
@@ -997,7 +1606,7 @@ shadow_normal_bias = 1.2
 shadow_blur = 1.2
 omni_range = 13.0
 
-[node name="ChandelierUp1" type="OmniLight3D" parent="Lights" unique_id=764034857]
+[node name="ChandelierUp1" type="OmniLight3D" parent="Lights" unique_id=1230388171]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.68, -8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.9
@@ -1007,7 +1616,7 @@ light_specular = 0.0
 light_bake_mode = 1
 omni_range = 7.0
 
-[node name="Chandelier2" type="OmniLight3D" parent="Lights" unique_id=1789872122 groups=["character_lights", "shadow_lights"]]
+[node name="Chandelier2" type="OmniLight3D" parent="Lights" unique_id=1503744027 groups=["character_lights", "shadow_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.43, 0)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 2.6
@@ -1021,7 +1630,7 @@ shadow_normal_bias = 1.2
 shadow_blur = 1.2
 omni_range = 13.0
 
-[node name="ChandelierUp3" type="OmniLight3D" parent="Lights" unique_id=1950834442]
+[node name="ChandelierUp3" type="OmniLight3D" parent="Lights" unique_id=1597553096]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.68, 0)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.9
@@ -1031,7 +1640,7 @@ light_specular = 0.0
 light_bake_mode = 1
 omni_range = 7.0
 
-[node name="Chandelier4" type="OmniLight3D" parent="Lights" unique_id=989503200 groups=["character_lights", "shadow_lights"]]
+[node name="Chandelier4" type="OmniLight3D" parent="Lights" unique_id=571373072 groups=["character_lights", "shadow_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.43, 8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 2.6
@@ -1045,7 +1654,7 @@ shadow_normal_bias = 1.2
 shadow_blur = 1.2
 omni_range = 13.0
 
-[node name="ChandelierUp5" type="OmniLight3D" parent="Lights" unique_id=188877126]
+[node name="ChandelierUp5" type="OmniLight3D" parent="Lights" unique_id=1247743947]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.68, 8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.9
@@ -1055,7 +1664,7 @@ light_specular = 0.0
 light_bake_mode = 1
 omni_range = 7.0
 
-[node name="Sconce6" type="OmniLight3D" parent="Lights" unique_id=399930752 groups=["character_lights"]]
+[node name="Sconce6" type="OmniLight3D" parent="Lights" unique_id=1589833716 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.635, 2.53, -10)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.5
@@ -1064,7 +1673,7 @@ light_volumetric_fog_energy = 0.08
 light_bake_mode = 1
 omni_range = 4.6
 
-[node name="Sconce7" type="OmniLight3D" parent="Lights" unique_id=1571157340 groups=["character_lights"]]
+[node name="Sconce7" type="OmniLight3D" parent="Lights" unique_id=1901589080 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.635, 2.53, -2)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.5
@@ -1073,7 +1682,7 @@ light_volumetric_fog_energy = 0.08
 light_bake_mode = 1
 omni_range = 4.6
 
-[node name="Sconce8" type="OmniLight3D" parent="Lights" unique_id=435056650 groups=["character_lights"]]
+[node name="Sconce8" type="OmniLight3D" parent="Lights" unique_id=472799799 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.635, 2.53, 2)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.5
@@ -1082,7 +1691,7 @@ light_volumetric_fog_energy = 0.08
 light_bake_mode = 1
 omni_range = 4.6
 
-[node name="Sconce9" type="OmniLight3D" parent="Lights" unique_id=1313356307 groups=["character_lights"]]
+[node name="Sconce9" type="OmniLight3D" parent="Lights" unique_id=1120231009 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.635, 2.53, 10)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.5
@@ -1091,7 +1700,7 @@ light_volumetric_fog_energy = 0.08
 light_bake_mode = 1
 omni_range = 4.6
 
-[node name="Sconce10" type="OmniLight3D" parent="Lights" unique_id=2109660936 groups=["character_lights"]]
+[node name="Sconce10" type="OmniLight3D" parent="Lights" unique_id=543828889 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.635, 2.53, -10)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.5
@@ -1100,7 +1709,7 @@ light_volumetric_fog_energy = 0.08
 light_bake_mode = 1
 omni_range = 4.6
 
-[node name="Sconce11" type="OmniLight3D" parent="Lights" unique_id=2101861564 groups=["character_lights"]]
+[node name="Sconce11" type="OmniLight3D" parent="Lights" unique_id=138773006 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.635, 2.53, -2)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.5
@@ -1109,7 +1718,7 @@ light_volumetric_fog_energy = 0.08
 light_bake_mode = 1
 omni_range = 4.6
 
-[node name="Sconce12" type="OmniLight3D" parent="Lights" unique_id=914938941 groups=["character_lights"]]
+[node name="Sconce12" type="OmniLight3D" parent="Lights" unique_id=181355766 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.635, 2.53, 2)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.5
@@ -1118,7 +1727,7 @@ light_volumetric_fog_energy = 0.08
 light_bake_mode = 1
 omni_range = 4.6
 
-[node name="Sconce13" type="OmniLight3D" parent="Lights" unique_id=88696869 groups=["character_lights"]]
+[node name="Sconce13" type="OmniLight3D" parent="Lights" unique_id=715195231 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.635, 2.53, 10)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.5
@@ -1127,7 +1736,7 @@ light_volumetric_fog_energy = 0.08
 light_bake_mode = 1
 omni_range = 4.6
 
-[node name="Sconce14" type="OmniLight3D" parent="Lights" unique_id=1380143364 groups=["character_lights"]]
+[node name="Sconce14" type="OmniLight3D" parent="Lights" unique_id=1111375251 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.55, 2.28, 11.31)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.5
@@ -1136,7 +1745,7 @@ light_volumetric_fog_energy = 0.08
 light_bake_mode = 1
 omni_range = 4.6
 
-[node name="Sconce15" type="OmniLight3D" parent="Lights" unique_id=429837663 groups=["character_lights"]]
+[node name="Sconce15" type="OmniLight3D" parent="Lights" unique_id=76773143 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.55, 2.28, 11.31)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.5
@@ -1145,7 +1754,7 @@ light_volumetric_fog_energy = 0.08
 light_bake_mode = 1
 omni_range = 4.6
 
-[node name="Stand16" type="OmniLight3D" parent="Lights" unique_id=1478679369]
+[node name="Stand16" type="OmniLight3D" parent="Lights" unique_id=416584184]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.7, 1.95, -10.15)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.8
@@ -1155,7 +1764,7 @@ light_size = 0.05
 light_bake_mode = 1
 omni_range = 4.5
 
-[node name="Stand17" type="OmniLight3D" parent="Lights" unique_id=958446351]
+[node name="Stand17" type="OmniLight3D" parent="Lights" unique_id=1357172494]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.7, 1.95, -10.15)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.8
@@ -1165,7 +1774,7 @@ light_size = 0.05
 light_bake_mode = 1
 omni_range = 4.5
 
-[node name="Stand18" type="OmniLight3D" parent="Lights" unique_id=507680167]
+[node name="Stand18" type="OmniLight3D" parent="Lights" unique_id=1930004099]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 1.95, 11.2)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.8
@@ -1175,7 +1784,7 @@ light_size = 0.05
 light_bake_mode = 1
 omni_range = 4.5
 
-[node name="Stand19" type="OmniLight3D" parent="Lights" unique_id=2097094980]
+[node name="Stand19" type="OmniLight3D" parent="Lights" unique_id=1542967333]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 1.95, 11.2)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.8
@@ -1185,7 +1794,7 @@ light_size = 0.05
 light_bake_mode = 1
 omni_range = 4.5
 
-[node name="Table20" type="OmniLight3D" parent="Lights" unique_id=1339902200]
+[node name="Table20" type="OmniLight3D" parent="Lights" unique_id=827290842]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.3, 1.514, 3.05)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.6
@@ -1195,7 +1804,7 @@ light_size = 0.05
 light_bake_mode = 1
 omni_range = 3.6
 
-[node name="Table21" type="OmniLight3D" parent="Lights" unique_id=1638663894]
+[node name="Table21" type="OmniLight3D" parent="Lights" unique_id=481008385]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.3, 1.514, 0.95)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.6
@@ -1205,7 +1814,7 @@ light_size = 0.05
 light_bake_mode = 1
 omni_range = 3.6
 
-[node name="SideTable22" type="OmniLight3D" parent="Lights" unique_id=752251735]
+[node name="SideTable22" type="OmniLight3D" parent="Lights" unique_id=1589699510]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.78, 1.05, -8.85)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.5
@@ -1215,7 +1824,7 @@ light_size = 0.03
 light_bake_mode = 1
 omni_range = 3.0
 
-[node name="Mantel23" type="OmniLight3D" parent="Lights" unique_id=235854572]
+[node name="Mantel23" type="OmniLight3D" parent="Lights" unique_id=352160146]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.79, -10.27)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.7
@@ -1225,7 +1834,7 @@ light_size = 0.05
 light_bake_mode = 1
 omni_range = 4.0
 
-[node name="Sideboard24" type="OmniLight3D" parent="Lights" unique_id=512946821]
+[node name="Sideboard24" type="OmniLight3D" parent="Lights" unique_id=500340483]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.01, 1.55, 8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 0.8
@@ -1235,7 +1844,7 @@ light_size = 0.05
 light_bake_mode = 1
 omni_range = 3.8
 
-[node name="WorkshopLamp25" type="OmniLight3D" parent="Lights" unique_id=142711444 groups=["character_lights"]]
+[node name="WorkshopLamp25" type="OmniLight3D" parent="Lights" unique_id=905529650 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.1, 4.3, 8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1245,7 +1854,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp26" type="OmniLight3D" parent="Lights" unique_id=1348281064 groups=["character_lights"]]
+[node name="WorkshopLamp26" type="OmniLight3D" parent="Lights" unique_id=1684256223 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.1, 4.3, 0)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1255,7 +1864,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp27" type="OmniLight3D" parent="Lights" unique_id=2092807853 groups=["character_lights"]]
+[node name="WorkshopLamp27" type="OmniLight3D" parent="Lights" unique_id=1394356587 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.1, 4.3, -8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1265,7 +1874,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp28" type="OmniLight3D" parent="Lights" unique_id=919161899 groups=["character_lights"]]
+[node name="WorkshopLamp28" type="OmniLight3D" parent="Lights" unique_id=2096600270 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.1, 4.3, 8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1275,7 +1884,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp29" type="OmniLight3D" parent="Lights" unique_id=1586850350 groups=["character_lights"]]
+[node name="WorkshopLamp29" type="OmniLight3D" parent="Lights" unique_id=966385381 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.1, 4.3, 0)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1285,7 +1894,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp30" type="OmniLight3D" parent="Lights" unique_id=633927035 groups=["character_lights"]]
+[node name="WorkshopLamp30" type="OmniLight3D" parent="Lights" unique_id=1597963668 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.1, 4.3, -8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1295,7 +1904,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp31" type="OmniLight3D" parent="Lights" unique_id=2111283509 groups=["character_lights"]]
+[node name="WorkshopLamp31" type="OmniLight3D" parent="Lights" unique_id=310388335 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.1, 4.3, 8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1305,7 +1914,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp32" type="OmniLight3D" parent="Lights" unique_id=715443720 groups=["character_lights"]]
+[node name="WorkshopLamp32" type="OmniLight3D" parent="Lights" unique_id=865754016 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.1, 4.3, 0)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1315,7 +1924,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp33" type="OmniLight3D" parent="Lights" unique_id=2019580605 groups=["character_lights"]]
+[node name="WorkshopLamp33" type="OmniLight3D" parent="Lights" unique_id=1840595018 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.1, 4.3, -8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1325,7 +1934,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp34" type="OmniLight3D" parent="Lights" unique_id=2007746259 groups=["character_lights"]]
+[node name="WorkshopLamp34" type="OmniLight3D" parent="Lights" unique_id=1875232721 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.1, 4.3, 8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1335,7 +1944,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp35" type="OmniLight3D" parent="Lights" unique_id=533534270 groups=["character_lights"]]
+[node name="WorkshopLamp35" type="OmniLight3D" parent="Lights" unique_id=578827931 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.1, 4.3, 0)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1345,7 +1954,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp36" type="OmniLight3D" parent="Lights" unique_id=1330198457 groups=["character_lights"]]
+[node name="WorkshopLamp36" type="OmniLight3D" parent="Lights" unique_id=214428004 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.1, 4.3, -8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1355,7 +1964,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp37" type="OmniLight3D" parent="Lights" unique_id=1829072410 groups=["character_lights"]]
+[node name="WorkshopLamp37" type="OmniLight3D" parent="Lights" unique_id=1779726276 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.1, 4.3, 8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1365,7 +1974,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp38" type="OmniLight3D" parent="Lights" unique_id=689904975 groups=["character_lights"]]
+[node name="WorkshopLamp38" type="OmniLight3D" parent="Lights" unique_id=565927387 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.1, 4.3, 0)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1375,7 +1984,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp39" type="OmniLight3D" parent="Lights" unique_id=396068284 groups=["character_lights"]]
+[node name="WorkshopLamp39" type="OmniLight3D" parent="Lights" unique_id=1444058134 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.1, 4.3, -8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1385,7 +1994,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp40" type="OmniLight3D" parent="Lights" unique_id=1074923762 groups=["character_lights"]]
+[node name="WorkshopLamp40" type="OmniLight3D" parent="Lights" unique_id=457433188 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43.1, 4.3, 8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1395,7 +2004,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp41" type="OmniLight3D" parent="Lights" unique_id=2118333793 groups=["character_lights"]]
+[node name="WorkshopLamp41" type="OmniLight3D" parent="Lights" unique_id=754321567 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43.1, 4.3, 0)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1405,7 +2014,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp42" type="OmniLight3D" parent="Lights" unique_id=858358673 groups=["character_lights"]]
+[node name="WorkshopLamp42" type="OmniLight3D" parent="Lights" unique_id=809700442 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43.1, 4.3, -8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1415,7 +2024,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp43" type="OmniLight3D" parent="Lights" unique_id=8706498 groups=["character_lights"]]
+[node name="WorkshopLamp43" type="OmniLight3D" parent="Lights" unique_id=883195928 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.1, 4.3, 8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1425,7 +2034,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp44" type="OmniLight3D" parent="Lights" unique_id=1698554605 groups=["character_lights"]]
+[node name="WorkshopLamp44" type="OmniLight3D" parent="Lights" unique_id=1873127177 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.1, 4.3, 0)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1435,7 +2044,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp45" type="OmniLight3D" parent="Lights" unique_id=27929273 groups=["character_lights"]]
+[node name="WorkshopLamp45" type="OmniLight3D" parent="Lights" unique_id=661499203 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.1, 4.3, -8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1445,7 +2054,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp46" type="OmniLight3D" parent="Lights" unique_id=1938694619 groups=["character_lights"]]
+[node name="WorkshopLamp46" type="OmniLight3D" parent="Lights" unique_id=1130882133 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55.1, 4.3, 8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1455,7 +2064,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp47" type="OmniLight3D" parent="Lights" unique_id=1858466612 groups=["character_lights"]]
+[node name="WorkshopLamp47" type="OmniLight3D" parent="Lights" unique_id=644835630 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55.1, 4.3, 0)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1465,7 +2074,7 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="WorkshopLamp48" type="OmniLight3D" parent="Lights" unique_id=170558704 groups=["character_lights"]]
+[node name="WorkshopLamp48" type="OmniLight3D" parent="Lights" unique_id=1063571083 groups=["character_lights"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55.1, 4.3, -8)
 light_color = Color(1, 0.72, 0.42, 1)
 light_energy = 5.0
@@ -1475,16 +2084,16 @@ light_size = 0.3
 light_bake_mode = 1
 omni_range = 9.0
 
-[node name="Windows" type="Node3D" parent="." unique_id=1825717395]
+[node name="Windows" type="Node3D" parent="." unique_id=752255728]
 
-[node name="Glass0" type="MeshInstance3D" parent="Windows" unique_id=1070201215]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -6.91, 2.63, -4)
+[node name="Glass0" type="MeshInstance3D" parent="Windows" unique_id=17624]
+transform = Transform3D(-3.6199901e-06, 0, 1, 0, 1, 0, -1, 0, -3.6199901e-06, -6.91, 2.63, -4)
 cast_shadow = 0
 gi_mode = 0
-mesh = SubResource("QuadMesh_8jj61")
+mesh = SubResource("QuadMesh_8hsf2")
 
-[node name="FogLight0" type="SpotLight3D" parent="Windows" unique_id=937154850 groups=["character_lights"]]
-transform = Transform3D(-4.371139e-08, 0.7071068, -0.7071067, 0, 0.7071067, 0.7071068, 1, 3.090862e-08, -3.0908616e-08, -6.81, 2.63, -4)
+[node name="FogLight0" type="SpotLight3D" parent="Windows" unique_id=1945635404 groups=["character_lights"]]
+transform = Transform3D(3.7709858e-06, 0.7071068, -0.7071067, 0, 0.7071067, 0.7071068, 1, -2.6664898e-06, 2.6664893e-06, -6.81, 2.63, -4.0000005)
 light_color = Color(0.72, 0.84, 1, 1)
 light_energy = 42.0
 light_indirect_energy = 3.0
@@ -1497,14 +2106,14 @@ spot_attenuation = 1.25
 spot_angle = 43.0
 spot_angle_attenuation = 1.5
 
-[node name="Glass1" type="MeshInstance3D" parent="Windows" unique_id=598360633]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -6.91, 2.63, 0)
+[node name="Glass1" type="MeshInstance3D" parent="Windows" unique_id=711139007]
+transform = Transform3D(-3.6199901e-06, 0, 1, 0, 1, 0, -1, 0, -3.6199901e-06, -6.91, 2.63, 0)
 cast_shadow = 0
 gi_mode = 0
-mesh = SubResource("QuadMesh_wpumx")
+mesh = SubResource("QuadMesh_8inmc")
 
-[node name="FogLight1" type="SpotLight3D" parent="Windows" unique_id=1969457874 groups=["character_lights"]]
-transform = Transform3D(7.54979e-08, 0.7071068, -0.7071067, 0, 0.7071067, 0.7071068, 1, -5.3385083e-08, 5.3385072e-08, -6.81, 2.63, -4.371139e-09)
+[node name="FogLight1" type="SpotLight3D" parent="Windows" unique_id=1336075790 groups=["character_lights"]]
+transform = Transform3D(3.6517765e-06, 0.7071068, -0.7071067, 0, 0.7071067, 0.7071068, 1, -2.5821962e-06, 2.5821957e-06, -6.81, 2.63, -3.61999e-07)
 light_color = Color(0.72, 0.84, 1, 1)
 light_energy = 42.0
 light_indirect_energy = 3.0
@@ -1517,14 +2126,14 @@ spot_attenuation = 1.25
 spot_angle = 43.0
 spot_angle_attenuation = 1.5
 
-[node name="Glass2" type="MeshInstance3D" parent="Windows" unique_id=565586660]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -6.91, 2.63, 4)
+[node name="Glass2" type="MeshInstance3D" parent="Windows" unique_id=1052329954]
+transform = Transform3D(-3.6199901e-06, 0, 1, 0, 1, 0, -1, 0, -3.6199901e-06, -6.91, 2.63, 4)
 cast_shadow = 0
 gi_mode = 0
-mesh = SubResource("QuadMesh_d01v6")
+mesh = SubResource("QuadMesh_jxdwr")
 
-[node name="FogLight2" type="SpotLight3D" parent="Windows" unique_id=926408567 groups=["character_lights"]]
-transform = Transform3D(-4.371139e-08, 0.7071068, -0.7071067, 0, 0.7071067, 0.7071068, 1, 3.090862e-08, -3.0908616e-08, -6.81, 2.63, 4)
+[node name="FogLight2" type="SpotLight3D" parent="Windows" unique_id=1451706902 groups=["character_lights"]]
+transform = Transform3D(3.5325672e-06, 0.7071068, -0.7071067, 0, 0.7071067, 0.7071068, 1, -2.4979024e-06, 2.497902e-06, -6.81, 2.63, 3.9999995)
 light_color = Color(0.72, 0.84, 1, 1)
 light_energy = 42.0
 light_indirect_energy = 3.0
@@ -1537,14 +2146,14 @@ spot_attenuation = 1.25
 spot_angle = 43.0
 spot_angle_attenuation = 1.5
 
-[node name="Glass3" type="MeshInstance3D" parent="Windows" unique_id=1533863482]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -6.91, 2.63, 8)
+[node name="Glass3" type="MeshInstance3D" parent="Windows" unique_id=532160347]
+transform = Transform3D(-3.6199901e-06, 0, 1, 0, 1, 0, -1, 0, -3.6199901e-06, -6.91, 2.63, 8)
 cast_shadow = 0
 gi_mode = 0
-mesh = SubResource("QuadMesh_le68a")
+mesh = SubResource("QuadMesh_3thw2")
 
-[node name="FogLight3" type="SpotLight3D" parent="Windows" unique_id=641399505 groups=["character_lights"]]
-transform = Transform3D(-4.371139e-08, 0.7071068, -0.7071067, 0, 0.7071067, 0.7071068, 1, 3.090862e-08, -3.0908616e-08, -6.81, 2.63, 8)
+[node name="FogLight3" type="SpotLight3D" parent="Windows" unique_id=1148026637 groups=["character_lights"]]
+transform = Transform3D(3.7709858e-06, 0.7071068, -0.7071067, 0, 0.7071067, 0.7071068, 1, -2.6664898e-06, 2.6664893e-06, -6.81, 2.63, 7.9999995)
 light_color = Color(0.72, 0.84, 1, 1)
 light_energy = 42.0
 light_indirect_energy = 3.0
@@ -1557,76 +2166,716 @@ spot_attenuation = 1.25
 spot_angle = 43.0
 spot_angle_attenuation = 1.5
 
-[node name="Fire" type="Node3D" parent="." unique_id=248945845]
+[node name="Glass4" type="MeshInstance3D" parent="Windows" unique_id=251014748]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.6, 2.63, -12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_fypkj")
+
+[node name="FogLight4" type="SpotLight3D" parent="Windows" unique_id=1280723215 groups=["character_lights"]]
+transform = Transform3D(-1, 6.181724e-08, -6.181723e-08, 0, 0.7071067, 0.7071068, 8.742278e-08, 0.7071068, -0.7071067, 8.6, 2.63, -12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass5" type="MeshInstance3D" parent="Windows" unique_id=1244551163]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.6, 2.63, -12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_3q00a")
+
+[node name="FogLight5" type="SpotLight3D" parent="Windows" unique_id=1486587808 groups=["character_lights"]]
+transform = Transform3D(-1, 6.181724e-08, -6.181723e-08, 0, 0.7071067, 0.7071068, 8.742278e-08, 0.7071068, -0.7071067, 11.6, 2.63, -12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass6" type="MeshInstance3D" parent="Windows" unique_id=781194671]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.6, 2.63, -12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_ggpdl")
+
+[node name="FogLight6" type="SpotLight3D" parent="Windows" unique_id=555312484 groups=["character_lights"]]
+transform = Transform3D(-1, 6.181724e-08, -6.181723e-08, 0, 0.7071067, 0.7071068, 8.742278e-08, 0.7071068, -0.7071067, 14.6, 2.63, -12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass7" type="MeshInstance3D" parent="Windows" unique_id=314790296]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.6, 2.63, -12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_yd3db")
+
+[node name="FogLight7" type="SpotLight3D" parent="Windows" unique_id=2086231167 groups=["character_lights"]]
+transform = Transform3D(-1, 6.181724e-08, -6.181723e-08, 0, 0.7071067, 0.7071068, 8.742278e-08, 0.7071068, -0.7071067, 17.6, 2.63, -12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass8" type="MeshInstance3D" parent="Windows" unique_id=1522290227]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.6, 2.63, -12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_gjt03")
+
+[node name="FogLight8" type="SpotLight3D" parent="Windows" unique_id=430333373 groups=["character_lights"]]
+transform = Transform3D(-1, 6.181724e-08, -6.181723e-08, 0, 0.7071067, 0.7071068, 8.742278e-08, 0.7071068, -0.7071067, 20.6, 2.63, -12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass9" type="MeshInstance3D" parent="Windows" unique_id=154992969]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.6, 2.63, -12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_744cn")
+
+[node name="FogLight9" type="SpotLight3D" parent="Windows" unique_id=731456574 groups=["character_lights"]]
+transform = Transform3D(-1, 6.181724e-08, -6.181723e-08, 0, 0.7071067, 0.7071068, 8.742278e-08, 0.7071068, -0.7071067, 23.6, 2.63, -12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass10" type="MeshInstance3D" parent="Windows" unique_id=1608198399]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.6, 2.63, -12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_r80t2")
+
+[node name="FogLight10" type="SpotLight3D" parent="Windows" unique_id=1017020545 groups=["character_lights"]]
+transform = Transform3D(-1, 6.181724e-08, -6.181723e-08, 0, 0.7071067, 0.7071068, 8.742278e-08, 0.7071068, -0.7071067, 26.6, 2.63, -12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass11" type="MeshInstance3D" parent="Windows" unique_id=20201511]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.6, 2.63, -12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_j6lor")
+
+[node name="FogLight11" type="SpotLight3D" parent="Windows" unique_id=1695361875 groups=["character_lights"]]
+transform = Transform3D(-1, 6.181724e-08, -6.181723e-08, 0, 0.7071067, 0.7071068, 8.742278e-08, 0.7071068, -0.7071067, 29.6, 2.63, -12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass12" type="MeshInstance3D" parent="Windows" unique_id=1374468863]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.6, 2.63, -12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_h5vko")
+
+[node name="FogLight12" type="SpotLight3D" parent="Windows" unique_id=747645589 groups=["character_lights"]]
+transform = Transform3D(-1, 6.181724e-08, -6.181723e-08, 0, 0.7071067, 0.7071068, 8.742278e-08, 0.7071068, -0.7071067, 32.6, 2.63, -12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass13" type="MeshInstance3D" parent="Windows" unique_id=549832887]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.6, 2.63, -12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_1onby")
+
+[node name="FogLight13" type="SpotLight3D" parent="Windows" unique_id=1920120769 groups=["character_lights"]]
+transform = Transform3D(-1, 6.181724e-08, -6.181723e-08, 0, 0.7071067, 0.7071068, 8.742278e-08, 0.7071068, -0.7071067, 35.6, 2.63, -12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass14" type="MeshInstance3D" parent="Windows" unique_id=500989833]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.6, 2.63, -12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_i7v4v")
+
+[node name="FogLight14" type="SpotLight3D" parent="Windows" unique_id=1652025134 groups=["character_lights"]]
+transform = Transform3D(-1, 6.181724e-08, -6.181723e-08, 0, 0.7071067, 0.7071068, 8.742278e-08, 0.7071068, -0.7071067, 38.6, 2.63, -12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass15" type="MeshInstance3D" parent="Windows" unique_id=336359283]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.6, 2.63, -12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_tgl7s")
+
+[node name="FogLight15" type="SpotLight3D" parent="Windows" unique_id=782515490 groups=["character_lights"]]
+transform = Transform3D(-1, 6.181724e-08, -6.181723e-08, 0, 0.7071067, 0.7071068, 8.742278e-08, 0.7071068, -0.7071067, 41.6, 2.63, -12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass16" type="MeshInstance3D" parent="Windows" unique_id=549149168]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44.6, 2.63, -12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_crvmn")
+
+[node name="FogLight16" type="SpotLight3D" parent="Windows" unique_id=1355165498 groups=["character_lights"]]
+transform = Transform3D(-1, 6.181724e-08, -6.181723e-08, 0, 0.7071067, 0.7071068, 8.742278e-08, 0.7071068, -0.7071067, 44.6, 2.63, -12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass17" type="MeshInstance3D" parent="Windows" unique_id=185225548]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47.6, 2.63, -12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_xbequ")
+
+[node name="FogLight17" type="SpotLight3D" parent="Windows" unique_id=311691936 groups=["character_lights"]]
+transform = Transform3D(-1, 6.181724e-08, -6.181723e-08, 0, 0.7071067, 0.7071068, 8.742278e-08, 0.7071068, -0.7071067, 47.6, 2.63, -12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass18" type="MeshInstance3D" parent="Windows" unique_id=2078116075]
+transform = Transform3D(-1, 0, 2.5351817e-06, 0, 1, 0, -2.5351817e-06, 0, -1, 8.6, 2.63, 12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_k4hjw")
+
+[node name="FogLight18" type="SpotLight3D" parent="Windows" unique_id=397780760 groups=["character_lights"]]
+transform = Transform3D(1, 2.023049e-06, -2.0230486e-06, 0, 0.7071067, 0.7071068, 2.8610232e-06, -0.7071068, 0.7071067, 8.6, 2.63, 12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass19" type="MeshInstance3D" parent="Windows" unique_id=1934051607]
+transform = Transform3D(-1, 0, 2.5351817e-06, 0, 1, 0, -2.5351817e-06, 0, -1, 11.6, 2.63, 12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_rdpl8")
+
+[node name="FogLight19" type="SpotLight3D" parent="Windows" unique_id=705041847 groups=["character_lights"]]
+transform = Transform3D(1, 2.023049e-06, -2.0230486e-06, 0, 0.7071067, 0.7071068, 2.8610232e-06, -0.7071068, 0.7071067, 11.6, 2.63, 12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass20" type="MeshInstance3D" parent="Windows" unique_id=1663383026]
+transform = Transform3D(-1, 0, 2.5351817e-06, 0, 1, 0, -2.5351817e-06, 0, -1, 14.6, 2.63, 12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_irctn")
+
+[node name="FogLight20" type="SpotLight3D" parent="Windows" unique_id=635449923 groups=["character_lights"]]
+transform = Transform3D(1, 2.023049e-06, -2.0230486e-06, 0, 0.7071067, 0.7071068, 2.8610232e-06, -0.7071068, 0.7071067, 14.6, 2.63, 12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass21" type="MeshInstance3D" parent="Windows" unique_id=639707723]
+transform = Transform3D(-1, 0, 2.5351817e-06, 0, 1, 0, -2.5351817e-06, 0, -1, 17.6, 2.63, 12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_hocks")
+
+[node name="FogLight21" type="SpotLight3D" parent="Windows" unique_id=1129100519 groups=["character_lights"]]
+transform = Transform3D(1, 1.3486992e-06, -1.348699e-06, 0, 0.7071067, 0.7071068, 1.9073486e-06, -0.7071068, 0.7071067, 17.6, 2.63, 12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass22" type="MeshInstance3D" parent="Windows" unique_id=1509890309]
+transform = Transform3D(-1, 0, 2.5351817e-06, 0, 1, 0, -2.5351817e-06, 0, -1, 20.6, 2.63, 12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_e1qov")
+
+[node name="FogLight22" type="SpotLight3D" parent="Windows" unique_id=937196502 groups=["character_lights"]]
+transform = Transform3D(1, 1.3486992e-06, -1.348699e-06, 0, 0.7071067, 0.7071068, 1.9073486e-06, -0.7071068, 0.7071067, 20.6, 2.63, 12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass23" type="MeshInstance3D" parent="Windows" unique_id=1365033571]
+transform = Transform3D(-1, 0, 2.5351817e-06, 0, 1, 0, -2.5351817e-06, 0, -1, 23.6, 2.63, 12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_3p1yq")
+
+[node name="FogLight23" type="SpotLight3D" parent="Windows" unique_id=1385464646 groups=["character_lights"]]
+transform = Transform3D(1, 1.3486992e-06, -1.348699e-06, 0, 0.7071067, 0.7071068, 1.9073486e-06, -0.7071068, 0.7071067, 23.6, 2.63, 12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass24" type="MeshInstance3D" parent="Windows" unique_id=224093751]
+transform = Transform3D(-1, 0, 2.5351817e-06, 0, 1, 0, -2.5351817e-06, 0, -1, 26.6, 2.63, 12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_bjvgg")
+
+[node name="FogLight24" type="SpotLight3D" parent="Windows" unique_id=1570078618 groups=["character_lights"]]
+transform = Transform3D(1, 1.3486992e-06, -1.348699e-06, 0, 0.7071067, 0.7071068, 1.9073486e-06, -0.7071068, 0.7071067, 26.6, 2.63, 12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass25" type="MeshInstance3D" parent="Windows" unique_id=1167762834]
+transform = Transform3D(-1, 0, 2.5351817e-06, 0, 1, 0, -2.5351817e-06, 0, -1, 29.6, 2.63, 12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_w6gev")
+
+[node name="FogLight25" type="SpotLight3D" parent="Windows" unique_id=361531411 groups=["character_lights"]]
+transform = Transform3D(1, 1.3486992e-06, -1.348699e-06, 0, 0.7071067, 0.7071068, 1.9073486e-06, -0.7071068, 0.7071067, 29.6, 2.63, 12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass26" type="MeshInstance3D" parent="Windows" unique_id=1775634220]
+transform = Transform3D(-1, 0, 2.5351817e-06, 0, 1, 0, -2.5351817e-06, 0, -1, 32.6, 2.63, 12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_7puhv")
+
+[node name="FogLight26" type="SpotLight3D" parent="Windows" unique_id=485162884 groups=["character_lights"]]
+transform = Transform3D(1, 2.6973985e-06, -2.697398e-06, 0, 0.7071067, 0.7071068, 3.8146973e-06, -0.7071068, 0.7071067, 32.6, 2.63, 12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass27" type="MeshInstance3D" parent="Windows" unique_id=1819133098]
+transform = Transform3D(-1, 0, 2.5351817e-06, 0, 1, 0, -2.5351817e-06, 0, -1, 35.6, 2.63, 12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_sg8un")
+
+[node name="FogLight27" type="SpotLight3D" parent="Windows" unique_id=491524822 groups=["character_lights"]]
+transform = Transform3D(1, 2.6973985e-06, -2.697398e-06, 0, 0.7071067, 0.7071068, 3.8146973e-06, -0.7071068, 0.7071067, 35.6, 2.63, 12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass28" type="MeshInstance3D" parent="Windows" unique_id=1935747148]
+transform = Transform3D(-1, 0, 2.5351817e-06, 0, 1, 0, -2.5351817e-06, 0, -1, 38.6, 2.63, 12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_h3k18")
+
+[node name="FogLight28" type="SpotLight3D" parent="Windows" unique_id=1934899482 groups=["character_lights"]]
+transform = Transform3D(1, 2.6973985e-06, -2.697398e-06, 0, 0.7071067, 0.7071068, 3.8146973e-06, -0.7071068, 0.7071067, 38.6, 2.63, 12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass29" type="MeshInstance3D" parent="Windows" unique_id=71410063]
+transform = Transform3D(-1, 0, 2.5351817e-06, 0, 1, 0, -2.5351817e-06, 0, -1, 41.6, 2.63, 12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_14q8m")
+
+[node name="FogLight29" type="SpotLight3D" parent="Windows" unique_id=1453944041 groups=["character_lights"]]
+transform = Transform3D(1, 2.6973985e-06, -2.697398e-06, 0, 0.7071067, 0.7071068, 3.8146973e-06, -0.7071068, 0.7071067, 41.6, 2.63, 12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass30" type="MeshInstance3D" parent="Windows" unique_id=1676221366]
+transform = Transform3D(-1, 0, 2.5351817e-06, 0, 1, 0, -2.5351817e-06, 0, -1, 44.6, 2.63, 12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_jfyon")
+
+[node name="FogLight30" type="SpotLight3D" parent="Windows" unique_id=2041932559 groups=["character_lights"]]
+transform = Transform3D(1, 2.6973985e-06, -2.697398e-06, 0, 0.7071067, 0.7071068, 3.8146973e-06, -0.7071068, 0.7071067, 44.6, 2.63, 12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass31" type="MeshInstance3D" parent="Windows" unique_id=888991779]
+transform = Transform3D(-1, 0, 2.5351817e-06, 0, 1, 0, -2.5351817e-06, 0, -1, 47.6, 2.63, 12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_m7kh6")
+
+[node name="FogLight31" type="SpotLight3D" parent="Windows" unique_id=728350005 groups=["character_lights"]]
+transform = Transform3D(1, 2.6973985e-06, -2.697398e-06, 0, 0.7071067, 0.7071068, 3.8146973e-06, -0.7071068, 0.7071067, 47.6, 2.63, 12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass32" type="MeshInstance3D" parent="Windows" unique_id=2049091261]
+transform = Transform3D(-1, 0, 2.5351817e-06, 0, 1, 0, -2.5351817e-06, 0, -1, 50.6, 2.63, 12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_nih6l")
+
+[node name="FogLight32" type="SpotLight3D" parent="Windows" unique_id=689710307 groups=["character_lights"]]
+transform = Transform3D(1, 2.6973985e-06, -2.697398e-06, 0, 0.7071067, 0.7071068, 3.8146973e-06, -0.7071068, 0.7071067, 50.6, 2.63, 12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass33" type="MeshInstance3D" parent="Windows" unique_id=1244447983]
+transform = Transform3D(-1, 0, 2.5351817e-06, 0, 1, 0, -2.5351817e-06, 0, -1, 53.6, 2.63, 12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_17fdq")
+
+[node name="FogLight33" type="SpotLight3D" parent="Windows" unique_id=1563582616 groups=["character_lights"]]
+transform = Transform3D(1, 2.6973985e-06, -2.697398e-06, 0, 0.7071067, 0.7071068, 3.8146973e-06, -0.7071068, 0.7071067, 53.6, 2.63, 12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass34" type="MeshInstance3D" parent="Windows" unique_id=1784193982]
+transform = Transform3D(-1, 0, 2.5351817e-06, 0, 1, 0, -2.5351817e-06, 0, -1, 56.6, 2.63, 12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_yktju")
+
+[node name="FogLight34" type="SpotLight3D" parent="Windows" unique_id=875941126 groups=["character_lights"]]
+transform = Transform3D(1, 2.6973985e-06, -2.697398e-06, 0, 0.7071067, 0.7071068, 3.8146973e-06, -0.7071068, 0.7071067, 56.6, 2.63, 12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Glass35" type="MeshInstance3D" parent="Windows" unique_id=359518126]
+transform = Transform3D(-1, 0, 2.5351817e-06, 0, 1, 0, -2.5351817e-06, 0, -1, 59.6, 2.63, 12.41)
+cast_shadow = 0
+gi_mode = 0
+mesh = SubResource("QuadMesh_pvuan")
+
+[node name="FogLight35" type="SpotLight3D" parent="Windows" unique_id=585056968 groups=["character_lights"]]
+transform = Transform3D(1, 2.6973985e-06, -2.697398e-06, 0, 0.7071067, 0.7071068, 3.8146973e-06, -0.7071068, 0.7071067, 59.6, 2.63, 12.309999)
+light_color = Color(0.72, 0.84, 1, 1)
+light_energy = 42.0
+light_indirect_energy = 3.0
+light_volumetric_fog_energy = 0.35
+light_size = 1.0
+light_specular = 0.25
+light_bake_mode = 1
+spot_range = 8.0
+spot_attenuation = 1.25
+spot_angle = 43.0
+spot_angle_attenuation = 1.5
+
+[node name="Fire" type="Node3D" parent="." unique_id=1955827083]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.12, -11.1)
 
-[node name="Flame0" type="MeshInstance3D" parent="Fire" unique_id=1328528281]
+[node name="Flame0" type="MeshInstance3D" parent="Fire" unique_id=986920017]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
 cast_shadow = 0
 extra_cull_margin = 1.0
 gi_mode = 0
-mesh = SubResource("QuadMesh_18f6y")
+mesh = SubResource("QuadMesh_th6qr")
 
-[node name="Flame1" type="MeshInstance3D" parent="Fire" unique_id=21037761]
+[node name="Flame1" type="MeshInstance3D" parent="Fire" unique_id=33605517]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.28, 0.16, 0.08)
 cast_shadow = 0
 extra_cull_margin = 1.0
 gi_mode = 0
-mesh = SubResource("QuadMesh_moofs")
+mesh = SubResource("QuadMesh_padke")
 
-[node name="Flame2" type="MeshInstance3D" parent="Fire" unique_id=747906852]
+[node name="Flame2" type="MeshInstance3D" parent="Fire" unique_id=418574682]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 0.17, -0.06)
 cast_shadow = 0
 extra_cull_margin = 1.0
 gi_mode = 0
-mesh = SubResource("QuadMesh_ec8vl")
+mesh = SubResource("QuadMesh_xiv2n")
 
-[node name="Flame3" type="MeshInstance3D" parent="Fire" unique_id=604204760]
+[node name="Flame3" type="MeshInstance3D" parent="Fire" unique_id=925620305]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.05, 0.3, -0.14)
 cast_shadow = 0
 extra_cull_margin = 1.0
 gi_mode = 0
-mesh = SubResource("QuadMesh_12re6")
+mesh = SubResource("QuadMesh_2k1qy")
 
-[node name="Flame4" type="MeshInstance3D" parent="Fire" unique_id=837116972]
+[node name="Flame4" type="MeshInstance3D" parent="Fire" unique_id=1480437331]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12, 0.1, 0.18)
 cast_shadow = 0
 extra_cull_margin = 1.0
 gi_mode = 0
-mesh = SubResource("QuadMesh_7qicb")
+mesh = SubResource("QuadMesh_7vtx1")
 
-[node name="Flame5" type="MeshInstance3D" parent="Fire" unique_id=1162047886]
+[node name="Flame5" type="MeshInstance3D" parent="Fire" unique_id=1726935863]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.1, 0.16)
 cast_shadow = 0
 extra_cull_margin = 1.0
 gi_mode = 0
-mesh = SubResource("QuadMesh_0pvjh")
+mesh = SubResource("QuadMesh_1wou0")
 
-[node name="Flame6" type="MeshInstance3D" parent="Fire" unique_id=1609149096]
+[node name="Flame6" type="MeshInstance3D" parent="Fire" unique_id=1173634746]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42, 0.12, -0.08)
 cast_shadow = 0
 extra_cull_margin = 1.0
 gi_mode = 0
-mesh = SubResource("QuadMesh_60efn")
+mesh = SubResource("QuadMesh_cm56a")
 
-[node name="Flame7" type="MeshInstance3D" parent="Fire" unique_id=1901694212]
+[node name="Flame7" type="MeshInstance3D" parent="Fire" unique_id=16526252]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.46, 0.12, 0.05)
 cast_shadow = 0
 extra_cull_margin = 1.0
 gi_mode = 0
-mesh = SubResource("QuadMesh_6d2yp")
+mesh = SubResource("QuadMesh_av0a8")
 
-[node name="Sparks" type="GPUParticles3D" parent="Fire" unique_id=1587078112]
+[node name="Sparks" type="GPUParticles3D" parent="Fire" unique_id=557780096]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
 cast_shadow = 0
 amount = 36
 lifetime = 1.9
 randomness = 0.6
 visibility_aabb = AABB(-1.5, -0.5, -1.5, 3, 3, 3)
-process_material = SubResource("ParticleProcessMaterial_3b6k8")
-draw_pass_1 = SubResource("QuadMesh_4tmpy")
+process_material = SubResource("ParticleProcessMaterial_8ttte")
+draw_pass_1 = SubResource("QuadMesh_727cf")
 
-[node name="FireKey" type="OmniLight3D" parent="Fire" unique_id=1588625607]
+[node name="FireKey" type="OmniLight3D" parent="Fire" unique_id=1059969477]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0.95)
 light_color = Color(1, 0.55, 0.22, 1)
 light_energy = 5.5
@@ -1643,7 +2892,7 @@ base_energy = 5.5
 flicker = 0.16
 speed = 4.0
 
-[node name="FireFill" type="OmniLight3D" parent="Fire" unique_id=1843304547]
+[node name="FireFill" type="OmniLight3D" parent="Fire" unique_id=1225091649]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
 light_color = Color(1, 0.45, 0.16, 1)
 light_energy = 0.5
@@ -1656,14 +2905,14 @@ base_energy = 0.5
 flicker = 0.15
 speed = 6.0
 
-[node name="CandleFlames" type="MultiMeshInstance3D" parent="." unique_id=2091983704]
+[node name="CandleFlames" type="MultiMeshInstance3D" parent="." unique_id=716955504]
 cast_shadow = 0
 gi_mode = 0
 script = ExtResource("11_smtjo")
 points = PackedVector3Array(0.95, 5.0016, -8, 0.8227, 4.9721, -7.525, 0.475, 4.9695, -7.1773, 0, 4.9526, -7.05, -0.475, 4.9757, -7.1773, -0.8227, 5.0245, -7.525, -0.95, 5.0243, -8, -0.8227, 4.9787, -8.475, -0.475, 4.983, -8.8227, 0, 5.0024, -8.95, 0.475, 5.0034, -8.8227, 0.8227, 4.9411, -8.475, 0.4607, 5.4828, -7.734, 0, 5.436, -7.468, -0.4607, 5.4707, -7.734, -0.4607, 5.4365, -8.266, 0, 5.4762, -8.532, 0.4607, 5.497, -8.266, 0.95, 4.9617, 0, 0.8227, 4.9954, 0.475, 0.475, 4.9598, 0.8227, 0, 4.9867, 0.95, -0.475, 5.0309, 0.8227, -0.8227, 4.9757, 0.475, -0.95, 4.9611, 0, -0.8227, 4.961, -0.475, -0.475, 4.959, -0.8227, 0, 5.0227, -0.95, 0.475, 4.9779, -0.8227, 0.8227, 4.9855, -0.475, 0.4607, 5.4663, 0.266, 0, 5.4979, 0.532, -0.4607, 5.4397, 0.266, -0.4607, 5.5093, -0.266, 0, 5.4885, -0.532, 0.4607, 5.4854, -0.266, 0.95, 4.9941, 8, 0.8227, 4.9585, 8.475, 0.475, 5.0125, 8.8227, 0, 4.9926, 8.95, -0.475, 4.9812, 8.8227, -0.8227, 4.9477, 8.475, -0.95, 4.9792, 8, -0.8227, 5.0248, 7.525, -0.475, 4.9727, 7.1773, 0, 5.0168, 7.05, 0.475, 4.9773, 7.1773, 0.8227, 5.0089, 7.525, 0.4607, 5.4937, 8.266, 0, 5.4829, 8.532, -0.4607, 5.5181, 8.266, -0.4607, 5.4567, 7.734, 0, 5.5059, 7.468, 0.4607, 5.459, 7.734, 6.055, 2.466, -10, 6.055, 2.466, -2, 6.055, 2.466, 2, 6.055, 2.466, 10, -6.055, 2.466, -10, -6.055, 2.466, -2, -6.055, 2.466, 2, -6.055, 2.466, 10, 1.55, 2.216, 11.73, -1.55, 2.216, 11.73, -3.7, 1.6941, -10.15, 3.7, 1.715, -10.15, -2.2, 1.6701, 11.2, 2.2, 1.6972, 11.2, -5.3, 1.2222, 3.19, -5.3, 1.3084, 3.05, -5.3, 1.2449, 2.91, -5.3, 1.2197, 1.09, -5.3, 1.313, 0.95, -5.3, 1.2516, 0.81, 3.78, 0.902, -8.85, -2.25, 2.742, -10.37, -1.2, 2.592, -10.67, 2.25, 2.742, -10.37, 1.2, 2.592, -10.67, 6.14, 1.372, 7.22, 6.14, 1.372, 8.78, -6.66, 1.637, 0.45, -6.66, 1.637, 4.45, -6.66, 1.637, 8.45)
-flame_mesh = SubResource("QuadMesh_ao30h")
+flame_mesh = SubResource("QuadMesh_nnt8n")
 
-[node name="ReflectionProbe" type="ReflectionProbe" parent="." unique_id=285369442]
+[node name="ReflectionProbe0" type="ReflectionProbe" parent="." unique_id=1556902956]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
 intensity = 0.8
 max_distance = 40.0
@@ -1673,7 +2922,17 @@ box_projection = true
 interior = true
 ambient_mode = 0
 
-[node name="LightmapGI" type="LightmapGI" parent="." unique_id=467328435]
+[node name="ReflectionProbe1" type="ReflectionProbe" parent="." unique_id=955343059]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34.1, 3, 0)
+intensity = 0.8
+max_distance = 40.0
+size = Vector3(54.4, 6.4, 24.4)
+origin_offset = Vector3(0, -1.2, 0)
+box_projection = true
+interior = true
+ambient_mode = 0
+
+[node name="LightmapGI" type="LightmapGI" parent="." unique_id=13787968]
 quality = 2
 bounces = 5
 directional = true
@@ -1681,5 +2940,5 @@ interior = true
 max_texture_size = 4096
 generate_probes_subdiv = 4
 
-[node name="PlayerSpawn" type="Marker3D" parent="." unique_id=1545348059]
+[node name="PlayerSpawn" type="Marker3D" parent="." unique_id=2086369466]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5.5)

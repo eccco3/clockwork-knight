@@ -105,20 +105,6 @@ Plan the game's opening scene with the dev in the main chat; this is not a subag
 
 Not started. Needs the dev; the workshop items build the room.
 
-## Workshop: windows and surfaces
-
-### Task description
-
-Give the workshop windows onto the same foggy day the hall shows, and finish its surfaces: floorboards, plaster, panelling and timber matching the hall's materials, with wear where a craftsman works. Detail the door between the rooms and the apartment's outer walls. Compare screenshots with the hall for consistency.
-
-### Open questions
-
-None. Windows along both of the workshop's long walls, every few metres; none on the hall side or the apartment's walls.
-
-### Status
-
-Not started. The walls are built: 54 m workshop, 12 m apartment.
-
 ## Workshop: lamps and bake
 
 ### Task description
@@ -131,7 +117,7 @@ Light the workshop for close work: bench lamps, hanging lamps and the window day
 
 ### Status
 
-Not started. Needs the windows and surfaces; it rebakes the hall, so nothing else may bake at the same time.
+Not started. Windows and worn surfaces are built (32 windows with FogLights, about 0.1 ms); the lightmap is a draft, grown to 4096×32768, so the full bake will take longer than 14 minutes. It rebakes the hall, so nothing else may bake at the same time.
 
 ## Workshop: research and layout
 
@@ -145,7 +131,7 @@ None. Dense around the edges and the benches, with one or two clear aisles about
 
 ### Status
 
-Not started. The walls are built: 54 m workshop, 12 m apartment.
+Not started. The walls, windows and surfaces are built: 54 m workshop, 12 m apartment. Benches go in `WORK` (`tools/workshop_shell.py`), which the floor wear follows. Two nave posts at the apartment end stand in or half in its walls: move or remove them.
 
 ## Workshop: clocks
 
