@@ -321,3 +321,17 @@ Add a `dev/` tool that shows the dev two faces from the morphable model side by 
 ### Status
 
 Built, women and men rated apart: a face is 62 scan components, 22 MakeHuman features and 6 brow numbers, with slight random asymmetry on final faces only. The dev rates the new pools from the launcher's two rating tools (his 91 women's answers still count), `build_faces.py -- --refine --sex women` (or men) every 40 or so answers, then `--best` makes the final faces.
+
+## Knight: shattering on death
+
+### Task description
+
+When the knight's health runs out, break her apart: armour plates, limbs and clockwork pieces come loose and scatter with simple physics, then settle on the ground before the screen fades. Split her along her existing parts where possible, add a few gears and springs flung from inside, and keep it cheap. Record clips from two angles.
+
+### Open questions
+
+- Does she shatter in place of the collapse, or after kneeling?
+
+### Status
+
+Low priority. Not started. Builds on the collapse and restart from "Enemy: behaviour and combat".
