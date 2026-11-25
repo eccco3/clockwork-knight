@@ -3,7 +3,8 @@
 Head frame as the knight's: origin between the eyes at the centre of the skull, +y out of the face, +z up,
 metres; the sculpt is symmetric in x. `field` is the carving, `paint` its lacquer (lips, brows, lashes,
 blush) as a tint over the wood, and `wrap` meshes it with edge loops round the eyes and along the lips.
-The lips part on a slot that runs back to a pocket, so a jaw can open them.
+The lips part on a slot that runs back to a pocket, so a jaw can open them. Each eye has a sleeping lid: a
+shell hidden under the brow that turns down over the eyeball, so she blinks without her wood bending.
 """
 import numpy as np
 from sculpt import sdf as S, mesher, gen
@@ -34,6 +35,12 @@ NECK_CUT = -0.0012                             # the head ends this far along th
 PAINT_X, PAINT_Z0, PAINT_Z1 = 0.064, -0.100, 0.044          # the front-projected paint texture covers this
 
 
+def _lid_heights(s):
+    """Heights on the eyeball (rad) of the upper and lower lid's edges, across the opening from -1 to 1."""
+    s2 = np.clip(1.0 - s * s, 0.0, 1.0)
+    return AP_UP * s2 ** 0.52 * (1.0 - 0.20 * s) + AP_TILT * s, -AP_LO * s2 ** 0.58 * (1.0 + 0.28 * s) + AP_TILT * s
+
+
 def _aperture(q):
     """Angular eye opening in the mirrored frame: g < 0 inside (metres on the eyeball), the place across it
     (-1 inner corner .. 1 outer corner), the height on the eyeball and the heights of the two lids there."""
@@ -43,9 +50,7 @@ def _aperture(q):
     ph = np.arcsin(np.clip(d[:, 2] / r, -1, 1))
     reach = np.where(th > 0, AP_OUT, AP_IN)
     s = th / reach
-    s2 = np.clip(1.0 - s * s, 0.0, 1.0)
-    up = AP_UP * s2 ** 0.52 * (1.0 - 0.20 * s) + AP_TILT * s
-    lo = -AP_LO * s2 ** 0.58 * (1.0 + 0.28 * s) + AP_TILT * s
+    up, lo = _lid_heights(s)
     g = np.maximum(ph - up, lo - ph)
     g = np.where(np.abs(s) < 1.0, g, np.hypot((np.abs(s) - 1.0) * reach, ph - AP_TILT * np.sign(s)) + 0.004)
     return g * EYE_R, s, ph, up, lo
@@ -298,3 +303,52 @@ def eyeball(segs=32):
     tint = np.where((off < PUPIL)[:, None], V(0.02, 0.02, 0.02), np.where((off < IRIS)[:, None], V(0.24, 0.42, 0.58),
                                                                            V(0.90, 0.88, 0.84)))
     return v, faces, S.normalize(v), tint
+
+
+# ---------------------------------------------------------------- sleeping lids
+
+LID_R = EYE_R + 0.0004                         # the lid's shell slides this close over the eyeball
+LID_TUCK = 0.035                               # how far (rad) it reaches behind the wooden lids all round the opening
+
+
+def _on_eye(th, ph):
+    return np.stack([np.cos(ph) * np.sin(th), np.cos(ph) * np.cos(th), np.sin(ph)], axis=-1)
+
+
+def _lid_hinge():
+    """The lid turns about the line through the eyeball's centre that runs as the eye's corners do. Returns the
+    hinge (unit, toward the outer corner), the way the opening faces and the way the lid lifts; then the
+    opening's two edges as (place along the hinge, angle round it), and the turn (rad) that hides the lid."""
+    s = np.linspace(-1.0, 1.0, 241)
+    th = s * np.where(s > 0, AP_OUT, AP_IN)
+    up, lo = _lid_heights(s)
+    hinge = S.normalize(_on_eye(th[-1], up[-1]) - _on_eye(th[0], up[0]))
+    faces = _on_eye(0.0, 0.5 * (up[120] + lo[120]))
+    faces = S.normalize(faces - hinge * (faces @ hinge))
+    lifts = np.cross(hinge, faces)
+    edges = []
+    for d in (_on_eye(th, up), _on_eye(th, lo)):
+        order = np.argsort(d @ hinge)
+        edges.append(((d @ hinge)[order], np.arctan2(d @ lifts, d @ faces)[order]))
+    (ua, ul), (la, ll) = edges
+    return hinge, faces, lifts, edges, float(np.max(np.interp(la, ua, ul) - ll)) + 2.0 * LID_TUCK
+
+
+LID_HINGE, _LID_FACES, _LID_LIFTS, _LID_EDGES, _LID_HIDES = _lid_hinge()
+LID_SHUT = np.degrees(_LID_HIDES)              # the turn about LID_HINGE that shuts the eye
+
+
+def lid(segs=28, rows=10):
+    """One eye's sleeping lid about the eyeball's centre in the head's mirrored frame, open: the opening's own
+    shape and a tuck more, turned up under the brow. Returns verts, quads and normals."""
+    (ua, ul), (la, ll) = _LID_EDGES
+    along = np.linspace(la[0] - LID_TUCK, la[-1] + LID_TUCK, segs + 1)
+    low = np.interp(along, la, ll) - LID_TUCK + _LID_HIDES
+    high = np.interp(along, ua, ul) + LID_TUCK + _LID_HIDES
+    t = np.linspace(0.0, 1.0, rows + 1)[:, None]
+    a, turn = np.tile(along, (rows + 1, 1)), low + (high - low) * t
+    n = (a[..., None] * LID_HINGE + np.sqrt(1.0 - a[..., None] ** 2)
+         * (np.cos(turn)[..., None] * _LID_FACES + np.sin(turn)[..., None] * _LID_LIFTS)).reshape(-1, 3)
+    w = segs + 1
+    quads = [(r * w + c, r * w + c + 1, (r + 1) * w + c + 1, (r + 1) * w + c) for r in range(rows) for c in range(segs)]
+    return n * LID_R, quads, n
