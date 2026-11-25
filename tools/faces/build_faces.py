@@ -8,7 +8,7 @@ scales its lattice, as it does a figure's. --grid renders 25 random faces, of --
 sexes.py), each alone under the same camera and lamps, turned --view degrees. --spread is the share of
 the people's standard deviation the faces are drawn at. --labels renders the label set the dev labels the
 sexes on, --pool the pools taste.py shows him, of --sex or both, each face from the front and turned,
-keeping those already rendered. --refine renders the next refinement round of --sex (taste.refine) from
+keeping those already rendered, and their refinement rounds. --refine renders the next refinement round of --sex (taste.refine) from
 his answers so far; the rating tool shows it in place of the pool. --best renders the 25 faces of --sex furthest along the taste learnt
 from his answers to them, or to --answers, as a grid, best first, and writes their coefficients beside
 it: a.json.
@@ -35,7 +35,11 @@ STAND = Frame((0, 0, 1.63), (0, 0, 1), (-1, 0, 0))            # a head on a stan
 TARGET, SCALE, TILE = (0, 0, 1.61), 0.30, (360, 400)
 LAMPS = ((2.6, 1.2, 2.4), (135.0, 33.0, 90.0))                # the figures' preview lamps, dimmed for pale clay
 VIEWS = (0.0, 35.0)                             # a rendered set shows each face from these
-LOOK = 3                                        # the renders' look: a set rendered in another is rendered again
+# The model's heads sit chin up: the ear canal lies about this far (degrees) below the line through the eye
+# socket's floor that a level head keeps horizontal, which shows the front camera up the nostrils. Every
+# face is tipped forward by it.
+PITCH = 9.0
+LOOK = 4                                        # the renders' look: a set rendered in another is rendered again
 SKIN, HAIR = (0.60, 0.40, 0.30), (0.045, 0.032, 0.025)
 LIPS, CHEEKS = (0.52, 0.24, 0.21), (0.66, 0.36, 0.29)
 WHITE, IRIS, PUPIL = (0.80, 0.77, 0.72), (0.16, 0.10, 0.05), (0.01, 0.01, 0.01)
@@ -122,13 +126,20 @@ def bun(v):
     return ob
 
 
+def level(v):
+    """The points v of a head turned forward by PITCH about the left-right axis, chin down."""
+    a = np.radians(PITCH)
+    y, z = v[:, 1], v[:, 2]
+    return np.stack([v[:, 0], y * np.cos(a) + z * np.sin(a), z * np.cos(a) - y * np.sin(a)], 1)
+
+
 def portrait(model, coefficients, path, view, light, style="crop"):
-    """One face alone in the scene, painted, with hair and brows: style "crop" short, "bun" pulled back."""
+    """One face alone in the scene, level, painted, with hair and brows: style "crop" short, "bun" pulled back."""
     bl.reset_scene()
     stand, hair = groom(model.mean)
     skin, eye = paint(model.mean)
     v, quads, n, _ = model.mesh(coefficients)
-    v = v + n * stand[:, None]
+    v = level(v + n * stand[:, None])
     colour = skin + hair[:, None] * (np.array(HAIR) - skin)
     face = bl.to_object("face", STAND.w(v), quads, STAND.dir(normals(v, quads)), colour)
     for name, rough in (("skin", 0.5), ("hair", 0.85), ("eye", 0.15)):
@@ -165,15 +176,17 @@ def grid(model, sex, path, seed, spread, view, light):
 
 def render_set(model, name, faces, spread, light, set_name="pool"):
     """Renders a set of faces for the dev to judge (files.py), each from every view, keeping those already
-    rendered; other faces, or another look, replace the set. Returns whether they did."""
+    rendered; other faces, or another look, replace the set. Returns whether the faces changed: answers
+    given on the set hold for it in another look."""
     folder = files.folder(name)
     index = os.path.join(folder, "pool.npz")
     os.makedirs(folder, exist_ok=True)
-    replaced = True
+    changed = looks = True
     if os.path.exists(index):
         with np.load(index) as f:
-            replaced = not ("look" in f.files and int(f["look"]) == LOOK and np.array_equal(f["faces"], faces))
-    if replaced:
+            changed = not np.array_equal(f["faces"], faces)
+            looks = changed or not ("look" in f.files and int(f["look"]) == LOOK)
+    if looks:
         for old in os.listdir(folder):
             os.remove(os.path.join(folder, old))
         np.savez(index, faces=faces, share=model.share, spread=spread, look=LOOK, set=set_name)
@@ -184,17 +197,21 @@ def render_set(model, name, faces, spread, light, set_name="pool"):
             views = [portrait(model, c, path + ".tile.png", view, light, style(name)) for view in VIEWS]
             bpy.data.images.remove(bl.save_image(path, np.concatenate(views, axis=1)))
             print("%s %d/%d  t=%.0fs" % (name.upper(), i + 1, len(faces), time.time() - t0), flush=True)
-    return replaced
+    return changed
 
 
 def pool(model, name, light):
-    """Renders taste.py's pool of faces of the sex; answers and refinement rounds of an earlier pool go with it."""
-    answers = taste.answers(name)
+    """Renders taste.py's pool of faces of the sex, and its latest refinement round in the same look;
+    answers and refinement rounds of an earlier pool go with it."""
+    answers, refined = taste.answers(name), taste.refine_folder(name)
     if render_set(model, name, taste.pool(Sex(model, name)), taste.spread(len(model.share)), light):
         if os.path.exists(answers):
             os.remove(answers)
             print("DISCARDED", answers, "given on the earlier pool")
-        shutil.rmtree(taste.refine_folder(name), ignore_errors=True)
+        shutil.rmtree(refined, ignore_errors=True)
+    elif files.exists(refined):
+        faces, _, spread, set_name = files.rendered(refined)
+        render_set(model, os.path.basename(refined), faces, spread, light, set_name)
 
 
 def refine(model, sex, seed, light):
