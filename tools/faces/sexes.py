@@ -85,8 +85,10 @@ class Direction:
 
 
 class Sex:
-    """The faces of one sex: drawn as the model draws them, but with their place along the female-male
-    direction folded onto the sex's side and moved MARGIN further out, so the spread is otherwise the same."""
+    """The faces of one sex: drawn as the model draws them, but placed MARGIN from the middle on the sex's
+    side of the female-male direction, and further out by as far as the face was drawn from the average face
+    along it, so the spread is otherwise the same. (Measured from the middle instead, the average face's own
+    offset from the middle would be added to every face of one sex.)"""
 
     def __init__(self, model, name, labels=LABELS):
         self.model, self.name, self.side = model, name, SEXES[name]
@@ -94,8 +96,8 @@ class Sex:
 
     def sample(self, rng, spread=SPREAD):
         c = self.model.sample(rng, spread)
-        along = self.direction.along(c)
-        return c + (self.side * (MARGIN + abs(along)) - along) * self.direction.unit
+        drawn = c @ self.direction.unit
+        return c + (self.side * (MARGIN + abs(drawn)) - self.direction.along(c)) * self.direction.unit
 
 
 def report(model, labels, pools):

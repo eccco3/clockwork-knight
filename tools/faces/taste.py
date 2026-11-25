@@ -19,10 +19,12 @@ from .logistic import Posterior, shape_prior
 from .sexes import SEXES
 
 POOL_SEED, POOL_SIZE = 7, 240
-# The pools' faces are drawn this close to the average face: about half as far as the model draws faces,
-# since a face drawn at random in some sixty directions lands far out along many of them at once and looks
-# extreme. Their place along the female-male direction is kept (sexes.MARGIN), so they still read as a sex.
-POOL_SPREAD = 0.35
+# A face drawn at random in all of the model's sixty-odd directions lands far out along many of them at once
+# and looks extreme, where a real face is near the average in most ways and distinctive in a few. So a pool's
+# face is drawn at BASE of the people's spread in every direction, and at BOLD in FEATURES of the first FROM
+# directions, picked at random; the rest hold little a viewer sees. Its place along the female-male direction
+# is kept (sexes.MARGIN), so it still reads as a sex.
+BASE, BOLD, FEATURES, FROM = 0.30, 0.75, 4, 30
 PRIOR_LOGIT = 2.0
 CLEAR = 20
 REPEAT = 0.05
@@ -35,10 +37,25 @@ def answers(name):
     return os.path.join(HERE, "taste_%s.jsonl" % name)
 
 
+def draw(sex, rng):
+    """One face of a sex (sexes.Sex) as the pools hold them: near the average, distinctive in a few ways."""
+    spread = np.full(len(sex.model.share), BASE)
+    spread[rng.choice(min(FROM, len(spread)), FEATURES, replace=False)] = BOLD
+    return sex.sample(rng, spread)
+
+
+def spread(count):
+    """The spread a pool's faces are drawn at along each of `count` directions, on average."""
+    bold = min(FROM, count)
+    s = np.full(count, BASE)
+    s[:bold] = np.sqrt(BASE ** 2 + FEATURES / bold * (BOLD ** 2 - BASE ** 2))
+    return s
+
+
 def pool(sex, size=POOL_SIZE):
     """Coefficients of the faces of a sex (sexes.Sex) the dev is shown."""
     rng = np.random.default_rng((POOL_SEED, list(SEXES).index(sex.name)))
-    return np.stack([sex.sample(rng, POOL_SPREAD) for _ in range(size)])
+    return np.stack([draw(sex, rng) for _ in range(size)])
 
 
 def load_pool(name):
@@ -48,7 +65,7 @@ def load_pool(name):
 
 
 def prior(share, spread):
-    """Prior variances of w, for faces drawn at `spread`."""
+    """Prior variances of w, for faces drawn at `spread`, one number or one per direction."""
     return shape_prior(share, PRIOR_LOGIT / (np.sqrt(2) * spread))
 
 
@@ -56,7 +73,7 @@ def best(posterior, sex, rng, count, draws=4000):
     """The `count` faces, of `draws` random ones of the sex, furthest along the learnt direction, best first:
     faces the pool could hold, with their other features left to chance. Returns their coefficients and the
     logits of his preferring each to the mean face."""
-    faces = np.stack([sex.sample(rng, POOL_SPREAD) for _ in range(draws)])
+    faces = np.stack([draw(sex, rng) for _ in range(draws)])
     score = faces @ posterior.mean
     keep = np.argsort(-score)[:count]
     return faces[keep], score[keep]
