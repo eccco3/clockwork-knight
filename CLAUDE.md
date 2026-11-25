@@ -25,7 +25,7 @@ A roguelite: the workshop and hall are the safe hub; enemies appear only outdoor
 - Run: `godot --path .`. Playtest picker to pin: `tools\playtest\install.ps1` in the main checkout; `playtest.ps1 -DryRun` tests it.
 - Scripted play and screenshots: `dev/drive.tscn` with `--fixed-fps 60`; `dev/shot.tscn` photographs a scene. Both list arguments in their headers; `lamps=baked` drops live character lights.
 - Never open Godot windows on the dev's screen for tests or bakes, unless he is playtesting: replace `godot` with `toolchain\blender\4.5\python\bin\python.exe -I dev\quiet.py`; `--timing` first for GPU timing waits until nothing else runs.
-- Clips: that Python runs `tools\clip.py out.mp4 <drive arguments>`: records `dev/drive.tscn` hidden, encodes H.264.
+- Clips: `tools\clip.py out.mp4 <drive arguments>` (that Python) records `dev/drive.tscn` hidden.
 - Capped at 60 fps. Frame times: `dev/drive.tscn` events `perf:start` and `perf:stop`, run with `--disable-vsync --max-fps 0`.
 
 ## Where things are
@@ -53,4 +53,4 @@ A roguelite: the workshop and hall are the safe hub; enemies appear only outdoor
 
 ## Downloads
 
-CC0: Quaternius Universal Animation Library 1 and 2 (hand-keyed, not mocap); Poly Haven scans and sky. MIT: ICT-FaceKit heads.
+CC0: Quaternius Universal Animation Library 1 and 2 (hand-keyed, not mocap); Poly Haven scans and sky; MakeHuman face targets. MIT: ICT-FaceKit heads.

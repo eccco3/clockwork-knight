@@ -17,6 +17,14 @@ def mirrored(x, twin):
     return 0.5 * (x + x[..., twin, :] * MIRROR)
 
 
+def twins(v):
+    """Each vertex's partner across the midline of a symmetric mesh: the vertex nearest its mirror image."""
+    image = v * MIRROR
+    twin = np.concatenate([np.linalg.norm(image[k:k + 256, None] - v[None], axis=-1).argmin(1) for k in range(0, len(v), 256)])
+    assert (twin[twin] == np.arange(len(v))).all(), "the mesh is not symmetric"
+    return twin
+
+
 def components(modes, keep=KEEP):
     """Principal components of the heads spanned by modes (M, N, 3) with independent unit normal weights,
     largest first, each scaled to one standard deviation, and the share of the variance each explains."""

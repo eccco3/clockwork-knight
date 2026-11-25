@@ -8,7 +8,7 @@ and so carried over, give the model's components by PCA.
 import numpy as np
 from sculpt import sdf as S, mesher, scan
 from sculpt.sdf import V
-from .model import Model, MIRROR, mirrored, components
+from .model import Model, mirrored, components, twins
 
 AXIS = (V(0, -0.012, 0.045), V(0, -0.012, -0.105))
 EXTENT = (0.085, 0.105, 0.150)
@@ -38,13 +38,6 @@ def density(heads):
         return 1.0 + face * (5.0 + 14.0 * eye + 12.0 * mouth + 14.0 * nose)
     return weight
 
-
-def twins(v):
-    """Each vertex's partner across the midline of a symmetric mesh: the vertex nearest its mirror image."""
-    image = v * MIRROR
-    twin = np.concatenate([S.length(image[k:k + 256, None] - v[None]).argmin(1) for k in range(0, len(v), 256)])
-    assert (twin[twin] == np.arange(len(v))).all(), "the mesh is not symmetric"
-    return twin
 
 
 def fit(heads, detail=1.0):

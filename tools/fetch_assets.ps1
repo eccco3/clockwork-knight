@@ -1,4 +1,4 @@
-# Downloads the third-party files this project builds from: Poly Haven's CC0 surface scans and sky HDRI, and ICT-FaceKit.
+# Downloads the third-party files this project builds from: Poly Haven's CC0 surface scans and sky HDRI, ICT-FaceKit and MakeHuman.
 # Re-runnable: skips files that already exist.
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -65,3 +65,21 @@ foreach ($file in @('LICENSE') + ($shapes | ForEach-Object { "FaceXModel/$_.obj"
   Move-Item "$out.part" $out
 }
 "{0,-28} {1:N0} MB" -f 'ict_facekit', ((Get-ChildItem $kdir -File | Measure-Object Length -Sum).Sum / 1MB)
+
+# MakeHuman (CC0 since 2020): its base mesh and the face's hand-made shape targets, which tools/faces carries
+# onto the ICT head to reach shapes the scans barely vary in.
+$mh = 'a8bc2d54ff0ac92e78ff71431b1023eda42bf482'
+$mdir = Join-Path $root 'tools\downloads\makehuman'
+$wanted = '^(LICENSE\.ASSETS\.md|makehuman/data/3dobjs/base\.obj|makehuman/data/targets/(nose|mouth|eyes|chin|cheek)/[^/]+\.target)$'
+if (-not (Test-Path (Join-Path $mdir 'done'))) {
+  $tree = Invoke-RestMethod -Uri "https://api.github.com/repos/makehumancommunity/makehuman/git/trees/${mh}?recursive=1" -Headers $ua
+  foreach ($file in ($tree.tree | Where-Object { $_.path -match $wanted } | ForEach-Object { $_.path })) {
+    $out = Join-Path $mdir ($file -replace '^makehuman/data/', '' -replace '/', '\')
+    if (Test-Path $out) { continue }
+    New-Item -ItemType Directory -Force (Split-Path -Parent $out) | Out-Null
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/makehumancommunity/makehuman/$mh/$file" -OutFile "$out.part" -Headers $ua
+    Move-Item "$out.part" $out
+  }
+  New-Item -ItemType File (Join-Path $mdir 'done') | Out-Null
+}
+"{0,-28} {1:N1} MB" -f 'makehuman', ((Get-ChildItem $mdir -File -Recurse | Measure-Object Length -Sum).Sum / 1MB)
