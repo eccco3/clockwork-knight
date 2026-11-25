@@ -12,10 +12,21 @@ EAVE_S = 5.05     # underside of the roof boarding above the inner wall face
 PITCH = math.atan2(APEX - EAVE_S, HW)
 TRUSS_Z = [-10.0, -6.0, -2.0, 2.0, 6.0, 10.0]
 WSILL, WHEAD, WWID = 1.30, 3.90, 1.70
-WIN_Z = {'R': [-4.0, 0.0, 4.0, 8.0], 'L': [4.0, 0.0, -4.0, -8.0]}   # in wall-local u (see WALLS)
+SHARED = 'R'      # the long wall the workshop stands against: no windows, and the workshop's doors
+WIN_Z = {'R': [], 'L': [4.0, 0.0, -4.0, -8.0]}   # in wall-local u (see WALLS)
 PLINTH = 0.30
 WAINS = 1.25
 DOOR_W, DOOR_H = 2.0, 2.5
+JAMB_W, LINTEL_H = 0.22, 0.30   # door frame timbers
+FRAME_PROUD = 0.13              # how far a door frame stands out of the wall face
+LEAF_T = 0.06                   # door leaf thickness
+WS_DOOR_U = 0.0                 # the workshop's double doors: centre along the shared wall (wall-local u)
+WS_DOOR_W, WS_DOOR_H = 2.4, 2.9
+WS_DOOR_SWING = math.radians(140)   # how far the leaves stand open into the workshop
+SIDE_DOORS = {'R': [WS_DOOR_U], 'L': []}
+ROOF_T = 0.40     # roof boarding thickness
+EAVE_OUT = 0.5    # how far the boarding overhangs an outside wall
+EAVE_FILL = 0.42  # plaster filling on top of the long walls, between the rafter feet
 FIRE_W = 5.6      # chimney breast width on the fire wall
 FIRE_W2 = 3.8     # upper breast width
 
@@ -54,19 +65,75 @@ def floor(b):
     b.col((2 * HW + 3, 1.0, 2 * HL + 3), pos=(0, -0.5, 0))
 
 
-def _plaster_wall(b, half, openings, corner_ext):
+def plaster_wall(b, half, openings, corner_ext, top=EH):
     """Plaster boxes for one wall in wall-local space. openings: (u, width, y0, y1)."""
     cur = -half - corner_ext
     zc = -WT / 2
     for (u, w, y0, y1) in sorted(openings):
         a, c = u - w / 2, u + w / 2
-        b.box((a - cur, EH, WT), 'plaster', pos=((a + cur) / 2, EH / 2, zc), bevel=0, uv='world')
+        b.box((a - cur, top, WT), 'plaster', pos=((a + cur) / 2, top / 2, zc), bevel=0, uv='world')
         if y0 > 0.01:
             b.box((w, y0, WT), 'plaster', pos=(u, y0 / 2, zc), bevel=0, uv='world')
-        b.box((w, EH - y1, WT), 'plaster', pos=(u, (EH + y1) / 2, zc), bevel=0, uv='world')
+        b.box((w, top - y1, WT), 'plaster', pos=(u, (top + y1) / 2, zc), bevel=0, uv='world')
         cur = c
     end = half + corner_ext
-    b.box((end - cur, EH, WT), 'plaster', pos=((end + cur) / 2, EH / 2, zc), bevel=0, uv='world')
+    b.box((end - cur, top, WT), 'plaster', pos=((end + cur) / 2, top / 2, zc), bevel=0, uv='world')
+
+
+def wall_col(b, half, doors=(), inside=False, top=EH + 5.5):
+    """Colliders for one wall in wall-local space, rising past the roof to keep cameras in.
+    doors: (u, width, height) left open. An outside wall's are thicker than the wall; an inside
+    wall's fit it on both faces."""
+    d, zc = (WT + 0.06, -WT / 2) if inside else (WT + 0.4, -WT / 2 - 0.2 + 0.03)
+    cur = -half
+    for (u, w, h) in sorted(doors):
+        a = u - w / 2
+        b.col((a - cur, top, d), pos=((a + cur) / 2, top / 2, zc))
+        b.col((w, top - h, d), pos=(u, (top + h) / 2, zc))
+        cur = u + w / 2
+    b.col((half - cur, top, d), pos=((half + cur) / 2, top / 2, zc))
+
+
+def door_opening(w, h):
+    """The hole a w x h door's timber frame fills, so no plaster face lies in a timber face."""
+    return w + 2 * JAMB_W, h + LINTEL_H
+
+
+def door_frame(b, w, h, depth, zc):
+    """Jamb posts and lintel of a w x h doorway (wall-local), `depth` deep about z = zc."""
+    tb = lambda: b.vary(BEAM, 0.05)
+    for sx in (-1, 1):
+        b.box((JAMB_W, h + 0.1, depth), 'wood_beam', pos=(sx * (w / 2 + JAMB_W / 2), (h + 0.1) / 2, zc), bevel=0.02, grain=1, tint=tb())
+    b.box((w + 2 * JAMB_W + 0.3, LINTEL_H, depth + 0.02), 'wood_beam', pos=(0, h + LINTEL_H / 2, zc), bevel=0.022, grain=0, tint=tb())
+
+
+def plank_leaf(b, w, h, planks=5):
+    """Door leaf of upright planks: the hinge edge stands on the local origin, the leaf runs along +x."""
+    pw = (w - 0.006) / planks
+    for k in range(planks):
+        b.box((pw - 0.004, h, LEAF_T), 'wood_panel', pos=(0.003 + (k + 0.5) * pw, h / 2, 0), bevel=0.008, grain=1, tint=b.vary((0.95, 0.9, 0.86), 0.1))
+
+
+def doorway(b, w, h, leaves, swing=0.0):
+    """Plain doorway through a wall. Local z = 0 is the wall face its leaves hang on, with the
+    wall behind it: timber frame, sill, and one or two plank leaves swung `swing` radians open."""
+    depth = WT + 2 * FRAME_PROUD
+    door_frame(b, w, h, depth, -WT / 2)
+    b.box((w, 0.03, depth), 'wood_oak', pos=(0, -0.009, -WT / 2), bevel=0.005, grain=0)
+    lw = w / leaves
+    for sx in (1, -1)[:leaves]:
+        with b.at(T(sx * w / 2, 0, FRAME_PROUD + LEAF_T / 2) @ RY(sx * swing) @ SC(-sx, 1, 1)):
+            plank_leaf(b, lw, h)
+            b.col((lw, h, LEAF_T), pos=(lw / 2, h / 2, 0))
+
+
+def _runs(a, c, gaps):
+    """The stretches of a..c left between gaps [(centre, width)]."""
+    out = []
+    for (u, w) in sorted(gaps):
+        out.append((a, u - w / 2))
+        a = u + w / 2
+    return out + [(a, c)]
 
 
 def _wainscot(b, a, c):
@@ -168,6 +235,7 @@ def _window(b, name, u):
 def _frame_side(b, name):
     """Timber frame on a long wall (wall-local)."""
     wins = WIN_Z[name]
+    doors = SIDE_DOORS[name]
     sgn = 1 if name == 'R' else -1
     posts = [sgn * z for z in TRUSS_Z]
     tb = lambda a=0.09: b.vary(BEAM, a)
@@ -180,17 +248,16 @@ def _frame_side(b, name):
     b.box((2 * HL, 0.25, 0.3), 'wood_beam', pos=(0, EH - 0.125, 0.0), bevel=0.015, grain=0, tint=tb(0.04))
     b.box((2 * HL, 0.16, 0.2), 'wood_beam', pos=(0, WHEAD + 0.08, -0.03), bevel=0.012, grain=0, tint=tb(0.04))
     # studs: window jambs, and intermediate studs
-    bays = [(-HL, posts[0] if sgn > 0 else posts[-1])]
     ps = sorted(posts)
     edges = [-HL] + ps + [HL]
     for i in range(len(edges) - 1):
         a, c = edges[i], edges[i + 1]
         mid = (a + c) / 2
         win = [u for u in wins if a < u < c]
-        if win:
-            u = win[0]
-            for sx in (-1, 1):
-                b.box((0.15, WHEAD - WAINS, 0.16), 'wood_beam', pos=(u + sx * (WWID / 2 + 0.075), (WHEAD + WAINS) / 2, -0.02), bevel=0.012, grain=1, tint=tb())
+        if win or any(a < u < c for u in doors):
+            for u in win:
+                for sx in (-1, 1):
+                    b.box((0.15, WHEAD - WAINS, 0.16), 'wood_beam', pos=(u + sx * (WWID / 2 + 0.075), (WHEAD + WAINS) / 2, -0.02), bevel=0.012, grain=1, tint=tb())
             # short studs above the head rail
             n = 5
             for k in range(n):
@@ -210,17 +277,23 @@ def side_walls(b):
     for name in ('R', 'L'):
         with b.grp('walls'), b.at(WALLS[name]):
             wins = WIN_Z[name]
-            _plaster_wall(b, HL, [(u, WWID, WSILL, WHEAD) for u in wins], WT)
-            _plinth(b, -HL, HL)
-            _wainscot(b, -HL, HL)
+            doors = SIDE_DOORS[name]
+            ow, oh = door_opening(WS_DOOR_W, WS_DOOR_H)
+            plaster_wall(b, HL, [(u, WWID, WSILL, WHEAD) for u in wins] + [(u, ow, 0, oh) for u in doors], WT)
+            for a, c in _runs(-HL, HL, [(u, ow) for u in doors]):
+                _plinth(b, a, c)
+                _wainscot(b, a, c)
+                # wainscot/plinth thickness
+                b.col((c - a, WAINS + 0.05, 0.1), pos=((a + c) / 2, (WAINS + 0.05) / 2, 0.05))
             _frame_side(b, name)
             for u in wins:
                 _window(b, name, u)
-            b.col((2 * HL + 2 * WT, EH + 5.5, WT + 0.4), pos=(0, (EH + 5.5) / 2, -WT / 2 - 0.2 + 0.03))
+            for u in doors:
+                with b.at(T(u, 0, -WT) @ RY(PI)):
+                    doorway(b, WS_DOOR_W, WS_DOOR_H, 2, WS_DOOR_SWING)
+            wall_col(b, HL + WT, [(u, WS_DOOR_W, WS_DOOR_H) for u in doors], inside=(name == SHARED))
             # beam filling between the rafter feet (closes the eaves)
-            b.box((2 * HL + 2 * WT, 0.42, WT - 0.03), 'plaster', pos=(0, EH + 0.2, -WT / 2 - 0.015), bevel=0, uv='world')
-            # wainscot/plinth thickness
-            b.col((2 * HL, WAINS + 0.05, 0.1), pos=(0, (WAINS + 0.05) / 2, 0.05))
+            b.box((2 * HL + 2 * WT, EAVE_FILL, WT - 0.03), 'plaster', pos=(0, EH + EAVE_FILL / 2 - 0.01, -WT / 2 - 0.015), bevel=0, uv='world')
 
 
 def _gable(b, mat='plaster'):
@@ -277,15 +350,13 @@ def _corner_posts(b):
 def door_wall(b):
     with b.grp('walls'), b.at(WALLS['D']):
         tb = lambda a=0.09: b.vary(BEAM, a)
-        jw, lh = 0.22, 0.3          # jamb post width, lintel height
-        # the timber frame fills the plaster opening, so no plaster face lies in a timber face
-        ow, oh = DOOR_W + 2 * jw, DOOR_H + lh
-        _plaster_wall(b, HW, [(0, ow, 0, oh)], 0)
+        ow, oh = door_opening(DOOR_W, DOOR_H)
+        plaster_wall(b, HW, [(0, ow, 0, oh)], 0)
         _gable(b)
         _gable_frame(b)
         _corner_posts(b)
         for sx in (-1, 1):
-            a = DOOR_W / 2 + jw
+            a = ow / 2
             _plinth(b, min(sx * a, sx * HW), max(sx * a, sx * HW))
             _wainscot(b, min(sx * a, sx * (HW - 0.27)), max(sx * a, sx * (HW - 0.27)))
             # studs
@@ -294,10 +365,7 @@ def door_wall(b):
                 b.box((0.13, EH - WAINS, 0.15), 'wood_beam', pos=(u, (EH + WAINS) / 2, -0.025), bevel=0.01, grain=1, tint=tb())
             ln = HW - a
             b.box((ln, 0.14, 0.17), 'wood_beam', pos=(sx * (a + ln / 2), 3.0, -0.02), bevel=0.012, grain=0, tint=tb(0.04))
-            # door jamb posts
-            b.box((jw, DOOR_H + 0.1, 0.5), 'wood_beam', pos=(sx * (DOOR_W / 2 + jw / 2), (DOOR_H + 0.1) / 2, -0.12), bevel=0.02, grain=1, tint=tb(0.05))
-        # lintel
-        b.box((ow + 0.3, lh, 0.52), 'wood_beam', pos=(0, DOOR_H + lh / 2, -0.12), bevel=0.022, grain=0, tint=tb(0.05))
+        door_frame(b, DOOR_W, DOOR_H, 0.5, -0.12)
         # carved lintel: chamfered label with a row of rosettes
         b.box((DOOR_W + 0.3, 0.035, 0.03), 'wood_beam', pos=(0, DOOR_H + 0.27, 0.14), bevel=0.012, grain=0, tint=tb(0.05))
         b.box((DOOR_W + 0.3, 0.035, 0.03), 'wood_beam', pos=(0, DOOR_H + 0.03, 0.14), bevel=0.012, grain=0, tint=tb(0.05))
@@ -329,10 +397,8 @@ def door_wall(b):
         for sx in (-1, 1):
             lw = DOOR_W / 2 - 0.006
             npl = 5
-            for k in range(npl):
-                pw = lw / npl
-                x = sx * (0.003 + (k + 0.5) * pw)
-                b.box((pw - 0.004, DOOR_H, 0.06), 'wood_panel', pos=(x, DOOR_H / 2, zd), bevel=0.008, grain=1, tint=b.vary((0.95, 0.9, 0.86), 0.1))
+            with b.at(T(sx * DOOR_W / 2, 0, zd) @ SC(-sx, 1, 1)):
+                plank_leaf(b, DOOR_W / 2, DOOR_H, npl)
             for y in (0.35, 1.25, 2.1):
                 # strap hinge: tapered plate with a finial
                 x0 = sx * (DOOR_W / 2 - 0.02); x1 = sx * 0.2
@@ -355,7 +421,7 @@ def door_wall(b):
         b.box((DOOR_W + 0.5, 0.05, 0.6), 'stone', pos=(0, 0.012, -0.05), bevel=0.02, tint=(0.85, 0.83, 0.8))
         # blocking behind the door (keeps the dusk out)
         b.box((ow + 0.4, oh + 0.2, 0.2), 'mortar', pos=(0, (oh + 0.2) / 2, -0.5), bevel=0, tint=(0.1, 0.09, 0.08))
-        b.col((2 * HW, EH + 5.5, WT + 0.4), pos=(0, (EH + 5.5) / 2, -WT / 2 - 0.2 + 0.03))
+        wall_col(b, HW)
         for sx in (-1, 1):
             b.col((HW - DOOR_W / 2, WAINS + 0.05, 0.1), pos=(sx * (DOOR_W / 2 + (HW - DOOR_W / 2) / 2), (WAINS + 0.05) / 2, 0.05))
         b.col((DOOR_W + 0.6, DOOR_H + 0.4, 0.3), pos=(0, DOOR_H / 2, -0.13))
@@ -365,7 +431,7 @@ def door_wall(b):
 def fire_wall(b):
     with b.grp('walls'), b.at(WALLS['F']):
         tb = lambda a=0.09: b.vary(BEAM, a)
-        _plaster_wall(b, HW, [], 0)
+        plaster_wall(b, HW, [], 0)
         _gable(b)
         _gable_frame(b, skip=(-FIRE_W2 / 2 - 0.15, FIRE_W2 / 2 + 0.15))
         _corner_posts(b)
@@ -378,7 +444,7 @@ def fire_wall(b):
                 b.box((0.13, EH - WAINS, 0.15), 'wood_beam', pos=(u, (EH + WAINS) / 2, -0.025), bevel=0.01, grain=1, tint=tb())
             ln = HW - a
             b.box((ln, 0.14, 0.17), 'wood_beam', pos=(sx * (a + ln / 2), 3.0, -0.02), bevel=0.012, grain=0, tint=tb(0.04))
-        b.col((2 * HW, EH + 5.5, WT + 0.4), pos=(0, (EH + 5.5) / 2, -WT / 2 - 0.2 + 0.03))
+        wall_col(b, HW)
 
 
 def roof(b):
@@ -387,12 +453,14 @@ def roof(b):
     with b.grp('roof'):
         tb = lambda v=0.09: b.vary(BEAM, v)
         zlen = 2 * HL + 2 * WT + 0.3
-        for sx in (1, -1):
+        # the boarding overhangs an outside wall; its upper edge stops just inside the outer face of the shared wall
+        reach = {name: HW + WT + (-ROOF_T * math.sin(a) - 0.02 if name == SHARED else EAVE_OUT) for name in ('R', 'L')}
+        for sx, name in ((1, 'R'), (-1, 'L')):
             # slope frame: origin at the apex, +X runs down the slope, +Y is the outward normal
             with b.at(SC(sx, 1, 1) @ T(0, APEX, 0) @ RZ(-a)):
-                sl = (HW + WT + 0.5) / ca
+                sl = reach[name] / ca
                 # boarding (planks along the hall)
-                b.box((sl, 0.4, zlen), 'wood_roof', pos=(sl / 2, 0.2, 0), bevel=0, grain=2, uvoff=(0.13 * sx, 0.37))
+                b.box((sl, ROOF_T, zlen), 'wood_roof', pos=(sl / 2, ROOF_T / 2, 0), bevel=0, grain=2, uvoff=(0.13 * sx, 0.37))
                 # common rafters
                 rl = (HW + 0.12) / ca
                 z = -HL + 0.25
@@ -428,10 +496,10 @@ def roof(b):
         b.box((0.2, 0.28, 2 * HL), 'wood_beam', pos=(0, APEX - 0.30, 0), bevel=0.014, grain=2, tint=tb(0.05))
         b.col((1.2, 0.5, 2 * HL + 2 * WT), pos=(0, APEX + 0.1, 0))
         # roof skin collider (keeps cameras inside): two slabs
-        for sx in (1, -1):
+        for sx, name in ((1, 'R'), (-1, 'L')):
             with b.at(SC(1, 1, 1) @ T(0, APEX, 0) @ RZ(-a if sx > 0 else PI + a)):
-                sl = (HW + WT + 0.5) / ca
-                b.col((sl, 0.4, zlen), pos=(sl / 2, 0.2 if sx > 0 else -0.2, 0))
+                sl = reach[name] / ca
+                b.col((sl, ROOF_T, zlen), pos=(sl / 2, sx * ROOF_T / 2, 0))
 
 
 def build_shell(b):

@@ -1,4 +1,4 @@
-"""Great hall generator. Run:  blender --background --python tools/build_hall.py
+"""Great hall and workshop generator. Run:  blender --background --python tools/build_hall.py
 Writes assets/models/hall.glb (+ .import with external material mapping) and
 assets/models/hall_layout.json (colliders, candle/light/glass positions for the Godot side)."""
 import bpy, sys, os, json, time
@@ -22,7 +22,7 @@ for name, size, grain in [
 ]:
     defmat(name, size, grain)
 
-import hall_shell, hall_fireplace, hall_props
+import hall_shell, hall_fireplace, hall_props, workshop_shell
 
 t0 = time.time()
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -30,6 +30,7 @@ b = Builder(seed=11)
 hall_shell.build_shell(b)
 hall_fireplace.build_fireplace(b)
 hall_props.build_props(b)
+workshop_shell.build_workshop(b)
 b.mark('spawn', (0, 0, 5.5))
 objs = b.build_objects()
 print("built %d mesh objects, %d tris in %.1fs" % (len(objs), b.tris, time.time() - t0))
