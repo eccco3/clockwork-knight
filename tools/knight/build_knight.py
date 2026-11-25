@@ -145,7 +145,7 @@ def slim_hands(arm):
 
 def add_bones(arm, J, T):
     """Helper bones: eyes, sword socket, clockwork, and the floating guards. The couter and poleyn follow their
-    joints at half angle; `float_pauldrons` keys the pauldrons."""
+    joints at half angle; `float_pauldrons` keys the pauldrons, and the risers they hang from."""
     bpy.context.view_layer.objects.active = arm
     bpy.ops.object.mode_set(mode="EDIT")
     eb = arm.data.edit_bones
@@ -171,7 +171,9 @@ def add_bones(arm, J, T):
     for s, sx in SIDES:
         e = H0 + V(-sx * head.EYE[0], -head.EYE[1], head.EYE[2]) * V(-1, 1, 1)
         new("eye_" + s, "Head", e, e + FWD * 0.03)
-        new("pauldron_" + s, "clavicle_" + s, J["upperarm_" + s], T["upperarm_" + s], like="upperarm_" + s)
+        lift = np.cross(PAULDRON_LIFT * V(sx, 1, 1), PAULDRON_PIVOT)         # turning about this carries it up
+        hinge("pauldron_lift_" + s, "clavicle_" + s, J["upperarm_" + s] + PAULDRON_PIVOT, lift / np.linalg.norm(lift))
+        new("pauldron_" + s, "pauldron_lift_" + s, J["upperarm_" + s], T["upperarm_" + s], like="upperarm_" + s)
         new("couter_" + s, "upperarm_" + s, J["lowerarm_" + s], T["lowerarm_" + s], like="lowerarm_" + s)
         new("poleyn_" + s, "thigh_" + s, J["calf_" + s], T["calf_" + s], like="calf_" + s)
     for name, (a0, a1, _) in PLATES.items():    # the skirt's plates track the knee; the armour's are turned by `hang`
@@ -474,6 +476,7 @@ FACE_REACH, FACE_ROUND = 0.036, 0.090          # the face's crown from the joint
 REREBRACE = (0.056, 0.154, 0.0058)             # the rerebrace: from where to where down her upper arm, and how far it stands off it, trim and rivets too
 CUFF_SHORT, CUFF_FLARE = 0.022, 0.14           # the cuff ends this far short of the wrist, clear of her palm as it bends, and widens this fast toward it
 PAULDRON_LIFT = V(0.4, 0, 1)                   # the way her left pauldron rides up off her chest
+PAULDRON_PIVOT = BACK * 0.5                    # where it is turned from to ride up, from her shoulder: far enough that it barely tilts
 
 
 def upper_arm(J):
@@ -1084,9 +1087,8 @@ def float_pauldrons(arm, J):
     """Keys her pauldrons' turns and lifts into the clips."""
     solid, points, chest = sleeved_arm(J), carried("pauldron_l"), chest_shape(J)
     follow.bake(arm, {name: bpy.data.actions[name] for name in CLIPS},
-               [follow.Guard("pauldron_l", "upperarm_l", solid, points, chest, "spine_03", PAULDRON_LIFT),
-                follow.Guard("pauldron_r", "upperarm_r", lambda p: solid(p * MIRROR), points * MIRROR, chest, "spine_03",
-                             PAULDRON_LIFT * MIRROR)],
+               [follow.Guard("pauldron_l", "upperarm_l", solid, points, chest, "spine_03"),
+                follow.Guard("pauldron_r", "upperarm_r", lambda p: solid(p * MIRROR), points * MIRROR, chest, "spine_03")],
                set_pose)
     unpose(arm)
 
