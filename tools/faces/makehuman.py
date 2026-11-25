@@ -46,7 +46,7 @@ SHAPES = {
     "chin wide": (("chin/chin-width",), "incr", "decr", 0.5),
     "jaw wide": (("chin/chin-bones",), "incr", "decr", 0.5),
     "jaw corners low": (("chin/chin-jaw-drop",), "incr", "decr", 0.8),
-    "cheekbones": (("cheek/l-cheek-bones", "cheek/r-cheek-bones"), "incr", "decr", 0.7),
+    "cheekbones": (("cheek/l-cheek-bones", "cheek/r-cheek-bones"), "incr", "decr", 0.5),
     "cheeks full": (("cheek/l-cheek-inner", "cheek/r-cheek-inner"), "incr", "decr", 0.7),
     "brow ridge slanted up": (("eyebrows/eyebrows-angle",), "up", "down", 0.6),
     "forehead rounded": (("forehead/forehead-nubian",), "incr", "decr", 0.55),
