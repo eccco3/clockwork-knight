@@ -1,5 +1,5 @@
 # Picks the main checkout or a worktree and one of its playable scenes or dev tools, readies the checkout
-# and starts the scene windowed. A scene is playable when its root node has metadata/playable, the title
+# (an import shows Godot's progress, one launcher at a time) and starts the scene windowed. A scene is playable when its root node has metadata/playable, the title
 # listed here, and a dev tool when it has metadata/dev_tool; a checkout without any offers its main scene. The scene last played is remembered per user.
 # -DryRun prints the picker's entries and the steps it would take for -Pick (a branch or folder; main
 # by default) and -Scene (a title or res:// path; the remembered one by default).
@@ -9,6 +9,7 @@ Add-Type -AssemblyName System.Windows.Forms, System.Drawing
 try { [Console]::OutputEncoding = [Text.Encoding]::UTF8 } catch {}
 
 $script:Report = { param($line) Write-Host $line }
+$script:Progress = { param($text, $percent) }      # a long step's progress: text, or none once done; percent, or -1 if unknown
 $script:Notes = 0
 $script:LastScene = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'Clockwork Knight\playtest scene.txt'
 
@@ -26,20 +27,74 @@ function Invoke-Git([string]$dir, [string[]]$arguments) {
   $output
 }
 
-function Invoke-Hidden([string]$exe, [string[]]$arguments) {
+function Invoke-Hidden([string]$exe, [string[]]$arguments, [scriptblock]$onLine = {}) {
   $info = New-Object Diagnostics.ProcessStartInfo $exe, (($arguments | ForEach-Object { "`"$_`"" }) -join ' ')
   $info.UseShellExecute = $false
   $info.CreateNoWindow = $true
   $info.RedirectStandardOutput = $true
   $info.RedirectStandardError = $true
   $process = [Diagnostics.Process]::Start($info)
-  $output = $process.StandardOutput.ReadToEndAsync()
   $errors = $process.StandardError.ReadToEndAsync()
-  while (-not $process.WaitForExit(50)) { [Windows.Forms.Application]::DoEvents() }
+  $lines = New-Object Collections.Generic.List[string]
+  $next = $process.StandardOutput.ReadLineAsync()
+  while ($true) {                                   # each line as it comes, the window kept responsive between them
+    if ($next.Wait(50)) {
+      if ($null -eq $next.Result) { break }
+      $lines.Add($next.Result); & $onLine $next.Result
+      $next = $process.StandardOutput.ReadLineAsync()
+    } else { & $onLine $null }
+    [Windows.Forms.Application]::DoEvents()
+  }
   $process.WaitForExit()
   if ($process.ExitCode -ne 0) {
-    $tail = ($output.Result + $errors.Result) -split '\r?\n' | Where-Object { $_ } | Select-Object -Last 12
+    $tail = @($lines) + ($errors.Result -split '\r?\n') | Where-Object { $_ } | Select-Object -Last 12
     throw "$(Split-Path -Leaf $exe) exited with code $($process.ExitCode):`r`n$($tail -join "`r`n")"
+  }
+}
+
+# Godot's import reports each task's progress as "[ 25% ] task | item", coloured for a terminal.
+function Read-GodotProgress([string]$line) {
+  if (($line -replace '\x1b\[[0-9;]*m') -match '^\[\s*(\d+)% \]\s+(\S+)\s+\|\s*(.*)$') {
+    [pscustomobject]@{ Percent = [int]$Matches[1]; Task = $Matches[2]; Item = $Matches[3].Trim() }
+  }
+}
+
+# Imports a checkout, showing Godot's progress and the time taken. Only one launcher imports a checkout at
+# a time: another waits for it, then imports only if something is still out of date.
+function Wait-Lock([Threading.Mutex]$lock, [int]$ms) {
+  try { $lock.WaitOne($ms) } catch [Threading.AbandonedMutexException] { $true }   # its last holder was killed
+}
+
+function Invoke-Import($console, [string]$dir) {
+  $lock = New-Object Threading.Mutex $false, ('Local\ClockworkKnightImport_' + [BitConverter]::ToString(
+    [Security.Cryptography.MD5]::Create().ComputeHash([Text.Encoding]::UTF8.GetBytes($dir.ToLowerInvariant()))).Replace('-', ''))
+  $started = Get-Date
+  $held = $false
+  try {
+    $held = Wait-Lock $lock 0
+    if (-not $held) {
+      Write-Report 'Another launcher is importing this checkout; waiting for it...'
+      while (-not $held) {
+        $held = Wait-Lock $lock 50
+        & $script:Progress ('Waiting for the other import, {0:m\:ss}' -f ((Get-Date) - $started)) -1
+        [Windows.Forms.Application]::DoEvents()
+      }
+    }
+    $reason = Get-ImportReason $dir
+    if (-not $reason) { return }
+    Write-Report "import ($reason)..."
+    $state = @{ Text = 'Starting Godot'; Percent = -1 }
+    Invoke-Hidden $console @('--headless', '--path', $dir, '--import') {
+      param($line)
+      $step = if ($line) { Read-GodotProgress $line }
+      if ($step) { $state.Text = if ($step.Item) { "$($step.Task): $($step.Item)" } else { $step.Task }; $state.Percent = $step.Percent }
+      & $script:Progress ('Importing, {0:m\:ss}  {1}' -f ((Get-Date) - $started), $state.Text) $state.Percent
+    }
+    Write-Report ('Imported in {0:m\:ss}.' -f ((Get-Date) - $started))
+  } finally {
+    if ($held) { $lock.ReleaseMutex() }
+    $lock.Dispose()
+    & $script:Progress $null 0
   }
 }
 
@@ -167,8 +222,10 @@ function Start-Playtest($checkout, $main, $scene) {
     try { Update-Checkout $checkout.Path } catch { Write-Note "not updated: $_" }
   }
   Copy-MissingAssets $main.Path $checkout.Path
-  $reason = Get-ImportReason $checkout.Path
-  if ($reason) { Invoke-Step "import ($reason)" { Invoke-Hidden $console @('--headless', '--path', $checkout.Path, '--import') } }
+  if ($DryRun) {
+    $reason = Get-ImportReason $checkout.Path
+    if ($reason) { Write-Report "Would import ($reason)" }
+  } else { Invoke-Import $console $checkout.Path }
   $arguments = @('--path', "`"$($checkout.Path)`"", "`"$($scene.Path)`"")
   Invoke-Step "run $godot $arguments" { Start-Process $godot -ArgumentList $arguments -WorkingDirectory $checkout.Path }
 }
@@ -195,10 +252,19 @@ function Show-Picker {
   $play = New-Object Windows.Forms.Button -Property @{ Text = 'Play'; Width = 110; Height = 30; TabIndex = 2 }
   $bar = New-Object Windows.Forms.FlowLayoutPanel -Property @{ Dock = 'Bottom'; Height = 40; FlowDirection = 'RightToLeft'; Padding = '2, 2, 2, 2' }
   $bar.Controls.AddRange(@($play, $sceneBox, $label))
-  $form.Controls.AddRange(@($list, $log, $bar))
+  $progress = New-Object Windows.Forms.ProgressBar -Property @{ Dock = 'Bottom'; Height = 18; Maximum = 100; Visible = $false }
+  $status = New-Object Windows.Forms.Label -Property @{ Dock = 'Bottom'; Height = 22; AutoEllipsis = $true; Visible = $false }
+  $form.Controls.AddRange(@($list, $status, $progress, $log, $bar))
   $form.AcceptButton = $play
   $form.Add_KeyDown({ if ($_.KeyCode -eq 'Escape') { $form.Close() } })
   $script:Report = { param($line) $log.AppendText("$line`r`n"); [Windows.Forms.Application]::DoEvents() }.GetNewClosure()
+  $script:Progress = {
+    param($text, $percent)
+    $progress.Visible = $status.Visible = [bool]$text
+    if (-not $text) { return }
+    if ($status.Text -ne $text) { $status.Text = $text }
+    if ($percent -lt 0) { $progress.Style = 'Marquee' } else { $progress.Style = 'Continuous'; $progress.Value = [math]::Min(100, $percent) }
+  }.GetNewClosure()
 
   try {
     $checkouts = @(Get-Checkouts | Sort-Object Time -Descending)
