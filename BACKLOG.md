@@ -292,7 +292,7 @@ Fold the rating steps into the launcher's two taste tools (`dev/taste.gd`, `tool
 
 ### Status
 
-Not started. Waits for the new pools to finish rendering on main.
+Not started. The new pools are rendered on main.
 
 ## Faces: learn the dev's taste
 
