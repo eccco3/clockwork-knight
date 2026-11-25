@@ -1,7 +1,10 @@
 extends Node3D
 ## Bare test stage for the knight: a gridded floor (so foot sliding shows), a couple of blocks
 ## to bump into, sky lighting and a warm key light. With dev/shot.tscn, call=stand:<model path>
-## puts a model in the knight's place, and call=spread:<model path> its detail levels side by side.
+## puts a model in the knight's place, call=spread:<model path> its detail levels side by side, and
+## call=pose:<clip>:<frame> holds the knight in one frame of a clip, counted as her builder counts them.
+
+const FRAMES_PER_SECOND := 30.0
 
 func _ready() -> void:
 	var env := Environment.new()
@@ -85,6 +88,12 @@ void fragment() {
 	var m := ShaderMaterial.new()
 	m.shader = sh
 	return m
+
+
+func pose(at: String) -> void:
+	var clip_frame := at.rsplit(":", true, 1)
+	$Player.set_physics_process(false)
+	$Player.knight.pose_at(clip_frame[0], float(clip_frame[1]) / FRAMES_PER_SECOND)
 
 
 func stand(path: String) -> Node3D:
