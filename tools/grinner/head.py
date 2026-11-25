@@ -225,6 +225,26 @@ def density(p):
     return 1.0 + front * (4.0 + 12.0 * eye + 10.0 * nose) + 12.0 * mouth + 9.0 * ear + 22.0 * corner
 
 
+JAW_HINGE, CHIN = V(0, -0.005, -0.050), V(0, 0.072, -0.088)
+JAW_SHUT, JAW_FULL = MYC + MB * np.cos(TH_M), MYC + MB * np.cos(0.15 * TH_M)    # how far forward the jaw begins, and is whole
+
+
+def jaw(p):
+    """0..1: how far each point of the head follows the lower jaw as it swings on JAW_HINGE. All that lies below
+    the parting of the teeth does, more the further forward of the corners of the grin, which stay shut, and less
+    under the chin. Each lower tooth moves as one piece; the dark wall behind the teeth stretches."""
+    q = S.mirror_x(p)
+    g, th, rho, zm, hh = _mouth(q)
+    step = 2.0 * (TH_M - 0.07) / TEETH
+    cell = (np.floor(th / step) + 0.5) * step
+    tooth = (rho > 0.84) & (rho < 0.995) & (g < 0.0034)
+    parting = np.where(tooth, MZ0 + RISE * np.clip(cell / TH_M, 0.0, 1.0) ** 2.2, zm)
+    soft = np.where(tooth, 0.0002, np.maximum(0.9 * hh, 0.0002))
+    forward = np.where(tooth, MYC + MB * np.cos(cell), p[:, 1])
+    below = smoothstep(soft, -soft, p[:, 2] - parting)
+    return below * smoothstep(JAW_SHUT, JAW_FULL, forward) * smoothstep(-0.120, -0.096, p[:, 2])
+
+
 def face(p):
     """1 over the face, 0 elsewhere: the part of the head that deserves the most texels."""
     return smoothstep(0.0, 0.045, p[:, 1]) * smoothstep(0.050, 0.030, p[:, 2]) * smoothstep(-0.105, -0.090, p[:, 2])

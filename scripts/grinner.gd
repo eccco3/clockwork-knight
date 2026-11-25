@@ -1,18 +1,19 @@
 class_name Grinner
 extends Node3D
-## A grinner: the model, whose own AnimationTree (built by tools/grinner/import_grinner.gd) blends its idle
-## into its waddle and plays its moves, and the travelling that their root motion does.
+## A grinner: the model of its kind, whose own AnimationTree (built by tools/grinner/import_grinner.gd) blends
+## its idle into its waddle or run and plays its moves, and the travelling that their root motion does.
 ##
-## pounce() leaps four metres ahead and swipe() strikes in place. Each winds up first; flinch() cuts into the
-## wind-up, and does nothing once the leap or swipe has begun. striking() is true while the claws can hit.
-## die() cuts into anything and stays down.
+## pounce() leaps ahead; the walking grinner's swipe() and the scuttler's bite() strike in place. Each winds up
+## first; flinch() cuts into the wind-up, and does nothing once the leap or strike has begun. striking() is true
+## while the claws or teeth can hit. die() cuts into anything and stays down.
 
-const MODEL := preload("res://assets/models/grinner.glb")
 const GAIT := &"parameters/Gait/blend_position"
 const PLAYBACK := &"parameters/playback"
 const HIT := &"hit"
 
-## 0 stands idle, 1 waddles at full pace.
+## Its kind: the walking grinner, or the scuttler on all fours.
+@export var model: PackedScene = preload("res://assets/models/grinner.glb")
+## 0 stands idle, 1 waddles or runs at full pace.
 @export_range(0.0, 1.0) var gait := 0.0:
 	set(value):
 		gait = value
@@ -26,11 +27,11 @@ var _playback: AnimationNodeStateMachinePlayback
 
 func _ready() -> void:
 	add_to_group(Layers.CHARACTER_GROUP)
-	var model := MODEL.instantiate()
-	add_child(model)
-	for v: VisualInstance3D in model.find_children("*", "VisualInstance3D", true, false):
+	var figure := model.instantiate()
+	add_child(figure)
+	for v: VisualInstance3D in figure.find_children("*", "VisualInstance3D", true, false):
 		v.layers = Layers.CHARACTERS
-	_tree = model.get_node("AnimationTree")
+	_tree = figure.get_node("AnimationTree")
 	_clips = _tree.get_node(_tree.anim_player)
 	_playback = _tree[PLAYBACK]
 	_tree[GAIT] = gait
@@ -46,6 +47,10 @@ func pounce() -> void:
 
 func swipe() -> void:
 	_playback.travel(&"Swipe")
+
+
+func bite() -> void:
+	_playback.travel(&"Bite")
 
 
 func flinch() -> void:

@@ -1,28 +1,44 @@
 extends SceneTree
 ## Dev check (not used at runtime):  godot --headless --fixed-fps 60 --path . --script res://dev/grinner_check.gd
-## Plays each of the grinner's moves through its AnimationTree and prints, in seconds since the move was
+##     [-- model=res://assets/models/scuttler.glb attacks=pounce,bite cut=0.15 late=0.45,0.6]
+## Plays each of a grinner's moves through its AnimationTree and prints, in seconds since the move was
 ## asked for, when it wound up, struck, and came back to its gait, and how far its root motion took it.
-## Then cuts a flinch into each wind-up, and into a pounce in mid leap a flinch, which it ignores, and a death.
+## Then cuts a flinch into each wind-up `cut` seconds in, and into the first attack, a pounce in mid leap at
+## the first of `late`, a flinch, which it ignores, and at the second a death.
 
 const STEP := 1.0 / 60.0
 
+var _model: PackedScene
+var _attacks: PackedStringArray = ["pounce", "swipe"]
+var _cut := 0.3
+var _late: PackedFloat64Array = [0.8, 1.0]
+
 
 func _init() -> void:
+	for a in OS.get_cmdline_user_args():
+		var value := a.get_slice("=", 1)
+		match a.get_slice("=", 0):
+			"model": _model = load(value)
+			"attacks": _attacks = value.split(",")
+			"cut": _cut = float(value)
+			"late": _late = value.split_floats(",")
 	_run()
 
 
 func _run() -> void:
 	await process_frame
-	for move: String in ["pounce", "swipe", "flinch", "die"]:
+	for move: String in _attacks + PackedStringArray(["flinch", "die"]):
 		await _play(move, [])
-	for attack: String in ["pounce", "swipe"]:
-		await _play(attack, [[0.3, "flinch"]])
-	await _play("pounce", [[0.8, "flinch"], [1.0, "die"]])
+	for attack: String in _attacks:
+		await _play(attack, [[_cut, "flinch"]])
+	await _play(_attacks[0], [[_late[0], "flinch"], [_late[1], "die"]])
 	quit()
 
 
 func _play(move: String, cuts: Array) -> void:
 	var grinner := Grinner.new()
+	if _model:
+		grinner.model = _model
 	root.add_child(grinner)
 	for i in 30:
 		await process_frame

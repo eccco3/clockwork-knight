@@ -1,4 +1,5 @@
-"""What the grinner's clips are keyed with: curves through (time, value) pairs, and the bearing every clip shares.
+"""What the grinners' clips are keyed with: curves through (time, value) pairs, the bearing every clip of the
+walking grinner shares, and what makes a kind of grinner.
 
 A curve eases from key to key without overshooting, so a held value stays held. Looping curves take a phase
 (0..1 round the loop); `held` curves take seconds and keep their first and last values beyond them.
@@ -98,6 +99,25 @@ BEARING = dict(sided(dict(_HANGING, foot_yaw=4.0, arm_out=-7.0, elbow=6.0, wrist
                hips_z=-0.002,neck_roll=2.0, head_roll=4.0)
 
 
-def borne(controls):
+def borne(controls, bearing=BEARING):
     """The clip's controls on top of how the grinner always carries itself: crooked, one shoulder up."""
-    return {name: controls.get(name, 0.0) + BEARING.get(name, 0.0) for name in {*controls, *BEARING}}
+    return {name: controls.get(name, 0.0) + bearing.get(name, 0.0) for name in {*controls, *bearing}}
+
+
+class Kind:
+    """A kind of grinner, named as its model is: the clips it loops, standing still first and at full pace last
+    (name -> (clip, frames), a clip being a function of phase, 0..1 from its start to its end, returning
+    controls), the moves it plays once (name -> (move, seconds, marks)), the poses that test its skin, and
+    whether its jaw is hinged."""
+
+    def __init__(self, name, loops, moves, poses, jaw=False):
+        self.name, self.loops, self.poses, self.jaw = name, loops, poses, jaw
+        self.clips = dict(loops, **{clip: (lambda phase, move=move, seconds=seconds: move(phase * seconds), round(seconds * FPS))
+                                    for clip, (move, seconds, marks) in moves.items()})
+        self.marks = {clip: marks for clip, (move, seconds, marks) in moves.items()}     # clip -> phase -> the second it begins
+        self.gait = {clip: k / (len(loops) - 1) for k, clip in enumerate(loops)}         # clip -> 0 at rest .. 1 at full pace
+
+    def phase(self, clip, seconds):
+        """The phase a clip is in: the last of its marks to have begun, or None before the first."""
+        begun = [(at, name) for name, at in self.marks.get(clip, {}).items() if at <= seconds]
+        return max(begun)[1] if begun else None
