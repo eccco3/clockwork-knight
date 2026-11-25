@@ -2,7 +2,8 @@ class_name Knight
 extends Node3D
 ## The clockwork knight's body: her colours, animation state, and the little mechanical motions
 ## (turning chest gears, the winding key, glancing eyes). The controller drives it through
-## `speed`, `play()` / `stop()` and `tick()`.
+## `speed`, `play()` / `then()` / `stop()` and `tick()`, asks `blow()` and `blade()` where her sword
+## can land, and winds her down when she falls. Her collapse is keyed by KnightCollapse.
 
 const MODEL := preload("res://assets/models/knight.glb")
 const FACE_PAINT := preload("res://assets/textures/knight/face_paint.png")
@@ -25,6 +26,15 @@ const JOG_FLIGHT_RATE := 2.3
 const JOG_FLIGHT_RISE := 0.22
 ## Her legs and what hangs over them, by the start of each bone's name: what keeps the jump's pose under an action in the air.
 const LEG_BONES: Array[String] = ["thigh", "calf", "foot", "ball", "poleyn", "skirt", "tabard"]
+## When each sword clip's blows can land: seconds into the clip, one window a blow, found where the blade sweeps fast.
+const BLOWS := {
+	"Sword_Regular_A": [Vector2(0.19, 0.31)],
+	"Sword_Regular_B": [Vector2(0.19, 0.32)],
+	"Sword_Regular_C": [Vector2(0.04, 0.21), Vector2(0.58, 0.75)],
+	"Sword_Heavy_Combo": [Vector2(2.52, 2.66)],
+}
+## The blade along the weapon_r bone, from the guard to the tip, in metres.
+const BLADE := Vector2(0.06, 0.84)
 
 var model: Node3D
 var skel: Skeleton3D
@@ -51,10 +61,16 @@ var action_weight := 1.0
 ## Whether her legs and pelvis hold the jump's pose under the action, as while she attacks in the air.
 ## `play()` clears it; `land_legs()` hands them to the action.
 var air_legs := false
+## Her clockwork has run down: the gears and key slow to a stop and her eyes stop glancing.
+var wound_down := false
 var _action_loop := false
+var _action_holds := false
 var _action_next := ""
 var _action_next_loop := false
+var _action_next_holds := false
 var _action_fade_out := 0.2
+var _weapon := -1
+var _gear_rate := 0.0
 ## Blend of the sword arm toward the ready carry while moving without an action (0..1).
 var carry := 0.0
 var _pose: Array[Quaternion]
@@ -89,7 +105,9 @@ func _ready() -> void:
 		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var player: AnimationPlayer = _find(model, "AnimationPlayer")
 	player.active = false
+	KnightCollapse.add_to(player, skel)
 	anim.setup(skel, player)
+	_weapon = skel.find_bone("weapon_r")
 	_pose = anim.new_pose()
 	_tmp = anim.new_pose()
 	_tmp2 = anim.new_pose()
@@ -179,6 +197,7 @@ func play(clip: String, blend := 0.12, start := 0.0, rate := 1.0, loop := false,
 	air_legs = false
 	_action_next = ""
 	_action_loop = loop
+	_action_holds = false
 	_action_fade_out = fade_out
 
 
@@ -189,10 +208,12 @@ func land_legs(blend := 0.1) -> void:
 		air_legs = false
 
 
-## Queue a clip that takes over, without a blend, when the current one ends.
-func then(clip: String, loop := false) -> void:
+## Queue a clip that takes over, without a blend, when the current one ends. One that `holds` stays on its last
+## frame when it ends.
+func then(clip: String, loop := false, holds := false) -> void:
 	_action_next = clip
 	_action_next_loop = loop
+	_action_next_holds = holds
 
 
 func stop(blend := 0.2) -> void:
@@ -203,6 +224,21 @@ func stop(blend := 0.2) -> void:
 
 func action_length() -> float:
 	return anim.length(action) if action != "" else 0.0
+
+
+## Which blow of the current action can land now, counting its windows in BLOWS from 0, or -1 if none can.
+func blow() -> int:
+	var windows: Array = BLOWS.get(action, [])
+	for i in windows.size():
+		if action_t >= windows[i].x and action_t <= windows[i].y:
+			return i
+	return -1
+
+
+## The blade's edge where it is drawn, from the guard to the tip.
+func blade() -> PackedVector3Array:
+	var bone := skel.global_transform * skel.get_bone_global_pose(_weapon)
+	return PackedVector3Array([bone * Vector3(0.0, BLADE.x, 0.0), bone * Vector3(0.0, BLADE.y, 0.0)])
 
 
 ## Advance animation clocks by one physics step; returns root motion (model space) for that step.
@@ -221,7 +257,10 @@ func tick(dt: float) -> Vector3:
 				action_t = 0.0
 				_action_next = ""
 				_action_loop = _action_next_loop
+				_action_holds = _action_next_holds
 				_action_rate = 1.0
+			elif _action_holds:
+				action_t = len
 			else:
 				stop(_action_fade_out)
 	# stride phase advances so the planted foot matches the ground speed, and hurries through flight
@@ -278,8 +317,10 @@ func _locomotion(into: Array[Quaternion]) -> Vector3:
 
 func _mechanics(dt: float) -> void:
 	_clock += dt
-	# the movement runs faster the harder she works
-	_gear_angle += dt * (0.9 + speed * 0.9 + (2.5 if action != "" else 0.0))
+	# the movement runs faster the harder she works, and once wound down runs on a moment and stops
+	var rate := 0.9 + speed * 0.9 + (2.5 if action != "" else 0.0)
+	_gear_rate = move_toward(_gear_rate, 0.0, dt * 1.6) if wound_down else rate
+	_gear_angle += dt * _gear_rate
 	for g in _gears:
 		skel.set_bone_pose_rotation(g[0], g[2] * Quaternion(Vector3.UP, _gear_angle * g[1]))
 	if _key >= 0:
@@ -289,7 +330,9 @@ func _mechanics(dt: float) -> void:
 		skel.set_bone_pose_rotation(_key, skel.get_bone_rest(_key).basis.get_rotation_quaternion() * Quaternion(Vector3.UP, k * TAU / 24.0))
 	# eyes: small glances, quick moves, long holds
 	_eye_timer -= dt
-	if _eye_timer <= 0.0:
+	if wound_down:
+		_eye_goal = Vector2(0.0, -0.045)
+	elif _eye_timer <= 0.0:
 		_eye_timer = _rng.randf_range(0.9, 3.2)
 		_eye_goal = Vector2(_rng.randf_range(-0.16, 0.16), _rng.randf_range(-0.045, 0.04)) if _rng.randf() < 0.75 else Vector2.ZERO
 	_eye_look = _eye_look.lerp(_eye_goal, 1.0 - exp(-dt * 22.0))

@@ -3,8 +3,11 @@ extends Node
 ## cursor and a click captures it again, F11 toggles fullscreen and H hides the hint. The cursor
 ## is captured for mouse look while an orbit camera is in play. The hint shows while a playable
 ## scene is running: one whose root has metadata/playable, its title in the playtest picker.
+## restart() fades to black, starts the scene again and fades back in.
 
 const PLAYABLE := &"playable"
+const FADE_OUT := 1.6
+const FADE_IN := 0.9
 const HINT := "WASD  move      Ctrl  walk  (C toggles)      Space  jump      Shift / RMB  dodge-roll      LMB  attack ×3\n" \
 	+ "Mouse  look      Wheel  zoom      Esc  free cursor      F11  fullscreen      H  hide this\n" \
 	+ "Gamepad:  stick move · right stick look · A jump · B roll · X attack"
@@ -13,20 +16,47 @@ var _cameras := 0
 var _hint: Label
 var _hint_t := 0.0
 var _hint_on := true
+var _veil := ColorRect.new()
+var _restarting := false
 
 
 func _ready() -> void:
 	_build_hint()
+	_build_veil()
 	get_tree().node_added.connect(_on_node_added)
 	# the scene Godot starts with is in the tree before autoloads are ready
 	if get_tree().current_scene:
 		_on_node_added(get_tree().current_scene)
 
 
+## Fades to black, starts the running scene over and fades back in. A harness that runs the game under a
+## scene of its own, such as dev/drive.tscn, starts its scene under test over instead, so its script runs on.
+func restart() -> void:
+	if _restarting:
+		return
+	_restarting = true
+	await _fade(1.0, FADE_OUT)
+	var running := get_tree().current_scene
+	if running.has_method(&"restart_scene"):
+		running.restart_scene()
+	else:
+		get_tree().reload_current_scene()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_restarting = false
+	await _fade(0.0, FADE_IN)
+
+
+func _fade(to: float, seconds: float) -> void:
+	var tween := create_tween()
+	tween.tween_property(_veil, "color:a", to, seconds).set_trans(Tween.TRANS_SINE)
+	await tween.finished
+
+
 func _on_node_added(node: Node) -> void:
 	if node is CameraRig:
 		_add_camera.call_deferred(node)
-	if node.has_meta(PLAYABLE) and node == get_tree().current_scene:	# not under a harness's scene
+	if node.has_meta(PLAYABLE) and node == get_tree().current_scene and not _restarting:	# not under a harness's scene
 		_hint.visible = true
 		_hint.modulate.a = 1.0
 		_hint_t = 0.0
@@ -71,6 +101,16 @@ func _build_hint() -> void:
 	_hint.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.add_child(_hint)
+
+
+func _build_veil() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 100
+	add_child(layer)
+	_veil.color = Color(0, 0, 0, 0)
+	_veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(_veil)
 
 
 func _unhandled_input(e: InputEvent) -> void:

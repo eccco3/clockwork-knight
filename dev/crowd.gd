@@ -45,6 +45,7 @@ func spawn(spec: String) -> void:
 		else:
 			var g := Grinner.new()
 			g.gait = 1.0
+			g.fights = false
 			_crowd.append(g)
 			_radius.append(r * (1.0 if k % 2 == 0 else -1.0))
 			unit = g

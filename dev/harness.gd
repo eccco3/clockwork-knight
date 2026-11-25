@@ -20,6 +20,14 @@ func load_scene(default: String) -> void:
 	add_child(scene)
 
 
+## Starts the scene under test over, as App.restart() asks when the knight dies.
+func restart_scene() -> void:
+	var path := scene.scene_file_path
+	remove_child(scene)
+	scene.queue_free()
+	load_scene(path)
+
+
 func add_camera(default_fov: float) -> Camera3D:
 	var cam := Camera3D.new()
 	cam.fov = float(args.get("fov", default_fov))

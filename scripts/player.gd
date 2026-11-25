@@ -3,6 +3,12 @@ extends CharacterBody3D
 ## The knight's controller: camera-relative movement, jump, dodge-roll, a three-hit sword combo
 ## and a slash in the air. Rolls and ground attacks travel by the root motion of their clips, so
 ## feet stay planted; the air slash keeps the jump's motion.
+##
+## She fights with a Health, a Stamina and a Strike. Swings and rolls spend stamina and need some
+## left; her blade lands on any foe it passes through in a swing's hit window (Knight.BLOWS), and
+## blows pass through her for most of a roll. An attack turns her toward the nearest foe within
+## REACH of the way she aims it. A blow staggers her, and with no health left she collapses, the
+## screen fades and the scene starts over.
 
 const WALK_SPEED := 1.3
 const RUN_SPEED := 4.6
@@ -29,10 +35,31 @@ const AIR_SLASH_FALLS_AT := 3.1
 ## Clip time in a finishing blow after which she can act again.
 const FREE_AT := {"Sword_Regular_C": 1.05, "Sword_Heavy_Combo": 3.0}
 
-enum State { GROUND, AIR, ROLL, ATTACK, AIR_ATTACK }
+## She starts as one among equals: little stamina, and a sword that fells a grinner in three blows.
+const HEALTH := 100.0
+const STAMINA := 100.0
+const COSTS := {"Sword_Regular_A": 16.0, "Sword_Regular_B": 18.0, "Sword_Regular_C": 26.0, "Sword_Heavy_Combo": 22.0,
+	"Roll": 22.0}
+const SWORD_DAMAGE := 10.0
+const SWORD_SHOVE := 0.1
+const SWORD_STOP := 0.06
+## The Roll clip's seconds through which blows pass her by.
+const DODGE := Vector2(0.12, 0.62)
+## A foe this near, and this far off the way she aims, draws her attack round to it.
+const REACH := 3.2
+const REACH_ANGLE := deg_to_rad(70.0)
+## Hit_Chest's seconds after which she can roll out of a stagger, and the seconds a blow's shove lasts.
+const STAGGER_FREE_AT := 0.2
+const SHOVE_TIME := 0.25
+## Seconds from the killing blow until the screen starts to fade.
+const FADE_AFTER := 1.9
+
+enum State { GROUND, AIR, ROLL, ATTACK, AIR_ATTACK, HURT, DEAD }
 
 var knight: Knight
 var camera: CameraRig
+var health := Health.new()
+var stamina := Stamina.new(STAMINA)
 var state := State.GROUND
 var facing := 0.0
 var walk_toggle := false
@@ -51,12 +78,18 @@ var _jumped := false
 var _speed_s := 0.0
 var _lean := Vector2.ZERO
 var _prev_hvel := Vector3.ZERO
+var _strike := Strike.new(health)
+var _blow := -1
+var _stop := 0.0
+var _shove := Vector3.ZERO
+var _shove_t := 0.0
+var _dead_t := 0.0
 
 
 func _ready() -> void:
 	add_to_group("player")
 	collision_layer = Layers.CHARACTERS
-	collision_mask = Layers.SCENERY
+	collision_mask = Layers.SCENERY | Layers.CHARACTERS
 	floor_snap_length = 0.25
 	floor_max_angle = deg_to_rad(50.0)
 	var col := CollisionShape3D.new()
@@ -89,6 +122,17 @@ func _ready() -> void:
 	fill.shadow_enabled = false
 	fill.position = Vector3(0.5, 0.5, 0.3)
 	camera.camera.add_child(fill)
+	health.name = "Health"
+	health.most = HEALTH
+	health.side = &"knight"
+	add_child(health)
+	health.hurt.connect(_on_hurt)
+	health.died.connect(_on_died)
+	add_child(Hurtbox.new(health, 0.3, 1.72))
+	_strike.damage = SWORD_DAMAGE
+	_strike.shove = SWORD_SHOVE
+	_strike.stop = SWORD_STOP
+	add_child(Hud.new(health, stamina))
 
 
 func _dir(yaw: float) -> Vector3:
@@ -107,6 +151,11 @@ func _physics_process(dt: float) -> void:
 	_buf_jump = BUFFER if Input.is_action_just_pressed("jump") else _buf_jump - dt
 	if Input.is_action_just_pressed("walk_toggle"):
 		walk_toggle = not walk_toggle
+	stamina.tick(dt)
+	if _stop > 0.0:
+		# a blow landing holds her still a moment, as it does the one it lands on
+		_stop -= dt
+		return
 
 	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back", 0.15)
 	var amount := minf(input.length(), 1.0)
@@ -179,6 +228,23 @@ func _physics_process(dt: float) -> void:
 			hvel = _move_basis * Vector3(rm.x, 0.0, rm.z) / dt
 			_face_rate = 16.0
 			_attack_logic(wish)
+		State.HURT:
+			hvel = _shoved(dt)
+			_face_rate = 0.0
+			if knight.action != "Hit_Chest":
+				state = State.GROUND
+			elif knight.action_t > STAGGER_FREE_AT and on_floor and _buf_roll > 0.0:
+				_start_roll(wish)
+		State.DEAD:
+			hvel = _shoved(dt)
+			_face_rate = 0.0
+			_dead_t += dt
+			if _dead_t >= FADE_AFTER and _dead_t - dt < FADE_AFTER:
+				App.restart()
+
+	health.dodging = state == State.ROLL and knight.action == "Roll" \
+		and knight.action_t >= DODGE.x and knight.action_t <= DODGE.y
+	_land_blows()
 
 	if on_floor and velocity.y <= 0.0:
 		velocity.y = -0.5
@@ -252,8 +318,28 @@ func _aim(wish: Vector3) -> void:
 	_move_basis = Basis(Vector3.UP, _face_goal)
 
 
+## The way to aim an attack: toward the nearest living foe within REACH and REACH_ANGLE of the way she
+## would aim it otherwise, if there is one.
+func _toward_foe(wish: Vector3) -> Vector3:
+	var ahead := wish if wish != Vector3.ZERO else _dir(facing)
+	var best := wish
+	var nearest := INF
+	for other: Health in get_tree().get_nodes_in_group(Health.FIGHTERS):
+		if not other.alive() or not health.foe(other):
+			continue
+		var to := (other.figure().global_position - global_position) * Vector3(1, 0, 1)
+		var off := ahead.angle_to(to)
+		var far := to.length() * (1.0 + off)
+		if to.length() > 0.01 and to.length() < REACH and off < REACH_ANGLE and far < nearest:
+			nearest = far
+			best = to.normalized()
+	return best
+
+
 func _start_roll(wish: Vector3) -> void:
 	_buf_roll = 0.0
+	if not stamina.spend(COSTS["Roll"]):
+		return
 	_aim(wish)
 	state = State.ROLL
 	knight.play("Roll", 0.10, ROLL_START, ROLL_RATE, false, 0.25)
@@ -262,8 +348,10 @@ func _start_roll(wish: Vector3) -> void:
 func _start_attack(i: int, wish: Vector3) -> void:
 	_buf_attack = 0.0
 	_queued = false
+	if not stamina.spend(COSTS[SWINGS[i]]):
+		return
 	_combo = i
-	_aim(wish)
+	_aim(_toward_foe(wish))
 	state = State.ATTACK
 	var clip := SWINGS[i]
 	knight.play(clip, 0.10 if i == 0 else 0.08, 0.0, 1.0, false, 0.35)
@@ -275,8 +363,10 @@ func _start_attack(i: int, wish: Vector3) -> void:
 func _start_air_attack(wish: Vector3) -> void:
 	_buf_attack = 0.0
 	_queued = false
+	if not stamina.spend(COSTS[AIR_SLASH]):
+		return
 	_combo = SWINGS.size() - 1          # a finishing blow: no swing follows it
-	_aim(wish)
+	_aim(_toward_foe(wish))
 	state = State.AIR_ATTACK
 	knight.play(AIR_SLASH, 0.10, AIR_SLASH_FROM, 1.0, false, 0.35)
 	knight.air_legs = true
@@ -310,3 +400,48 @@ func _attack_logic(wish: Vector3) -> void:
 		elif wish != Vector3.ZERO:
 			knight.stop(0.35)
 			state = State.GROUND
+
+
+## Sweeps her blade through the hit window of the swing she is in, and holds still a moment when it lands.
+func _land_blows() -> void:
+	var blow := knight.blow() if state == State.ATTACK or state == State.AIR_ATTACK else -1
+	if blow >= 0:
+		if blow != _blow:
+			_strike.begin()
+		for hit in _strike.sweep(knight.blade()):
+			_stop = maxf(_stop, hit.stop)
+			camera.shake(0.2)
+	_blow = blow
+
+
+func _on_hurt(hit: Hit) -> void:
+	_take(hit)
+	state = State.HURT
+	# heavier blows stagger her longer
+	knight.play("Hit_Chest", 0.05, 0.0, clampf(1.15 - hit.damage * 0.018, 0.7, 1.0), false, 0.3)
+
+
+func _on_died(hit: Hit) -> void:
+	_take(hit)
+	state = State.DEAD
+	health.dodging = false
+	knight.play("Hit_Chest", 0.05, 0.0, 0.8, false)
+	knight.then(KnightCollapse.NAME, false, true)
+	knight.wound_down = true
+	_dead_t = 0.0
+
+
+func _take(hit: Hit) -> void:
+	_stop = hit.stop
+	_shove = hit.way * hit.shove * 2.0 / SHOVE_TIME
+	_shove_t = SHOVE_TIME
+	_queued = false
+	_buf_attack = 0.0
+	camera.shake(0.3 + hit.damage * 0.015)
+	Burst.splinters(get_parent(), hit.at, hit.way)
+
+
+## The velocity of the last blow's shove, slowing evenly to nothing over SHOVE_TIME.
+func _shoved(dt: float) -> Vector3:
+	_shove_t = maxf(_shove_t - dt, 0.0)
+	return _shove * _shove_t / SHOVE_TIME

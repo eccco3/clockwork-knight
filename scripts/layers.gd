@@ -4,4 +4,6 @@ class_name Layers
 
 const SCENERY := 1
 const CHARACTERS := 2
+## Physics only: where blows can land (Hurtbox), apart from the bodies that block movement.
+const HURTBOXES := 4
 const CHARACTER_GROUP := &"characters"

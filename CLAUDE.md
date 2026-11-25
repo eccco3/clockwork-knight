@@ -26,7 +26,7 @@ A roguelite: the workshop and hall are the safe hub; enemies appear only outdoor
 - Scripted play: `dev/drive.tscn` with `--fixed-fps 60`; `dev/shot.tscn` photographs a scene. Their headers list arguments.
 - Never open Godot windows on the dev's screen for tests or bakes, unless he is playtesting: replace `godot` with `toolchain\blender\4.5\python\bin\python.exe -I dev\quiet.py`; `--timing` first for GPU timing waits until nothing else runs.
 - Clips: `tools\clip.py out.mp4 <drive arguments>` (that Python) records `dev/drive.tscn` hidden.
-- Capped at 60 fps. Frame times: `dev/drive.tscn` events `perf:start`, `perf:stop` with `--disable-vsync --max-fps 0`; crowds: `dev/crowd.tscn`.
+- Capped at 60 fps. Frame times: `dev/drive.tscn` perf events; crowds: `dev/crowd.tscn`.
 
 ## Where things are
 
@@ -35,7 +35,7 @@ A roguelite: the workshop and hall are the safe hub; enemies appear only outdoor
 - The `App` autoload, `scripts/app.gd`, holds the keys Esc, F11 and H, cursor capture and the controls hint for playable scenes.
 - `scenes/outdoors.tscn` builds the grinner's foggy ground on load.
 - `dev/` tests the game; `builders/` builds in Godot; `tools/`, hidden from Godot, builds and fetches assets.
-- `scripts/` holds the player controller, animator and camera rig; `looks.gd` makes each figure's wood, metal and eye materials.
+- `scripts/` holds the player controller, animator and camera rig; `looks.gd` makes each figure's wood, metal and eye materials; fighters carry `Health`, `Hurtbox`, `Strike`.
 - Lamps are baked. `scripts/hall.gd` turns those marked `lights_characters` into lights for the Characters layer only, and `shadows_characters` into cancelling pairs leaving character shadows on the baked floor. Only the fire is live.
 - `addons/lightmap_bake` presses the editor's bake button.
 - `tools/sculpt/` is the characters' shared toolkit.
