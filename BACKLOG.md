@@ -117,7 +117,7 @@ Light the workshop for close work: bench lamps, hanging lamps and the window day
 
 ### Status
 
-Not started. Windows and worn surfaces are built (32 windows with FogLights, about 0.1 ms); the lightmap is a draft, grown to 4096×32768, so the full bake will take longer than 14 minutes. It rebakes the hall, so nothing else may bake at the same time.
+Not started. Windows and worn surfaces are built (32 windows with FogLights, about 0.1 ms); the lightmap is a draft, grown to 4096×32768: its import holds about 2 GB, so cut the workshop's texel density or split the lightmap, and the full bake will take longer than 14 minutes. It rebakes the hall, so nothing else may bake at the same time.
 
 ## Workshop: research and layout
 
