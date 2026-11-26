@@ -1,19 +1,5 @@
 # Backlog
 
-## Sculpt: lid snaps and bake bleed
-
-### Task description
-
-Two faults in the shared `tools/sculpt/` modules, found on the faces' bust (`tools/faces/build_bust.py`). White specks run along the lids in extreme close-ups: a few vertices of the lids' two edge loops land on the wrong side in the mesher's inner snap. Dark streaks show along the bust's UV seams at the throat and crown from about 1 m in Godot: lower mip levels reach past the bake's 12 texels of bleed (`bake.dilate`). Fix both for every figure that uses them, and check the knight, grinner and Rosalyn for changes.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. The bust also has about 27 folded quads at the eye corners, no detail levels or shadow stand-in, and always the short crop.
-
 ## Faces: lines across the women's ears
 
 ### Task description
@@ -251,7 +237,7 @@ Low priority. Not started. Builds on the collapse and restart from "Enemy: behav
 
 ### Task description
 
-Fix what her speech work found but left. A pale streak runs down the skirt's side in Godot: its lighting and normal buffers show wrong normals along the panels' side seam, likely the baked normal map's tangent frame against the exported tangents in `tools/sculpt/bake.py`. Pale jagged slivers show along the lower lids near both corners in close-ups. The palm's edge creases, probably because the arm's lattice is half the palm's thickness (`body.arm_boxes`); recheck the clasp after. A fully overhead raise bulks the sleeve (`rig.py` weights).
+Fix what her speech work found but left. A pale streak runs down the skirt's side in Godot: its lighting and normal buffers show wrong normals along the panels' side seam, likely the baked normal map's tangent frame against the exported tangents in `tools/sculpt/bake.py`. A bright square shows by one outer eye corner. The palm's edge creases, probably because the arm's lattice is half the palm's thickness (`body.arm_boxes`); recheck the clasp after. A fully overhead raise bulks the sleeve (`rig.py` weights).
 
 ### Open questions
 

@@ -116,20 +116,23 @@ def front_view(field, paint, half_width, bottom, top, width=1024, front=0.112):
     return np.concatenate([rgb[:, ::-1], rgb], axis=1)
 
 
-def dilate(img, filled, steps):
-    """Bleed filled texels outward so filtering never reaches an empty one."""
-    img, filled = img.copy(), filled.copy()
-    for _ in range(steps):
-        acc = np.zeros_like(img)
-        cnt = np.zeros(filled.shape)
-        for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)):
-            src = np.roll(np.roll(filled, dy, 0), dx, 1)
-            acc += np.roll(np.roll(img, dy, 0), dx, 1) * src[..., None]
-            cnt += src
-        new = ~filled & (cnt > 0)
-        img[new] = acc[new] / cnt[new][:, None]
-        filled |= new
-    return img
+def bleed(img, filled):
+    """Each empty texel given the mean of the filled ones in the smallest block about it that holds any, of the
+    blocks mipmapping averages (2, 4, 8 ... texels a side), so that no mip level, however small, mixes an empty
+    texel into an island's edge."""
+    sums, counts = [img * filled[..., None]], [filled.astype(np.float64)]
+    while max(counts[-1].shape) > 1:
+        s, c = sums[-1], counts[-1]
+        h, w = c.shape[0] + c.shape[0] % 2, c.shape[1] + c.shape[1] % 2
+        s = np.pad(s, ((0, h - s.shape[0]), (0, w - s.shape[1]), (0, 0)))
+        c = np.pad(c, ((0, h - c.shape[0]), (0, w - c.shape[1])))
+        sums.append(s.reshape(h // 2, 2, w // 2, 2, -1).sum((1, 3)))
+        counts.append(c.reshape(h // 2, 2, w // 2, 2).sum((1, 3)))
+    out = sums[-1] / np.maximum(counts[-1], 1.0)[..., None]
+    for s, c in zip(sums[-2::-1], counts[-2::-1]):
+        block = out.repeat(2, 0).repeat(2, 1)[:c.shape[0], :c.shape[1]]
+        out = np.where(c[..., None] > 0, s / np.maximum(c, 1.0)[..., None], block)
+    return out
 
 
 def bake(pieces, size, occluder, grain, scale, log=print):
@@ -183,4 +186,4 @@ def bake(pieces, size, occluder, grain, scale, log=print):
     filled = np.zeros(size * size, dtype=bool)
     filled[texel] = True
     filled = filled.reshape(size, size)
-    return [dilate(img.reshape(size, size, 3), filled, 12) for img in (albedo, nrm, orm)]
+    return [bleed(img.reshape(size, size, 3), filled) for img in (albedo, nrm, orm)]
