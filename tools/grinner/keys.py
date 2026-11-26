@@ -114,10 +114,12 @@ class Kind:
         self.name, self.loops, self.poses, self.jaw = name, loops, poses, jaw
         self.clips = dict(loops, **{clip: (lambda phase, move=move, seconds=seconds: move(phase * seconds), round(seconds * FPS))
                                     for clip, (move, seconds, marks) in moves.items()})
-        self.marks = {clip: marks for clip, (move, seconds, marks) in moves.items()}     # clip -> phase -> the second it begins
+        self.marks = {clip: marks for clip, (move, seconds, marks) in moves.items()}     # clip -> mark -> its second
+        for clip, marks in self.marks.items():                                            # Godot keeps one marker a moment
+            assert len(set(marks.values())) == len(marks), "%s has two marks at one moment" % clip
         self.gait = {clip: k / (len(loops) - 1) for k, clip in enumerate(loops)}         # clip -> 0 at rest .. 1 at full pace
 
-    def phase(self, clip, seconds):
-        """The phase a clip is in: the last of its marks to have begun, or None before the first."""
-        begun = [(at, name) for name, at in self.marks.get(clip, {}).items() if at <= seconds]
-        return max(begun)[1] if begun else None
+    def within(self, clip, seconds, opens, closes):
+        """Whether a clip has passed its mark `opens` but not `closes`, or its end if it has no `closes`."""
+        marks = self.marks.get(clip, {})
+        return opens in marks and marks[opens] <= seconds < marks.get(closes, np.inf)

@@ -92,7 +92,7 @@ SHEETS = {"grinner": {"Waddle": (12, (-90, -25), "walk"), "Idle": (12, (-25,), "
                        "Pounce": (16, (-90, -25), "spring"), "Bite": (12, (-90, -25), "prowl"),
                        "Flinch": (8, (-90, -25), "prowl"), "Death": (16, (-90, -25), "sprawl")}}
 ACROSS = 8
-GROUND, GROUND_HIT = (0.20, 0.20, 0.21, 1.0), (0.60, 0.08, 0.06, 1.0)
+GROUND, GROUND_HIT, GROUND_SHRUG = (0.20, 0.20, 0.21, 1.0), (0.60, 0.08, 0.06, 1.0), (0.10, 0.22, 0.50, 1.0)
 
 
 def turnaround(path, views, zoom, samples=48, at=(0.0, 0.0)):
@@ -103,7 +103,7 @@ def turnaround(path, views, zoom, samples=48, at=(0.0, 0.0)):
 
 def contact_sheet(path, skeleton, action, kind):
     """A clip at even steps from its start, left to right in rows of ACROSS, view after view. The camera keeps
-    pace with the root, and the ground reddens while a hit window is open."""
+    pace with the root, and the ground reddens while a hit window is open and blues while blows are shrugged off."""
     steps, views, zoom = SHEETS[kind.name][action.name]
     ground = bl.to_object("ground", [(x, y, z) for z in (-0.02, 0) for x, y in ((-4, -4), (4, -4), (4, 4), (-4, 4))],
                           [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)])
@@ -115,7 +115,8 @@ def contact_sheet(path, skeleton, action, kind):
     for k in range(steps):
         frame = round(k * end / (steps if action.name in kind.loops else steps - 1))
         bpy.context.scene.frame_set(frame)
-        colour.default_value = GROUND_HIT if kind.phase(action.name, frame / FPS) == "hit" else GROUND
+        colour.default_value = (GROUND_HIT if kind.within(action.name, frame / FPS, "hit", "recover") else
+                                GROUND_SHRUG if kind.within(action.name, frame / FPS, "shrug", "heed") else GROUND)
         root = skeleton.pose.bones["root"].head
         ground.location = (root.x, root.y, 0.0)
         turnaround(path + ".step.png", views, zoom, 32, (root.x, root.y))

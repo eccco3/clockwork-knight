@@ -1,8 +1,10 @@
 """The grinner's moves, each played once from rest: two attacks, a flinch and a death.
 
-A move is a function of the seconds since it began, returning controls of `pose`. Its marks name the moments
-its phases begin, in seconds; until the first mark an attack is winding up. Both wind-ups keep the feet where
-the grinner stands, as the flinch begins, so a flinch can cut in at any moment of either.
+A move is a function of the seconds since it began, returning controls of `pose`. Its marks name moments in
+seconds; until the first mark an attack is winding up. Its hit window is open from `hit` until `recover`, and
+it shrugs blows off from `shrug` until `heed`, or until its end if it has no `heed`: in a pounce's leap and
+late in the swipe. Any other blow makes it flinch, cutting in where it is. Both wind-ups keep the feet where
+the grinner stands, as the flinch begins.
 """
 import numpy as np
 from .body import FINGERS
@@ -27,8 +29,8 @@ def _foot(curves, t, foot_y):
 
 # ---------------------------------------------------------------- pounce
 
-LEAP, LEAP_HEIGHT, LANDS = 4.0, 0.30, 1.10
-POUNCE = dict(leap=0.60, hit=0.94, recover=1.16)
+LEAP, LEAP_HEIGHT, TAKES_OFF, LANDS = 4.0, 0.30, 0.60, 1.10
+POUNCE = dict(shrug=TAKES_OFF, hit=0.94, heed=LANDS, recover=1.16)    # it shrugs blows off in the air
 TRAILING = Curve((0.0, 0.0), (0.22, -0.10), (0.50, 0.0), (0.86, 0.86), (1.0, 1.0), loop=False)
 COIL = dict(hips_y=held((0.16, 0.10), (0.48, 0.13), (0.60, 0.02), (0.85, -0.02), (1.08, 0.02), (1.24, -0.02), (1.50, 0.0)),
             hips_z=held((0.16, -0.21), (0.48, -0.25), (0.60, -0.07), (1.06, -0.22), (1.20, -0.27), (1.45, -0.12), (1.78, 0.0)),
@@ -53,7 +55,7 @@ SPRING_R = dict(foot_z=held((0.57, 0.0), (0.69, 0.24), (0.87, 0.30), (0.99, 0.14
                 foot_pitch=held((0.42, 0.0), (0.54, 25.0), (0.59, 55.0), (0.78, 62.0), (0.98, 10.0), (1.05, -12.0), (1.10, 0.0),
                                 (1.38, 0.0), (1.46, 22.0), (1.56, 4.0), (1.62, -6.0), (1.66, 0.0)),
                 knee=SPRING_L["knee"])
-STEPS_L = (0.0, LEAP), [(0.60, LANDS, TRAILING)]
+STEPS_L = (0.0, LEAP), [(TAKES_OFF, LANDS, TRAILING)]
 STEPS_R = (0.0, LEAP - 0.18, LEAP), [(0.57, 1.07, TRAILING), (1.42, 1.64, STEPPED)]
 RAKE = dict(arm_fwd=held((0.16, -35.0), (0.48, -45.0), (0.62, 40.0), (0.80, 150.0), (0.94, 165.0), (1.06, 80.0), (1.14, 38.0),
                          (1.24, 30.0), (1.60, 4.0), (1.85, 0.0)),
@@ -75,7 +77,7 @@ REACH_CLAWS = held((0.16, 0.5), (1.24, 0.5), (1.60, 0.0)), held((0.62, 0.0), (0.
 
 
 def _leapt(t):
-    return LEAP * glide(t, 0.50, POUNCE["leap"], LANDS, 1.20)
+    return LEAP * glide(t, 0.50, TAKES_OFF, LANDS, 1.20)
 
 
 def pounce(t):
@@ -84,7 +86,7 @@ def pounce(t):
     out = at(COIL, t)
     wiggle = WIGGLE(t) * np.sin(2.0 * np.pi * 4.5 * (t - 0.16))
     out.update(hips_x=0.014 * wiggle, hips_yaw=-5.0 * wiggle, travel=_leapt(t), head_level=0.85)
-    out["hips_z"] += LEAP_HEIGHT * thrown(t, POUNCE["leap"], LANDS)
+    out["hips_z"] += LEAP_HEIGHT * thrown(t, TAKES_OFF, LANDS)
     out["spine_yaw"] += 3.0 * wiggle
     out.update(sided(dict(at(REACH, t), **_claws(*(c(t) for c in REACH_CLAWS)), **_foot(SPRING_L, t, trod(t, _leapt, *STEPS_L))),
                      dict(at(RAKE, t), **_claws(*(c(t) for c in RAKE_CLAWS)), **_foot(SPRING_R, t, trod(t, _leapt, *STEPS_R)))))
@@ -93,7 +95,7 @@ def pounce(t):
 
 # ---------------------------------------------------------------- swipe
 
-SWIPE = dict(hit=0.40, recover=0.58)
+SWIPE = dict(hit=0.40, recover=0.58, shrug=0.70)          # it shrugs blows off as the crossed arms unfold
 REAR = dict(hips_z=held((0.14, -0.06), (0.36, 0.015), (0.40, 0.01), (0.52, -0.13), (0.66, -0.15), (0.95, -0.04), (1.20, 0.0)),
             hips_y=held((0.30, 0.05), (0.40, 0.04), (0.52, -0.07), (0.66, -0.08), (1.00, -0.01), (1.20, 0.0)),
             hips_pitch=held((0.14, 6.0), (0.36, -8.0), (0.52, 22.0), (0.66, 26.0), (1.00, 6.0), (1.20, 0.0)),

@@ -1,5 +1,5 @@
 """The walking grinner: its looping clips, keyed by hand on the controls of `pose`, and the poses that test its
-skin. Idle and Waddle loop; the moves of `moves` play once, and their marks say when their phases begin.
+skin. Idle and Waddle loop; the moves of `moves` play once, and their marks say when their windows open and close.
 """
 from .body import FINGERS
 from .keys import Curve, Kind, twice, swaying, sided, both, borne
