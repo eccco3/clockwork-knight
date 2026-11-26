@@ -22,9 +22,9 @@ as a grid, best first, and writes their numbers beside it: a.json.
 
 Every face is painted the same, with skin, lips, eyes and hair, so that only its shape and its brows
 differ. The label set wears short hair, so that no face reads as a sex for its hair, and so do the men.
-The women wear it long, so that each reads as a woman from the front: parted, full over the crown and the
-sides and tucked behind the ears, falling behind the neck past the shoulders, and kept off the forehead,
-the temples, the cheekbones and the jaw, whose outline he judges. It is the same on every woman, laid on
+The women wear it long, so that each reads as a woman from the front: parted, close over the crown, fuller
+down the sides and tucked behind the ears, streaked strand by strand and glossy along them, falling behind
+the neck past the shoulders, and kept off the forehead, the temples, the cheekbones and the jaw, whose outline he judges. It is the same on every woman, laid on
 her head and falling from it, so the taste learnt from it is still the face's. The faces he judges are
 symmetric, so that his answers measure his taste and not chance; the grid's and the best faces are each
 slightly lopsided, as people are, by weights a.json keeps.
@@ -51,7 +51,7 @@ VIEWS = (0.0, 35.0)                             # a rendered set shows each face
 # socket's floor that a level head keeps horizontal, which shows the front camera up the nostrils. Every
 # face is tipped forward by it.
 PITCH = 9.0
-LOOK = 5                                        # the renders' look: a set rendered in another is rendered again
+LOOK = 6                                        # the renders' look: a set rendered in another is rendered again
 SKIN, HAIR = (0.60, 0.40, 0.30), (0.045, 0.032, 0.025)
 LIPS, CHEEKS = (0.52, 0.24, 0.21), (0.66, 0.36, 0.29)
 WHITE, IRIS, PUPIL = (0.80, 0.77, 0.72), (0.16, 0.10, 0.05), (0.01, 0.01, 0.01)
@@ -77,7 +77,15 @@ CROP = (0.003, 0.008, 0.010)                   # hair thickness low on the head 
 LONG_LINE = ((0, 0.071), (30, 0.066), (50, 0.058), (65, 0.045), (74, 0.030), (82, 0.012), (90, 0.006),
              (115, 0.006), (125, -0.020), (140, -0.060), (180, -0.080))
 ROUND, SOFT, RISE, TUCK, PART_BACK = 0.085, 0.007, 0.035, 0.35, -0.02
-COMB, COMB_TO, RIDGES = (0.0, -0.01, 0.02), (1.0, -0.25, -1.0), 40   # see combed
+COMB, COMB_TO, RIDGES = (0.0, -0.01, 0.02), (1.0, -0.25, -1.0), 70   # combed; ridges to a turn
+# Long hair is as thick as CROWN of its sides' thickness on top of the head, at TOP, thickening down to the
+# full over DROP. Its streaks (streaked) are STRANDS[0] apart and STRANDS[1] deep, and clumps of them
+# CLUMPS[0] across are lighter and darker by CLUMPS[1]; it is as glossy as HAIR_GLOSS, a roughness, with a
+# sheen along the strands HAIR_SHEEN, an anisotropy. STRAND_ROUND turns a strand's angle about the comb's
+# line into metres across, and its right side is SIDES on from its left.
+CROWN, TOP, DROP = 0.4, 0.109, 0.06
+STRANDS, CLUMPS, HAIR_GLOSS, HAIR_SHEEN = (0.0005, 0.0003), (0.004, 0.25), 0.45, 0.8
+STRAND_ROUND, SIDES = 0.08, 1.0
 # Long hair falls round the back from FALL_FROM degrees from the front, behind the ears, down to FALL_END
 # (fall): from where the head is widest above FALL_WIDEST, sunk FALL_DIVE into the head above that, and
 # spreading out below FALL_FLARE. It is reckoned FALL_STEP apart (metres down, degrees round), made of rings
@@ -133,12 +141,61 @@ def beyond(mean, line):
 
 
 def combed(mean):
-    """Ridges along hair parted at x = 0 as it falls down either side toward a point below the ear: about the
-    line from COMB toward COMB_TO (on +x), RIDGES to a turn, from -1 to 1 at each vertex of the mean head."""
+    """Hair parted at x = 0 and combed down either side toward a point below the ear, as each vertex of the
+    mean head carries it: the strand's angle (radians) about the line from COMB toward COMB_TO (on +x), and
+    its direction there, down from the part."""
     to = np.array(COMB_TO) / np.linalg.norm(COMB_TO)
     up = np.array((0.0, 0.0, 1.0)) - to[2] * to
     p = np.column_stack([np.abs(mean[:, 0]), mean[:, 1:]]) - COMB
-    return np.cos(RIDGES * np.arctan2(p @ np.cross(to, up), p @ up))
+    out = p / np.linalg.norm(p, axis=1, keepdims=True)
+    along = to - (out @ to)[:, None] * out
+    along = along / np.maximum(np.linalg.norm(along, axis=1, keepdims=True), 1e-9)
+    along[:, 0] *= np.where(mean[:, 0] < 0.0, -1.0, 1.0)
+    return np.arctan2(p @ np.cross(to, up), p @ up), along
+
+
+def streaked(name, base, vertex_color=True):
+    """Hair's material, `base` or the vertex colours times it: streaked across the strands that the `strand`
+    attribute (metres across them) and the `tangent` attribute (their direction) of the mesh lay, finely in
+    relief and in clumps lighter and darker, and glossy along them."""
+    m = bl.clay(name, base=base, rough=HAIR_GLOSS, vertex_color=vertex_color)
+    nodes, links = m.node_tree.nodes, m.node_tree.links
+    surface = nodes["Principled BSDF"]
+    strand, tangent = nodes.new("ShaderNodeAttribute"), nodes.new("ShaderNodeAttribute")
+    strand.attribute_name, tangent.attribute_name = "strand", "tangent"
+
+    def noise(scale, detail):
+        n = nodes.new("ShaderNodeTexNoise")
+        n.noise_dimensions = "1D"
+        n.inputs["Scale"].default_value, n.inputs["Detail"].default_value = scale, detail
+        links.new(strand.outputs["Fac"], n.inputs["W"])
+        return n.outputs["Fac"]
+
+    bump = nodes.new("ShaderNodeBump")
+    bump.inputs["Distance"].default_value = STRANDS[1]
+    links.new(noise(1.0 / STRANDS[0], 4.0), bump.inputs["Height"])
+    links.new(bump.outputs["Normal"], surface.inputs["Normal"])
+    shade = nodes.new("ShaderNodeMapRange")                 # a clump's brightness, about 1
+    shade.inputs["To Min"].default_value, shade.inputs["To Max"].default_value = 1.0 - CLUMPS[1], 1.0 + CLUMPS[1]
+    links.new(noise(1.0 / CLUMPS[0], 2.0), shade.inputs["Value"])
+    colour = nodes.new("ShaderNodeVectorMath")
+    colour.operation = "SCALE"
+    if surface.inputs["Base Color"].is_linked:
+        links.new(surface.inputs["Base Color"].links[0].from_socket, colour.inputs["Vector"])
+    else:
+        colour.inputs["Vector"].default_value = base
+    links.new(shade.outputs["Result"], colour.inputs["Scale"])
+    links.new(colour.outputs["Vector"], surface.inputs["Base Color"])
+    surface.inputs["Anisotropic"].default_value = HAIR_SHEEN
+    links.new(tangent.outputs["Vector"], surface.inputs["Tangent"])
+    return m
+
+
+def carry(ob, strand, along):
+    """Gives the mesh of `ob` the attributes `streaked` reads, at each vertex."""
+    ob.data.attributes.new("strand", "FLOAT", "POINT").data.foreach_set("value", np.asarray(strand, np.float32))
+    ob.data.attributes.new("tangent", "FLOAT_VECTOR", "POINT").data.foreach_set(
+        "vector", STAND.dir(along).astype(np.float32).ravel())
 
 
 class Crop:
@@ -152,27 +209,44 @@ class Crop:
         thick = CROP[0] + (CROP[1] - CROP[0]) * ramp((z - CROP[2]) / 0.08)
         return thick * ramp(above / 0.020) * (1.0 - ears(mean)), ramp(above / 0.003 + 0.5) * (1.0 - ears(mean))
 
+    def coat(self, ob, mean):
+        """The material of the hair on the head `ob`, whose vertices lie at `mean` on the mean head."""
+        return bl.clay("hair", base=(1.0, 1.0, 1.0), rough=0.85)
+
     def dress(self, v):
         """Puts in the scene the hair that stands clear of the head v (levelled): none."""
 
 
 class Long:
-    """Long hair, as high as LONG_LINE: parted `part` metres to her right of the middle, `thick` over the crown
-    and the sides and thinner where it is tucked behind the ears, combed into ridges `locks` deep, and
-    falling from behind the ears down her back (fall), spread out by `flare` and waved `wave` deep."""
+    """Long hair, as high as LONG_LINE: parted `part` metres to her right of the middle, `thick` over the
+    sides, CROWN of that on top and thinner where it is tucked behind the ears, combed into ridges `locks`
+    deep and streaked along its strands (streaked), and falling from behind the ears down her back (fall),
+    spread out by `flare` and waved `wave` deep."""
 
-    def __init__(self, part=0.0, thick=0.017, tuck=TUCK, flare=0.018, locks=0.0005, wave=0.0):
+    def __init__(self, part=0.0, thick=0.011, tuck=TUCK, flare=0.018, locks=0.0003, wave=0.0):
         self.part, self.thick, self.tuck, self.flare, self.locks, self.wave = part, thick, tuck, flare, locks, wave
 
     def scalp(self, mean):
         z, side = mean[:, 2], mean[:, 0] - self.part
         inside = beyond(mean, LONG_LINE)
         part = ramp((mean[:, 1] - PART_BACK) / 0.03) * ramp(inside / 0.01)
-        thick = self.thick * (self.tuck + (1.0 - self.tuck) * ramp((z - EARS[1]) / 0.07))
+        thick = self.thick * (self.tuck + (1.0 - self.tuck) * ramp((z - EARS[1]) / 0.07)) \
+            * (CROWN + (1.0 - CROWN) * ramp((TOP - z) / DROP))
         thick = thick * (1.0 - 0.4 * part * np.exp(-(side / 0.008) ** 2)) \
-            + self.locks * combed(mean - (self.part, 0.0, 0.0)) * ramp(np.abs(side) / 0.025)
+            + self.locks * np.cos(RIDGES * combed(mean - (self.part, 0.0, 0.0))[0]) * ramp(np.abs(side) / 0.025)
         cover = ramp(inside / SOFT + 0.5) * (1.0 - 0.25 * part * np.exp(-(side / 0.001) ** 2))
         return thick * ramp(inside / RISE) * (1.0 - ears(mean)), cover * (1.0 - ears(mean))
+
+    def strands(self, mean):
+        """Where each vertex of the mean head lies across the strands (metres, either side apart by SIDES), and
+        their direction there."""
+        angle, along = combed(mean - (self.part, 0.0, 0.0))
+        return STRAND_ROUND * angle + SIDES * (mean[:, 0] < self.part), along
+
+    def coat(self, ob, mean):
+        strand, along = self.strands(mean)
+        carry(ob, strand, level(along))
+        return streaked("hair", (1.0, 1.0, 1.0))
 
     def dress(self, v):
         fall(v, 0.8 * self.thick, self.flare, self.locks, self.wave)
@@ -257,7 +331,9 @@ def fall(v, thick, flare, locks, wave):
     ring = np.arange(n)
     quads = np.stack([row + ring, row + (ring + 1) % n, row + n + (ring + 1) % n, row + n + ring], -1).reshape(-1, 4)
     sheet = bl.to_object("fall", STAND.w(pts), quads, STAND.dir(normals(pts, quads)))
-    sheet.data.materials.append(bl.clay("fall", base=HAIR, rough=0.85, vertex_color=False))
+    across = np.broadcast_to(STRAND_ROUND * a + 2.0 * SIDES, r.shape).ravel()
+    carry(sheet, across, np.tile((0.0, 0.0, 1.0), (len(pts), 1)))
+    sheet.data.materials.append(streaked("fall", HAIR, vertex_color=False))
 
 
 def level(v):
@@ -277,8 +353,9 @@ def portrait(model, face, path, view, light, style="crop", lopsided=()):
     v = level(v + n * stand[:, None])
     colour = skin + hair[:, None] * (np.array(HAIR) - skin)
     face = bl.to_object("face", STAND.w(v), quads, STAND.dir(normals(v, quads)), colour)
-    for name, rough in (("skin", 0.5), ("hair", 0.85), ("eye", 0.15)):
-        face.data.materials.append(bl.clay(name, base=(1.0, 1.0, 1.0), rough=rough))
+    for material in (bl.clay("skin", base=(1.0, 1.0, 1.0), rough=0.5), HAIRS[style].coat(face, model.mean),
+                     bl.clay("eye", base=(1.0, 1.0, 1.0), rough=0.15)):
+        face.data.materials.append(material)
     index = np.where(model.eyes[quads].mean(1) > 0.5, 2, (hair[quads].mean(1) > 0.5).astype(np.int32))
     face.data.polygons.foreach_set("material_index", index.astype(np.int32))
     HAIRS[style].dress(v)
