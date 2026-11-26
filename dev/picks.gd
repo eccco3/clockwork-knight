@@ -5,10 +5,10 @@ extends FaceTool
 ##
 ##   godot --path . res://dev/picks_women.tscn
 ##
-## A click picks a face or unpicks it; Enter or Space submits the sheet's picks, none if none, and shows the
+## Faces show as they render, about 5 s each. A click picks a face or unpicks it; Enter or Space submits the sheet's picks, none if none, and shows the
 ## next; P shows the profiles instead, and again the fronts; Backspace takes the last sheet back. For tests,
 ## on quiet.py: picks=<jsonl> and answers=<json> keep the picks and read the candidate answers elsewhere;
-## once the sheet shows, pick=<i,j,...> clicks those faces and key=<name> presses that key; shot=<png>
+## once the sheet shows, or faces=<n> of it, pick=<i,j,...> clicks those faces and key=<name> presses that key; shot=<png>
 ## photographs the screen; then it quits.
 
 const PICK := "res://tools/faces/pick.py"
@@ -69,7 +69,7 @@ func _unhandled_input(e: InputEvent) -> void:
 		return
 	match e.physical_keycode:
 		KEY_ENTER, KEY_KP_ENTER, KEY_SPACE:
-			if not _pictures.is_empty():
+			if _pictures.size() == SHEET:
 				send("submit " + JSON.stringify(_picked.keys()))
 		KEY_P:
 			_profile = not _profile
@@ -91,7 +91,7 @@ func _fit() -> void:
 
 
 func _toggle(i: int) -> void:
-	if _pictures.is_empty():
+	if i >= _pictures.size():
 		return
 	if _picked.has(i):
 		_picked.erase(i)
@@ -100,16 +100,19 @@ func _toggle(i: int) -> void:
 	_lay_out()
 
 
+## Shows the sheet's faces as they are rendered, keeping his picks while more arrive.
 func show(shown: Dictionary) -> void:
-	if shown["sheet"] != _sheet or shown["pictures"] != _paths:
+	var paths: Array = shown["pictures"]
+	if shown["sheet"] != _sheet or paths.slice(0, _paths.size()) != _paths:
 		_sheet = shown["sheet"]
-		_paths = shown["pictures"]
+		_paths = []
 		_picked = {}
 		for i in shown["picked"]:
 			_picked[int(i)] = true
 		_pictures.clear()
-		for path in _paths:
-			_pictures.append(ImageTexture.create_from_image(Image.load_from_file(path)))
+	for path in paths.slice(_paths.size()):
+		_pictures.append(ImageTexture.create_from_image(Image.load_from_file(path)))
+	_paths = paths
 	_shown = shown
 	_lay_out()
 
@@ -135,9 +138,11 @@ func _status(shown: Dictionary) -> String:
 	var sheet := "%s, sheet %d" % [sex.capitalize(), shown["sheet"]]
 	if not here["failed"].is_empty():
 		return "%s failed: %s" % [sheet, here["failed"]]
-	if _pictures.is_empty():
-		return "%s rendering: %d of %d faces" % [sheet, here["rendered"], here["faces"]] if here["faces"] > 0 \
-				else sheet + ": drawing its faces"
+	if here["faces"] == 0:
+		return sheet + ": drawing its faces"
+	if _pictures.size() < SHEET:
+		return "%s rendering: %d of %d faces, about 5 s each      %d picked      Enter once all are in" % [
+			sheet, _pictures.size(), SHEET, _picked.size()]
 	var narrowest := ", ".join(shown["narrowest"].map(func(n): return "%s %d%%" % [n[0], roundi(100.0 * n[1])]))
 	var carries := "candidates: " + (", ".join(shown["candidates"]) if not shown["candidates"].is_empty() else "none")
 	if shown["unanswered"] > 0:
@@ -161,7 +166,7 @@ static func _next(next: Dictionary) -> String:
 func _test() -> void:
 	if not args.has("shot"):
 		return
-	await _until(func(): return _pipe == null or not _pictures.is_empty())
+	await _until(func(): return _pipe == null or _pictures.size() >= int(args.get("faces", SHEET)))
 	for i in args.get("pick", "").split(",", false):
 		_toggle(int(i))
 	if args.has("key"):

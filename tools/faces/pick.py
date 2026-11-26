@@ -6,8 +6,8 @@ writes the sheet to show, drawing each next sheet and rendering it in the backgr
 
 In: "submit" and the JSON list of the faces he picked on the sheet shown, [] if none, or "undo", to take the
 last sheet submitted back and show it again. Out, for each line in, and as a "notice" whenever a render moves
-on: the "sheet" shown, its "pictures", a face each, the front and the profile side by side ([] until all are
-rendered), and the faces "picked" on it before ([] unless taken back); how many
+on: the "sheet" shown, its "pictures", a face each, the front and the profile side by side (those rendered so
+far), and the faces "picked" on it before ([] unless taken back); how many
 "sheets" he has submitted and "picks" he made on them; the sheet's "narrowest" directions as [name, share of
 the full spread], the "candidates" its faces carry and how many candidate features are "unanswered", held at
 0; and the render of the sheet shown, "here", and of the "next": how many of its "faces" are "rendered", and
@@ -107,12 +107,17 @@ class Sitting:
         failed = self.build.failure() if self.build and self.building == j else ""
         return dict(rendered=rendered, faces=faces, failed=failed)
 
+    def pictures(self, j):
+        """The jth sheet's pictures rendered so far, in order: its faces render one after another."""
+        drawn = progress(self.folder(j))[1]
+        shown = [picture(i, self.folder(j)) for i in range(drawn)]
+        return shown[:next((i for i, path in enumerate(shown) if not os.path.exists(path)), drawn)]
+
     def state(self):
         j = self.shown()
         sheet = rounds.load(self.record(j)) if os.path.exists(self.record(j)) else dict(r=[], candidates={})
         names = candidates.names()
-        return dict(sheet=j, pictures=[picture(i, self.folder(j)) for i in range(rounds.SHEET)]
-                    if complete(self.folder(j)) else [], picked=self.restored, sheets=len(self.picks),
+        return dict(sheet=j, pictures=self.pictures(j), picked=self.restored, sheets=len(self.picks),
                     picks=self.picks.picks(), narrowest=self.rounds.narrowest(sheet),
                     candidates=[names[key] for key in sheet["candidates"]], unanswered=self.rounds.unanswered(),
                     here=self.render(j), next=self.render(j + 1))
