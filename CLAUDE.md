@@ -2,7 +2,7 @@ The dev's rules, which bind every session, are in @DEV.md.
 
 ## Game
 
-A roguelite: the workshop and hall are the safe hub; enemies appear only outdoors, in MOBA-lane runs of about 12 grinners on screen, 40 units in all.
+The dev's design is in `DESIGN.md`: a roguelite of escort runs outdoors; the workshop and hall are the safe hub.
 
 ## Tools
 

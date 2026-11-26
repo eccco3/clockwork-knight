@@ -45,22 +45,19 @@ After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% wit
 
 Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 Ãƒâ€šÃ‚Â°C; 50% gave 43 W and 70 Ãƒâ€šÃ‚Â°C.
 
-## Plan the balance model with the dev
+## Plan the run with the dev
 
 ### Task description
 
-Settle how a run stays balanced before combat numbers are built. Within a run she goes from one among equals to hero, starting low each time; her offence and defence upgrades keep pace with growing enemy damage and numbers. The meta loop widens her options and moves, with small number bonuses. Her minions can be chosen, added to or modified. Candidate model: one unit (grinner-equivalents) for threat and power, fixed upgrade axes priced in it, army size as slot points, minions stronger near her, fresh waves per area, and headless simulated runs.
+Keep settling the run's design with the dev in the main chat; this is not a subagent task. `DESIGN.md` holds the decisions and its own open points. Then split the plan into backlog items: the escort area and payload, the retinue and their AI, the captains, items, level-ups and attributes, the curves, and the headless simulation with its bot playing the knight.
 
 ### Open questions
 
-- Do surviving minions carry over to the next area: all, none, or a few veterans?
-- Does she order her minions (hold, push, follow), or do they act on their own?
-- Can the army win a lane without her?
-- Which minion upgrades belong to runs and which to the meta loop?
+- The open points at the end of `DESIGN.md`.
 
 ### Status
 
-Planning with the dev; not for an agent.
+Planning with the dev. The run's shape, sides, commands and growth are settled.
 
 ## Plan the Clockmaker with the dev
 
@@ -182,12 +179,11 @@ Not started. Better after the dev picks a clockwork variant (or a flavour) from 
 
 ### Task description
 
-Make fights between groups outdoors, in the shape of a MOBA lane: waves of minions and grinners advance, meet and fight, with the knight among them. Units pick targets sensibly, hold formation, surround without stacking, and retreat or regroup when losing. Keep it cheap enough for 40 units at 60 fps, for example with staggered thinking and simple avoidance. Record a scripted battle and measure its CPU time.
+Make fights between groups outdoors, along an escort route (`DESIGN.md`): waves of minions and grinners advance, meet and fight, with the knight among them. Units pick targets sensibly, hold formation, surround without stacking, and retreat or regroup when losing. Keep it cheap enough for 40 units at 60 fps, for example with staggered thinking and simple avoidance. Record a scripted battle and measure its CPU time.
 
 ### Open questions
 
-- Which sides exist, and who fights whom?
-- Do waves spawn on a timer, and what ends a run?
+- None: `DESIGN.md` settles the sides, the waves' periodic spawning and the clock ending a run.
 
 ### Status
 

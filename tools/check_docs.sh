@@ -20,13 +20,13 @@ docs() {
 }
 
 check_global() {
-	for f in CLAUDE.md DEV.md BACKLOG.md; do
+	for f in CLAUDE.md DEV.md DESIGN.md BACKLOG.md; do
 		[ -f "$f" ] || echo "$f: missing"
 	done
 	docs | while IFS= read -r f; do
 		case "$f" in
-			CLAUDE.md | DEV.md | BACKLOG.md | */*) ;;
-			*) echo "$f: the only global documents are CLAUDE.md, DEV.md and BACKLOG.md" ;;
+			CLAUDE.md | DEV.md | DESIGN.md | BACKLOG.md | */*) ;;
+			*) echo "$f: the only global documents are CLAUDE.md, DEV.md, DESIGN.md and BACKLOG.md" ;;
 		esac
 	done
 }

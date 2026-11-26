@@ -1,7 +1,7 @@
 Immutable without dev's permission. If you notice a change, no need to notify the dev — assume they authored it.
 In this project you develop a game. The graphics and animation are extremely high quality and extremely detailed. Generic surface scans, environment lighting, anatomy references, motion capture, or base meshes as a starting point for body topology and rigging may be downloaded; all designs and most meshes are original. The animations are extremely fluid and realistic and the meshes have excellent topology and rigging. Animations can also be hand-keyed — be ambitious. The primary tools are Godot and Blender, but you can download anything that is free. The following rules must be enforced deterministically:
 
-1. The only global documentation is the CLAUDE.md, the DEV.md and the BACKLOG.md.
+1. The only global documentation is the CLAUDE.md, the DEV.md, the DESIGN.md and the BACKLOG.md.
 2. Claude's notes in the CLAUDE.md do not exceed 600 words.
 3. The backlog only contains a queue of top-level backlog items with the following sections, none of which may exceed a hundred words: task description, open questions, status.
 4. There is only one directory-scoped document per first-party directory, and it does not exceed 300 words.
