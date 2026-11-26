@@ -82,7 +82,8 @@ $shortcut.Save()
 "Shortcut: $($shortcut.FullName)"
 
 # The picker's windows show on the pinned launcher when its shortcut carries the ID they take (playtest.ps1's
-# $AppId). Pinning copies the shortcut, so the pinned copy gets it too, if it is pinned already.
+# $AppId). Pinning copies the shortcut with its ID; a pin made before must be pinned again, since changing the
+# pinned copy leaves the taskbar unable to find it.
 Add-Type -Namespace Playtest -Name Shortcut -MemberDefinition @'
 [StructLayout(LayoutKind.Sequential, Pack = 4)] public struct Key { public Guid Format; public int Id; }
 [StructLayout(LayoutKind.Sequential)] public struct Variant { public ushort Type; ushort A, B, C; public IntPtr Value; IntPtr D; }
@@ -104,8 +105,5 @@ public static void SetAppId(string path, string id) {
 }
 '@
 $appId = if ((Get-Content -Raw (Join-Path $PSScriptRoot 'playtest.ps1')) -match "(?m)^\`$AppId = '(.+)'") { $Matches[1] } else { throw 'No $AppId in playtest.ps1' }
-$pinned = Join-Path $env:APPDATA "Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\$(Split-Path -Leaf $shortcut.FullName)"
-foreach ($link in @($shortcut.FullName) + @($pinned | Where-Object { Test-Path -LiteralPath $_ })) {
-  [Playtest.Shortcut]::SetAppId($link, $appId)
-  "App ID $appId on $link"
-}
+[Playtest.Shortcut]::SetAppId($shortcut.FullName, $appId)
+"App ID $appId on $($shortcut.FullName)"
