@@ -24,19 +24,20 @@ A roguelite: the workshop and hall are the safe hub; enemies appear only outdoor
 - Never combine `--only` with `--out`: it overwrites the full model.
 - Run: `godot --path .`. Playtest picker to pin: `tools\playtest\install.ps1` in the main checkout; `playtest.ps1 -DryRun` tests it.
 - Scripted play: `dev/drive.tscn` with `--fixed-fps 60`; `dev/shot.tscn` photographs a scene. Their headers list arguments.
-- Never open Godot windows on the dev's screen for tests or bakes, unless he is playtesting: replace `godot` with `toolchain\blender\4.5\python\bin\python.exe -I dev\quiet.py`; `--timing` first for GPU timing waits until nothing else runs.
-- Clips: `tools\clip.py out.mp4 <drive arguments>` (that Python) records `dev/drive.tscn` hidden.
+- Never open Godot windows on the dev's screen unless he is playtesting: replace `godot` with `toolchain\blender\4.5\python\bin\python.exe -I dev\quiet.py`; `--timing` first for GPU timing waits until nothing else runs.
+- Clips: `tools\clip.py out.mp4 <drive arguments>` (that Python) records `dev/drive.tscn` hidden, with sound.
+- `tools\voice.ps1 <folder>` speaks `lines.json` to WAVs and visemes for `scripts/mouth.gd`.
 - Capped at 60 fps. Frame times: `dev/drive.tscn` perf events; crowds: `dev/crowd.tscn`.
 
 ## Where things are
 
 - The playtest picker shows `metadata/playable` scenes and the dev's `metadata/dev_tool` tools. `scenes/main.tscn` is the hall.
 - `project.godot` holds the input map and names the layers; `scripts/layers.gd` gives code the same names.
-- The `App` autoload, `scripts/app.gd`, holds the keys Esc, F11 and H, cursor capture and the controls hint for playable scenes.
+- `scripts/app.gd`, the `App` autoload, holds Esc, F11 and H, cursor capture and playable scenes' controls hint.
 - `scenes/outdoors.tscn` builds the grinner's foggy ground on load.
 - `dev/` tests the game; `builders/` builds in Godot; `tools/`, hidden from Godot, builds and fetches assets.
 - `scripts/` holds the player controller, animator and camera rig; `looks.gd` makes each figure's wood, metal and eye materials; fighters carry `Health`, `Hurtbox`, `Strike`.
-- Lamps are baked. `scripts/hall.gd` turns those marked `lights_characters` into lights for the Characters layer only, and `shadows_characters` into cancelling pairs leaving character shadows on the baked floor. Only the fire is live.
+- Lamps are baked. `scripts/hall.gd` turns those marked `lights_characters` into Characters-layer lights, and `shadows_characters` into cancelling pairs leaving character shadows on the baked floor. Only the fire is live.
 - `addons/lightmap_bake` presses the editor's bake button.
 - `tools/sculpt/` is the characters' shared toolkit.
 - `tools/knight/` builds the knight, `assets/textures/knight/face_paint.png` and its placement `face_paint.json`; `tools/build_hall.py` and `builders/hall_*.gd` build the hall; `tools/workshop_shell.py`'s constants size the workshop beyond its east doors.
@@ -47,7 +48,7 @@ A roguelite: the workshop and hall are the safe hub; enemies appear only outdoor
 
 ## Repository
 
-- `tools/check_docs.sh` enforces `DEV.md`'s four documentation rules; `tools/hooks/pre-commit` runs it. After cloning: `git config core.hooksPath tools/hooks`.
+- `tools/check_docs.sh` enforces `DEV.md`'s documentation rules; `tools/hooks/pre-commit` runs it. After cloning: `git config core.hooksPath tools/hooks`.
 - First-party means everything git tracks except `tools/downloads/`.
 - Git ignores `toolchain/`, `.godot/`, `dev/shots/` and what `tools/fetch_assets.ps1` and `build_models.ps1` restore.
 - Commit with Windows git, not WSL.

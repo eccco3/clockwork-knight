@@ -8,9 +8,16 @@ extends Node3D
 ## `say` gives her a line: she talks through her speech clips until it is spoken, crossing from one to
 ## another every few seconds, or keeps to the one it names, and the line goes to the scene's Subtitles.
 ## While the knight is near and before her, she turns her head and eyes to the knight (Gaze).
+##
+## Her `mouth` moves with a voiced line one of the ways Mouth tries, still by default: her face's lips on a jaw,
+## or lacquered lip pieces, swapped or pivoted, on a face cut for them. The pieces ride her head; how the pivots
+## stand in each shape comes from the skeleton's extras.
 
 const FACE_PAINT := preload("res://assets/textures/rosalyn/face_paint.png")
 const FACE_PAINT_PLACEMENT := preload("res://assets/textures/rosalyn/face_paint.json")
+const INLAID_PAINT := preload("res://assets/textures/rosalyn/face_paint_inlaid.png")
+const INLAID_PAINT_PLACEMENT := preload("res://assets/textures/rosalyn/face_paint_inlaid.json")
+const LIPS: Array[Color] = [Color(0.80, 0.38, 0.29), Color(0.64, 0.27, 0.22)]  ## the lip pieces' lacquered wood
 const BROW := preload("res://assets/textures/rosalyn/brow.png")
 const BROW_PLACEMENT := preload("res://assets/textures/rosalyn/brow.json")
 const FACE_WOOD: Array[Color] = [Color(0.88, 0.73, 0.54), Color(0.77, 0.59, 0.41)]
@@ -28,6 +35,8 @@ const KNIGHT_EYES := 1.55  ## above the knight's feet
 const ATTEND_FADE := 0.8  ## seconds to turn to the knight, or away
 const MOUTH := Vector3(0.0, 1.57, 0.1)  ## where her voice comes from
 
+var mouth: Mouth
+
 var _tree: AnimationTree
 var _gaze: Gaze
 var _voice: AudioStreamPlayer3D
@@ -43,6 +52,8 @@ func _ready() -> void:
 	var looks: Dictionary[String, Material] = {
 		"wood": Looks.lacquered_wood(Color(0.86, 0.70, 0.50), Color(0.70, 0.50, 0.32)),
 		"wood_face": Looks.face_wood(FACE_WOOD[0], FACE_WOOD[1], FACE_PAINT, FACE_PAINT_PLACEMENT, true),
+		"wood_face_inlaid": Looks.face_wood(FACE_WOOD[0], FACE_WOOD[1], INLAID_PAINT, INLAID_PAINT_PLACEMENT, true),
+		"lip": Looks.lacquered_wood(LIPS[0], LIPS[1]),
 		"lacquer": Looks.lacquered_wood(Color(0.93, 0.80, 0.42), Color(0.78, 0.60, 0.24)),
 		"brass": Looks.brass(Color(0.90, 0.70, 0.34)),
 		"eye": Looks.glass_eye(Color(0.11, 0.26, 0.46), Color(0.48, 0.66, 0.80), 0.40, 0.345),
@@ -55,6 +66,7 @@ func _ready() -> void:
 	_gaze = Gaze.new()
 	_gaze.influence = 0.0
 	skeleton.add_child(_gaze)
+	_fit_mouth(skeleton)
 	_voice = AudioStreamPlayer3D.new()
 	_voice.position = MOUTH
 	add_child(_voice)
@@ -72,6 +84,8 @@ func say(line: String, voice: AudioStream = null, manner := "") -> void:
 	if voice:
 		_voice.stream = voice
 		_voice.play()
+		if mouth:
+			mouth.speak(_voice, _visemes(voice))
 	_talking = seconds + AFTER
 	_manner = manner
 	_next_gesture = 0.0
@@ -80,6 +94,12 @@ func say(line: String, voice: AudioStream = null, manner := "") -> void:
 
 func is_talking() -> bool:
 	return _talking > 0.0
+
+
+## The visemes tools/voice.ps1 wrote beside a voice, or none.
+func _visemes(voice: AudioStream) -> Array:
+	var path := voice.resource_path.get_basename() + ".json"
+	return (load(path) as JSON).data["visemes"] if ResourceLoader.exists(path) else []
 
 
 ## The speech clips a line may name as its manner.
@@ -143,3 +163,43 @@ func _paint_brows(skeleton: Skeleton3D) -> void:
 		var square := Transform3D(Basis(Vector3(side, 0.0, 0.0), Vector3.BACK, Vector3.DOWN), rest.origin)
 		brow.transform = rest.affine_inverse() * square
 		follow.add_child(brow)
+
+
+## Her Mouth, if the model has the lip pieces: each is set on her head where it stood at rest, the carved ones
+## by shape, RosalynLips<Shape>, and the pivots' by piece, RosalynLip<Piece>, with their moves into each shape.
+func _fit_mouth(skeleton: Skeleton3D) -> void:
+	var holders := find_children("*", "", true, false).filter(
+		func(n: Node) -> bool: return n.has_meta("extras") and n.get_meta("extras").has("mouths"))
+	if holders.is_empty():
+		return
+	var mouths: Dictionary = holders[0].get_meta("extras")["mouths"]
+	var head := BoneAttachment3D.new()
+	head.bone_name = "head"
+	skeleton.add_child(head)
+	var to_head := (global_transform.affine_inverse() * skeleton.global_transform
+		* skeleton.get_bone_global_rest(skeleton.find_bone("head"))).affine_inverse()
+	mouth = Mouth.new()
+	mouth.face = find_child("RosalynFace", true, false)
+	mouth.inlaid = find_child("RosalynFaceInlaid", true, false)
+	var rests := {}
+	for piece: MeshInstance3D in find_children("RosalynLip*", "MeshInstance3D", true, false):
+		var rest := global_transform.affine_inverse() * piece.global_transform
+		var called := String(piece.name)
+		piece.reparent(head, false)
+		piece.transform = to_head * rest
+		if called.begins_with("RosalynLips"):
+			mouth.carved[called.trim_prefix("RosalynLips").to_lower()] = piece
+		else:
+			called = called.trim_prefix("RosalynLip").to_snake_case()
+			mouth.pivots[called] = piece
+			rests[called] = rest
+	for shape: String in mouths:
+		var moves: Dictionary = mouths[shape]
+		mouth.shapes[shape] = {"jaw": moves["jaw"]}
+		for piece: String in mouth.pivots:
+			var m: Array = moves[piece]
+			var move := Transform3D(Vector3(m[0], m[1], m[2]), Vector3(m[3], m[4], m[5]), Vector3(m[6], m[7], m[8]),
+				Vector3(m[9], m[10], m[11]))
+			mouth.shapes[shape][piece] = to_head * move * rests[piece]
+	mouth.style = Mouth.Style.STILL
+	skeleton.add_child(mouth)

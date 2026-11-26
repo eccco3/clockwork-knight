@@ -1,10 +1,10 @@
-"""Records a dev/drive.tscn script to an H.264 MP4 on the hidden desktop, and deletes the AVI.
+"""Records a dev/drive.tscn script to an H.264 MP4 with its sound on the hidden desktop, and deletes the AVI.
 
     toolchain\\blender\\4.5\\python\\bin\\python.exe -I tools\\clip.py out.mp4 [godot arguments] [-- drive arguments]
 
 Godot gets --path, res://dev/drive.tscn, --fixed-fps 60 and --write-movie for you; add --resolution
 WxH and drive's key=value arguments (scene=, do=, side=) as usual. Godot's movie writer makes an
-AVI; Blender's built-in FFmpeg, run in the background on this same file, encodes it.
+AVI; Blender's built-in FFmpeg, run in the background on this same file, encodes it, the sound as AAC.
 """
 import subprocess
 import sys
@@ -18,7 +18,9 @@ QUIET = ROOT / 'dev' / 'quiet.py'
 def encode(avi: str, mp4: str) -> None:
     import bpy
     scene = bpy.context.scene
-    strip = scene.sequence_editor_create().strips.new_movie('clip', avi, 1, 1)
+    strips = scene.sequence_editor_create().strips
+    strip = strips.new_movie('clip', avi, 1, 1)
+    strips.new_sound('sound', avi, 2, 1)
     scene.render.resolution_x, scene.render.resolution_y = strip.elements[0].orig_width, strip.elements[0].orig_height
     scene.render.resolution_percentage = 100
     scene.render.fps, scene.render.fps_base = round(strip.fps), 1.0
@@ -29,6 +31,7 @@ def encode(avi: str, mp4: str) -> None:
     ffmpeg.format, ffmpeg.codec = 'MPEG4', 'H264'
     ffmpeg.constant_rate_factor, ffmpeg.ffmpeg_preset = 'HIGH', 'GOOD'
     ffmpeg.gopsize = 30
+    ffmpeg.audio_codec, ffmpeg.audio_bitrate = 'AAC', 192
     scene.render.filepath = mp4
     bpy.ops.render.render(animation=True)
 

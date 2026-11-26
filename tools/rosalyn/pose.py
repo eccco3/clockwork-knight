@@ -9,6 +9,7 @@ from rest, in the figure's axes (+X her left, -Y forward, +Z up).
   spine_, chest_, neck_, head_    the same three turns, each on top of the bone below
   head_level                      0..1: how far the head ignores the body's lean
   eye_yaw, eye_up, blink          both eyes turned to her left and upward; 0..1: the lids shut
+  jaw                             the jaw opened
   brow_up, brow_tilt              the brow slid up her face; turned about its middle to lift its inner end
   foot_x/y/z, foot_yaw/pitch/roll the sole under the ankle; pitch lifts the heel off the ball (or, negative,
                                   the toes off the heel), yaw turns the toes out
@@ -130,7 +131,7 @@ def solve(controls):
     head_ = part(chest, 1.0 - c("head_level")) @ turns("neck") @ turns("head")
     eye = head_ @ turn(Z, c("eye_yaw")) @ turn(X, -c("eye_up"))
     out = {"root": SAME, "hips": hips, "spine": spine, "chest": chest, "head": head_, "eye_l": eye, "eye_r": eye,
-           "neck": part(chest, 1.0 - 0.5 * c("head_level")) @ turns("neck")}
+           "jaw": head_ @ turn(X, c("jaw")), "neck": part(chest, 1.0 - 0.5 * c("head_level")) @ turns("neck")}
     out.update(_skirt(c, hips))
     moves = {"root": V(0, 0, 0), "hips": V(c("hips_x"), c("hips_y"), c("hips_z"))}
     pelvis = PELVIS + moves["hips"]

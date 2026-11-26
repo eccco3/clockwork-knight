@@ -1,14 +1,14 @@
 """Rosalyn's skeleton and skin.
 
-Eighty-two bones stand on the sculpt's landmarks: a root, five up the middle, an eye, its sleeping lid and a
-brow on each side, an arm of nine with fifteen in the hand, a leg of three, and sixteen in the skirt, which
-hangs in eight columns of two. The upper arm and the forearm are each LENGTHS bones end to end, which share
-out the limb's twist: the shoulder keeps its roundness, and the hand turns over without wringing the arm.
+Eighty-three bones stand on the sculpt's landmarks: a root, five up the middle, a jaw, an eye, its sleeping lid
+and a brow on each side, an arm of nine with fifteen in the hand, a leg of three, and sixteen in the skirt,
+which hangs in eight columns of two. The upper arm and the forearm are each LENGTHS bones end to end, which
+share out the limb's twist: the shoulder keeps its roundness, and the hand turns over without wringing the arm.
 
-Whatever is carved or cast in one piece rides one bone: her head from the choker up, her hair, eyes, lids and
-brass. A brow carries no mesh: the game paints the brow where its bone has moved it over the wood. The rest
-is skinned by a field over the rest pose: `weights` gives any point its bones, so every mesh binds by where
-its points lie, at each detail.
+Whatever is carved or cast in one piece rides one bone: her hair, eyes, lids and brass, and her head from the
+choker up, but for what the jaw carries of her face (head.jaw). A brow carries no mesh: the game paints the brow
+where its bone has moved it over the wood. The rest is skinned by a field over the rest pose: `weights` gives
+any point its bones, so every mesh binds by where its points lie, at each detail.
 """
 import numpy as np
 from sculpt import sdf as S, rig as R
@@ -35,6 +35,7 @@ DIGITS = dict(body.FINGERS, thumb=body.THUMB)
 EYE = Frame(body.HEAD.w(head.EYE * R.MIRROR), FWD * np.cos(head.EYE_TURN) + LEFT * np.sin(head.EYE_TURN), LEFT)
 LID_HINGE = body.HEAD.dir(head.LID_HINGE * R.MIRROR)          # the left lid shuts by turning head.LID_SHUT about this
 BROW = body.HEAD.w(head.BROW_AT * R.MIRROR)
+JAW, CHIN = body.HEAD.w(head.JAW), body.HEAD.w(V(0, 0.0695, -0.0940))
 
 HIPLINE, FLOUNCE = 0.930, 0.615               # heights at which the skirt's columns begin, and their lower halves
 SKIRT = dict(front=0.0, fore=45.0, side=90.0, aft=135.0, back=180.0)        # columns, in degrees round from the front
@@ -74,7 +75,7 @@ def _skirt_bones():
 BONES = list(R.both_sides([
     ("root", None, V(0, 0, 0), V(0, 0, 0.15)),
     ("hips", "root", PELVIS, WAIST), ("spine", "hips", WAIST, CHEST), ("chest", "spine", CHEST, NECK_A),
-    ("neck", "chest", NECK_A, CHOKER), ("head", "neck", CHOKER, CROWN),
+    ("neck", "chest", NECK_A, CHOKER), ("head", "neck", CHOKER, CROWN), ("jaw", "head", JAW, CHIN),
     ("eye_l", "head", EYE.o, EYE.w(V(0, 0, 0.030))), ("lid_l", "head", EYE.o, EYE.o + LID_HINGE * 0.030),
     ("brow_l", "head", BROW, BROW + FWD * 0.020),
     ("clavicle_l", "chest", STERNUM, SHOULDER), ("deltoid_l", "clavicle_l", SHOULDER, SHOULDER + CAP * 0.05),
@@ -92,9 +93,12 @@ def armature(name):
 
 def weigh(ob, bone=None, right=False):
     """Skin a mesh of the figure: to `bone` alone if it rides one (its twin, for the right side's of a pair
-    described on the left), or else by where its points stand."""
+    described on the left), to the head and the jaw for her face, or else by where its points stand."""
     if bone is None:
         R.weigh(ob, NAMES, weights(R.points(ob)))
+    elif bone == "face":
+        share = head.jaw(body.HEAD.l(R.points(ob)))
+        R.weigh(ob, ["head", "jaw"], np.stack([1.0 - share, share], axis=1))
     else:
         side = bone + ("_r" if right else "_l")
         R.weigh(ob, [side if side in NAMES else bone], np.ones((len(ob.data.vertices), 1)))

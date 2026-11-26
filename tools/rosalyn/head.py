@@ -4,9 +4,12 @@ Head frame as the knight's: origin between the eyes at the centre of the skull, 
 metres; the sculpt is symmetric in x. `field` is the carving, `paint` its lacquer (lips, lashes, blush) as a
 tint over the wood, and `wrap` meshes it with edge loops round the eyes and along the lips. The brows are
 painted apart, by `brow`, for the game to lay over the wood where her brows have moved to.
-The lips part on a slot that runs back to a pocket, so a jaw can open them. Each eye has a sleeping lid: a
-shell hidden under the brow that turns down over the eyeball, so she blinks without her wood bending.
+The lips part on a slot that runs back to a pocket, and `jaw` shares the face between the head and a jaw that
+turns a little to open them. `inlaid=True` carves the face without lips, a dark hollow where her mouth opens, for
+the lacquered lip pieces of mouth.py. Each eye has a sleeping lid: a shell hidden under the brow that turns down
+over the eyeball, so she blinks without her wood bending.
 """
+from types import SimpleNamespace
 import numpy as np
 from sculpt import sdf as S, mesher, gen
 from sculpt.sdf import V
@@ -31,7 +34,13 @@ TH_M = 0.292                                   # the corners of the mouth, as an
 MZ, RISE, BOW = -0.0612, 0.0013, 0.0005        # height of the parting, lift at the corners, dip under the cupid's bow
 MH = 0.00035                                   # half the parting's height at the centre
 POCKET = (0.0885, 0.0812)                      # distance of the pocket's back from the axis: centre, corners
+PARTING = (MH, MH, TH_M, 0.5)                  # the parting: open above and below its line at the middle, closed at
+                                               # this angle round the axis, and how sharply it closes toward there
+SOCKET = (0.0020, 0.0055, 0.200, 1.5)          # likewise the socket the inlaid face opens on, under the lip pieces
 NECK_CUT = -0.0012                             # the head ends this far along the neck from the choker
+JAW = V(0, -0.0150, -0.0050)                   # the jaw's hinge, between the joints before her ears; it opens about x
+JAW_BLEND = 0.014                              # this far off the parting, the lips go as the head and the chin do
+JAW_EDGE = (0.065, -0.101, 0.44)               # the jaw's lower edge: how far forward and how high at the chin, and its rise back
 
 PAINT_X, PAINT_Z0, PAINT_Z1 = 0.064, -0.100, 0.044          # the front-projected paint texture covers this
 
@@ -68,15 +77,59 @@ def _lip_line(th):
     return MZ + RISE * s ** 3 - BOW * np.exp(-(s / 0.30) ** 2) + 0.010 * smoothstep(TH_M, 2.0, th)
 
 
-def _mouth(q):
-    """The parting in the mirrored frame: g < 0 inside it, with its place along the mouth (0 centre .. 1
-    corner), its half height there and the distance from the axis."""
+def _open(th, opening):
+    """How far open a mouth's `opening` is at an angle round the axis: 1 in the middle, 0 where it closes."""
+    return np.clip(1.0 - (th / opening[2]) ** 2, 0.0, 1.0) ** opening[3]
+
+
+def _openings(inlaid):
+    """What the mouth opens on: the parting, and in the inlaid face the socket too."""
+    return (PARTING, SOCKET) if inlaid else (PARTING,)
+
+
+def _mouth(q, openings=(PARTING,)):
+    """The `openings` on the parting's line, in the mirrored frame: g < 0 inside them, with the place along the
+    mouth (0 centre .. 1 corner) and the distance from the axis."""
     th, r = _round(q)
-    s = th / TH_M
     off = q[:, 2] - _lip_line(th)
-    hh = MH * np.sqrt(np.clip(1.0 - s * s, 0.0, 1.0))
-    g = np.where(s < 1.0, np.abs(off) - hh, np.hypot((th - TH_M) * r, off) + 1e-4)
-    return g, s, hh, r
+    g = np.full(len(q), np.inf)
+    for opening in openings:
+        k = _open(th, opening)
+        inside = np.where(off > 0, off - opening[0] * k, -off - opening[1] * k)
+        g = np.minimum(g, np.where(th < opening[2], inside, np.hypot((th - opening[2]) * r, off) + 1e-4))
+    return g, th / TH_M, r
+
+
+def _pocket(d, g, s, r):
+    """The sculpt with the parting `g` cut back to the pocket."""
+    back = POCKET[0] + (POCKET[1] - POCKET[0]) * np.minimum(s, 1.0) ** 2
+    return S.smax(d, -np.maximum(g, back - r), 0.0004)
+
+
+def lips(p):
+    """Her lips as they rest: a cupid's bow over a fuller lower lip, the corners tucked up into the cheeks. Each is
+    whole, upper and lower, before the parting divides them."""
+    q = S.mirror_x(p)
+    up_l = S.ellipsoid(q, V(0.0078, 0.0796, -0.0570), V(0.0126, 0.0056, 0.0056), S.euler(z=-27, y=9))
+    up_c = S.ellipsoid(p, V(0, 0.0820, -0.0588), V(0.0048, 0.0046, 0.0040))
+    lower = S.ellipsoid(q, V(0.0060, 0.0778, -0.0678), V(0.0116, 0.0066, 0.0070), S.euler(z=-25))
+    lower = S.smin(lower, S.ellipsoid(p, V(0, 0.0786, -0.0682), V(0.0084, 0.0066, 0.0066)), 0.004)
+    return S.smin(up_l, up_c, 0.003), lower
+
+
+def jaw(p):
+    """The jaw's share in each point of the face, 0..1. The lips part between the upper, which the jaw leaves, and
+    the lower, which it carries, less toward the corners of the mouth, where both go half its way; past the
+    corners the cheek blends from the head above the parting's line to the jaw below it. Behind the cheek, and
+    down the throat from the jaw's edge, the head keeps all."""
+    q = S.mirror_x(p)
+    th, _ = _round(q)
+    s = np.minimum(th / TH_M, 1.0)
+    off = q[:, 2] - _lip_line(th)
+    whole = 1.0 - s * s * (1.0 - smoothstep(0.0, JAW_BLEND, np.abs(off)))
+    share = 0.5 + 0.5 * np.where(off < -0.5 * LIP_STAND, whole, -whole)     # the pocket's back stays with the upper lip
+    edge = JAW_EDGE[1] + JAW_EDGE[2] * (JAW_EDGE[0] - q[:, 1])
+    return share * smoothstep(-0.004, 0.032, q[:, 1]) * smoothstep(edge - 0.014, edge + 0.002, q[:, 2])
 
 
 def skull(p):
@@ -85,7 +138,7 @@ def skull(p):
                   S.ellipsoid(p, V(0, 0.016, -0.036), V(0.0500, 0.0625, 0.0660)), 0.034)
 
 
-def _parts(p):
+def _parts(p, inlaid=False, cut=True):
     q = S.mirror_x(p)
     P = {}
     # ---- skull and the large masses of the face
@@ -126,22 +179,19 @@ def _parts(p):
     nostril = S.ellipsoid(q, V(0.0050, 0.0856, -0.0398), V(0.0021, 0.0036, 0.0014), S.euler(z=-25, x=22))
     P["nostril"] = nostril
     d = S.ssub(d, nostril, 0.0020)
-    # ---- lips: a cupid's bow over a fuller lower lip, the corners tucked up into the cheeks
-    up_l = S.ellipsoid(q, V(0.0078, 0.0796, -0.0570), V(0.0126, 0.0056, 0.0056), S.euler(z=-27, y=9))
-    up_c = S.ellipsoid(p, V(0, 0.0820, -0.0588), V(0.0048, 0.0046, 0.0040))
-    upper = S.smin(up_l, up_c, 0.003)
-    lower = S.ellipsoid(q, V(0.0060, 0.0778, -0.0678), V(0.0116, 0.0066, 0.0070), S.euler(z=-25))
-    lower = S.smin(lower, S.ellipsoid(p, V(0, 0.0786, -0.0682), V(0.0084, 0.0066, 0.0066)), 0.004)
+    # ---- lips, or where the lip pieces lie in a mouth that hollows round the parting
+    upper, lower = lips(p)
     P["upper_lip"], P["lower_lip"] = upper, lower
-    d = S.smin(d, S.smin(upper, lower, 0.0012), 0.0022)
+    if not inlaid:
+        d = S.smin(d, S.smin(upper, lower, 0.0012), 0.0022)
     phil = S.tube(p, [V(0, 0.0868, -0.0440), V(0, 0.0876, -0.0520)], [0.0018, 0.0022])
     d = S.ssub(d, phil, 0.0038)
     crease = S.ellipsoid(p, V(0, 0.0850, -0.0775), V(0.0120, 0.0070, 0.0038))
     d = S.ssub(d, crease, 0.0060)
-    g, s, hh, r = _mouth(q)
+    g, s, r = _mouth(q, _openings(inlaid))
     P["mouth_g"] = g
-    back = POCKET[0] + (POCKET[1] - POCKET[0]) * np.minimum(s, 1.0) ** 2
-    d = S.smax(d, -np.maximum(g, back - r), 0.0004)
+    if cut:
+        d = _pocket(d, g, s, r)
     # ---- eyelids: a shell over the eyeball, open across the aperture
     ga, across, ph, up, lo = _aperture(q)
     r_eye = S.length(q - EYE)
@@ -164,8 +214,13 @@ def _parts(p):
     return P
 
 
-def field(p):
-    return _parts(p)["d"]
+def field(p, inlaid=False):
+    return _parts(p, inlaid)["d"]
+
+
+def bare(p):
+    """The face without lips or a mouth cut in it: what the lip pieces rest on."""
+    return _parts(p, True, False)["d"]
 
 
 def density(p):
@@ -205,13 +260,14 @@ def dims(detail):
     return tuple(2 * max(4, round(r * detail / 2)) for r in RES)
 
 
-def rails(detail):
-    """Three neighbouring loops: the edge of the upper lip, the back of the pocket, the edge of the lower lip."""
+def rails(detail, openings=(PARTING,)):
+    """Three neighbouring loops: the edge of the upper lip, the back of the pocket, the edge of the lower lip; or the
+    edges of all the mouth's `openings`, and their back."""
     def edge(side):
         def g(p):
             th, _ = _round(S.mirror_x(p))
-            s = np.minimum(th / TH_M, 1.0)
-            stand = MH * np.sqrt(1.0 - s * s) + LIP_STAND + LIP_GAP * smoothstep(TH_M, TH_M + 0.09, th)
+            half = np.max([o[1 if side < 0 else 0] * _open(th, o) for o in openings], axis=0)
+            stand = half + LIP_STAND + LIP_GAP * smoothstep(TH_M, TH_M + 0.09, th)
             return side * (p[:, 2] - _lip_line(th)) - stand
         return g
     ring = round(LIP_RING * dims(detail)[2])
@@ -219,11 +275,11 @@ def rails(detail):
             Rail(ring + 1, edge(1.0))]
 
 
-def wrap(detail=1.0):
+def wrap(detail=1.0, inlaid=False):
     """The head's quad mesh in the head frame: verts, quads, normals and lattice points."""
     n = dims(detail)
-    v, q, nrm = mesher.wrap(field, *AXIS, (0.085, 0.105, 0.150), n, relax=14, density=density, snap=FEATURES,
-                            rails=rails(detail))
+    v, q, nrm = mesher.wrap(lambda p: field(p, inlaid), *AXIS, (0.085, 0.105, 0.150), n, relax=14, density=density,
+                            snap=FEATURES, rails=rails(detail, _openings(inlaid)))
     unit = mesher.cube_lattice(*n)[0]
     lat = np.rint((unit + 1.0) / 2.0 * np.array(n)).astype(np.int64)
     ring = round(LIP_RING * n[2])
@@ -273,16 +329,17 @@ def _front(p):
     return np.clip((p[:, 1] - 0.020) / 0.020, 0, 1)
 
 
-def paint(p):
+def paint(p, inlaid=False):
     """Lacquer tint multiplied over the wood at points on or near the surface. RGB in 0..1."""
-    P = _parts(p)
+    P = _parts(p, inlaid)
     q = S.mirror_x(p)
     col = np.ones((len(p), 3))
     col = mix(col, BLUSH, 0.50 * bump(q[:, 0], 0.040, 0.017) * bump(q[:, 2], -0.028, 0.015) * _front(p))
-    lips = np.minimum(P["upper_lip"], P["lower_lip"])
-    m = smoothstep(0.0012, 0.0001, lips)
-    deep = np.exp(-np.maximum(P["mouth_g"], 0) / 0.0011) * 0.9 + 0.25 * np.clip((q[:, 0] - 0.012) / 0.012, 0, 1)
-    col = mix(col, LIP * (1 - deep[:, None]) + LIP_DEEP * deep[:, None], m * 0.88)
+    if not inlaid:
+        lips = np.minimum(P["upper_lip"], P["lower_lip"])
+        m = smoothstep(0.0012, 0.0001, lips)
+        deep = np.exp(-np.maximum(P["mouth_g"], 0) / 0.0011) * 0.9 + 0.25 * np.clip((q[:, 0] - 0.012) / 0.012, 0, 1)
+        col = mix(col, LIP * (1 - deep[:, None]) + LIP_DEEP * deep[:, None], m * 0.88)
     col = mix(col, MOUTH, smoothstep(0.00015, -0.00005, P["mouth_g"]))
     col = mix(col, V(0.50, 0.33, 0.26), np.clip(1.0 - (P["nostril"] + 0.0006) / 0.0014, 0, 1) * 0.8)
     g = P["lid_g"]
@@ -296,10 +353,14 @@ def paint(p):
     return mix(col, LASH, lash * np.where(upper_side, 1.0, 0.40 * np.clip((s + 0.2) / 0.8, 0, 1)))
 
 
-def at_rest(p):
+def at_rest(p, inlaid=False):
     """`paint` with the brows where they rest: how previews show her face."""
     q = S.mirror_x(p)
-    return mix(paint(p), BROW, _brow(q[:, 0], q[:, 2]) * BROW_INK * _front(p))
+    return mix(paint(p, inlaid), BROW, _brow(q[:, 0], q[:, 2]) * BROW_INK * _front(p))
+
+
+INLAID = SimpleNamespace(field=lambda p: field(p, True), paint=lambda p: paint(p, True), PAINT_X=PAINT_X,
+                         PAINT_Z0=PAINT_Z0, PAINT_Z1=PAINT_Z1, __file__=__file__)   # the face without lips, for build.face_paint
 
 
 def brow():

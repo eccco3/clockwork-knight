@@ -1,0 +1,12 @@
+{
+	"voice": "Microsoft Zira Desktop",
+	"rate": -1,
+	"lines": {
+		"evening": "Good evening. I wondered when you would come back.",
+		"fire": "Sit by the fire a while. The night is long, and the road will keep.",
+		"clocks": "Do you hear that? Every clock in the hall has stopped at the same minute.",
+		"doors": "No. I will not open the east doors, not tonight, and not for anyone.",
+		"waiting": "Perhaps I was made for waiting. Perhaps it is the thing I do best.",
+		"fog": "Tell me, what did you see out there, past the fog?"
+	}
+}
