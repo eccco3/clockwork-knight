@@ -14,6 +14,23 @@ A launcher tool where the dev picks the women he likes from sheets of 25 drawn a
 
 Not started. The candidate features' pictures are rendering; the dev is choosing their ranges in Face features: women.
 
+## Faces: the men's track, from the launcher
+
+### Task description
+
+Repeat the women's track for the men with the dev's wife's taste, every step a launcher tool in order: pick favourites from men's pool sheets; base face = their average pushed 2× (preview 1×, 1.5×, 2× and paints); candidate features on it, front and profile, men's own included; picking rounds. Generalise `candidates.py`, the features and picks tools by sex and rater; keep her answers apart. Carry the lessons: scans at 1×, the 22 at 0.5×, procedural eyes, ≥75% scan-covered features dropped unless her favourite is far out, shrinkage spreads, the taste model only once it predicts her picks.
+
+### Open questions
+
+- Skip pairwise rating and start from picks, since the women's base came from picks?
+- Let the men's draws reach toward androgynous, so her taste can pull there?
+- Facial hair: a candidate feature, a paint, or out?
+- What paint suits the men: no lash line, natural lips?
+
+### Status
+
+Not started. Needs "Faces: picking rounds" merged. No androgynous pool exists: the labels' androgynous answers only mark the middle of the sex direction, and the men's pool is drawn on the men's side.
+
 ## Faces: lines across the women's ears
 
 ### Task description
