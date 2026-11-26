@@ -51,7 +51,7 @@ VIEWS = (0.0, 35.0)                             # a rendered set shows each face
 # socket's floor that a level head keeps horizontal, which shows the front camera up the nostrils. Every
 # face is tipped forward by it.
 PITCH = 9.0
-LOOK = 6                                        # the renders' look: a set rendered in another is rendered again
+LOOK = 7                                        # the renders' look: a set rendered in another is rendered again
 SKIN, HAIR = (0.60, 0.40, 0.30), (0.045, 0.032, 0.025)
 LIPS, CHEEKS = (0.52, 0.24, 0.21), (0.66, 0.36, 0.29)
 WHITE, IRIS, PUPIL = (0.80, 0.77, 0.72), (0.16, 0.10, 0.05), (0.01, 0.01, 0.01)

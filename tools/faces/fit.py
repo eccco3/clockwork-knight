@@ -21,7 +21,7 @@ from sculpt.num import smoothstep
 from sculpt.sdf import V
 from .model import Model, mirrored, principal, twins
 
-VERSION = 2                                    # a model fitted by another version of this is fitted again
+VERSION = 3                                    # a model fitted by another version of this is fitted again
 BASIS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "basis.json")
 AXIS = (V(0, -0.012, 0.045), V(0, -0.012, -0.105))
 EXTENT = (0.085, 0.105, 0.150)

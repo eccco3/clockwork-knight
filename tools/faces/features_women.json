@@ -1,0 +1,57 @@
+{
+	"chin/chin-cleft": {
+		"favourite": 0.0,
+		"range": [0.0, 0.0]
+	},
+	"chin/chin-pointed": {
+		"favourite": 0.0,
+		"range": [0.0, 1.0]
+	},
+	"chin/chin-prominent": {
+		"favourite": 0.0,
+		"range": [-0.5, 0.3]
+	},
+	"chin/jaw-forward": {
+		"favourite": 0.0,
+		"range": [0.0, 0.0]
+	},
+	"eyes/eyes-apart": {
+		"range": [-1.0, 1.0]
+	},
+	"eyes/eyes-higher": {
+		"range": [-1.0, 2.0]
+	},
+	"eyes/eyes-larger": {
+		"range": [-1.0, 2.0]
+	},
+	"eyes/eyes-prominent": {
+		"range": [-2.0, 2.0]
+	},
+	"eyes/outer-corners-up": {
+		"range": [-1.0, 1.0]
+	},
+	"upper/brow-ridge-forward": {
+		"favourite": 0.0,
+		"range": [0.0, 0.0]
+	},
+	"upper/brow-ridge-up": {
+		"favourite": 0.8,
+		"range": [0.0, 1.5]
+	},
+	"upper/cheeks-fuller": {
+		"favourite": -0.3,
+		"range": [-0.7, 0.4]
+	},
+	"upper/cheeks-higher": {
+		"favourite": 0.0,
+		"range": [0.0, 0.7]
+	},
+	"upper/forehead-forward": {
+		"favourite": 0.0,
+		"range": [0.0, 0.0]
+	},
+	"upper/forehead-taller": {
+		"favourite": 0.0,
+		"range": [-2.0, 1.0]
+	}
+}
