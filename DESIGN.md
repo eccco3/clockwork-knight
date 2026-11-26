@@ -41,7 +41,7 @@ A roguelite. The workshop and hall are the safe hub, where the meta loop happens
 - At each level-up she and each retainer gain attribute points, rolled from the allocations set in the meta loop, and each retainer ranks its skills in the order set there.
 - Each area has two kinds of side objective: sequestered enemies, which give XP, and caches only she can see, born of the magic that is the source of her power.
 - Side objectives cost progress in their area but pay off in later ones. Whether to attempt them should be a real trade-off, depending partly on whether her build and retinue lean to the early or the late game, as early-game champions take dragons in League of Legends.
-- A captain's death gives the clockwork resource, scaled by her share of the damage it took, and capped per area so that farming stops paying quickly. Kills give no XP of their own.
+- A captain's death gives essence, scaled by her share of the damage it took, and capped per area so that farming stops paying quickly. Kills give no XP of their own.
 - Deaths do not feed the captains.
 
 ## Her items
@@ -54,7 +54,7 @@ A roguelite. The workshop and hall are the safe hub, where the meta loop happens
 - Her current moves and animations were trials of what can be made, and the game's will differ. Attack speed and movement speed have soft ceilings, and some animation cancelling is acceptable.
 - Items have rarities, and offers scale with the level they are found at, so a kept item falls behind unless enchanted.
 - Each offer is three items of the same rarity. Accepting one loses the other two.
-- She can dismantle an offered item into a clockwork resource, and declining a better offer gives more of it. The resource enchants an item to a higher rarity, which rolls something new for that item.
+- She can dismantle an offered item into essence, and declining a better offer gives more of it. Essence enchants an item to a higher rarity, which rolls something new for that item.
 - Most of the time she should accept the offer, but keeping a favoured piece stays possible. One rarity step of enchanting costs about what two declined offers of that rarity give, and a bot that always takes the better item should accept about 75 to 85% of offers.
 - The retinue never take items: they grow only in attributes and skills.
 
@@ -89,4 +89,4 @@ A roguelite. The workshop and hall are the safe hub, where the meta loop happens
 
 ## Open
 
-- What the caches hold, and the clockwork resource's name.
+- What the caches hold.
