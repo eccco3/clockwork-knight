@@ -127,11 +127,12 @@ def wrap(f, a, b, extent, dims, relax=10, tmax=None, density=None, snap=None, sn
             q[bad] = _cast(f, o[bad], d[bad], tmax)[0]
         return q
 
-    def slide(g, q, goal, place, steps=7):
+    def slide(g, q, goal, place, steps=7, halvings=12):
         """Newton steps moving q along grad g to g = goal; `place` puts each step back where it belongs. The steps
         can end across the curve g = 0 from the goal: they swing across it where the surface `place` keeps to
         jumps past the goal, as where a lid's rim hides its edge from the rays, and stall on it where g grows along
-        the rays. A point left across goes back to where it last stood on the goal's side."""
+        the rays. A point left across is brought back to the edge of the goal's side, found by halving the way
+        from where it last stood there."""
         grad = np.zeros_like(q)
         last, stood = q.copy(), np.zeros(len(q), dtype=bool)        # where each point last stood on the goal's side
         for _ in range(steps):
@@ -146,7 +147,14 @@ def wrap(f, a, b, extent, dims, relax=10, tmax=None, density=None, snap=None, sn
             n2 = np.maximum((grad * grad).sum(-1), 1e-9)
             q = place(q - grad * ((gq - goal) / n2)[:, None])
         back = stood & (g(q) * goal < 0)
-        q[back] = last[back]
+        if back.any():
+            across = q.copy()
+            for _ in range(halvings):
+                mid = place(0.5 * (last + across))
+                on = (g(mid) * goal > 0)[:, None]
+                last = np.where(on, mid, last)
+                across = np.where(on, across, mid)
+            q[back] = last[back]
         return q, S.normalize(grad)
 
     def bridge(p):
