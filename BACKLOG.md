@@ -1,5 +1,19 @@
 # Backlog
 
+## Faces: a face maker with dials
+
+### Task description
+
+The dev: "let's just build the final product: a face maker which has dials for the features." A launcher tool, live in Godot: the face model's head as a mesh whose blend shapes are its numbers, painted and lit as the sheets are, women's long hair. A dial per named feature (the 22, brows, the kept candidates, each within his range), a few for the scan numbers, Randomize drawing as Face picks does at full spread, profile turn, and saving faces for the game's characters. Every face on the women's sheets looked fine to him; he wants variety, not narrowing.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. The bust (`build_bust.py`) bakes one face; nothing changes a face live yet.
+
 ## Faces: the men's track, from the launcher
 
 ### Task description
