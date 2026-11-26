@@ -67,11 +67,10 @@
 		]
 	},
 	"upper/brow-ridge-up": {
-		"dropped": "the scan numbers make 81% of it",
-		"favourite": 0.0,
+		"favourite": 0.8,
 		"range": [
 			0.0,
-			0.0
+			1.5
 		]
 	},
 	"upper/cheeks-fuller": {
