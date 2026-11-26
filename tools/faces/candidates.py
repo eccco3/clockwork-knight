@@ -59,10 +59,9 @@ MAKEHUMAN = {
 EYES = ["eyes larger", "outer corners up", "eyes apart", "eyes higher", "eyes prominent"]
 UNITS = dict(size=0.05, tilt=4.0, apart=0.0015, higher=0.0015, prominent=0.0015)   # scale, degrees, metres
 EYE_FADE = (0.018, 0.034)                         # the eye moves wholly within the first radius, not past the second
-# Where each category's pictures look (the face looks down -y), and how tall: the eyes close, the rest the
-# whole face; forward of the head's middle, so that the profile is of the face.
+# Where the pictures look (the face looks down -y), and how tall: the whole face, so that a feature is judged
+# on it; forward of the head's middle, so that the profile is of the face.
 FACE = ((0, -0.035, 1.605), 0.21)
-FRAMES = dict(eyes=((0, -0.04, 1.625), 0.11), mouth=FACE, nose=FACE, chin=FACE, upper=FACE)
 LASH, LASH_COLOUR, LIPS = (0.0018, 0.0009), (0.035, 0.025, 0.022), (0.42, 0.17, 0.15)
 
 
@@ -162,7 +161,7 @@ def render(categories):
                     continue
                 face = np.concatenate([her[:D], [s], her[D:]])
                 tiles.append(bf.portrait(model, face, os.path.join(FOLDER, "tile.png"), view, 1.0, bf.WOMEN,
-                                         frame=FRAMES[category]))
+                                         frame=FACE))
             rows.append(np.concatenate(tiles, axis=1))
         picture = k.replace("/", "_") + ".png"
         bf.save(os.path.join(FOLDER, picture), np.concatenate(rows[::-1], axis=0))
