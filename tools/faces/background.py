@@ -1,6 +1,6 @@
-"""build_faces.py run in the background: in Blender without a window, its output in a log, and ended with
-the process that started it, however that ends (a Windows job object), so a closed tool leaves no render
-running behind it."""
+"""A face script, build_faces.py or another, run in the background: in Blender without a window, its output
+in a log, and ended with the process that started it, however that ends (a Windows job object), so a
+closed tool leaves no render running behind it."""
 import ctypes, os, subprocess
 from ctypes import wintypes
 
@@ -51,14 +51,13 @@ def blender():
 
 
 class Build:
-    """One run of build_faces.py with these arguments, writing its output to `log`."""
+    """One run of the script, build_faces.py unless named, with these arguments, writing its output to `log`."""
 
-    def __init__(self, arguments, log):
+    def __init__(self, arguments, log, script=os.path.join(HERE, "build_faces.py")):
         self.log = log
         with open(log, "w", encoding="utf-8") as out:
             self.process = subprocess.Popen(
-                [blender(), "--background", "--python-exit-code", "1", "--python", os.path.join(HERE, "build_faces.py"),
-                 "--"] + arguments, stdin=subprocess.DEVNULL, stdout=out, stderr=subprocess.STDOUT,
+                [blender(), "--background", "--python-exit-code", "1", "--python", script, "--"] + arguments, stdin=subprocess.DEVNULL, stdout=out, stderr=subprocess.STDOUT,
                 creationflags=subprocess.CREATE_NO_WINDOW)
         process = kernel32.OpenProcess(SET_QUOTA | TERMINATE, False, self.process.pid)
         joined = process and kernel32.AssignProcessToJobObject(JOB, process)
@@ -71,6 +70,11 @@ class Build:
 
     def running(self):
         return self.process.poll() is None
+
+    def stop(self):
+        """Ends the run, its work no longer wanted."""
+        self.process.kill()
+        self.process.wait()
 
     def failure(self):
         """Why it failed, the last line it wrote; "" while it runs or once it has succeeded."""

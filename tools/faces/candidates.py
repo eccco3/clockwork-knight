@@ -19,9 +19,11 @@ import sys, os, json, re, numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 from faces import makehuman
+from faces.files import whole
 
 FOLDER = os.path.join(HERE, "candidates")
 BASE = os.path.join(HERE, "women_base.json")
+ANSWERS = os.path.join(HERE, "features_women.json")
 STEPS = (-2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0)
 
 # MakeHuman's, by category: the name the dev sees, the target's folder and stem, and its two ends (the
@@ -66,6 +68,26 @@ LASH, LASH_COLOUR, LIPS = (0.0018, 0.0009), (0.035, 0.025, 0.022), (0.42, 0.17, 
 
 def key(category, name):
     return "%s/%s" % (category, re.sub(r"[^a-z]+", "-", name.lower()).strip("-"))
+
+
+def names():
+    """{key: the name the dev sees} of every candidate feature, in the order he is shown them."""
+    return {key("eyes", n): n for n in EYES} | {key(c, row[0]): row[0] for c, rows in MAKEHUMAN.items() for row in rows}
+
+
+def answered(answers=ANSWERS):
+    """{key: answer} of the features the dev has answered (dev/features.gd): given a favourite."""
+    if not os.path.exists(answers):
+        return {}
+    with open(answers, encoding="utf-8") as f:
+        return {k: a for k, a in json.load(f).items() if "favourite" in a}
+
+
+def kept(answers=ANSWERS):
+    """{key: (lowest, favourite, highest)} of the features the dev keeps: answered, with strengths other than
+    0 alone. The rest stay at 0."""
+    return {k: (a["range"][0], a["favourite"], a["range"][1]) for k, a in sorted(answered(answers).items())
+            if a["range"] != [0.0, 0.0]}
 
 
 def _makehuman(fit, group, stem, way):
@@ -130,7 +152,6 @@ def render(categories):
     listed = {f["key"]: f for f in index.get("features", [])}
     base = model.directions
     for k, (category, name, one_way, d) in candidates(model, bf.EYE, categories).items():
-        bf.TARGET, bf.SCALE = FRAMES[category]
         model.directions = np.concatenate([base, d[None].astype(base.dtype)])
         rows = []
         for view in (0.0, 90.0):
@@ -140,7 +161,8 @@ def render(categories):
                     tiles.append(np.zeros((bf.TILE[1], bf.TILE[0], 4), np.float32))
                     continue
                 face = np.concatenate([her[:D], [s], her[D:]])
-                tiles.append(bf.portrait(model, face, os.path.join(FOLDER, "tile.png"), view, 1.0, bf.WOMEN))
+                tiles.append(bf.portrait(model, face, os.path.join(FOLDER, "tile.png"), view, 1.0, bf.WOMEN,
+                                         frame=FRAMES[category]))
             rows.append(np.concatenate(tiles, axis=1))
         picture = k.replace("/", "_") + ".png"
         bf.save(os.path.join(FOLDER, picture), np.concatenate(rows[::-1], axis=0))
@@ -148,8 +170,8 @@ def render(categories):
                          largest_mm=round(1000 * float(np.linalg.norm(d, axis=1).max()), 2))
         print("CANDIDATE", k, flush=True)
     model.directions = base
-    order = [key("eyes", n) for n in EYES] + [key(c, r[0]) for c, rows in MAKEHUMAN.items() for r in rows]
-    with bf.whole(index_path) as part, open(part, "w", encoding="utf-8", newline="\n") as f:
+    order = list(names())
+    with whole(index_path) as part, open(part, "w", encoding="utf-8", newline="\n") as f:
         json.dump(dict(steps=STEPS, tile=list(bf.TILE), views=["front", "profile"],
                        features=sorted(listed.values(), key=lambda f: order.index(f["key"]))), f, indent=1)
 

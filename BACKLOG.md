@@ -1,19 +1,5 @@
 # Backlog
 
-## Faces: picking rounds around the women's base face
-
-### Task description
-
-A launcher tool where the dev picks the women he likes from sheets of 25 drawn around the base face (`women_base.json`): scan numbers at 1× the pool's spread, the 22 at 0.5×, brows at 1×, and the candidate features he keeps (`features_women.json`) within his ranges, most often near his favourites. Each next sheet renders in the background. Its centre is the average of all his picks; each direction's spread is an empirical-Bayes shrinkage estimate of how much narrower his picks are than their draws, never below half. No correlations. Front view, with a key for profile.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. The candidate features' pictures are rendering; the dev is choosing their ranges in Face features: women.
-
 ## Faces: the men's track, from the launcher
 
 ### Task description
@@ -29,7 +15,7 @@ Repeat the women's track for the men with the dev's wife's taste, every step a l
 
 ### Status
 
-Not started. Needs "Faces: picking rounds" merged. No androgynous pool exists: the labels' androgynous answers only mark the middle of the sex direction, and the men's pool is drawn on the men's side.
+Not started. The women's picking rounds are in (`tools/faces/rounds.py`, `pick.py`, `dev/picks.gd`, with a `sex` export). No androgynous pool exists: the labels' androgynous answers only mark the middle of the sex direction, and the men's pool is drawn on the men's side.
 
 ## Faces: lines across the women's ears
 

@@ -29,7 +29,7 @@ her head and falling from it, so the taste learnt from it is still the face's. T
 symmetric, so that his answers measure his taste and not chance; the grid's and the best faces are each
 slightly lopsided, as people are, by weights a.json keeps.
 """
-import bpy, contextlib, json, sys, os, shutil, time
+import bpy, json, sys, os, shutil, time
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -38,6 +38,7 @@ from sculpt import bl
 from sculpt.bl import argv, opt
 from sculpt.gen import Frame
 from faces import brows, files, fit, ict, makehuman, taste
+from faces.files import whole
 from faces.model import Model, SPREAD, normals
 from faces.sexes import SEXES, LABEL_SPREAD, Sex, label_set
 
@@ -343,9 +344,11 @@ def level(v):
     return np.stack([v[:, 0], y * np.cos(a) + z * np.sin(a), z * np.cos(a) - y * np.sin(a)], 1)
 
 
-def portrait(model, face, path, view, light, style="crop", lopsided=()):
+def portrait(model, face, path, view, light, style="crop", lopsided=(), frame=None):
     """One face alone in the scene, level, painted, with brows and the hair of HAIRS `style` names. `face` is
-    its coefficients and then its brow numbers; `lopsided` weighs the model's asymmetries."""
+    its coefficients and then its brow numbers; `lopsided` weighs the model's asymmetries. The camera turns
+    about `frame`'s target and shows its height, (TARGET, SCALE) unless given."""
+    target, scale = frame or (TARGET, SCALE)
     bl.reset_scene()
     stand, hair = groom(model.mean, face[len(model.directions):], style)
     skin = paint(model.mean, model.eyes)
@@ -359,7 +362,7 @@ def portrait(model, face, path, view, light, style="crop", lopsided=()):
     index = np.where(model.eyes[quads].mean(1) > 0.5, 2, (hair[quads].mean(1) > 0.5).astype(np.int32))
     face.data.polygons.foreach_set("material_index", index.astype(np.int32))
     HAIRS[style].dress(v)
-    bl.turnaround(path, [view], TARGET, SCALE, TILE, bl.studio(LAMPS[0], [e * light for e in LAMPS[1]]))
+    bl.turnaround(path, [view], target, scale, TILE,bl.studio(LAMPS[0], [e * light for e in LAMPS[1]]))
     tile = bl.read_image(path)
     os.remove(path)
     return tile
@@ -369,15 +372,6 @@ def style(name):
     """The hair a set of faces wears: the women's pool, refinement rounds and best faces WOMEN, every other set
     short hair."""
     return WOMEN if name.startswith("women") else "crop"
-
-
-@contextlib.contextmanager
-def whole(path):
-    """A file to write beside `path`, with its extension, that then takes its place, so that what is at `path`
-    is whole, the old or the new, however the writing ends."""
-    part = path + ".part" + os.path.splitext(path)[1]
-    yield part
-    os.replace(part, path)
 
 
 def save(path, pixels):
@@ -418,8 +412,9 @@ def worn(folder):
         return int(f["look"]) if "look" in f.files else None, str(f["hair"]) if "hair" in f.files else "crop"
 
 
-def render_in(model, folder, faces, share, spread, light, set_name, hair):
-    """Renders a set of faces in the folder in that hair, each from every view and symmetric, keeping those
+def render_in(model, folder, faces, share, spread, light, set_name, hair, views=VIEWS, frame=None):
+    """Renders a set of faces in the folder in that hair, each from every view side by side in the portraits'
+    `frame` and symmetric, keeping those
     already rendered, so a render cut short carries on where it stopped; each picture and the set's index
     appear whole or not at all. Other faces, another look or other hair replace the set. Returns whether the
     faces changed."""
@@ -437,8 +432,8 @@ def render_in(model, folder, faces, share, spread, light, set_name, hair):
     for i, c in enumerate(faces):
         path = files.picture(i, folder)
         if not os.path.exists(path):
-            views = [portrait(model, c, path + ".tile.png", view, light, hair) for view in VIEWS]
-            save(path, np.concatenate(views, axis=1))
+            tiles = [portrait(model, c, path + ".tile.png", view, light, hair, frame=frame) for view in views]
+            save(path, np.concatenate(tiles, axis=1))
             print("%s %d/%d  t=%.0fs" % (os.path.basename(folder).upper(), i + 1, len(faces), time.time() - t0),
                   flush=True)
     return changed

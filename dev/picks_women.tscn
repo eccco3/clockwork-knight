@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://dev/picks.gd" id="1"]
+
+[node name="Picks" type="Node"]
+script = ExtResource("1")
+sex = "women"
+metadata/dev_tool = "Face picks: women"

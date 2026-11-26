@@ -1,9 +1,18 @@
 """What the face tools and the dev exchange: sets of faces rendered for him to judge, and his answers on
 them, one JSON line each, written the moment he gives it."""
-import json, os
+import contextlib, json, os
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+
+@contextlib.contextmanager
+def whole(path):
+    """A file to write beside `path`, with its extension, that then takes its place, so that what is at `path`
+    is whole, the old or the new, however the writing ends."""
+    part = path + ".part" + os.path.splitext(path)[1]
+    yield part
+    os.replace(part, path)
 
 
 def folder(name):
