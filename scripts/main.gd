@@ -1,5 +1,6 @@
 extends Node3D
-## The playable scene: the hall, and the knight at its spawn marker.
+## The playable scene: the hall, the knight at its spawn marker, and Rosalyn, whom the scene stands by the
+## hall's first window on the fire's side, with the subtitles of what she says.
 
 const HALL := preload("res://scenes/hall.tscn")
 

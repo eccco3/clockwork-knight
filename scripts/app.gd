@@ -8,9 +8,9 @@ extends Node
 const PLAYABLE := &"playable"
 const FADE_OUT := 1.6
 const FADE_IN := 0.9
-const HINT := "WASD  move      Ctrl  walk  (C toggles)      Space  jump      Shift / RMB  dodge-roll      LMB  attack ×3\n" \
+const HINT := "WASD  move      Ctrl  walk  (C toggles)      Space  jump      Shift / RMB  dodge-roll      LMB  attack ×3      T  talk\n" \
 	+ "Mouse  look      Wheel  zoom      Esc  free cursor      F11  fullscreen      H  hide this\n" \
-	+ "Gamepad:  stick move · right stick look · A jump · B roll · X attack"
+	+ "Gamepad:  stick move · right stick look · A jump · B roll · X attack · Y talk"
 
 var _cameras := 0
 var _hint: Label

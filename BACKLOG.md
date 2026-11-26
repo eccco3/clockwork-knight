@@ -42,19 +42,19 @@ After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% wit
 
 Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 Ãƒâ€šÃ‚Â°C; 50% gave 43 W and 70 Ãƒâ€šÃ‚Â°C.
 
-## Rosalyn: place her and test two entities
+## Subtitles: a stall at the first line
 
 ### Task description
 
-Stand Rosalyn in the hall and have her speak as the knight comes near. Check that both characters are lit, shadowed and reflected correctly together, and that the knight cannot walk through her. Measure frame time, GPU time and CPU time for animation with one and with both, in real play, and record a scripted approach and conversation.
+The first subtitle line shown in the hall makes one frame of 44 to 46 ms, about 0.85 s after it appears; later lines don't. It comes from showing the subtitles (`scripts/subtitles.gd`): it persists with Rosalyn's processing off and vanishes with the subtitles hidden. A visible warm-up label at load, and turning off accessibility or the pipeline cache, didn't remove it. Find the cause and remove it, measured with `dev/drive.tscn` perf events.
 
 ### Open questions
 
-None. She stands by one of the windows closer to the first one, between that window and the fire. She speaks only when the knight is close, and idles otherwise.
+- None.
 
 ### Status
 
-Not started. Her scene needs a `Subtitles` node (`scripts/subtitles.gd`) for her lines to show.
+Not started. Found while standing Rosalyn in the hall (`scenes/main.tscn`), where with the knight she adds about 0.3 ms of frame time, 0.24 ms of GPU and 0.2 ms of animation CPU. Her 1-4 and 0 keys for holding a speech clip are physical keys in `scripts/rosalyn.gd`, not input-map actions; `build_rosalyn.py` borrows the knight's shadow stand-in helper, which belongs in `tools/sculpt/`.
 
 ## Plan the balance model with the dev
 
@@ -273,4 +273,4 @@ None. Try both: four or five shapes as swapped meshes, and the same shapes as pi
 
 ### Status
 
-Deprioritized: waits for the change to her model, which may affect it; a first attempt is on branch `worktree-agent-a657b3d97045922cc`. Speech is built: four 12 s clips (Tell, Ask, Muse, Insist) crossed by her AnimationTree, `Rosalyn.say()` with subtitles, brows as decals on brow bones and `scripts/gaze.gd` turning her head to the knight; `dev/talk.tscn` tries it. No voice files yet, so a real voice stream is untested.
+Deprioritized: waits for the change to her model, which may affect it; a first attempt is on branch `worktree-agent-a657b3d97045922cc`. Speech is built: four 12 s clips (Tell, Ask, Muse, Insist) crossed by her AnimationTree, `Rosalyn.say()` with subtitles, brows as decals on brow bones and `scripts/gaze.gd` turning her head to the knight; she speaks in the hall, T saying her next line. No voice files yet, so a real voice stream is untested.
