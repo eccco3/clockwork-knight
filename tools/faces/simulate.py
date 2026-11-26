@@ -120,7 +120,7 @@ def test(model, sex, kinds, start, a):
     share, spread = taste.shares(model), taste.spread(model)
     prior, pool = taste.prior(share, spread), taste.pool(sex)
     rng = np.random.default_rng(1)
-    judged = np.stack([taste.draw(sex, rng) for _ in range(JUDGED)])
+    judged = taste.sample(sex, rng, JUDGED)
     for name, draw in kinds:
         rows = []
         for seed in range(a.raters):

@@ -21,13 +21,14 @@ still unclear, a new round every ROUND or so answers; the rating tool renders ea
 switches to it once rendered (rate.py). Every round's answers join the same file, each line naming its
 set, and all of them teach w. simulate.py measures what these choices cost in answers.
 """
-import json, os, shutil, sys, time
+import functools, json, os, shutil, sys, time
 import numpy as np
 
 from . import brows
 from .files import HERE, Log, complete, exists, folder, rendered
 from .logistic import Posterior
 from .sexes import SEXES
+from .widths import Widths
 
 POOL, POOL_SEED, POOL_SIZE = "pool 2", 7, 240  # the pool's name in the answers: the second, whose faces have features and brows
 # A face drawn at random in all of its numbers lands far out along many of them at once and looks extreme,
@@ -37,6 +38,12 @@ POOL, POOL_SEED, POOL_SIZE = "pool 2", 7, 240  # the pool's name in the answers:
 # the artists' full sliders. Its place along the female-male direction
 # is kept (sexes.MARGIN), so it still reads as a sex.
 BASE, BOLD, FEATURES, FROM, LIMIT = 0.30, 0.75, 8, 30, 2.0
+# Yet a woman's face drawn so can still be broad in jaw, cheeks or head, which reads as a man's whatever her
+# place along that direction, and pairs of such faces hide the finer things he judges. So the sexes named
+# here keep only faces no broader in any of widths.py's measures than this many standard deviations past
+# the average of the faces drawn so, a share of them; the rest are drawn again.
+NARROW = {"women": 0.3}
+TRIED = 4000                                   # faces drawn to learn a sex's average widths and their spread
 PRIOR_LOGIT, NEW = 2.0, 0.25
 CLEAR = 20
 REPEAT = 0.05
@@ -44,6 +51,7 @@ FIRST_REPEAT = 10                              # no pair is re-shown before this
 CANDIDATES = 4000
 FIRST, ROUND = 40, 40
 REFINE_SIZE, REFINE_DRAWS = 60, 500
+RECENT = 40                                    # his latest answers the status tells how many were foreseen of
 
 
 def answers(name):
@@ -84,10 +92,29 @@ def draw(sex, rng):
     return np.concatenate([sex.sample(rng, s[:scans]), np.clip(rng.normal(0.0, s[scans:]), -LIMIT, LIMIT)])
 
 
+@functools.cache
+def broadest(sex):
+    """How a sex's faces are measured (widths.Widths) and the broadest each measure may be (NARROW)."""
+    measure, rng = Widths(sex.model), np.random.default_rng(0)
+    tried = measure(np.stack([draw(sex, rng) for _ in range(TRIED)]))
+    return measure, tried.mean(0) + NARROW[sex.name] * tried.std(0)
+
+
+def sample(sex, rng, count):
+    """`count` faces of a sex (sexes.Sex) as the pools hold them (draw), none broader than NARROW lets it be."""
+    kept = []
+    while sum(map(len, kept)) < count:
+        faces = np.stack([draw(sex, rng) for _ in range(count)])
+        if sex.name in NARROW:
+            measure, most = broadest(sex)
+            faces = faces[(measure(faces) <= most).all(1)]
+        kept.append(faces)
+    return np.concatenate(kept)[:count]
+
+
 def pool(sex, size=POOL_SIZE):
     """The faces of a sex (sexes.Sex) the dev is shown first."""
-    rng = np.random.default_rng((POOL_SEED, list(SEXES).index(sex.name)))
-    return np.stack([draw(sex, rng) for _ in range(size)])
+    return sample(sex, np.random.default_rng((POOL_SEED, list(SEXES).index(sex.name))), size)
 
 
 def refine_folder(name):
@@ -143,7 +170,7 @@ def refine(posterior, sex, rng, size=REFINE_SIZE, draws=REFINE_DRAWS):
     posterior is least sure of his taste, so his answers on them teach what makes the best faces best."""
     faces = []
     for w in rng.multivariate_normal(posterior.mean, posterior.cov, size):
-        drawn = np.stack([draw(sex, rng) for _ in range(draws)])
+        drawn = sample(sex, rng, draws)
         faces.append(drawn[np.argmax(drawn @ w)])
     return np.stack(faces)
 
@@ -158,7 +185,7 @@ def best(posterior, sex, rng, count, draws=4000):
     """The `count` faces, of `draws` random ones of the sex, furthest along the learnt direction, best first:
     faces the pool could hold, with their other features left to chance. Returns the faces and the logits
     of his preferring each to the mean face."""
-    faces = np.stack([draw(sex, rng) for _ in range(draws)])
+    faces = sample(sex, rng, draws)
     score = faces @ posterior.mean
     keep = np.argsort(-score)[:count]
     return faces[keep], score[keep]
@@ -178,10 +205,23 @@ class Answers(Log):
         """How many refinement rounds he has answered on."""
         return max([int(line["set"].split()[1]) for line in self.lines if line.get("set", "").startswith("refine")], default=0)
 
-    def posterior(self, prior_var):
+    def posterior(self, prior_var, count=None):
+        """What his first `count` answers, or all, teach of w."""
         size = len(prior_var)
-        won, lost = (np.array([padded(line[key], size) for line in self.lines]).reshape(-1, size) for key in ("won", "lost"))
+        won, lost = (np.array([padded(line[key], size) for line in self.lines[:count]]).reshape(-1, size)
+                     for key in ("won", "lost"))
         return Posterior(prior_var, won - lost, 1.0)
+
+    def foreseen(self, prior_var, recent=RECENT):
+        """Of his last `recent` answers on pairs not re-shown, how many the answers before each foresaw: how
+        well w is known, where settled tells only how sure it is. Each pair was picked for being near even,
+        so a w known well foresees fewer of them than it would of random pairs."""
+        asked = [k for k, line in enumerate(self.lines) if line["repeat_of"] is None][-recent:]
+        right = 0
+        for k in asked:
+            size = len(prior_var)
+            right += self.posterior(prior_var, k).logit(padded(self.lines[k]["won"], size) - padded(self.lines[k]["lost"], size))[0] > 0
+        return int(right), len(asked)
 
 
 class Session:
@@ -263,5 +303,6 @@ class Session:
 
     def status(self):
         agreed, again = self.answers.consistency()
+        foreseen, recent = self.answers.foreseen(self.prior_var)
         return dict(set=self.set, answers=len(self.answers), here=self.here(), quota=self.quota(), agreed=agreed,
-                    repeats=again, settled=round(self.posterior.settled(self.rng), 3))
+                    repeats=again, settled=round(self.posterior.settled(self.rng), 3), foreseen=foreseen, recent=recent)

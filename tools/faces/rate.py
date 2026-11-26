@@ -9,8 +9,9 @@ In: "left" or "right", the face he prefers, "undo", or "best", to have the best 
 answers (build_faces.py --best) unless they are. Out, for each line in, and as a "notice" whenever a render
 moves on: {"left", "right"} pictures of the pair to show; the session's status: the "set" shown, his
 "answers" in all and "here", on that set, of the "quota" after which the next round is due, "agreed" of the
-"repeats" re-shown, and "settled", from 0 to 1; "next", the next round's render: whether "rendering", how
-many of its "faces" are "rendered", and why it "failed" if it did; and "best", the best faces: their
+"repeats" re-shown, "settled", from 0 to 1, and "foreseen" of his "recent" answers (taste.Answers.foreseen);
+"next", the next round's render: whether "rendering", how many of its "faces" are "rendered", and why it
+"failed" if it did; and "best", the best faces: their
 "picture" ("" until rendered), the "answers" they were learnt from, whether "rendering" and why it "failed".
 
 Every answer is saved before the next pair is sent. Once a set has its quota of answers the next round

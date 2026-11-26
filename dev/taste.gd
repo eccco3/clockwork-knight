@@ -99,9 +99,9 @@ func _rating_status(shown: Dictionary) -> String:
 		round = "next round ready: it starts with your next answer"
 	elif shown["set"].begins_with("refine") and shown["here"] < NEW:
 		round = "a new round: these faces are drawn from all your answers"
-	return "%s, %s:  %d answers, %d here      direction settled %d%%      re-shown pairs answered alike: %d of %d      %s" % [
+	return "%s, %s:  %d answers, %d here      foreseen: %d of your last %d      re-shown pairs answered alike: %d of %d      %s" % [
 		sex.capitalize(), shown["set"].replace("refine", "round"), shown["answers"], shown["here"],
-		roundi(100.0 * shown["settled"]), shown["agreed"], shown["repeats"], round]
+		shown["foreseen"], shown["recent"], shown["agreed"], shown["repeats"], round]
 
 
 func _best_status(shown: Dictionary, stale: bool) -> String:
