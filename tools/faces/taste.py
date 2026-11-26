@@ -213,7 +213,9 @@ def best(posterior, sex, rng, count, draws=4000):
 class Answers(Log):
     """The answers file: each line is one answer, "set" the set of faces shown (files.rendered; "pool" if
     missing), {"left", "right", "winner"} indices in it, the numbers of the winning face "won" and the
-    losing one "lost", "repeat_of" the line it re-asks or null, "seconds" he took and "at", the time."""
+    losing one "lost", "repeat_of" the line it re-asks or null, "seconds" he took and "at", the time. When
+    he liked neither face, "winner" is null and both lose to the set's average face: "won" holds that face,
+    "lost" the left one and "lost_too" the right, so that a flaw that spoils a face teaches w directly."""
 
     def consistency(self):
         """How many re-shown pairs he answered as he did the first time, and how many were re-shown."""
@@ -227,8 +229,8 @@ class Answers(Log):
     def differences(self, prior_var, lines):
         """The rows the answers `lines` give the logistic regression: the winners' terms less the losers'."""
         size = len(prior_var) // 2
-        won, lost = (terms(np.array([padded(line[key], size) for line in lines]).reshape(-1, size))
-                     for key in ("won", "lost"))
+        pairs = [(line["won"], lost) for line in lines for lost in [line["lost"]] + ([line["lost_too"]] if "lost_too" in line else [])]
+        won, lost = (terms(np.array([padded(pair[k], size) for pair in pairs]).reshape(-1, size)) for k in (0, 1))
         return won - lost
 
     def posterior(self, prior_var, count=None):
@@ -268,7 +270,7 @@ class Session:
         """Earlier first-time answers on this set's faces that have not been re-shown."""
         again = {line["repeat_of"] for line in self.answers.lines}
         return [k for k, line in enumerate(self.answers.lines)
-                if self.mine(line) and line["repeat_of"] is None and k not in again
+                if self.mine(line) and line["repeat_of"] is None and k not in again and line["winner"] is not None
                 and line["left"] < len(self.faces) and line["right"] < len(self.faces)
                 and np.allclose(self.faces[line["winner"]], line["won"], atol=1e-3)]
 
@@ -301,11 +303,16 @@ class Session:
         return self.pair
 
     def answer(self, pick, seconds):
-        """Records that he picked the "left" or "right" face of the pair shown."""
+        """Records that he picked the "left" or "right" face of the pair shown, or "neither"."""
         left, right, repeat_of = self.pair
-        winner, loser = (left, right) if pick == "left" else (right, left)
-        self.answers.add(dict(set=self.set, left=left, right=right, winner=winner, repeat_of=repeat_of,
-                              won=np.round(self.faces[winner], 5).tolist(), lost=np.round(self.faces[loser], 5).tolist(),
+        numbers = lambda face: np.round(face, 5).tolist()
+        if pick == "neither":
+            faces = dict(winner=None, won=numbers(self.faces.mean(0)), lost=numbers(self.faces[left]),
+                         lost_too=numbers(self.faces[right]))
+        else:
+            winner, loser = (left, right) if pick == "left" else (right, left)
+            faces = dict(winner=winner, won=numbers(self.faces[winner]), lost=numbers(self.faces[loser]))
+        self.answers.add(dict(set=self.set, left=left, right=right, repeat_of=repeat_of, **faces,
                               seconds=round(seconds, 2), at=time.strftime("%Y-%m-%dT%H:%M:%S")))
         self.posterior = self.answers.posterior(self.prior_var)
 
@@ -320,11 +327,11 @@ class Session:
         return self.pair
 
     def foreseen(self, recent=RECENT):
-        """Of his last `recent` answers on pairs not re-shown, how many the answers before each foresaw: how
-        well w is known, where settled tells only how sure it is. Each pair was picked for being near even,
-        so a w known well foresees fewer of them than it would of random pairs."""
+        """Of his last `recent` picks of a face on pairs not re-shown, how many the answers before each
+        foresaw: how well w is known, where settled tells only how sure it is. Each pair was picked for being
+        near even, so a w known well foresees fewer of them than it would of random pairs."""
         lines = self.answers.lines
-        asked = [k for k, line in enumerate(lines) if line["repeat_of"] is None][-recent:]
+        asked = [k for k, line in enumerate(lines) if line["repeat_of"] is None and line["winner"] is not None][-recent:]
         for k in asked:
             if self.foreseen_lines.get(k, (None,))[0] is not lines[k]:
                 self.foreseen_lines[k] = (lines[k], self.answers.foresaw(self.prior_var, k))

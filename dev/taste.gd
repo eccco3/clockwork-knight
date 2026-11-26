@@ -6,12 +6,12 @@ extends FaceTool
 ##
 ##   godot --path . res://dev/taste_women.tscn      or taste_men.tscn
 ##
-## Left arrow or A, or a click on the left face, picks it; right arrow or D the right one; Backspace
-## takes back the last answer. B shows the best faces learnt so far, rendering them again first if he has
+## Left arrow or A, or a click on the left face, picks it; right arrow or D the right one; down arrow or S
+## says he likes neither, when a flaw spoils both; Backspace takes back the last answer. B shows the best faces learnt so far, rendering them again first if he has
 ## answered since, and B again goes back to rating. answers=<jsonl> keeps the answers elsewhere, for tests.
 
 const RATE := "res://tools/faces/rate.py"
-const KEYS := "←  or  A   ·   click a face   ·   D  or  →          Backspace  undo          B  best faces"
+const KEYS := "←  or  A   ·   click a face   ·   D  or  →          S  or  ↓  neither          Backspace  undo          B  best faces"
 const BEST_KEYS := "B  back to rating"
 const NEW := 5                                  # answers on a round during which the status line calls it new
 
@@ -53,6 +53,8 @@ func _unhandled_input(e: InputEvent) -> void:
 				send("left")
 			KEY_RIGHT, KEY_D:
 				send("right")
+			KEY_DOWN, KEY_S:
+				send("neither")
 			KEY_BACKSPACE:
 				send("undo")
 

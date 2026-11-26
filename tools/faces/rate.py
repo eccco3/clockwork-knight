@@ -5,8 +5,8 @@ next round and the best faces beside it in the background (background.py).
   python -I rate.py --sex women|men [--answers a.jsonl]     a session, one JSON line out per line in
   python -I rate.py --sex women|men --report                how far the learning has come
 
-In: "left" or "right", the face he prefers, "undo", or "best", to have the best faces rendered from all his
-answers (build_faces.py --best) unless they are. Out, for each line in, and as a "notice" whenever a render
+In: "left" or "right", the face he prefers, "neither" if he likes neither (taste.Answers), "undo", or "best",
+to have the best faces rendered from all his answers (build_faces.py --best) unless they are. Out, for each line in, and as a "notice" whenever a render
 moves on: {"left", "right"} pictures of the pair to show; the session's status: the "set" shown, his
 "answers" in all and "here", on that set, of the "quota" after which the next round is due, "agreed" of the
 "repeats" re-shown, "settled", from 0 to 1, and "foreseen" of his "recent" answers (taste.Session.foreseen);
@@ -47,7 +47,7 @@ class Sitting:
         self.pair = self.session.next()
 
     def request(self, said):
-        if said in ("left", "right"):
+        if said in ("left", "right", "neither"):
             self.session.answer(said, time.monotonic() - self.shown)
             if not (self.round and self.round.running()) and taste.advance(self.sex):
                 self.round = None
