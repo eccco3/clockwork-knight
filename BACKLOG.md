@@ -22,10 +22,10 @@ Repeat the women's track for the men with the dev's wife's taste, every step a l
 
 ### Open questions
 
-- Skip pairwise rating and start from picks, since the women's base came from picks?
-- Let the men's draws reach toward androgynous, so her taste can pull there?
-- Facial hair: a candidate feature, a paint, or out?
-- What paint suits the men: no lash line, natural lips?
+- Skip pairwise rating and start from picks? Recommended: yes. The women's base came from picks, and the taste model is unproven; keep Face rating: men for later, to train a filter.
+- Let the men's draws reach toward androgynous? Recommended: yes, to the sex direction's middle and not past it, with no separate androgynous pool; her picks and the shrinkage decide how far.
+- Facial hair: out (the dev).
+- Men's paint? Recommended: the plain paint, no lash line and the default lips, previewed beside a faint lash line for her to choose.
 
 ### Status
 
@@ -276,7 +276,7 @@ Fix what her speech work found but left. A pale streak runs down the skirt's sid
 
 ### Status
 
-Not started. Evidence in the speech branch's `dev/shots/speech/diag_*` and `dbg_*`.
+Deprioritized: her face and skirt will be remodelled, which may remove these. Evidence in the speech branch's `dev/shots/speech/diag_*` and `dbg_*`.
 
 ## Rosalyn: a moving mouth
 
