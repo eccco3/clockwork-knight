@@ -209,7 +209,8 @@ def add_bones(arm, J, T):
 
 # ============================================================== torso
 
-SOCKET_OUT, SOCKET_R = 0.006, 0.053           # each shoulder's socket: how far outside the joint it is centred, and its radius
+ROUNDED = 0.138                                # her chest's upper corners keep within this of the heads of her collar bones
+RESTS_BACK = np.radians(2)                     # how far behind where her shoulder rests the rounding runs on, before it flattens
 WIN_C = V(0, -0.108, 1.392)                    # heart-window gear plane centre
 WIN_R = 0.034
 _WF = Frame(WIN_C, FWD, LEFT)                  # local x = left, y = up, z = out of the chest
@@ -220,9 +221,25 @@ GEARS = {
 }
 
 
+def shoulder_room(J):
+    """Where her chest gives way to her left shoulder, as a sculpt at rest: her collar bone turns the ball of her
+    shoulder about an upright through its head, so her chest's corner is rounded about that upright, from the front
+    to just behind where the ball rests, and flat from there on toward her spine. The ball turns forward with no
+    socket to leave and no rim to press."""
+    head = J["clavicle_l"][:2]
+    rests = J["upperarm_l"][:2] - head
+    back = np.arctan2(rests[1], rests[0]) + RESTS_BACK
+    flat = V(np.cos(back), np.sin(back))
+
+    def outside(p):
+        h = p[:, :2] - head
+        return np.where(np.arctan2(h[:, 1], h[:, 0]) <= back, np.hypot(h[:, 0], h[:, 1]), h @ flat) - ROUNDED
+    return outside
+
+
 def chest_shape(J):
     """Her chest, as a sculpt at rest."""
-    socket = J["upperarm_l"] + V(SOCKET_OUT, 0, 0)
+    room = shoulder_room(J)
 
     def chest(p):
         q = S.mirror_x(p)
@@ -235,7 +252,7 @@ def chest_shape(J):
         d = S.smin(d, keel, 0.03)
         d = S.smax(d, S.plane(p, V(0, 0, 1.300), DOWN), 0.012)
         d = S.smax(d, S.plane(p, V(0, 0, 1.476), UP), 0.016)
-        d = S.ssub(d, S.sphere(q, socket, SOCKET_R), 0.008)
+        d = S.smax(d, room(q), 0.012)
         win = S.cylinder(p, V(0, -0.22, WIN_C[2]), V(0, -0.100, WIN_C[2]), WIN_R, 0.002)
         return S.ssub(d, win, 0.0025)
     return chest
@@ -558,8 +575,11 @@ def arms(J, T):
     # floating guards
     pf = Frame(J["upperarm_l"] + V(0, 0, 0.002), UP, LEFT)     # local x toward the arm, y back
     def pth(az):
+        """How far down it reaches: least toward her arm and neck, and cut back in front toward her neck, clear of
+        her chest."""
         c = np.cos(az)
-        return np.radians(80 - 36 * np.maximum(c, 0) ** 1.4 - 34 * np.maximum(-c, 0) ** 1.4)
+        return np.radians(80 - 36 * np.maximum(c, 0) ** 1.4 - 34 * np.maximum(-c, 0) ** 1.4
+                          - 10 * np.maximum(np.cos(az - np.radians(240)), 0) ** 3)
     guard("pauldron", "pauldron_l", pf, 0.068, 0.0065, pth, 40, 10, 0.0042, (1.0, 1.06, 0.94))
     v, f = gen.gear(12, 0.0150, 0.0185, r_hole=0.0, spokes=0)
     add("pauldron_rosette", "pauldron_l", "brass", pf.w(v + V(0, 0, 0.068 * 0.94 - 0.001)), f, thickness=-0.0045, mirror=True)
@@ -1077,7 +1097,6 @@ def carried(bone):
 def settle_shoulders(arm, J):
     """Keeps her shoulders out of her chest in every clip, and her upper arms out of her chest and face."""
     points = carried("upperarm_l")
-    points = points[np.linalg.norm(points - J["upperarm_l"] - V(SOCKET_OUT, 0, 0), axis=1) > SOCKET_R]
     bodies = {"spine_03": chest_shape(J), "Head": lambda p: head.field(to_head(p))}
     for name in CLIPS:
         collar.settle(arm, bpy.data.actions[name], {"l": points, "r": points * MIRROR}, bodies)

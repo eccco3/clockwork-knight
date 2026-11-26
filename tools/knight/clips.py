@@ -42,9 +42,11 @@ def add(action, bone, prop, frames, values):
 
 
 def eased(frames, needs, over):
-    """Each of `needs` (one per frame) held over the frames about it, rising and falling over `over` frames."""
+    """Each of `needs` (one per frame) held over the frames about it, rising and falling over `over` frames: a frame
+    takes the need, its own or a nearby one's, that weighs most there, whichever way it points."""
     near = np.clip(1.0 - np.abs(np.subtract.outer(frames, frames)) / over, 0.0, 1.0)
-    return (np.asarray(needs)[None, :] * (near * near * (3.0 - 2.0 * near))).max(axis=1)
+    weighed = np.asarray(needs, dtype=np.float64)[None, :] * (near * near * (3.0 - 2.0 * near))
+    return weighed[np.arange(len(frames)), np.argmax(np.abs(weighed), axis=1)]
 
 
 class Posed:

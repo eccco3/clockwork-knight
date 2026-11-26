@@ -1,5 +1,19 @@
 # Backlog
 
+## Sculpt: lid snaps and bake bleed
+
+### Task description
+
+Two faults in the shared `tools/sculpt/` modules, found on the faces' bust (`tools/faces/build_bust.py`). White specks run along the lids in extreme close-ups: a few vertices of the lids' two edge loops land on the wrong side in the mesher's inner snap. Dark streaks show along the bust's UV seams at the throat and crown from about 1 m in Godot: lower mip levels reach past the bake's 12 texels of bleed (`bake.dilate`). Fix both for every figure that uses them, and check the knight, grinner and Rosalyn for changes.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. The bust also has about 27 folded quads at the eye corners, no detail levels or shadow stand-in, and always the short crop.
+
 ## Test lower render scale
 
 ### Task description
@@ -91,19 +105,19 @@ Light the workshop for close work: bench lamps, hanging lamps and the window day
 
 Not started. Windows and worn surfaces are built (32 windows with FogLights, about 0.1 ms); the lightmap is a draft, grown to 4096×32768: its import holds about 2 GB, so cut the workshop's texel density or split the lightmap, and the full bake will take longer than 14 minutes. It rebakes the hall, so nothing else may bake at the same time.
 
-## Workshop: research and layout
+## Plan the workshop with the dev
 
 ### Task description
 
-Research real clockmakers' and automaton makers' workshops: benches, machines, tools, storage and how work flows between them. Write the findings into the workshop builder as a layout: where benches, machines, shelves and clutter zones go, with walkable aisles for the knight. Block it out with simple shapes and collision, coarse like the walls (this is for planning, not finish), and deliver overhead and eye-level screenshots.
+Plan the workshop with the dev in the main chat; this is not a subagent task. The dev has new ideas for it. Built so far: walls, 32 windows and worn surfaces, a 54 m workshop and a 12 m apartment (`tools/workshop_shell.py`, whose `WORK` the floor wear follows). Two nave posts at the apartment end stand in its walls. Settle the layout and what fills it, then split the plan into backlog items, replacing the clocks, benches and automata items below if they no longer fit.
 
 ### Open questions
 
-None. Dense around the edges and the benches, with one or two clear aisles about the knight's width plus a margin.
+- What are the dev's new ideas for the workshop?
 
 ### Status
 
-Not started. The walls, windows and surfaces are built: 54 m workshop, 12 m apartment. Benches go in `WORK` (`tools/workshop_shell.py`), which the floor wear follows. Two nave posts at the apartment end stand in or half in its walls: move or remove them.
+Not started. Needs the dev.
 
 ## Workshop: clocks
 
@@ -117,7 +131,7 @@ None. Pendulums swing and a few clocks tick audibly: cheap looping animation on 
 
 ### Status
 
-Not started. Needs the research and layout.
+Not started. Needs the workshop plan.
 
 ## Workshop: benches, machines and tools
 
@@ -131,7 +145,7 @@ Model original versions of the clockmaker's workbenches, tables, machines and ha
 
 ### Status
 
-Not started. Needs the research and layout.
+Not started. Needs the workshop plan.
 
 ## Workshop: automata, trinkets and budget
 
@@ -146,20 +160,6 @@ Model unfinished automata at different stages, from bare mechanism to painted fi
 ### Status
 
 Not started. Needs the clocks, benches and tools.
-
-## Knight: shoulder sockets and the overhead pauldron
-
-### Task description
-
-Her shoulders now stay out of her chest (`tools/knight/collar.py`, `follow.py`), but the thrusts (Sword_Regular_B, Regular_Combo, Dash) carry the right shoulder up to 9 cm forward, leaving its socket empty behind the ball, and the ball presses up to 8 mm into the socket's front rim in Heavy_Combo and Regular_A. Give the socket a cup carried by the collar bone, or open the chest toward the front. With the arm overhead (Heavy_Combo:32–34, 49–53) the right pauldron still sinks 13 mm into the chest. The death collapse leaves her pauldrons held.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. Worst poses: `--gaps` in `build_knight.py`.
 
 ## Minion: rig and animation
 
@@ -203,7 +203,7 @@ The grinners and the knight now fight outdoors (`scripts/grinner.gd`, `player.gd
 
 ### Status
 
-Not started. Needs the dev's playtest.
+Not started. Needs the dev's playtest. Also watch Heavy_Combo's overhead swing: at frame 34 her right pauldron lifts about 48 mm for one frame to clear her chest, which may read as a flick.
 
 ## Faces: learn the dev's taste
 
@@ -255,25 +255,11 @@ Grinners now flinch only when a blow lands during an attack's wind-up, and other
 
 ### Open questions
 
-- Does the scuttler's bite follow the same rule as the swipe?
+None. The scuttler's bite follows the swipe's rule: it shrugs off blows toward its end.
 
 ### Status
 
 Not started.
-
-## Sculpt: lid snaps and bake bleed
-
-### Task description
-
-Two faults in the shared `tools/sculpt/` modules, found on the faces' bust (`tools/faces/build_bust.py`). White specks run along the lids in extreme close-ups: a few vertices of the lids' two edge loops land on the wrong side in the mesher's inner snap. Dark streaks show along the bust's UV seams at the throat and crown from about 1 m in Godot: lower mip levels reach past the bake's 12 texels of bleed (`bake.dilate`). Fix both for every figure that uses them, and check the knight, grinner and Rosalyn for changes.
-
-### Open questions
-
-- None.
-
-### Status
-
-Not started. The bust also has about 27 folded quads at the eye corners, no detail levels or shadow stand-in, and always the short crop.
 
 ## Rosalyn: a moving mouth
 

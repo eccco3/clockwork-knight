@@ -2,12 +2,12 @@
 
 The clips swing a collar bone as much as 29 degrees. Forward, out and up, that brings her shoulder round her
 chest as her arm reaches across her body, and the clips keep it. Back, in and down, it draws the shoulder as much
-as 6 cm into her chest: a living shoulder slides there under its muscle, but hers is a wooden arm in a wooden
-socket and would sink in. `settle` holds each shoulder within about SINK of its socket those ways. Where her upper
-arm would still pass through her body, it carries the shoulder on forward and out, as a reaching shoulder goes,
-just far enough to clear it, coming and going over EASE frames. Either way it bends the arm at the shoulder and
-elbow so that the wrist stays where the clip put it and the hand turns as it did; only a wrist the arm can no
-longer reach falls short, along the line it would have reached.
+as 6 cm into her chest: a living shoulder slides there under its muscle, but hers is a wooden ball against a
+wooden chest and would sink in. `settle` holds each shoulder within about SINK of where it rests those ways.
+Where her upper arm would still pass through her body, it carries the shoulder on forward and out, as a reaching
+shoulder goes, just far enough to clear it, coming and going over EASE frames. Either way it bends the arm at the
+shoulder and elbow so that the wrist stays where the clip put it and the hand turns as it did; only a wrist the
+arm can no longer reach falls short, along the line it would have reached.
 
 Lengths are metres and angles radians."""
 import math
@@ -105,8 +105,7 @@ class _Side:
 
 def settle(arm, action, points, bodies):
     """Holds and carries both shoulders in every key of an action, keeping the wrists. `points` are each side's
-    upper arm's vertices at rest, those its socket does not hold, and `bodies` the sculpts at rest they keep out of,
-    by the bone that carries each."""
+    upper arm's vertices at rest, and `bodies` the sculpts at rest they keep out of, by the bone that carries each."""
     sides = [_Side(arm, side, points[side]) for side in "lr"]
     keys = {(n, s.side): Channel(action, n + "_" + s.side, "rotation_quaternion") for n in ARM for s in sides}
     first = keys["clavicle", "l"]
