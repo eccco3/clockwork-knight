@@ -55,17 +55,18 @@ class Memory(taste.Answers):
 
 
 class Rater:
-    """Answers by the hidden taste w, scaled so that the logits of two faces drawn at `spread` differ by
-    about `strength`."""
+    """Answers by the hidden taste w over a face's terms (taste.terms; one over its numbers alone weighs no
+    squares), scaled so that the logits of two of the faces `faces` differ by about `strength`."""
 
-    def __init__(self, w, spread, strength, lapse, rng):
-        self.w = w * strength / np.sqrt(2 * ((w * spread) ** 2).sum())
+    def __init__(self, w, faces, strength, lapse, rng):
+        w = np.pad(w, (0, 2 * faces.shape[1] - len(w)))
+        self.w = w * strength / (np.sqrt(2) * (taste.terms(faces) @ w).std())
         self.lapse, self.rng = lapse, rng
 
     def pick(self, left, right):
         if self.rng.random() < self.lapse:
             return "left" if self.rng.random() < 0.5 else "right"
-        return "left" if self.rng.random() < sigmoid(self.w @ (left - right)) else "right"
+        return "left" if self.rng.random() < sigmoid(self.w @ (taste.terms(left) - taste.terms(right))) else "right"
 
 
 class Labeller:
@@ -90,8 +91,8 @@ class Labeller:
 def quality(learnt, w, judged):
     """How good, by the rater's taste w, the KEPT faces the learnt taste likes best of those judged are:
     their mean score above the average face's, as a share of that of the KEPT he likes best."""
-    true = judged @ w
-    picked = true[np.argsort(-(judged @ learnt))[:KEPT]]
+    true = taste.terms(judged) @ w
+    picked = true[np.argsort(-(taste.terms(judged) @ learnt))[:KEPT]]
     return (picked.mean() - true.mean()) / (np.sort(true)[-KEPT:].mean() - true.mean())
 
 
@@ -118,14 +119,14 @@ def run(sex, prior, pool, judged, rater, start, a, rng):
 def test(model, sex, kinds, start, a):
     """kinds: for each kind of rater, its name and what draws one's hidden taste from a generator."""
     share, spread = taste.shares(model), taste.spread(model)
-    prior, pool = taste.prior(share, spread), taste.pool(sex)
+    prior, pool = taste.prior(share, spread, sex), taste.pool(sex)
     rng = np.random.default_rng(1)
     judged = taste.sample(sex, rng, JUDGED)
     for name, draw in kinds:
         rows = []
         for seed in range(a.raters):
             rng = np.random.default_rng(1000 + seed)
-            rows.append(run(sex, prior, pool, judged, Rater(draw(rng), spread, a.strength, a.lapse, rng), start, a, rng))
+            rows.append(run(sex, prior, pool, judged, Rater(draw(rng), judged, a.strength, a.lapse, rng), start, a, rng))
         rows = np.array(rows, float)
         print("%s, rater %s, %s pairs, %d answers on the pool then rounds of %d, strength %.1f, lapse %.2f, %d raters" % (
             sex.name, name, "random" if a.random else "chosen", min(a.first, a.answers), a.round, a.strength, a.lapse, a.raters))
@@ -140,7 +141,7 @@ def taste_main(model, a):
     share = taste.shares(model)
     if a.his:
         answers = taste.Answers(taste.answers("women"))
-        known = answers.posterior(taste.prior(share, taste.spread(model)))
+        known = answers.posterior(taste.prior(share, taste.spread(model), Sex(model, "women")))
         test(model, Sex(model, "women"), [("his", lambda rng: rng.multivariate_normal(known.mean, known.cov))], answers.lines, a)
         return
     kinds = [("prior", lambda rng: hidden(share, rng)), ("flatter", lambda rng: hidden(np.sqrt(share), rng))]

@@ -1,11 +1,13 @@
 """The dev's taste in faces, learnt from his choices between pairs of them (numpy only).
 
 A face is its numbers: the face model's coefficients, on the scans' components and then on its hand-made
-features (model.py), and then its brow numbers (brows.py). A Bradley-Terry model over them: he prefers face
-a to face b with probability sigmoid(w . (a - b)), a logistic regression (logistic.py). Its prior on the
-components is isotropic in shape, scaled so that two random faces differ by about PRIOR_LOGIT; the features
-and brows, which move little of the head but are what a viewer looks at, each get an equal share of NEW
-times as much again. His first CLEAR pairs are the clearest: of random pairs of faces not yet shown, those
+features (model.py), and then its brow numbers (brows.py). His taste weighs those numbers and their squares
+(terms), so that he can like a number best somewhere between its extremes rather than only more or less of
+it, which foresaw far more of his answers than the numbers alone. A Bradley-Terry model over them: he
+prefers face a to face b with probability sigmoid(w . (terms(a) - terms(b))), a logistic regression
+(logistic.py). Its prior on the components is isotropic in shape, scaled so that two random faces differ by
+about PRIOR_LOGIT; the features and brows, which move little of the head but are what a viewer looks at,
+each get an equal share of NEW times as much again; and each square as much as its number. His first CLEAR pairs are the clearest: of random pairs of faces not yet shown, those
 he is expected to prefer one of most strongly, or, before he has answered, the most different. After that
 each next pair is the one whose answer is expected to tell the most about w (BALD), which is soon one near
 even; about REPEAT of them instead re-show an earlier pair, sides swapped, to measure his consistency.
@@ -27,7 +29,8 @@ import numpy as np
 from . import brows
 from .files import HERE, Log, complete, exists, folder, rendered
 from .logistic import Posterior
-from .sexes import SEXES
+from .model import Model
+from .sexes import SEXES, Sex
 from .widths import Widths
 
 POOL, POOL_SEED, POOL_SIZE = "pool 2", 7, 240  # the pool's name in the answers: the second, whose faces have features and brows
@@ -43,7 +46,7 @@ BASE, BOLD, FEATURES, FROM, LIMIT = 0.30, 0.75, 8, 30, 2.0
 # here keep only faces no broader in any of widths.py's measures than this many standard deviations past
 # the average of the faces drawn so, a share of them; the rest are drawn again.
 NARROW = {"women": 0.3}
-TRIED = 4000                                   # faces drawn to learn a sex's average widths and their spread
+TRIED = 4000                                   # faces drawn to learn how a sex's faces vary
 PRIOR_LOGIT, NEW = 2.0, 0.25
 CLEAR = 20
 REPEAT = 0.05
@@ -62,6 +65,12 @@ def answers(name):
 def padded(face, size):
     """A face's numbers at the length faces have now: those it was written without are zero."""
     return np.pad(np.asarray(face, float), (0, size - len(face)))
+
+
+def terms(faces):
+    """What his taste weighs of faces (..., n): their numbers, then their squares."""
+    faces = np.asarray(faces, float)
+    return np.concatenate([faces, faces ** 2], -1)
 
 
 def shares(model):
@@ -93,11 +102,18 @@ def draw(sex, rng):
 
 
 @functools.cache
+def tried(sex):
+    """TRIED faces of a sex (sexes.Sex) drawn as `draw` draws them, the same each time."""
+    rng = np.random.default_rng(0)
+    return np.stack([draw(sex, rng) for _ in range(TRIED)])
+
+
+@functools.cache
 def broadest(sex):
     """How a sex's faces are measured (widths.Widths) and the broadest each measure may be (NARROW)."""
-    measure, rng = Widths(sex.model), np.random.default_rng(0)
-    tried = measure(np.stack([draw(sex, rng) for _ in range(TRIED)]))
-    return measure, tried.mean(0) + NARROW[sex.name] * tried.std(0)
+    measure = Widths(sex.model)
+    widths = measure(tried(sex))
+    return measure, widths.mean(0) + NARROW[sex.name] * widths.std(0)
 
 
 def sample(sex, rng, count):
@@ -161,7 +177,7 @@ def current(name):
         sys.exit("no %s's faces are rendered in %s: rate in the main checkout, which holds the dev's faces and answers"
                  % (name, os.path.dirname(os.path.dirname(HERE))))
     faces, share, spread, set_name = rendered(where)
-    return where, faces, prior(share, spread), set_name
+    return where, faces, prior(share, spread, Sex(Model.load(os.path.join(HERE, "model.npz")), name)), set_name
 
 
 def refine(posterior, sex, rng, size=REFINE_SIZE, draws=REFINE_DRAWS):
@@ -171,14 +187,17 @@ def refine(posterior, sex, rng, size=REFINE_SIZE, draws=REFINE_DRAWS):
     faces = []
     for w in rng.multivariate_normal(posterior.mean, posterior.cov, size):
         drawn = sample(sex, rng, draws)
-        faces.append(drawn[np.argmax(drawn @ w)])
+        faces.append(drawn[np.argmax(terms(drawn) @ w)])
     return np.stack(faces)
 
 
-def prior(share, spread):
-    """Prior variances of w, for faces drawn at `spread`, one number or one per number of a face: two such
-    faces' logits differ by PRIOR_LOGIT for each unit the shares sum to."""
-    return share * (PRIOR_LOGIT / (np.sqrt(2) * spread)) ** 2
+def prior(share, spread, sex):
+    """Prior variances of w, for faces of a sex (sexes.Sex) drawn at `spread`, one number or one per number
+    of a face: two such faces' logits differ by PRIOR_LOGIT for each unit the shares sum to, in each number
+    and as much again in its square, by how the faces' numbers and squares vary (tried)."""
+    numbers = share * (PRIOR_LOGIT / (np.sqrt(2) * spread)) ** 2
+    faces = tried(sex)[:, :len(numbers)]
+    return np.concatenate([numbers, numbers * faces.var(0) / np.maximum((faces ** 2).var(0), 1e-12)])
 
 
 def best(posterior, sex, rng, count, draws=4000):
@@ -186,7 +205,7 @@ def best(posterior, sex, rng, count, draws=4000):
     faces the pool could hold, with their other features left to chance. Returns the faces and the logits
     of his preferring each to the mean face."""
     faces = sample(sex, rng, draws)
-    score = faces @ posterior.mean
+    score = terms(faces) @ posterior.mean - terms(faces.mean(0)) @ posterior.mean
     keep = np.argsort(-score)[:count]
     return faces[keep], score[keep]
 
@@ -205,23 +224,20 @@ class Answers(Log):
         """How many refinement rounds he has answered on."""
         return max([int(line["set"].split()[1]) for line in self.lines if line.get("set", "").startswith("refine")], default=0)
 
+    def differences(self, prior_var, lines):
+        """The rows the answers `lines` give the logistic regression: the winners' terms less the losers'."""
+        size = len(prior_var) // 2
+        won, lost = (terms(np.array([padded(line[key], size) for line in lines]).reshape(-1, size))
+                     for key in ("won", "lost"))
+        return won - lost
+
     def posterior(self, prior_var, count=None):
         """What his first `count` answers, or all, teach of w."""
-        size = len(prior_var)
-        won, lost = (np.array([padded(line[key], size) for line in self.lines[:count]]).reshape(-1, size)
-                     for key in ("won", "lost"))
-        return Posterior(prior_var, won - lost, 1.0)
+        return Posterior(prior_var, self.differences(prior_var, self.lines[:count]), 1.0)
 
-    def foreseen(self, prior_var, recent=RECENT):
-        """Of his last `recent` answers on pairs not re-shown, how many the answers before each foresaw: how
-        well w is known, where settled tells only how sure it is. Each pair was picked for being near even,
-        so a w known well foresees fewer of them than it would of random pairs."""
-        asked = [k for k, line in enumerate(self.lines) if line["repeat_of"] is None][-recent:]
-        right = 0
-        for k in asked:
-            size = len(prior_var)
-            right += self.posterior(prior_var, k).logit(padded(self.lines[k]["won"], size) - padded(self.lines[k]["lost"], size))[0] > 0
-        return int(right), len(asked)
+    def foresaw(self, prior_var, k):
+        """Whether his answers before the k-th foresaw it."""
+        return bool(self.posterior(prior_var, k).logit(self.differences(prior_var, self.lines[k:k + 1]))[0][0] > 0)
 
 
 class Session:
@@ -230,6 +246,8 @@ class Session:
 
     def __init__(self, faces, prior_var, answers, rng, set_name=POOL):
         self.faces, self.prior_var, self.answers, self.rng, self.set = faces, prior_var, answers, rng, set_name
+        self.terms = terms(faces)
+        self.foreseen_lines = {}                # answer index: (the answer, whether it was foreseen)
         self.posterior = answers.posterior(prior_var)
         self.pair = None
 
@@ -275,10 +293,10 @@ class Session:
             return self.pair
         i, j = self.candidates()
         if len(self.answers) < CLEAR:
-            mean, var = self.posterior.logit(self.faces[i] - self.faces[j])
+            mean, var = self.posterior.logit(self.terms[i] - self.terms[j])
             k = int(np.argmax(mean ** 2 + var))
         else:
-            k = int(np.argmax(self.posterior.information(self.faces[i] - self.faces[j])))
+            k = int(np.argmax(self.posterior.information(self.terms[i] - self.terms[j])))
         self.pair = (int(i[k]), int(j[k]), None)
         return self.pair
 
@@ -301,8 +319,19 @@ class Session:
             self.pair = (line["left"], line["right"], line["repeat_of"])
         return self.pair
 
+    def foreseen(self, recent=RECENT):
+        """Of his last `recent` answers on pairs not re-shown, how many the answers before each foresaw: how
+        well w is known, where settled tells only how sure it is. Each pair was picked for being near even,
+        so a w known well foresees fewer of them than it would of random pairs."""
+        lines = self.answers.lines
+        asked = [k for k, line in enumerate(lines) if line["repeat_of"] is None][-recent:]
+        for k in asked:
+            if self.foreseen_lines.get(k, (None,))[0] is not lines[k]:
+                self.foreseen_lines[k] = (lines[k], self.answers.foresaw(self.prior_var, k))
+        return sum(self.foreseen_lines[k][1] for k in asked), len(asked)
+
     def status(self):
         agreed, again = self.answers.consistency()
-        foreseen, recent = self.answers.foreseen(self.prior_var)
+        foreseen, recent = self.foreseen()
         return dict(set=self.set, answers=len(self.answers), here=self.here(), quota=self.quota(), agreed=agreed,
                     repeats=again, settled=round(self.posterior.settled(self.rng), 3), foreseen=foreseen, recent=recent)

@@ -9,7 +9,7 @@ In: "left" or "right", the face he prefers, "undo", or "best", to have the best 
 answers (build_faces.py --best) unless they are. Out, for each line in, and as a "notice" whenever a render
 moves on: {"left", "right"} pictures of the pair to show; the session's status: the "set" shown, his
 "answers" in all and "here", on that set, of the "quota" after which the next round is due, "agreed" of the
-"repeats" re-shown, "settled", from 0 to 1, and "foreseen" of his "recent" answers (taste.Answers.foreseen);
+"repeats" re-shown, "settled", from 0 to 1, and "foreseen" of his "recent" answers (taste.Session.foreseen);
 "next", the next round's render: whether "rendering", how many of its "faces" are "rendered", and why it
 "failed" if it did; and "best", the best faces: their
 "picture" ("" until rendered), the "answers" they were learnt from, whether "rendering" and why it "failed".
@@ -111,8 +111,9 @@ def main():
         _, faces, prior_var, set_name = taste.current(a.sex)
         session = taste.Session(faces, prior_var, taste.Answers(answers), np.random.default_rng(), set_name)
         print(session.status())
-        order = np.argsort(-np.abs(session.posterior.mean))[:8]
-        print("strongest components:", ", ".join("%d %+.2f" % (k, session.posterior.mean[k]) for k in order))
+        order, size = np.argsort(-np.abs(session.posterior.mean))[:8], len(faces[0])
+        print("strongest terms:", ", ".join("%s %+.2f" % (k if k < size else "%d²" % (k - size), session.posterior.mean[k])
+                                             for k in order))
         return
     sitting = Sitting(a.sex, answers)
     requests = queue.Queue()

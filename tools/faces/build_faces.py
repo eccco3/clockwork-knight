@@ -410,7 +410,7 @@ def refine(model, sex, answers, seed, light):
         last = files.rendered(latest)[3] if files.exists(latest) else "refine 0"
         n = max(int(last.split()[1]), answers.rounds()) + 1
         share, spread, set_name = taste.shares(model), taste.spread(model), "refine %d" % n
-        faces = taste.refine(answers.posterior(taste.prior(share, spread)), sex, np.random.default_rng((seed, n)))
+        faces = taste.refine(answers.posterior(taste.prior(share, spread, sex)), sex, np.random.default_rng((seed, n)))
         print("REFINE %s %s from %d answers" % (sex.name, set_name, len(answers)))
     render_set(model, os.path.basename(where), faces, share, spread, light, set_name)
 
@@ -431,7 +431,7 @@ def best(model, sex, path, answers, seed, view, light):
     they were learnt from and the look and the hair they wear: a render cut short leaves the numbers of the
     faces before."""
     answers, rng = taste.Answers(answers), np.random.default_rng(seed)
-    posterior = answers.posterior(taste.prior(taste.shares(model), taste.spread(model)))
+    posterior = answers.posterior(taste.prior(taste.shares(model), taste.spread(model), sex))
     faces, score = taste.best(posterior, sex, rng, SIDE * SIDE)
     lopsided = uneven(model, rng, len(faces))
     sheet(model, faces, lopsided, path, view, light, style(sex.name))
