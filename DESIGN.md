@@ -21,6 +21,12 @@ A roguelite. The workshop and hall are the safe hub, where the meta loop happens
 - The retinue are resurrected when they fall, during an area's fight too. Resurrection costs no time.
 - Teamfights shift as they go, as in Overwatch or League of Legends: some fighters retreat while others escort them to safety, and the team's goal changes as the fight evolves. The retinue's own intelligence makes this, and the knight is always controlled apart from them.
 
+## Healing
+
+- Healing sits between League of Legends and Overwatch, nearer Overwatch. The waves give fighters minions to churn through, so times to kill can be longer than Overwatch's without healing as strong.
+- Health regeneration, from endurance, is a trickle under fire and ramps up after a few seconds unhurt, so that falling back to recover is a real move.
+- Support healing is moderate and works anywhere: focused damage still wins, and fights still wear fighters down.
+
 ## Commanding the retinue
 
 - She has four modes: fall back, target, with me, and at will.
@@ -83,6 +89,5 @@ A roguelite. The workshop and hall are the safe hub, where the meta loop happens
 
 ## Open
 
-- How fast healing is, between League of Legends and Overwatch 2.
 - What the caches hold, and the clockwork resource's name.
 - How kits make a mix of attributes pay.
