@@ -4,4 +4,3 @@
 
 [node name="Labels" type="Node"]
 script = ExtResource("1")
-metadata/dev_tool = "Face labels"

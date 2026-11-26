@@ -4,4 +4,3 @@
 
 [node name="Features" type="Node"]
 script = ExtResource("1")
-metadata/dev_tool = "Face features: women"
