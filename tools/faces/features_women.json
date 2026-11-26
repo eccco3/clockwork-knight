@@ -1,57 +1,106 @@
 {
 	"chin/chin-cleft": {
 		"favourite": 0.0,
-		"range": [0.0, 0.0]
+		"range": [
+			0.0,
+			0.0
+		]
 	},
 	"chin/chin-pointed": {
+		"dropped": "the scan numbers make 77% of it",
 		"favourite": 0.0,
-		"range": [0.0, 1.0]
+		"range": [
+			0.0,
+			0.0
+		]
 	},
 	"chin/chin-prominent": {
+		"dropped": "the scan numbers make 78% of it",
 		"favourite": 0.0,
-		"range": [-0.5, 0.3]
+		"range": [
+			0.0,
+			0.0
+		]
 	},
 	"chin/jaw-forward": {
 		"favourite": 0.0,
-		"range": [0.0, 0.0]
+		"range": [
+			0.0,
+			0.0
+		]
 	},
 	"eyes/eyes-apart": {
-		"range": [-1.0, 1.0]
+		"range": [
+			-1.0,
+			1.0
+		]
 	},
 	"eyes/eyes-higher": {
-		"range": [-1.0, 2.0]
+		"range": [
+			-1.0,
+			2.0
+		]
 	},
 	"eyes/eyes-larger": {
-		"range": [-1.0, 2.0]
+		"range": [
+			-1.0,
+			2.0
+		]
 	},
 	"eyes/eyes-prominent": {
-		"range": [-2.0, 2.0]
+		"range": [
+			-2.0,
+			2.0
+		]
 	},
 	"eyes/outer-corners-up": {
-		"range": [-1.0, 1.0]
+		"range": [
+			-1.0,
+			1.0
+		]
 	},
 	"upper/brow-ridge-forward": {
 		"favourite": 0.0,
-		"range": [0.0, 0.0]
+		"range": [
+			0.0,
+			0.0
+		]
 	},
 	"upper/brow-ridge-up": {
-		"favourite": 0.8,
-		"range": [0.0, 1.5]
+		"dropped": "the scan numbers make 81% of it",
+		"favourite": 0.0,
+		"range": [
+			0.0,
+			0.0
+		]
 	},
 	"upper/cheeks-fuller": {
-		"favourite": -0.3,
-		"range": [-0.7, 0.4]
+		"dropped": "the scan numbers make 86% of it",
+		"favourite": 0.0,
+		"range": [
+			0.0,
+			0.0
+		]
 	},
 	"upper/cheeks-higher": {
 		"favourite": 0.0,
-		"range": [0.0, 0.7]
+		"range": [
+			0.0,
+			0.7
+		]
 	},
 	"upper/forehead-forward": {
 		"favourite": 0.0,
-		"range": [0.0, 0.0]
+		"range": [
+			0.0,
+			0.0
+		]
 	},
 	"upper/forehead-taller": {
 		"favourite": 0.0,
-		"range": [-2.0, 1.0]
+		"range": [
+			-2.0,
+			1.0
+		]
 	}
 }
