@@ -90,4 +90,3 @@ A roguelite. The workshop and hall are the safe hub, where the meta loop happens
 ## Open
 
 - What the caches hold, and the clockwork resource's name.
-- How kits make a mix of attributes pay.
