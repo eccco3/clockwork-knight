@@ -26,9 +26,11 @@ from sculpt.pieces import under, either, on_left
 from sculpt.sdf import V
 from sculpt.gen import Frame
 from rosalyn import body, head, hair, dress, trim, rig, pose, clips
+from knight import shadow
 
 NAME = "rosalyn"                                # her working name: every file and object this build makes is called after it
 BUDGET = 300000                                 # triangles she may have; --detail 1.0 uses three quarters of them
+SHADOW_TRIS = 3000                              # her shadow stand-in's, as many as the knight's
 CLAY_LIGHT = 0.15                               # pale clay wants the lamps this much dimmer than her wood
 ROOT = os.path.dirname(os.path.dirname(HERE))
 FACE_PAINT = os.path.join(ROOT, "assets", "textures", NAME, "face_paint.png")
@@ -170,6 +172,21 @@ def asked():
     return clips.POSES[opt("--pose")]
 
 
+def shadow_caster(figure):
+    """A low-polygon copy of her whole figure on the same bones, which only the game's shadow maps draw."""
+    copies = []
+    for ob in figure:
+        copy = ob.copy()
+        copy.data = ob.data.copy()
+        ob.users_collection[0].objects.link(copy)
+        copies.append(copy)
+    whole = bl.join(copies, NAME.capitalize() + "Whole")
+    caster = shadow.shadow_mesh(whole, SHADOW_TRIS, name=NAME.capitalize() + "Shadow")
+    bpy.data.objects.remove(whole)
+    print("MESH %s: %d triangles" % (caster.name, len(caster.data.polygons)))
+    return caster
+
+
 def export(path, skeleton, meshes, actions):
     """Write the GLB. Which clips are her speech rides on the skeleton as the custom property `speech`, which
     import_rosalyn.gd reads."""
@@ -259,7 +276,7 @@ def main():
                 contact_sheet(os.path.join(opt("--shots"), "sheet_%s_%s.png" % (name.lower(), zoom)), skeleton,
                               actions[name], zoom)
     if opt("--out"):
-        export(opt("--out"), skeleton, figure, actions.values())
+        export(opt("--out"), skeleton, figure + [shadow_caster(figure)], actions.values())
         build.face_paint(FACE_PAINT, head, FACE_GRAIN)
         brows(BROW_PAINT)
     print("DONE t=%.1fs" % (time.time() - t0))

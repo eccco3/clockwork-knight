@@ -19,9 +19,10 @@ extends Harness
 ##   track:<frames>                  prints the knight's body, ankles, balls and pelvis each frame
 ##   fps                             prints frames per second and process time
 ##   perf:start, perf:stop           frame times; run with --disable-vsync --max-fps 0
-##   hide:<node name>
+##   hide:<node name>, free:<node name>   hides it, or takes it out of the scene
 ##   call:<method>[:<argument>]      on the scene root, as dev/shot.tscn's call=
-##   tell:<node>:<method>            on a node named as cam: names them, e.g. tell:Grinner:pounce
+##   tell:<node>:<method>[:<argument>]   on a node named as cam: names them, e.g. tell:Grinner:pounce,
+##                                   tell:Rosalyn:say:<line>, tell:Rosalyn:speak:<speech clip or any>
 ##   set:<node path or name pattern>:<property>:<value>, env:<property>:<value>,
 ##   vp:<property>:<value>, rs:<RenderingServer method>:<args...>   what-if switches
 ##   quit                            writes the contact sheet and quits
@@ -204,18 +205,20 @@ func _physics_process(dt: float) -> void:
 				_track = int(ev[1])
 			"fps":
 				print("fps: ", Engine.get_frames_per_second(), "  frame ms: ", snappedf(Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, 0.01))
-			"hide":
+			"hide", "free":
 				var n := scene.find_child(ev[1], true, false)
-				if n:
+				if not n:
+					print(ev[0], ": no node ", ev[1])
+				elif ev[0] == "hide":
 					n.set("visible", false)
 				else:
-					print("hide: no node ", ev[1])
+					n.queue_free()
 			"call":
 				scene.callv(ev[1], [":".join(ev.slice(2))] if ev.size() > 2 else [])
 			"tell":
 				var n := _subject(ev[1])
 				if n:
-					n.call(ev[2])
+					n.callv(ev[2], [":".join(ev.slice(3))] if ev.size() > 3 else [])
 			"set":
 				var found := [scene.get_node(ev[1])] if ev[1].contains("/") else scene.find_children(ev[1], "", true, false)
 				if found.is_empty():

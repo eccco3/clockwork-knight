@@ -192,9 +192,11 @@ func _scene() -> void:
 		i += 1
 
 	# --- reflections, one probe a room, + lightmap -----------------------------------------
+	# each probe renders once, so it sees only the scenery: figures standing there then would stay in it
 	i = 0
 	for p in _marks("probe"):
 		var probe := ReflectionProbe.new()
+		probe.cull_mask = Layers.SCENERY
 		probe.position = _v(p["pos"])
 		probe.size = _v(p["size"])
 		probe.origin_offset = _v(p["offset"])
