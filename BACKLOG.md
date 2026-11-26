@@ -14,6 +14,20 @@ Two faults in the shared `tools/sculpt/` modules, found on the faces' bust (`too
 
 Not started. The bust also has about 27 folded quads at the eye corners, no detail levels or shadow stand-in, and always the short crop.
 
+## Faces: lines across the women's ears
+
+### Task description
+
+The dev sees horizontal lines running across the women's ears in the rating tool. Find the cause and fix it without changing any face's numbers, so the dev's answers stay valid, then re-render the affected sets with `build_faces.py --again`. Suspects: the long hair's `groom()` and `ears()` tucking it behind the ears (`WOMEN` in `build_faces.py`), and the ears' undercut bridging by `mesher.wrap`'s `slope` from the crisper-features work. Compare a men's face, which wears the short crop.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started.
+
 ## Test lower render scale
 
 ### Task description
