@@ -10,7 +10,9 @@ class_name KnightCollapse
 ## share leaning to her left). A bone is aimed by itself, or by a bone it holds, as her hand by her sword; her
 ## shins rise as far as they must to keep the balls of her feet BALL off the ground. PELVIS lowers her by shares of
 ## the drop that rests her knees KNEE off the ground, and moves her ahead in metres. Every channel eases through
-## its keys without overshooting them, as the grinners' do (tools/grinner/keys.py).
+## its keys without overshooting them, as the grinners' do (tools/grinner/keys.py). FOLLOWS turn her guards with
+## the joints under them, as her build keys them: each pauldron as its upper arm turns, each couter and poleyn half
+## as far as its elbow or knee.
 
 const NAME := "Collapse"
 const FROM := "Hit_Chest"
@@ -51,6 +53,8 @@ const AIMS := {
 	"hand_l": [0.4, [[1.1, Vector2(-20, 0.05)]]],
 }
 const SHINS := {"calf_l": "foot_l", "calf_r": "foot_r"}
+const FOLLOWS := {"pauldron_l": ["upperarm_l", 1.0], "pauldron_r": ["upperarm_r", 1.0], "couter_l": ["lowerarm_l", 0.5],
+	"couter_r": ["lowerarm_r", 0.5], "poleyn_l": ["calf_l", 0.5], "poleyn_r": ["calf_r", 0.5]}
 
 
 ## Adds the clip to her AnimationPlayer's clips.
@@ -77,7 +81,7 @@ static func add_to(player: AnimationPlayer, skel: Skeleton3D) -> void:
 				clip.position_track_insert_key(track, f / FPS, start.hips(f / FPS))
 		elif type == Animation.TYPE_POSITION_3D:
 			clip.position_track_insert_key(track, 0.0, start.at[b])
-		elif TURNS.has(name) or AIMS.has(name):
+		elif TURNS.has(name) or AIMS.has(name) or FOLLOWS.has(name):
 			for f in frames + 1:
 				clip.rotation_track_insert_key(track, f / FPS, poses[f][b])
 		else:
@@ -157,7 +161,16 @@ class Start:
 				mine = Quaternion(mine * _holds(b) * Vector3.UP, goal) * mine
 			now.append(mine)
 			out.append((above.inverse() * mine).normalized())
+		for name in FOLLOWS:
+			var guard := skel.find_bone(name)
+			var under := skel.find_bone(FOLLOWS[name][0])
+			if guard >= 0 and under >= 0:
+				var turned := _rest(under).inverse() * out[under]
+				out[guard] = _rest(guard) * Quaternion.IDENTITY.slerp(turned, FOLLOWS[name][1])
 		return out
+
+	func _rest(b: int) -> Quaternion:
+		return skel.get_bone_rest(b).basis.get_rotation_quaternion()
 
 	## Where AIMS points bone `b`, or the bone it is aimed by, at `t`.
 	func aim(b: int, t: float) -> Vector3:
