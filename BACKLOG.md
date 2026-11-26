@@ -1,5 +1,19 @@
 # Backlog
 
+## Faces: picking rounds around the women's base face
+
+### Task description
+
+A launcher tool where the dev picks the women he likes from sheets of 25 drawn around the base face (`women_base.json`): scan numbers at 1× the pool's spread, the 22 at 0.5×, brows at 1×, and the candidate features he keeps (`features_women.json`) within his ranges, most often near his favourites. Each next sheet renders in the background. Its centre is the average of all his picks; each direction's spread is an empirical-Bayes shrinkage estimate of how much narrower his picks are than their draws, never below half. No correlations. Front view, with a key for profile.
+
+### Open questions
+
+- None.
+
+### Status
+
+Not started. The candidate features' pictures are rendering; the dev is choosing their ranges in Face features: women.
+
 ## Faces: lines across the women's ears
 
 ### Task description
