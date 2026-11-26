@@ -21,7 +21,7 @@ still unclear, a new round every ROUND or so answers; the rating tool renders ea
 switches to it once rendered (rate.py). Every round's answers join the same file, each line naming its
 set, and all of them teach w. simulate.py measures what these choices cost in answers.
 """
-import json, os, shutil, time
+import json, os, shutil, sys, time
 import numpy as np
 
 from . import brows
@@ -130,6 +130,9 @@ def current(name):
     """The set of faces of the sex of that name he rates now, the latest refinement round's or else the
     pool's: its folder, its faces, the prior on w and the set's name."""
     where = refine_folder(name) if exists(refine_folder(name)) else folder(name)
+    if not exists(where):
+        sys.exit("no %s's faces are rendered in %s: rate in the main checkout, which holds the dev's faces and answers"
+                 % (name, os.path.dirname(os.path.dirname(HERE))))
     faces, share, spread, set_name = rendered(where)
     return where, faces, prior(share, spread), set_name
 
