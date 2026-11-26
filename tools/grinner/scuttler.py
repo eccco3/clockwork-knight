@@ -3,9 +3,10 @@ the controls of `pose`, and the poses that test its skin.
 
 It is the walking grinner's own body dropped onto its hands, which stay planted as its feet do: every clip puts
 them where they should stand. It stands on its toes and finger pads, gallops at 5.1 m/s, a little faster than the
-knight runs, and bites with a jaw that swings open. A move is a function of the seconds since it began; until
-its first mark an attack is winding up, and both wind-ups keep hands and feet where it stands, as the flinch
-begins, so a flinch can cut in at any moment of either.
+knight runs, and bites with a jaw that swings open. A move is a function of the seconds since it began, its
+marks named as the walking grinner's are: until the first an attack is winding up, and it shrugs blows off in
+its pounce's leap and late in its bite, flinching from any other. Both wind-ups keep hands and feet where it
+stands, as the flinch begins.
 """
 import numpy as np
 from .body import FINGERS
@@ -155,8 +156,8 @@ def idle(phase):
 # ---------------------------------------------------------------- pounce
 
 LEAP, LEAP_HEIGHT = 4.5, 0.22
-POUNCE = dict(leap=0.38, hit=0.54, recover=0.82)
-HANDS_OFF, HANDS_ON, FEET_ON = 0.32, 0.74, 0.82
+HANDS_OFF, TAKES_OFF, HANDS_ON, FEET_ON = 0.32, 0.38, 0.74, 0.82
+POUNCE = dict(shrug=TAKES_OFF, hit=0.54, heed=HANDS_ON, recover=0.82)    # it shrugs blows off in the air
 TRAILED = Curve((0.0, 0.0), (0.12, 0.17), (0.28, 0.24), (0.60, 0.52), (0.90, 0.97), (1.0, 1.0), loop=False)
 FLUNG = Curve((0.0, 0.0), (0.35, 0.70), (0.70, 1.0), (1.0, 1.0), loop=False)
 STEPPED = Curve((0.0, 0.0), (0.5, 0.56), (1.0, 1.0), loop=False)
@@ -189,12 +190,12 @@ CAST = dict(lift=held((HANDS_OFF, 0.0), (0.40, 0.34), (0.54, 0.52), (0.66, 0.34)
 
 
 def _leapt(t):
-    return LEAP * glide(t, HANDS_OFF, POUNCE["leap"], 0.76, 0.92)
+    return LEAP * glide(t, HANDS_OFF, TAKES_OFF, 0.76, 0.92)
 
 
 def _sprung(t, late):
     c = at(SPRUNG, t - late)
-    y = trod(t, _leapt, (0.0, LEAP), [(POUNCE["leap"], FEET_ON + late, TRAILED)])
+    y = trod(t, _leapt, (0.0, LEAP), [(TAKES_OFF, FEET_ON + late, TRAILED)])
     return _foot(HEEL + c.pop("pitch"), c.pop("lift"), foot_y=y, **c)
 
 
@@ -211,14 +212,14 @@ def pounce(t):
     wiggle = WIGGLE(t) * np.sin(2.0 * np.pi * 7.0 * (t - 0.08))
     out.update(_back(COIL_PITCH(t), COIL_FLEX(t)), travel=_leapt(t), hips_x=0.016 * wiggle, hips_yaw=-6.0 * wiggle,
                spine_yaw=4.0 * wiggle)
-    out["hips_z"] += LEAP_HEIGHT * thrown(t, POUNCE["leap"], 0.77)
+    out["hips_z"] += LEAP_HEIGHT * thrown(t, TAKES_OFF, 0.77)
     out.update(sided(dict(_sprung(t, 0.0), **_cast(t, 0.03)), dict(_sprung(t, 0.008), **_cast(t, 0.0))))
     return _crouched(out)
 
 
 # ---------------------------------------------------------------- bite
 
-BITE = dict(hit=0.30, recover=0.42)
+BITE = dict(hit=0.30, recover=0.42, shrug=0.60)           # it shrugs blows off as it draws back
 LUNGE = dict(hips_y=held((0.10, 0.05), (0.24, 0.07), (0.34, -0.25), (0.44, -0.22), (0.62, -0.05), (0.95, 0.0)),
              hips_z=held((0.10, -0.03), (0.24, -0.05), (0.34, -0.02), (0.46, -0.04), (0.70, -0.01), (0.95, 0.0)),
              neck_pitch=held((0.10, -8.0), (0.24, -12.0), (0.33, 16.0), (0.44, 12.0), (0.70, 2.0), (0.95, 0.0)),

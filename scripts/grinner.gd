@@ -4,18 +4,24 @@ extends Node3D
 ## its idle into its waddle or run and plays its moves, and the travelling that their root motion does.
 ##
 ## pounce() leaps ahead; the walking grinner's swipe() and the scuttler's bite() strike in place. Each winds up
-## first; flinch() cuts into the wind-up, and does nothing once the leap or strike has begun. striking() is true
-## while the claws or teeth can hit. die() cuts into anything and stays down.
+## first. flinch() cuts into whatever it is doing, unless it is shrugging blows off, as shrugging() says: in a
+## leap, and late in a swipe or bite. striking() is true while the claws or teeth can hit. die() cuts into
+## anything and stays down.
 ##
 ## It fights `target`, by default the nearest foe within SIGHT: it waddles straight at it, pounces from mid range
 ## and swipes (the scuttler bites) up close, each attack ready again a while after it ends, and never waits its
 ## turn behind other grinners. While an attack's hit window is open, the paths of its ATTACKS edges land the blow
-## on whichever foe they cross. A blow that lands while it winds up makes it flinch; any other only jolts its
-## upper body. It keeps clear of other figures' bodies and stands on the ground beneath it.
+## on whichever foe they cross. A blow makes it flinch, or, while it shrugs blows off or flinches already, only
+## jolts its upper body. It keeps clear of other figures' bodies and stands on the ground beneath it.
 
 const GAIT := &"parameters/Gait/blend_position"
 const PLAYBACK := &"parameters/playback"
+## The markers on its moves' clips: their hit window is open from HIT until RECOVER, and they shrug blows off
+## from SHRUG until HEED, or until their end if they have no HEED.
 const HIT := &"hit"
+const RECOVER := &"recover"
+const SHRUG := &"shrug"
+const HEED := &"heed"
 
 const SIDE := &"grinners"
 ## The knight's sword fells one in three blows.
@@ -86,7 +92,7 @@ var _ready_at := {}
 var _next_attack := 0.0
 var _near := 0.0
 var _warp := 1.0
-var _phase_was := &""
+var _striking_was := false
 var _stop := 0.0
 var _shove := Vector3.ZERO
 var _shove_t := 0.0
@@ -175,7 +181,7 @@ func bite() -> void:
 
 
 func flinch() -> void:
-	if move() == &"Gait" or winding_up():
+	if _flinches():
 		_playback.travel(&"Flinch")
 
 
@@ -188,21 +194,42 @@ func move() -> StringName:
 	return _playback.get_current_node()
 
 
-## True from the start of an attack until its first marker: the time a hit makes it flinch.
+## True from the start of an attack until its first marker.
 func winding_up() -> bool:
-	return _clips.has_animation(move()) and _clips.get_animation(move()).get_marker_names().size() > 0 and _phase() == &""
+	if not _clips.has_animation(move()):
+		return false
+	var clip := _clips.get_animation(move())
+	return clip.get_marker_names().size() > 0 and clip.get_prev_marker(_playback.get_current_play_position()) == &""
 
 
 ## True while the hit window of an attack is open.
 func striking() -> bool:
-	return _phase() == HIT
+	return _within(HIT, RECOVER)
 
 
-## The marker the current move has last passed: the phase it is in.
-func _phase() -> StringName:
-	if not _clips.has_animation(move()):
-		return &""
-	return _clips.get_animation(move()).get_prev_marker(_playback.get_current_play_position())
+## True while a move shrugs blows off, taking them with only a jolt.
+func shrugging() -> bool:
+	return _within(SHRUG, HEED)
+
+
+## Whether flinch() would cut in: not while it shrugs blows off, flinches already or lies dead.
+func _flinches() -> bool:
+	return not shrugging() and move() != &"Flinch" and move() != &"Death"
+
+
+## True once the current move has passed its marker `opens`, until it passes `closes` or, without one, ends. A move
+## fading back into the gait at its end is still the current move here.
+func _within(opens: StringName, closes: StringName) -> bool:
+	var playing := move()
+	var now := _playback.get_current_play_position()
+	if playing == &"Gait" and _playback.get_fading_from_node() != &"":
+		playing = _playback.get_fading_from_node()
+		now = _playback.get_fading_from_play_position()
+	if not _clips.has_animation(playing):
+		return false
+	var clip := _clips.get_animation(playing)
+	return clip.has_marker(opens) and now >= clip.get_marker_time(opens) \
+		and (not clip.has_marker(closes) or now < clip.get_marker_time(closes))
 
 
 ## One step of fighting: keeps a target, closes on it and starts an attack when one is ready, in reach and faced,
@@ -310,9 +337,9 @@ func _stand() -> void:
 
 ## Lands the current attack's blow on each foe its edges cross while its hit window is open.
 func _land_blows() -> void:
-	var phase := _phase() if health.alive() else &""
-	if phase == HIT:
-		if _phase_was != HIT:
+	var open := striking() and health.alive()
+	if open:
+		if not _striking_was:
 			var attack: Dictionary = ATTACKS[move()]
 			_strike.damage = attack.damage
 			_strike.shove = attack.shove
@@ -321,7 +348,7 @@ func _land_blows() -> void:
 			_strike.begin()
 		for hit in _strike.sweep(_edges()):
 			_stop = maxf(_stop, hit.stop)
-	_phase_was = phase
+	_striking_was = open
 
 
 ## The striking edges of the current attack where its bones are now.
@@ -335,7 +362,7 @@ func _edges() -> PackedVector3Array:
 
 func _on_hurt(hit: Hit) -> void:
 	_take(hit, 1.0)
-	if winding_up():
+	if _flinches():
 		flinch()
 	else:
 		var way := global_basis.inverse() * hit.way

@@ -8,9 +8,9 @@ extends EditorScenePostImport
 ## motion: whoever owns the grinner moves it by the tree's `get_root_motion_position()`.
 ##
 ## The build says which clips are which in the skeleton's extras: `gait` places each looping clip along the
-## blend, and `marks` gives each move the seconds its phases begin, which become markers on the animations,
-## named after the phase: `hit` and `recover` on every attack, and `leap` before them on a pounce. An attack is
-## winding up until its first marker, and its hit window is open from `hit` to `recover`.
+## blend, and `marks` gives each move the seconds of its markers on the animations: `hit` and `recover` on every
+## attack, and `shrug`, with `heed` on a pounce. An attack is winding up until its first marker, its hit window
+## is open from `hit` to `recover`, and it shrugs blows off from `shrug` to `heed`, or to its end.
 
 const Levels := preload("res://tools/sculpt/levels.gd")
 const BEGIN: Array[float] = [0.0, 6.0, 12.0, 22.0]
@@ -28,8 +28,8 @@ func _post_import(scene: Node) -> Object:
 	var extras: Dictionary = scene.find_children("*").filter(func(n: Node) -> bool: return n.has_meta("extras"))[0].get_meta("extras")
 	var marks: Dictionary = extras["marks"]
 	for clip: String in marks:
-		for phase: String in marks[clip]:
-			player.get_animation(clip).add_marker(phase, marks[clip][phase])
+		for mark: String in marks[clip]:
+			player.get_animation(clip).add_marker(mark, marks[clip][mark])
 
 	var gait := AnimationNodeBlendSpace1D.new()
 	gait.min_space = 0.0

@@ -261,20 +261,6 @@ Fix what her speech work found but left. A pale streak runs down the skirt's sid
 
 Not started. Evidence in the speech branch's `dev/shots/speech/diag_*` and `dbg_*`.
 
-## Grinners: flinch when hit
-
-### Task description
-
-Grinners now flinch only when a blow lands during an attack's wind-up, and otherwise just jolt. Turn that around: any blow makes a grinner flinch, cutting into what it was doing, except while it is mid-pounce (in the air) or toward the end of its claw swipe, when it shrugs the blow off with only the jolt. Mark those windows in the clips like the hit windows, in `tools/grinner/moves.py` and `scripts/grinner.gd`. Record clips of each case.
-
-### Open questions
-
-None. The scuttler's bite follows the swipe's rule: it shrugs off blows toward its end.
-
-### Status
-
-Not started.
-
 ## Rosalyn: a moving mouth
 
 ### Task description
