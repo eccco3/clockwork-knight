@@ -30,32 +30,170 @@
 		]
 	},
 	"eyes/eyes-apart": {
+		"favourite": 0.5,
+		"name": "eyes apart",
 		"range": [
-			-1.0,
-			1.0
+			-1.5,
+			1.5
 		]
 	},
 	"eyes/eyes-higher": {
+		"favourite": 1.5,
+		"name": "eyes higher",
 		"range": [
 			-1.0,
 			2.0
 		]
 	},
 	"eyes/eyes-larger": {
+		"favourite": 2.0,
+		"name": "eyes larger",
 		"range": [
-			-1.0,
+			-2.0,
 			2.0
 		]
 	},
 	"eyes/eyes-prominent": {
+		"favourite": 0.5,
+		"name": "eyes prominent",
 		"range": [
 			-2.0,
 			2.0
 		]
 	},
 	"eyes/outer-corners-up": {
+		"favourite": -0.5,
+		"name": "outer corners up",
+		"range": [
+			-2.0,
+			1.5
+		]
+	},
+	"mouth/cupid-s-bow-deeper": {
+		"favourite": 0.0,
+		"name": "cupid's bow deeper",
+		"range": [
+			0.0,
+			0.0
+		]
+	},
+	"mouth/cupid-s-bow-wider": {
+		"favourite": 0.0,
+		"name": "cupid's bow wider",
+		"range": [
+			0.0,
+			0.0
+		]
+	},
+	"mouth/dimples": {
+		"favourite": 0.0,
+		"name": "dimples",
+		"range": [
+			-0.5,
+			2.0
+		]
+	},
+	"mouth/laugh-lines": {
+		"favourite": 0.0,
+		"name": "laugh lines",
+		"range": [
+			0.0,
+			2.0
+		]
+	},
+	"mouth/lower-lip-centre-up": {
+		"favourite": 0.0,
+		"name": "lower lip centre up",
 		"range": [
 			-1.0,
+			1.5
+		]
+	},
+	"mouth/lower-lip-ends-up": {
+		"favourite": 0.0,
+		"name": "lower lip ends up",
+		"range": [
+			-1.0,
+			0.5
+		]
+	},
+	"mouth/lower-lip-wider": {
+		"favourite": 0.0,
+		"name": "lower lip wider",
+		"range": [
+			-0.5,
+			0.5
+		]
+	},
+	"mouth/philtrum-fuller": {
+		"favourite": 0.0,
+		"name": "philtrum fuller",
+		"range": [
+			0.0,
+			0.0
+		]
+	},
+	"mouth/upper-lip-centre-up": {
+		"favourite": 1.5,
+		"name": "upper lip centre up",
+		"range": [
+			-1.0,
+			2.0
+		]
+	},
+	"mouth/upper-lip-ends-up": {
+		"favourite": 0.0,
+		"name": "upper lip ends up",
+		"range": [
+			-1.0,
+			2.0
+		]
+	},
+	"mouth/upper-lip-wider": {
+		"favourite": 0.0,
+		"name": "upper lip wider",
+		"range": [
+			0.0,
+			1.0
+		]
+	},
+	"nose/hump": {
+		"favourite": -0.5,
+		"name": "hump",
+		"range": [
+			-1.5,
+			1.0
+		]
+	},
+	"nose/lower-bridge-wider": {
+		"favourite": 0.0,
+		"name": "lower bridge wider",
+		"range": [
+			-0.5,
+			0.5
+		]
+	},
+	"nose/nose-base-up": {
+		"favourite": 0.0,
+		"name": "nose base up",
+		"range": [
+			-0.5,
+			0.5
+		]
+	},
+	"nose/nose-compressed": {
+		"favourite": 0.0,
+		"name": "nose compressed",
+		"range": [
+			-0.5,
+			0.5
+		]
+	},
+	"nose/nostrils-angled-up": {
+		"favourite": 0.5,
+		"name": "nostrils angled up",
+		"range": [
+			-0.5,
 			1.0
 		]
 	},
