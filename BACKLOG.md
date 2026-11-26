@@ -14,20 +14,6 @@ After baking, measure real play at render scales 100%, 85%, 75%, 67% and 50% wit
 
 Not started. Real play at the 60 fps cap now takes 6.9 ms of GPU time and 71 W with baked lighting; the live lighting took 8.9 ms and 76 W in the same test. The driver lowers the GPU clock below about 6.5 ms, and earlier tests reached 43 W only near 3.5 ms. Before baking, with plain stretching: 67% gave 72 W and 78 Ãƒâ€šÃ‚Â°C; 50% gave 43 W and 70 Ãƒâ€šÃ‚Â°C.
 
-## Rosalyn: a moving mouth
-
-### Task description
-
-Try two ways for Rosalyn's wooden mouth to move with her speech, where no wood visibly bends. First, lips that part: a jaw bone turns a few degrees, opening the lip parting onto the dark pocket behind it, moving the skin about a millimetre. Second, stop-motion style shapes: a few rigid lacquered lip pieces, swapped or pivoted. Time both to her voice. Deliver both in motion, with sound, beside her still-mouthed speech: close-up videos from Godot's movie writer and a playable scene that switches between the three. The dev picks; if neither works, she keeps the still mouth.
-
-### Open questions
-
-None. Try both: four or five shapes as swapped meshes, and the same shapes as pieces on pivots.
-
-### Status
-
-Not started. Speech is built: four 12 s clips (Tell, Ask, Muse, Insist) crossed by her AnimationTree, `Rosalyn.say()` with subtitles, brows as decals on brow bones and `scripts/gaze.gd` turning her head to the knight; `dev/talk.tscn` tries it. No voice files yet, so a real voice stream is untested.
-
 ## Rosalyn: place her and test two entities
 
 ### Task description
@@ -288,3 +274,17 @@ Two faults in the shared `tools/sculpt/` modules, found on the faces' bust (`too
 ### Status
 
 Not started. The bust also has about 27 folded quads at the eye corners, no detail levels or shadow stand-in, and always the short crop.
+
+## Rosalyn: a moving mouth
+
+### Task description
+
+Try two ways for Rosalyn's wooden mouth to move with her speech, where no wood visibly bends. First, lips that part: a jaw bone turns a few degrees, opening the lip parting onto the dark pocket behind it, moving the skin about a millimetre. Second, stop-motion style shapes: a few rigid lacquered lip pieces, swapped or pivoted. Time both to her voice. Deliver both in motion, with sound, beside her still-mouthed speech: close-up videos from Godot's movie writer and a playable scene that switches between the three. The dev picks; if neither works, she keeps the still mouth.
+
+### Open questions
+
+None. Try both: four or five shapes as swapped meshes, and the same shapes as pieces on pivots.
+
+### Status
+
+Deprioritized: waits for the change to her model, which may affect it; a first attempt is on branch `worktree-agent-a657b3d97045922cc`. Speech is built: four 12 s clips (Tell, Ask, Muse, Insist) crossed by her AnimationTree, `Rosalyn.say()` with subtitles, brows as decals on brow bones and `scripts/gaze.gd` turning her head to the knight; `dev/talk.tscn` tries it. No voice files yet, so a real voice stream is untested.
