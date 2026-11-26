@@ -59,6 +59,21 @@ Keep settling the run's design with the dev in the main chat; this is not a suba
 
 Planning with the dev. The run's shape, sides, commands and growth are settled.
 
+## Plan the stats with the dev
+
+### Task description
+
+Develop the attributes and derived stats in `DESIGN.md` into formulas, with the dev. Physical damage first: how strength, dexterity and luck feed physical damage, critical damage, attack speed and critical chance, how they multiply, where the soft ceilings sit, and how abilities scale from several derived stats. Then magic's own multipliers, without strength improving pure magic builds.
+
+### Open questions
+
+- Does critical chance apply to magic, and does magic get a critical damage of its own?
+- Is there mana, separate from stamina, which some skills spend and many magic skills multiply by?
+
+### Status
+
+Not started. Needs the dev; physical damage is the focus for now.
+
 ## Plan the Clockmaker with the dev
 
 ### Task description
