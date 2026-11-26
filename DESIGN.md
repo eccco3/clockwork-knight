@@ -35,13 +35,13 @@ A roguelite. The workshop and hall are the safe hub, where the meta loop happens
 
 ## Growth in a run
 
-- XP is shared, and earned per metre of the payload's progress and from side objectives. The team levels up together, during rounds, and the level-up is the unit of a run's progression.
+- XP is shared, and earned per metre of the payload's progress, from captain kills and from side objectives. The team levels up together, during rounds, and the level-up is the unit of a run's progression.
 - The team's experience gain is the sum of its members'.
 - At each level-up she chooses, roguelite-style, an item for herself and an upgrade for her minions. These are her only build choices in a run. The choice waits until she is ready, and choosing pauses the game.
 - At each level-up she and each retainer gain attribute points, rolled from the allocations set in the meta loop, and each retainer ranks its skills in the order set there.
 - Each area has two kinds of side objective: sequestered enemies, which give XP, and caches only she can see, born of the magic that is the source of her power.
 - Side objectives cost progress in their area but pay off in later ones. Whether to attempt them should be a real trade-off, depending partly on whether her build and retinue lean to the early or the late game, as early-game champions take dragons in League of Legends.
-- A captain's death gives essence, scaled by her share of the damage it took, and capped per area so that farming stops paying quickly. Kills give no XP of their own.
+- A captain's death gives XP, scaled by her share of the damage it took, and capped per area so that farming stops paying quickly.
 - Deaths do not feed the captains.
 
 ## Her items
