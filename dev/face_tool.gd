@@ -50,11 +50,16 @@ static func _python() -> String:
 
 ## Sends a request, unless the last is still unanswered.
 func send(request: String) -> void:
-	if _pipe == null or _asked > 0:
+	if not idle():
 		return
 	_pipe.store_line(request)
 	_pipe.flush()
 	_asked += 1
+
+
+## Whether the session is running and has answered every request.
+func idle() -> bool:
+	return _pipe != null and _asked == 0
 
 
 ## Shows a reply or notice of the session; each tool lays it out.

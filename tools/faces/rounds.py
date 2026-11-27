@@ -69,6 +69,17 @@ def scales(model):
     return np.concatenate([np.full(n, s) for n, s in zip(counts, SCALES)])
 
 
+def drawn(sex, middle, width, rng, count):
+    """`count` faces of a sex (sexes.Sex) drawn about `middle` as its pool draws its faces (taste.draw), about
+    their average, at `width` times their spread in each of a face's numbers."""
+    return middle + (np.stack([taste.draw(sex, rng) for _ in range(count)]) - taste.tried(sex).mean(0)) * width
+
+
+def strength(lowest, centre, highest, rng):
+    """A candidate's strength drawn between `lowest` and `highest`, most often at `centre`."""
+    return float(rng.triangular(lowest, centre, highest)) if highest > lowest else centre
+
+
 def triangle(lowest, mode, highest):
     """The mean and standard deviation of the triangular distribution."""
     return (lowest + mode + highest) / 3.0, float(np.sqrt(
@@ -180,23 +191,19 @@ class Rounds:
         numbers = len(self.tried[0])
         middle, at = self.centre(lines, kept)
         width = np.sqrt(r[:numbers]) * scales(self.sex.model)
-        faces = middle + (np.stack([taste.draw(self.sex, rng) for _ in range(SHEET)]) - self.tried.mean(0)) * width
-        drawn = {}
+        faces = drawn(self.sex, middle, width, rng, SHEET)
+        ways = {}
         for key, (lowest, _, highest) in kept.items():
             c, k = at[key], numbers + keys.index(key)
             q = float(np.sqrt(r[k]))
-            drawn[key] = dict(centre=c, range=[c - q * (c - lowest), c + q * (highest - c)], r=float(r[k]))
-
-        def strength(d):
-            low, high = d["range"]
-            return float(rng.triangular(low, d["centre"], high)) if high > low else d["centre"]
-
+            ways[key] = dict(centre=c, range=[c - q * (c - lowest), c + q * (highest - c)], r=float(r[k]))
         rounded = lambda x: np.round(x, 5).tolist()
         return dict(sex=self.sex.name, drawn_from=len(lines), centre=rounded(middle),
                     spread=rounded(self.tried.std(0) * width), r=rounded(r[:numbers]),
-                    candidates={key: {k: rounded(v) for k, v in d.items()} for key, d in drawn.items()},
+                    candidates={key: {k: rounded(v) for k, v in d.items()} for key, d in ways.items()},
                     shrinkage=judged, faces=[dict(numbers=rounded(face), strengths={
-                        key: round(strength(d), 5) for key, d in drawn.items()}) for face in faces])
+                        key: round(strength(d["range"][0], d["centre"], d["range"][1], rng), 5)
+                        for key, d in ways.items()}) for face in faces])
 
     def narrowest(self, sheet, count=4):
         """The sheet's `count` most narrowed directions, as [name, share of the full spread]."""
