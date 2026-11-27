@@ -12,7 +12,7 @@ The dev: "a face maker which has dials for the features", for the women; the men
 
 ### Status
 
-Not started. The bust (`build_bust.py`) bakes one face; nothing changes a face live yet.
+Paused by the dev, unmerged on branch `worktree-agent-a1328d10d040914ae` (5b634c5): a live head with blend shapes (`build_head.py`, `glb.py`, `face_head.gd`), face, hair and filmic shaders, and the tool's dials and buttons work. Left: undo the shaders' temporary matte calibration edits, then match the Blender sheets: a seam down the face, blocky eyes, striped hair, broken ear edges.
 
 ## Faces: the men's track, from the launcher
 
